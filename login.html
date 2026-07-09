@@ -1,0 +1,15 @@
+name: Send biweekly payroll report
+
+on:
+  schedule:
+    - cron: "0 19 * * 5"  # ~2pm Central Daylight Time (summer)
+    - cron: "0 20 * * 5"  # ~2pm Central Standard Time (winter)
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the report endpoint
+        run: |
+          curl -sS -f "${{ secrets.APP_URL }}/cron/send-report?token=${{ secrets.REPORT_TOKEN }}"

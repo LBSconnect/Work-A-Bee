@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{% if employee %}Edit Employee{% else %}Add Employee{% endif %}{% endblock %}
+{% block content %}
+  <div class="nav">
+    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('admin_employees') }}">Employees</a>
+  </div>
+
+  <h1>{% if employee %}Edit {{ employee.name }}{% else %}Add employee or contractor{% endif %}</h1>
+
+  <form method="post">
+    <label>Employee ID</label>
+    {% if employee %}
+      <input type="text" value="{{ employee.employee_code }}" disabled>
+    {% else %}
+      <input type="text" name="employee_code" required>
+    {% endif %}
+
+    <label>Full name</label>
+    <input type="text" name="name" value="{{ employee.name if employee else '' }}" required>
+
+    <label>Type</label>
+    <select name="worker_type">
+      <option value="employee" {% if employee and employee.worker_type == 'employee' %}selected{% endif %}>Employee</option>
+      <option value="contractor" {% if employee and employee.worker_type == 'contractor' %}selected{% endif %}>Contractor</option>
+    </select>
+
+    <label>Hourly rate ($)</label>
+    <input type="number" step="0.01" min="0" name="hourly_rate" value="{{ employee.hourly_rate if employee else '' }}" required>
+
+    <label>{% if employee %}New PIN (leave blank to keep current){% else %}PIN{% endif %}</label>
+    <input type="password" name="pin" inputmode="numeric" {% if not employee %}required{% endif %}>
+
+    {% if employee %}
+      <label><input type="checkbox" name="active" style="width:auto;" {% if employee.active %}checked{% endif %}> Active</label>
+    {% endif %}
+
+    <button type="submit">Save</button>
+  </form>
+{% endblock %}

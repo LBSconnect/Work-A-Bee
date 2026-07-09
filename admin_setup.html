@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Clock In / Out{% endblock %}
+{% block content %}
+  <h1>Linton Business Solutions</h1>
+  <p class="muted">Enter your Employee ID and PIN to clock in or out.</p>
+  <form method="post">
+    <label>Employee ID</label>
+    <input type="text" name="employee_code" autofocus required>
+    <label>PIN</label>
+    <input type="password" name="pin" inputmode="numeric" required>
+    <button type="submit">Continue</button>
+  </form>
+  <p class="muted" style="margin-top:24px;"><a href="{{ url_for('admin_login') }}">Admin login</a></p>
+{% endblock %}
