@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Create Admin Account{% endblock %}
+{% block content %}
+  <h1>Create your admin account</h1>
+  <p class="muted">This is the first time this app has been run. Set up the owner/admin login below.</p>
+  <form method="post">
+    <label>Username</label>
+    <input type="text" name="username" autofocus required>
+    <label>Password</label>
+    <input type="password" name="password" required minlength="8">
+    <label>Confirm password</label>
+    <input type="password" name="confirm_password" required minlength="8">
+    <button type="submit">Create account</button>
+  </form>
+{% endblock %}

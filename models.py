@@ -1,25 +1,80 @@
-# For LOCAL DEVELOPMENT ONLY. On Render, these are set in the dashboard
-# (most are wired up automatically by render.yaml) - you don't need this
-# file there. Copy this to ".env" only if you want to run the app on your
-# own machine against a local/test Postgres database.
+from contextlib import contextmanager
 
-SECRET_KEY=change-this-to-a-random-string
+import psycopg2
+import psycopg2.extras
 
-# A Postgres connection string. Render's Blueprint sets this for you in
-# production; for local dev you'd need your own Postgres instance.
-DATABASE_URL=postgresql://user:password@localhost:5432/linton_timekeeping
+import config
 
-# --- Outlook / Microsoft 365 SMTP settings ---
-SMTP_SERVER=smtp.office365.com
-SMTP_PORT=587
-SMTP_USERNAME=your-email@yourcompany.com
-SMTP_PASSWORD=your-app-password-here
-REPORT_RECIPIENT=sean006@gmail.com
 
-# The last known report Friday - every 14 days from this date is another
-# report Friday.
-PAY_PERIOD_ANCHOR=2026-07-03
+class ConnWrapper:
+    def __init__(self, conn):
+        self._conn = conn
 
-# Shared secret for the /cron/send-report endpoint - must match the
-# REPORT_TOKEN secret in your GitHub Actions workflow.
-REPORT_TOKEN=change-this-to-a-random-string-too
+    def execute(self, sql, params=None):
+        cur = self._conn.cursor()
+        cur.execute(sql, params or ())
+        return cur
+
+    def commit(self):
+        self._conn.commit()
+
+    def cursor(self):
+        return self._conn.cursor()
+
+
+@contextmanager
+def get_db():
+    if not config.DATABASE_URL:
+        raise RuntimeError(
+            "DATABASE_URL is not set. On Render this is wired up automatically "
+            "via render.yaml; for local dev, set it in your .env file."
+        )
+    raw_conn = psycopg2.connect(
+        config.DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor
+    )
+    try:
+        yield ConnWrapper(raw_conn)
+        raw_conn.commit()
+    except Exception:
+        raw_conn.rollback()
+        raise
+    finally:
+        raw_conn.close()
+
+
+def init_db():
+    with get_db() as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS admin_users (
+                id SERIAL PRIMARY KEY,
+                username TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS employees (
+                id SERIAL PRIMARY KEY,
+                employee_code TEXT UNIQUE NOT NULL,
+                name TEXT NOT NULL,
+                pin_hash TEXT NOT NULL,
+                hourly_rate REAL NOT NULL,
+                worker_type TEXT NOT NULL DEFAULT 'employee',
+                active INTEGER NOT NULL DEFAULT 1
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS time_entries (
+                id SERIAL PRIMARY KEY,
+                employee_id INTEGER NOT NULL REFERENCES employees(id),
+                clock_in TIMESTAMP NOT NULL,
+                clock_out TIMESTAMP
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS report_log (
+                id SERIAL PRIMARY KEY,
+                report_date DATE UNIQUE NOT NULL,
+                sent_at TIMESTAMP NOT NULL DEFAULT NOW()
+            )
+        """)
+        conn.commit()
