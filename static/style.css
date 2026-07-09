@@ -1,9 +1,25 @@
 * { box-sizing: border-box; }
 body {
-  font-family: -apple-system, Segoe UI, Arial, sans-serif;
+  font-family: 'Inter', -apple-system, Segoe UI, Arial, sans-serif;
   background: #f3f4f6;
   margin: 0;
   color: #1f2937;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 16px 32px;
+}
+.site-header-brand {
+  display: inline-flex;
+  align-items: center;
+}
+.site-header-brand img {
+  height: 40px;
+  display: block;
 }
 .wrap {
   max-width: 480px;
@@ -12,9 +28,50 @@ body {
   padding: 32px;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  flex: 1 0 auto;
+  width: 100%;
 }
 .wrap.wide {
   max-width: 900px;
+}
+.site-footer {
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  padding: 32px;
+  margin-top: auto;
+}
+.site-footer-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.site-footer-col strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.site-footer-col a {
+  color: inherit;
+  text-decoration: none;
+}
+.site-footer-col a:hover {
+  color: #116fd4;
+}
+.site-footer-copyright {
+  max-width: 900px;
+  margin: 24px auto 0;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
+}
+@media (max-width: 640px) {
+  .site-footer-inner {
+    grid-template-columns: 1fr;
+  }
 }
 h1 { font-size: 22px; margin-top: 0; }
 h2 { font-size: 18px; }
@@ -34,7 +91,7 @@ button, .btn {
   font-weight: 600;
   border: none;
   border-radius: 8px;
-  background: #2563eb;
+  background: #116fd4;
   color: white;
   cursor: pointer;
   text-decoration: none;
@@ -54,7 +111,7 @@ table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14p
 th, td { text-align: left; padding: 8px; border-bottom: 1px solid #e5e7eb; }
 th { background: #f9fafb; }
 .nav { margin-bottom: 20px; font-size: 14px; }
-.nav a { color: #2563eb; text-decoration: none; margin-right: 16px; }
+.nav a { color: #116fd4; text-decoration: none; margin-right: 16px; }
 .muted { color: #6b7280; font-size: 13px; }
 .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
 .badge.in { background: #dcfce7; color: #166534; }

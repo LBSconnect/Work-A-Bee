@@ -4,9 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Linton Timekeeping{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+  <header class="site-header">
+    <a href="https://www.myeasypass.net/" class="site-header-brand">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="MyEasyPass">
+    </a>
+  </header>
+
   <div class="wrap {% block wrapclass %}{% endblock %}">
     {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -17,5 +26,31 @@
     {% endwith %}
     {% block content %}{% endblock %}
   </div>
+
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div class="site-footer-col">
+        <strong>Linton Business Solutions</strong>
+        <p class="muted">Your path to professional licensing success</p>
+      </div>
+      <div class="site-footer-col">
+        <strong>Contact</strong>
+        <p class="muted">
+          Support@LBSconnect.net<br>
+          281-836-5357<br>
+          616 FM 1960 RD W STE 101<br>
+          Houston, TX 77090-3048
+        </p>
+      </div>
+      <div class="site-footer-col">
+        <strong>Quick Links</strong>
+        <p class="muted">
+          <a href="https://www.myeasypass.net/">MyEasyPass.net</a><br>
+          <a href="{{ url_for('clock_home') }}">Employee Time Clock</a>
+        </p>
+      </div>
+    </div>
+    <p class="site-footer-copyright">&copy; 2025 Linton Business Solutions LLC. All Rights Reserved.</p>
+  </footer>
 </body>
 </html>
