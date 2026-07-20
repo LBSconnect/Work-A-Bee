@@ -35,4 +35,43 @@
 
   <a class="btn" style="margin-top:24px;" href="{{ url_for('admin_send_report_now') }}"
      onclick="return confirm('Email this week\'s hours report now?');">Send report now</a>
+
+  <h1 style="margin-top:40px;">Clock in/out details &amp; running total due</h1>
+  {% for d in detail %}
+    <h2>
+      {{ d.name }}
+      <span class="muted">({{ d.employee_code }} &middot; {{ d.worker_type|capitalize }} &middot; ${{ "%.2f"|format(d.hourly_rate) }}/hr)</span>
+    </h2>
+    {% if d.entries %}
+    <table>
+      <tr>
+        <th>Clock in</th><th>Clock out</th><th>Hours</th><th>Running hours</th><th>Running total due</th>
+      </tr>
+      {% for e in d.entries %}
+      <tr>
+        <td>{{ e.clock_in.strftime('%a %b %d, %I:%M %p') }}</td>
+        <td>
+          {% if e.clock_out %}
+            {{ e.clock_out.strftime('%a %b %d, %I:%M %p') }}
+          {% else %}
+            <span class="muted">In progress</span>
+          {% endif %}
+        </td>
+        <td>{{ "%.2f"|format(e.hours) }}</td>
+        <td>{{ "%.2f"|format(e.running_hours) }}</td>
+        <td>${{ "%.2f"|format(e.running_due) }}</td>
+      </tr>
+      {% endfor %}
+      <tr>
+        <td colspan="3"></td>
+        <td><strong>{{ "%.2f"|format(d.total_hours) }}</strong></td>
+        <td><strong>${{ "%.2f"|format(d.total_due) }}</strong></td>
+      </tr>
+    </table>
+    {% else %}
+    <p class="muted">No clock entries this week.</p>
+    {% endif %}
+  {% else %}
+    <p class="muted">No active employees yet.</p>
+  {% endfor %}
 {% endblock %}

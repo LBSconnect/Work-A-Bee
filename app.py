@@ -8,7 +8,7 @@ from flask_limiter.util import get_remote_address
 
 import config
 from models import init_db, get_db
-from payroll import get_period_bounds, calculate_payroll
+from payroll import get_period_bounds, calculate_payroll, get_period_entries
 from email_report import send_report_email
 from tz import now_central, today_central
 
@@ -190,7 +190,19 @@ def admin_dashboard():
     today = today_central()
     period_start, period_end = get_period_bounds(today)
     with get_db() as conn:
-        rows = calculate_payroll(conn, period_start, period_end)
+        detail = get_period_entries(conn, period_start, period_end)
+    rows = [
+        {
+            "employee_code": d["employee_code"],
+            "name": d["name"],
+            "worker_type": d["worker_type"],
+            "hourly_rate": d["hourly_rate"],
+            "total_hours": d["total_hours"],
+            "pay": d["total_due"],
+            "incomplete": d["incomplete"],
+        }
+        for d in detail
+    ]
     next_report_note = (
         f"Next automatic email: {period_end.strftime('%A, %B %d, %Y')} at "
         f"{config.REPORT_HOUR % 12 or 12}:{config.REPORT_MINUTE:02d} "
@@ -199,6 +211,7 @@ def admin_dashboard():
     return render_template(
         "admin_dashboard.html",
         rows=rows,
+        detail=detail,
         period_start=period_start,
         period_end=period_end,
         next_report_note=next_report_note,
