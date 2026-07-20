@@ -27,9 +27,59 @@ limiter = Limiter(get_remote_address, app=app, default_limits=[])
 init_db()
 
 
+TIMEZONE_CHOICES = [
+    ("America/New_York", "Eastern"),
+    ("America/Chicago", "Central"),
+    ("America/Denver", "Mountain"),
+    ("America/Los_Angeles", "Pacific"),
+    ("America/Anchorage", "Alaska"),
+    ("Pacific/Honolulu", "Hawaii"),
+]
+
+
 @app.route("/")
 def clock_home():
     return render_template("login.html")
+
+
+@app.route("/signup", methods=["GET", "POST"])
+@limiter.limit("30 per hour")
+def signup():
+    form = {
+        "company_name": request.form.get("company_name", ""),
+        "report_recipients": request.form.get("report_recipients", ""),
+        "timezone": request.form.get("timezone", "America/Chicago"),
+    }
+
+    if request.method == "POST":
+        company_name = form["company_name"].strip()
+        report_recipients = form["report_recipients"].strip()
+        timezone = form["timezone"] if form["timezone"] in dict(TIMEZONE_CHOICES) else "America/Chicago"
+
+        if not company_name:
+            flash("Company name is required.")
+        elif "@" not in report_recipients:
+            flash("Please enter a valid notification email address.")
+        else:
+            with get_db() as conn:
+                next_id = conn.execute(
+                    "SELECT nextval(pg_get_serial_sequence('organizations', 'id')) AS n"
+                ).fetchone()["n"]
+                code = f"cc{next_id:03d}"
+                conn.execute(
+                    "INSERT INTO organizations (id, company_code, name, timezone, report_recipients) "
+                    "VALUES (%s, %s, %s, %s, %s)",
+                    (next_id, code, company_name, timezone, report_recipients),
+                )
+                conn.commit()
+
+            flash(
+                f"'{company_name}' is set up! Your Company Code is {code.upper()} - "
+                "write it down, you'll need it to log in. Now create your admin login below."
+            )
+            return redirect(url_for("admin_setup", company_code=code))
+
+    return render_template("signup.html", timezone_choices=TIMEZONE_CHOICES, **form)
 
 
 @app.route("/staff/login", methods=["GET", "POST"])
