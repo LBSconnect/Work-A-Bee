@@ -95,6 +95,29 @@ def clock_action():
     )
 
 
+@app.route("/clock/submit-hours", methods=["POST"])
+@limiter.limit("5 per hour")
+def submit_hours():
+    emp_id = session.get("employee_id")
+    if not emp_id:
+        return redirect(url_for("clock_home"))
+
+    with get_db() as conn:
+        emp = conn.execute("SELECT * FROM employees WHERE id=%s", (emp_id,)).fetchone()
+    if emp is None:
+        session.pop("employee_id", None)
+        return redirect(url_for("clock_home"))
+
+    try:
+        _send_current_period_report()
+        flash(f"Thanks, {emp['name']} - this week's hours report was emailed to the office.")
+    except Exception as e:
+        flash(f"Couldn't submit hours: {e}")
+
+    session.pop("employee_id", None)
+    return redirect(url_for("clock_home"))
+
+
 def admin_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):

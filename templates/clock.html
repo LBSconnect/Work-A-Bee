@@ -17,6 +17,11 @@
       <button type="submit">&#10004; CLOCK IN</button>
     {% endif %}
   </form>
+  <form method="post" action="{{ url_for('submit_hours') }}" style="margin-top:16px;"
+        onsubmit="return confirm('Email this week\'s hours report to the office now?');">
+    <button type="submit" class="btn secondary">Submit my hours</button>
+  </form>
+
   <p class="muted" style="margin-top:24px;"><a href="{{ url_for('clock_home') }}">Cancel</a></p>
 
   {% if history %}
