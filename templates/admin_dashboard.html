@@ -9,7 +9,7 @@
     <a href="{{ url_for('admin_logout') }}">Log out</a>
   </div>
 
-  <h1>Current pay period</h1>
+  <h1>This week's hours</h1>
   <p>{{ period_start.strftime('%B %d, %Y') }} &ndash; {{ period_end.strftime('%B %d, %Y') }}</p>
   <p class="muted">{{ next_report_note }}</p>
 
@@ -33,5 +33,5 @@
   </table>
 
   <a class="btn" style="margin-top:24px;" href="{{ url_for('admin_send_report_now') }}"
-     onclick="return confirm('Email this payroll report now?');">Send report now</a>
+     onclick="return confirm('Email this week\'s hours report now?');">Send report now</a>
 {% endblock %}

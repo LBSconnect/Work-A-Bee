@@ -1,8 +1,8 @@
-# Linton Timekeeping
+# Time Keeper
 
-A web app for employee/contractor clock in-out, with a payroll report
-(hours x rate per person) emailed to you automatically every other
-Friday at 2:00 PM Central.
+A web app for employee clock in/out, with an hours &amp; pay report
+(hours x rate per person, $16.00/hr by default) emailed automatically
+every Friday at 5:00 PM Central to `antonette.Linton@lbsconnect.net`.
 
 Deployed on **Render** (free tier to start) with a **Postgres** database,
 so it's reachable from a browser on any office computer - no local
@@ -25,34 +25,46 @@ If reliability becomes more important than cost later, upgrading the web
 service to Starter ($7/mo) removes the sleep delay, and upgrading the
 database removes the 90-day expiration.
 
-## 1. Push this project to GitHub
+## 1. This project on GitHub
 
-1. Go to https://github.com/new and create a new **private** repository
-   (e.g. `linton-timekeeping`).
-2. Upload this entire folder's contents to that repository (drag-and-drop
-   on GitHub's web UI works fine, or use `git push` if you're comfortable
-   with Git).
+This code already lives in a private GitHub repository
+(`LBSconnect/Time-Keeper`) - nothing to do here unless you're starting a
+brand-new copy, in which case create a private repo at
+https://github.com/new and push/upload this folder's contents to it.
 
 ## 2. Deploy to Render
+
+**Recommended - Blueprint (sets everything up automatically):**
 
 1. Go to https://dashboard.render.com and sign up/log in (you can sign in
    with your GitHub account).
 2. Click **New +** -> **Blueprint**.
-3. Connect your GitHub account if prompted, then select the
-   `linton-timekeeping` repo you just created.
+3. Connect your GitHub account if prompted, then select this repo.
 4. Render reads `render.yaml` in this project and sets up two things
    automatically: the web app, and a free Postgres database connected
    to it.
 5. Click **Apply** to deploy. First deploy takes a few minutes.
 
+**If you already created the web service manually** (e.g. via **New +**
+-> **Web Service** instead of Blueprint, like `time-keeper-tnb8.onrender.com`),
+Render won't have wired up the database or env vars for you. You'll need to:
+
+1. **New +** -> **PostgreSQL** to create a free database, then in your web
+   service's **Environment** tab set `DATABASE_URL` to that database's
+   "Internal Connection String" (from the database's Info page).
+2. In the same **Environment** tab, add the rest of the variables listed
+   under `envVars` in `render.yaml` (`SECRET_KEY` and `REPORT_TOKEN` can be
+   any long random strings).
+
 ## 3. Fill in email settings
 
-1. In the Render dashboard, open your **linton-timekeeping** web service.
+1. In the Render dashboard, open your web service.
 2. Go to the **Environment** tab.
 3. Fill in:
    - `SMTP_USERNAME` - your Outlook/Microsoft 365 email address
    - `SMTP_PASSWORD` - see note below
-   - `REPORT_RECIPIENT` - where the report should be emailed
+   - `REPORT_RECIPIENT` - already defaults to `antonette.Linton@lbsconnect.net`;
+     only set this if you want it sent somewhere else.
 4. Save changes (this triggers a quick redeploy).
 
 **About the password:** if your Microsoft 365/Outlook account has
@@ -67,12 +79,12 @@ provider like Gmail instead.
 ## 4. Set up the free scheduled email trigger
 
 Render's free web service sleeps when idle, so instead of relying on it
-to wake itself up at 2pm, a free GitHub Actions workflow
+to wake itself up at 5pm, a free GitHub Actions workflow
 (`.github/workflows/send-report.yml`, already included) pings the app
 at the right time to trigger the report.
 
-1. In Render, copy your app's URL (top of the service page, looks like
-   `https://linton-timekeeping-xxxx.onrender.com`).
+1. In Render, copy your app's URL (top of the service page) - e.g.
+   `https://time-keeper-tnb8.onrender.com`.
 2. In Render's Environment tab, copy the value of `REPORT_TOKEN`
    (auto-generated when you deployed).
 3. In GitHub, go to your repo -> **Settings** -> **Secrets and variables**
@@ -80,10 +92,10 @@ at the right time to trigger the report.
    - `APP_URL` = your Render app URL from step 1
    - `REPORT_TOKEN` = the value from step 2
 4. That's it - the workflow will ping the app every Friday and it'll
-   send the report automatically when it's actually a report Friday.
+   send the report automatically at 5pm Central.
 
 You can test it immediately: in GitHub, go to **Actions** -> "Send
-biweekly payroll report" -> **Run workflow** to trigger it by hand.
+weekly hours report" -> **Run workflow** to trigger it by hand.
 
 ## 5. Create your admin account
 
@@ -91,12 +103,12 @@ Visit your Render app URL. The first visit sends you to a setup page to
 create your own admin username and password - there's no default
 password to change later.
 
-## 6. Add employees and contractors
+## 6. Add employees
 
 1. Go to `<your-app-url>/admin/login` and log in.
 2. Click **Employees -> + Add employee**.
-3. Enter an Employee ID (e.g. `EMP001`), name, type (employee or
-   contractor), hourly rate, and a PIN they'll use to clock in.
+3. Enter an Employee ID (e.g. `EMP001`), name, hourly rate (defaults to
+   $16.00, editable per employee), and a PIN they'll use to clock in.
 
 ## 7. Daily use
 
@@ -104,16 +116,12 @@ Employees open `<your-app-url>` on any office computer (or bookmark it),
 enter their Employee ID and PIN, then click the big CLOCK IN / CLOCK OUT
 button.
 
-## 8. Payroll reports
+## 8. Weekly hours reports
 
-- **Automatic:** every other Friday around 2:00 PM Central, the report
-  (hours x rate per person, plus a total) is emailed to
-  `REPORT_RECIPIENT`.
+- **Automatic:** every Friday around 5:00 PM Central, a report (hours x
+  rate per person, plus a total) covering that Monday-Friday is emailed
+  to `REPORT_RECIPIENT` (`antonette.Linton@lbsconnect.net` by default).
 - **Manual:** log in as admin and click **Send report now** any time.
-- Pay periods run Monday through the second Friday, anchored to your
-  July 3, 2026 pay date (`PAY_PERIOD_ANCHOR` in Render's Environment
-  tab). You shouldn't need to change this unless your pay schedule
-  itself shifts.
 
 ## Security notes
 
@@ -135,4 +143,4 @@ button.
 
 You don't need this for normal use - it's only for testing changes
 before deploying. See `run.bat`; you'll need your own local Postgres
-database and a `.env` file (copy `.env.example`).
+database and a `.env` file (copy `env.example`).

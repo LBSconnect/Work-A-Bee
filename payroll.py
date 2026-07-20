@@ -1,16 +1,12 @@
 from datetime import date, datetime, timedelta
-from config import PAY_PERIOD_ANCHOR
 
 
 def get_period_bounds(reference_date: date):
-    days_from_anchor = (reference_date - PAY_PERIOD_ANCHOR).days
-    cycle_index = days_from_anchor // 14
-    end = PAY_PERIOD_ANCHOR + timedelta(days=14 * cycle_index)
-    if reference_date > end:
-        cycle_index += 1
-        end = PAY_PERIOD_ANCHOR + timedelta(days=14 * cycle_index)
-    start = end - timedelta(days=11)
-    return start, end
+    """Monday-Friday bounds of the week containing reference_date."""
+    days_since_monday = reference_date.weekday()
+    week_start = reference_date - timedelta(days=days_since_monday)
+    week_end = week_start + timedelta(days=4)
+    return week_start, week_end
 
 
 def calculate_payroll(conn, period_start: date, period_end: date):

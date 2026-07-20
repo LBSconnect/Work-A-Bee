@@ -1,9 +1,9 @@
-name: Send biweekly payroll report
+name: Send weekly hours report
 
 on:
   schedule:
-    - cron: "0 19 * * 5"  # ~2pm Central Daylight Time (summer)
-    - cron: "0 20 * * 5"  # ~2pm Central Standard Time (winter)
+    - cron: "0 22 * * 5"  # 5pm Central Daylight Time (summer, UTC-5)
+    - cron: "0 23 * * 5"  # 5pm Central Standard Time (winter, UTC-6)
   workflow_dispatch: {}
 
 jobs:
