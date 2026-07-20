@@ -1,16 +1,17 @@
 import os
 from functools import wraps
 
-from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
 import config
 from models import init_db, get_db
+from orgs import get_active_org, normalize_company_code
 from payroll import get_period_bounds, calculate_payroll, get_period_entries, get_prior_periods
 from email_report import send_report_email
-from tz import now_central, today_central
+from tz import now_in, today_in
 
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
@@ -34,29 +35,57 @@ def clock_home():
 @app.route("/staff/login", methods=["GET", "POST"])
 @limiter.limit("10 per minute")
 def staff_login():
+    if request.args.get("switch"):
+        session.pop("org_id", None)
+
+    org = None
+    org_id = session.get("org_id")
+    if org_id:
+        with get_db() as conn:
+            org = conn.execute(
+                "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+            ).fetchone()
+
     if request.method == "POST":
+        if org is None:
+            with get_db() as conn:
+                org = get_active_org(conn, request.form.get("company_code", ""))
+            if org is None:
+                flash("Company code, Employee ID, or PIN not recognized.")
+                return render_template("staff_login.html", org=None)
+
         code = request.form.get("employee_code", "").strip()
         pin = request.form.get("pin", "").strip()
         with get_db() as conn:
             emp = conn.execute(
-                "SELECT * FROM employees WHERE employee_code=%s AND active=1", (code,)
+                "SELECT * FROM employees WHERE org_id=%s AND employee_code=%s AND active=1",
+                (org["id"], code),
             ).fetchone()
         if emp and check_password_hash(emp["pin_hash"], pin):
+            session["org_id"] = org["id"]
             session["employee_id"] = emp["id"]
             return redirect(url_for("clock_action"))
-        flash("Employee ID or PIN not recognized.")
-    return render_template("staff_login.html")
+        flash("Company code, Employee ID, or PIN not recognized.")
+        return render_template("staff_login.html", org=org)
+
+    return render_template("staff_login.html", org=org)
 
 
 @app.route("/clock", methods=["GET", "POST"])
 def clock_action():
     emp_id = session.get("employee_id")
-    if not emp_id:
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
         return redirect(url_for("staff_login"))
 
     with get_db() as conn:
-        emp = conn.execute("SELECT * FROM employees WHERE id=%s", (emp_id,)).fetchone()
-        if emp is None:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if emp is None or org is None:
             session.pop("employee_id", None)
             return redirect(url_for("staff_login"))
 
@@ -66,7 +95,7 @@ def clock_action():
         ).fetchone()
 
         if request.method == "POST":
-            now = now_central()
+            now = now_in(org["timezone"])
             if open_entry:
                 conn.execute(
                     "UPDATE time_entries SET clock_out=%s WHERE id=%s",
@@ -88,10 +117,10 @@ def clock_action():
             (emp_id,),
         ).fetchall()
 
-        period_start, _ = get_period_bounds(today_central())
+        period_start, _ = get_period_bounds(today_in(org["timezone"]))
         weekly_history = []
         for start, end in get_prior_periods(period_start, count=4):
-            rows = calculate_payroll(conn, start, end)
+            rows = calculate_payroll(conn, org["id"], org["timezone"], start, end)
             mine = next((r for r in rows if r["employee_code"] == emp["employee_code"]), None)
             weekly_history.append({
                 "period_start": start,
@@ -120,17 +149,23 @@ def clock_action():
 @limiter.limit("5 per hour")
 def submit_hours():
     emp_id = session.get("employee_id")
-    if not emp_id:
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
         return redirect(url_for("staff_login"))
 
     with get_db() as conn:
-        emp = conn.execute("SELECT * FROM employees WHERE id=%s", (emp_id,)).fetchone()
-    if emp is None:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+    if emp is None or org is None:
         session.pop("employee_id", None)
         return redirect(url_for("staff_login"))
 
     try:
-        _send_current_period_report()
+        _send_current_period_report(org)
         flash(f"Thanks, {emp['name']} - this week's hours report was emailed to the office.")
     except Exception as e:
         flash(f"Couldn't submit hours: {e}")
@@ -142,23 +177,50 @@ def submit_hours():
 def admin_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        if not session.get("admin_id"):
+        admin_id = session.get("admin_id")
+        org_id = session.get("org_id")
+        if not admin_id or not org_id:
             return redirect(url_for("admin_login"))
+        with get_db() as conn:
+            admin = conn.execute(
+                "SELECT * FROM admin_users WHERE id=%s AND org_id=%s", (admin_id, org_id)
+            ).fetchone()
+            org = conn.execute(
+                "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+            ).fetchone()
+        if admin is None or org is None:
+            session.pop("admin_id", None)
+            session.pop("org_id", None)
+            return redirect(url_for("admin_login"))
+        g.admin = admin
+        g.org = org
         return f(*args, **kwargs)
     return wrapper
 
 
 @app.route("/admin/setup", methods=["GET", "POST"])
 def admin_setup():
+    company_code = request.values.get("company_code", "")
+
     with get_db() as conn:
-        existing = conn.execute("SELECT COUNT(*) AS c FROM admin_users").fetchone()["c"]
-    if existing > 0:
-        return redirect(url_for("admin_login"))
+        org = get_active_org(conn, company_code)
+    if org is not None:
+        with get_db() as conn:
+            existing = conn.execute(
+                "SELECT COUNT(*) AS c FROM admin_users WHERE org_id=%s", (org["id"],)
+            ).fetchone()["c"]
+        if existing > 0:
+            return redirect(url_for("admin_login"))
 
     if request.method == "POST":
         username = request.form["username"].strip()
         password = request.form["password"]
         confirm = request.form["confirm_password"]
+
+        if org is None:
+            flash("Company code not recognized. Contact support to set up your organization.")
+            return render_template("admin_setup.html", company_code=company_code)
+
         if not username or not password:
             flash("Username and password are required.")
         elif password != confirm:
@@ -168,34 +230,47 @@ def admin_setup():
         else:
             with get_db() as conn:
                 conn.execute(
-                    "INSERT INTO admin_users (username, password_hash) VALUES (%s, %s)",
-                    (username, generate_password_hash(password)),
+                    "INSERT INTO admin_users (org_id, username, password_hash) VALUES (%s, %s, %s)",
+                    (org["id"], username, generate_password_hash(password)),
                 )
                 conn.commit()
             flash("Admin account created. Please log in.")
             return redirect(url_for("admin_login"))
-    return render_template("admin_setup.html")
+        return render_template("admin_setup.html", company_code=company_code)
+
+    return render_template("admin_setup.html", company_code=company_code)
 
 
 @app.route("/admin/login", methods=["GET", "POST"])
 @limiter.limit("10 per minute")
 def admin_login():
-    with get_db() as conn:
-        existing = conn.execute("SELECT COUNT(*) AS c FROM admin_users").fetchone()["c"]
-    if existing == 0:
-        return redirect(url_for("admin_setup"))
-
     if request.method == "POST":
+        company_code = request.form.get("company_code", "")
         username = request.form["username"].strip()
         password = request.form["password"]
+
+        with get_db() as conn:
+            org = get_active_org(conn, company_code)
+        if org is None:
+            flash("Company code, username, or password not recognized.")
+            return render_template("admin_login.html")
+
+        with get_db() as conn:
+            existing = conn.execute(
+                "SELECT COUNT(*) AS c FROM admin_users WHERE org_id=%s", (org["id"],)
+            ).fetchone()["c"]
+        if existing == 0:
+            return redirect(url_for("admin_setup", company_code=normalize_company_code(company_code)))
+
         with get_db() as conn:
             admin = conn.execute(
-                "SELECT * FROM admin_users WHERE username=%s", (username,)
+                "SELECT * FROM admin_users WHERE org_id=%s AND username=%s", (org["id"], username)
             ).fetchone()
         if admin and check_password_hash(admin["password_hash"], password):
             session["admin_id"] = admin["id"]
+            session["org_id"] = org["id"]
             return redirect(url_for("admin_dashboard"))
-        flash("Invalid username or password.")
+        flash("Company code, username, or password not recognized.")
     return render_template("admin_login.html")
 
 
@@ -208,15 +283,15 @@ def admin_logout():
 @app.route("/admin")
 @admin_required
 def admin_dashboard():
-    today = today_central()
+    today = today_in(g.org["timezone"])
     period_start, period_end = get_period_bounds(today)
     with get_db() as conn:
-        detail = get_period_entries(conn, period_start, period_end)
+        detail = get_period_entries(conn, g.org["id"], g.org["timezone"], period_start, period_end)
         history = [
             {
                 "period_start": start,
                 "period_end": end,
-                "rows": calculate_payroll(conn, start, end),
+                "rows": calculate_payroll(conn, g.org["id"], g.org["timezone"], start, end),
             }
             for start, end in get_prior_periods(period_start, count=4)
         ]
@@ -234,8 +309,8 @@ def admin_dashboard():
     ]
     next_report_note = (
         f"Next automatic email: {period_end.strftime('%A, %B %d, %Y')} at "
-        f"{config.REPORT_HOUR % 12 or 12}:{config.REPORT_MINUTE:02d} "
-        f"{'PM' if config.REPORT_HOUR >= 12 else 'AM'} Central"
+        f"{g.org['report_hour'] % 12 or 12}:{g.org['report_minute']:02d} "
+        f"{'PM' if g.org['report_hour'] >= 12 else 'AM'} ({g.org['timezone']})"
     )
     return render_template(
         "admin_dashboard.html",
@@ -252,7 +327,9 @@ def admin_dashboard():
 @admin_required
 def admin_employees():
     with get_db() as conn:
-        employees = conn.execute("SELECT * FROM employees ORDER BY name").fetchall()
+        employees = conn.execute(
+            "SELECT * FROM employees WHERE org_id=%s ORDER BY name", (g.org["id"],)
+        ).fetchall()
     return render_template("admin_employees.html", employees=employees)
 
 
@@ -268,34 +345,44 @@ def admin_employee_new():
             rate = float(request.form["hourly_rate"])
         except ValueError:
             flash("Hourly rate must be a number.")
-            return render_template("admin_employee_form.html", employee=None, default_rate=config.DEFAULT_HOURLY_RATE)
+            return render_template(
+                "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"]
+            )
 
         if not code or not name or not pin:
             flash("Employee ID, name, and PIN are all required.")
-            return render_template("admin_employee_form.html", employee=None, default_rate=config.DEFAULT_HOURLY_RATE)
+            return render_template(
+                "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"]
+            )
 
         try:
             with get_db() as conn:
                 conn.execute(
-                    "INSERT INTO employees (employee_code, name, pin_hash, hourly_rate, worker_type) "
-                    "VALUES (%s, %s, %s, %s, %s)",
-                    (code, name, generate_password_hash(pin), rate, worker_type),
+                    "INSERT INTO employees (org_id, employee_code, name, pin_hash, hourly_rate, worker_type) "
+                    "VALUES (%s, %s, %s, %s, %s, %s)",
+                    (g.org["id"], code, name, generate_password_hash(pin), rate, worker_type),
                 )
                 conn.commit()
         except Exception:
             flash(f"Employee ID '{code}' is already in use.")
-            return render_template("admin_employee_form.html", employee=None, default_rate=config.DEFAULT_HOURLY_RATE)
+            return render_template(
+                "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"]
+            )
 
         flash(f"Added {name}.")
         return redirect(url_for("admin_employees"))
-    return render_template("admin_employee_form.html", employee=None)
+    return render_template(
+        "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"]
+    )
 
 
 @app.route("/admin/employees/<int:emp_id>/edit", methods=["GET", "POST"])
 @admin_required
 def admin_employee_edit(emp_id):
     with get_db() as conn:
-        emp = conn.execute("SELECT * FROM employees WHERE id=%s", (emp_id,)).fetchone()
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, g.org["id"])
+        ).fetchone()
         if emp is None:
             flash("Employee not found.")
             return redirect(url_for("admin_employees"))
@@ -313,13 +400,15 @@ def admin_employee_edit(emp_id):
 
             if pin:
                 conn.execute(
-                    "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s, pin_hash=%s WHERE id=%s",
-                    (name, rate, worker_type, active, generate_password_hash(pin), emp_id),
+                    "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s, pin_hash=%s "
+                    "WHERE id=%s AND org_id=%s",
+                    (name, rate, worker_type, active, generate_password_hash(pin), emp_id, g.org["id"]),
                 )
             else:
                 conn.execute(
-                    "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s WHERE id=%s",
-                    (name, rate, worker_type, active, emp_id),
+                    "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s "
+                    "WHERE id=%s AND org_id=%s",
+                    (name, rate, worker_type, active, emp_id, g.org["id"]),
                 )
             conn.commit()
             flash("Updated.")
@@ -328,12 +417,15 @@ def admin_employee_edit(emp_id):
     return render_template("admin_employee_form.html", employee=emp)
 
 
-def _send_current_period_report():
-    today = today_central()
+def _send_current_period_report(org):
+    recipients = [r.strip() for r in (org["report_recipients"] or "").split(",") if r.strip()]
+    if not recipients:
+        raise RuntimeError("No report recipients configured for this organization.")
+    today = today_in(org["timezone"])
     period_start, period_end = get_period_bounds(today)
     with get_db() as conn:
-        rows = calculate_payroll(conn, period_start, period_end)
-    send_report_email(period_start, period_end, rows)
+        rows = calculate_payroll(conn, org["id"], org["timezone"], period_start, period_end)
+    send_report_email(org["name"], recipients, period_start, period_end, rows)
     return period_start, period_end
 
 
@@ -341,11 +433,45 @@ def _send_current_period_report():
 @admin_required
 def admin_send_report_now():
     try:
-        _send_current_period_report()
+        _send_current_period_report(g.org)
         flash("Report emailed successfully.")
     except Exception as e:
         flash(f"Failed to send report: {e}")
     return redirect(url_for("admin_dashboard"))
+
+
+def _maybe_send_report_for_org(org):
+    now = now_in(org["timezone"])
+    if now.weekday() != org["report_weekday"] or now.hour != org["report_hour"]:
+        return {"org_id": org["id"], "status": "skipped", "reason": "not report time"}
+
+    today = now.date()
+    with get_db() as conn:
+        already_sent = conn.execute(
+            "SELECT 1 FROM report_log WHERE org_id=%s AND report_date=%s",
+            (org["id"], today),
+        ).fetchone()
+    if already_sent:
+        return {"org_id": org["id"], "status": "skipped", "reason": "already sent today"}
+
+    try:
+        period_start, period_end = _send_current_period_report(org)
+    except Exception as e:
+        return {"org_id": org["id"], "status": "error", "message": str(e)}
+
+    with get_db() as conn:
+        conn.execute(
+            "INSERT INTO report_log (org_id, report_date) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+            (org["id"], today),
+        )
+        conn.commit()
+
+    return {
+        "org_id": org["id"],
+        "status": "sent",
+        "period_start": str(period_start),
+        "period_end": str(period_end),
+    }
 
 
 @app.route("/cron/send-report")
@@ -354,35 +480,10 @@ def cron_send_report():
     if not config.REPORT_TOKEN or token != config.REPORT_TOKEN:
         abort(403)
 
-    from scheduler import is_report_day
-    today = today_central()
-    if not is_report_day(today):
-        return {"status": "skipped", "reason": "not a report day", "date": str(today)}, 200
-
     with get_db() as conn:
-        already_sent = conn.execute(
-            "SELECT 1 FROM report_log WHERE report_date=%s", (today,)
-        ).fetchone()
-        if already_sent:
-            return {"status": "skipped", "reason": "already sent today", "date": str(today)}, 200
+        orgs = conn.execute("SELECT * FROM organizations WHERE status='active'").fetchall()
 
-    try:
-        period_start, period_end = _send_current_period_report()
-    except Exception as e:
-        return {"status": "error", "message": str(e)}, 500
-
-    with get_db() as conn:
-        conn.execute(
-            "INSERT INTO report_log (report_date) VALUES (%s) ON CONFLICT DO NOTHING",
-            (today,),
-        )
-        conn.commit()
-
-    return {
-        "status": "sent",
-        "period_start": str(period_start),
-        "period_end": str(period_end),
-    }, 200
+    return {"status": "ok", "orgs": [_maybe_send_report_for_org(org) for org in orgs]}, 200
 
 
 if __name__ == "__main__":

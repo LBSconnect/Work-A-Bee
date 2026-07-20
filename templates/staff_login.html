@@ -4,11 +4,18 @@
   <h1>Work-A-Bee</h1>
   <p class="muted">Enter your Employee ID and PIN to clock in or out.</p>
   <form method="post">
+    {% if not org %}
+    <label>Company Code</label>
+    <input type="text" name="company_code" autofocus required>
+    {% endif %}
     <label>Employee ID</label>
-    <input type="text" name="employee_code" autofocus required>
+    <input type="text" name="employee_code" {% if org %}autofocus{% endif %} required>
     <label>PIN</label>
     <input type="password" name="pin" inputmode="numeric" required>
     <button type="submit">Continue</button>
   </form>
+  {% if org %}
+    <p class="muted" style="margin-top:8px;">{{ org.name }} &middot; <a href="{{ url_for('staff_login', switch=1) }}">Not your company?</a></p>
+  {% endif %}
   <p class="muted" style="margin-top:24px;"><a href="{{ url_for('clock_home') }}">Back</a></p>
 {% endblock %}

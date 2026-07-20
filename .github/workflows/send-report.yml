@@ -1,9 +1,12 @@
-name: Send weekly hours report
+name: Send weekly hours reports
 
 on:
   schedule:
-    - cron: "0 22 * * 5"  # 5pm Central Daylight Time (summer, UTC-5)
-    - cron: "0 23 * * 5"  # 5pm Central Standard Time (winter, UTC-6)
+    # Hourly - each org's own timezone/weekday/hour settings (in the
+    # organizations table) decide whether a report actually goes out on a
+    # given ping. This also doubles as a keep-warm ping for the free-tier
+    # web service.
+    - cron: "0 * * * *"
   workflow_dispatch: {}
 
 jobs:

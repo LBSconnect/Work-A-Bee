@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta
 
-from tz import now_central
+from tz import now_in
 
 
 def get_period_bounds(reference_date: date):
@@ -21,14 +21,15 @@ def get_prior_periods(period_start: date, count: int = 4):
     return periods
 
 
-def get_period_entries(conn, period_start: date, period_end: date):
+def get_period_entries(conn, org_id: int, tz_name: str, period_start: date, period_end: date):
     """Per-employee clock in/out detail for the period, with running hours/pay totals."""
     period_start_dt = datetime.combine(period_start, datetime.min.time())
     period_end_dt = datetime.combine(period_end, datetime.max.time())
-    now = now_central()
+    now = now_in(tz_name)
 
     employees = conn.execute(
-        "SELECT * FROM employees WHERE active=1 ORDER BY name"
+        "SELECT * FROM employees WHERE org_id=%s AND active=1 ORDER BY name",
+        (org_id,),
     ).fetchall()
 
     results = []
@@ -73,8 +74,8 @@ def get_period_entries(conn, period_start: date, period_end: date):
     return results
 
 
-def calculate_payroll(conn, period_start: date, period_end: date):
-    detail = get_period_entries(conn, period_start, period_end)
+def calculate_payroll(conn, org_id: int, tz_name: str, period_start: date, period_end: date):
+    detail = get_period_entries(conn, org_id, tz_name, period_start, period_end)
     return [
         {
             "employee_code": d["employee_code"],

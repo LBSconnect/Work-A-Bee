@@ -3,8 +3,10 @@
 {% block content %}
   <h1>Admin login</h1>
   <form method="post">
+    <label>Company Code</label>
+    <input type="text" name="company_code" autofocus required>
     <label>Username</label>
-    <input type="text" name="username" autofocus required>
+    <input type="text" name="username" required>
     <label>Password</label>
     <input type="password" name="password" required>
     <button type="submit">Log in</button>
