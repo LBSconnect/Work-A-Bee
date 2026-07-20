@@ -2,7 +2,7 @@
 
 A web app for employee clock in/out, with an hours &amp; pay report
 (hours x rate per person, $16.00/hr by default) emailed automatically
-every Friday at 5:00 PM Central to `antonette.Linton@lbsconnect.net`.
+every Friday at 5:00 PM Central to `info@lbsconnect.net`.
 
 Deployed on **Render** (free tier to start) with a **Postgres** database,
 so it's reachable from a browser on any office computer - no local
@@ -63,7 +63,7 @@ Render won't have wired up the database or env vars for you. You'll need to:
 3. Fill in:
    - `SMTP_USERNAME` - your Outlook/Microsoft 365 email address
    - `SMTP_PASSWORD` - see note below
-   - `REPORT_RECIPIENT` - already defaults to `antonette.Linton@lbsconnect.net`;
+   - `REPORT_RECIPIENT` - already defaults to `info@lbsconnect.net`;
      only set this if you want it sent somewhere else.
 4. Save changes (this triggers a quick redeploy).
 
@@ -120,7 +120,7 @@ button.
 
 - **Automatic:** every Friday around 5:00 PM Central, a report (hours x
   rate per person, plus a total) covering that Monday-Friday is emailed
-  to `REPORT_RECIPIENT` (`antonette.Linton@lbsconnect.net` by default).
+  to `REPORT_RECIPIENT` (`info@lbsconnect.net` by default).
 - **Manual:** log in as admin and click **Send report now** any time.
 
 ## Security notes
