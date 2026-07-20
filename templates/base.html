@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Linton Timekeeping{% endblock %}</title>
+  <title>{% block title %}Work-A-Bee{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo-workabee.svg') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -11,8 +12,9 @@
 </head>
 <body>
   <header class="site-header">
-    <a href="https://www.myeasypass.net/" class="site-header-brand">
-      <img src="{{ url_for('static', filename='logo.png') }}" alt="MyEasyPass">
+    <a href="{{ url_for('clock_home') }}" class="site-header-brand">
+      <img src="{{ url_for('static', filename='logo-workabee.svg') }}" alt="Work-A-Bee">
+      <span class="site-header-brand-name">Work-A-Bee</span>
     </a>
   </header>
 
@@ -29,28 +31,13 @@
 
   <footer class="site-footer">
     <div class="site-footer-inner">
-      <div class="site-footer-col">
-        <strong>Linton Business Solutions</strong>
-        <p class="muted">Your path to professional licensing success</p>
-      </div>
-      <div class="site-footer-col">
-        <strong>Contact</strong>
-        <p class="muted">
-          Support@LBSconnect.net<br>
-          281-836-5357<br>
-          616 FM 1960 RD W STE 101<br>
-          Houston, TX 77090-3048
-        </p>
-      </div>
-      <div class="site-footer-col">
-        <strong>Quick Links</strong>
-        <p class="muted">
-          <a href="https://www.myeasypass.net/">MyEasyPass.net</a><br>
-          <a href="{{ url_for('staff_login') }}">Employee Time Clock</a>
-        </p>
+      <img src="{{ url_for('static', filename='logo-workabee.svg') }}" alt="Work-A-Bee">
+      <div>
+        <div class="site-footer-brand-name">Work-A-Bee</div>
+        <p class="site-footer-tagline">Simple time tracking for hardworking teams.</p>
       </div>
     </div>
-    <p class="site-footer-copyright">&copy; 2025 Linton Business Solutions LLC. All Rights Reserved.</p>
+    <p class="site-footer-copyright">&copy; 2026 Work-A-Bee. All Rights Reserved.</p>
   </footer>
 </body>
 </html>
