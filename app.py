@@ -1,4 +1,5 @@
 import os
+import traceback
 from functools import wraps
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g
@@ -37,6 +38,13 @@ TIMEZONE_CHOICES = [
 ]
 
 
+def _active_companies():
+    with get_db() as conn:
+        return conn.execute(
+            "SELECT company_code, name FROM organizations WHERE status='active' ORDER BY name"
+        ).fetchall()
+
+
 @app.route("/")
 def clock_home():
     return render_template("login.html")
@@ -61,17 +69,22 @@ def signup():
         elif "@" not in report_recipients:
             flash("Please enter a valid notification email address.")
         else:
-            with get_db() as conn:
-                next_id = conn.execute(
-                    "SELECT nextval(pg_get_serial_sequence('organizations', 'id')) AS n"
-                ).fetchone()["n"]
-                code = f"cc{next_id:03d}"
-                conn.execute(
-                    "INSERT INTO organizations (id, company_code, name, timezone, report_recipients) "
-                    "VALUES (%s, %s, %s, %s, %s)",
-                    (next_id, code, company_name, timezone, report_recipients),
-                )
-                conn.commit()
+            try:
+                with get_db() as conn:
+                    next_id = conn.execute(
+                        "SELECT nextval(pg_get_serial_sequence('organizations', 'id')) AS n"
+                    ).fetchone()["n"]
+                    code = f"cc{next_id:03d}"
+                    conn.execute(
+                        "INSERT INTO organizations (id, company_code, name, timezone, report_recipients) "
+                        "VALUES (%s, %s, %s, %s, %s)",
+                        (next_id, code, company_name, timezone, report_recipients),
+                    )
+                    conn.commit()
+            except Exception:
+                traceback.print_exc()
+                flash("Something went wrong creating your company. Please try again.")
+                return render_template("signup.html", timezone_choices=TIMEZONE_CHOICES, **form)
 
             flash(
                 f"'{company_name}' is set up! Your Company Code is {code.upper()} - "
@@ -101,8 +114,8 @@ def staff_login():
             with get_db() as conn:
                 org = get_active_org(conn, request.form.get("company_code", ""))
             if org is None:
-                flash("Company code, Employee ID, or PIN not recognized.")
-                return render_template("staff_login.html", org=None)
+                flash("Company not found, or Employee ID/PIN not recognized.")
+                return render_template("staff_login.html", org=None, companies=_active_companies())
 
         code = request.form.get("employee_code", "").strip()
         pin = request.form.get("pin", "").strip()
@@ -115,10 +128,10 @@ def staff_login():
             session["org_id"] = org["id"]
             session["employee_id"] = emp["id"]
             return redirect(url_for("clock_action"))
-        flash("Company code, Employee ID, or PIN not recognized.")
-        return render_template("staff_login.html", org=org)
+        flash("Company not found, or Employee ID/PIN not recognized.")
+        return render_template("staff_login.html", org=org, companies=_active_companies())
 
-    return render_template("staff_login.html", org=org)
+    return render_template("staff_login.html", org=org, companies=_active_companies())
 
 
 @app.route("/clock", methods=["GET", "POST"])
@@ -302,8 +315,8 @@ def admin_login():
         with get_db() as conn:
             org = get_active_org(conn, company_code)
         if org is None:
-            flash("Company code, username, or password not recognized.")
-            return render_template("admin_login.html")
+            flash("Company not found, or username/password not recognized.")
+            return render_template("admin_login.html", companies=_active_companies())
 
         with get_db() as conn:
             existing = conn.execute(
@@ -320,8 +333,8 @@ def admin_login():
             session["admin_id"] = admin["id"]
             session["org_id"] = org["id"]
             return redirect(url_for("admin_dashboard"))
-        flash("Company code, username, or password not recognized.")
-    return render_template("admin_login.html")
+        flash("Company not found, or username/password not recognized.")
+    return render_template("admin_login.html", companies=_active_companies())
 
 
 @app.route("/admin/logout")

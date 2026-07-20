@@ -3,8 +3,13 @@
 {% block content %}
   <h1>Admin login</h1>
   <form method="post">
-    <label>Company Code</label>
-    <input type="text" name="company_code" autofocus required>
+    <label>Company</label>
+    <select name="company_code" autofocus required>
+      <option value="" disabled selected>Select your company&hellip;</option>
+      {% for c in companies %}
+        <option value="{{ c.company_code }}">{{ c.name }}</option>
+      {% endfor %}
+    </select>
     <label>Username</label>
     <input type="text" name="username" required>
     <label>Password</label>
