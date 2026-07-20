@@ -11,6 +11,16 @@ def get_period_bounds(reference_date: date):
     return week_start, week_end
 
 
+def get_prior_periods(period_start: date, count: int = 4):
+    """The `count` Monday-Friday periods immediately before period_start, most recent first."""
+    periods = []
+    for i in range(1, count + 1):
+        start = period_start - timedelta(days=7 * i)
+        end = start + timedelta(days=4)
+        periods.append((start, end))
+    return periods
+
+
 def get_period_entries(conn, period_start: date, period_end: date):
     """Per-employee clock in/out detail for the period, with running hours/pay totals."""
     period_start_dt = datetime.combine(period_start, datetime.min.time())
