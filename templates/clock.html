@@ -44,4 +44,18 @@
       {% endfor %}
     </table>
   {% endif %}
+
+  {% if weekly_history %}
+    <h2 style="margin-top:32px; font-size:16px;">Prior 4 weeks</h2>
+    <table>
+      <tr><th>Week</th><th>Hours</th><th>Pay</th></tr>
+      {% for w in weekly_history %}
+      <tr>
+        <td>{{ w.period_start.strftime('%b %d') }} &ndash; {{ w.period_end.strftime('%b %d') }}</td>
+        <td>{{ "%.2f"|format(w.hours) }}</td>
+        <td>${{ "%.2f"|format(w.pay) }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
 {% endblock %}
