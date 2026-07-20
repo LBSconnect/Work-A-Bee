@@ -7,12 +7,12 @@ import config
 
 def send_report_email(period_start, period_end, rows):
     subject = (
-        f"Payroll report: {period_start.strftime('%b %d, %Y')} - "
+        f"Weekly hours report: {period_start.strftime('%b %d, %Y')} - "
         f"{period_end.strftime('%b %d, %Y')}"
     )
 
     lines = [
-        f"Payroll report for {period_start.strftime('%B %d, %Y')} - "
+        f"Weekly hours report for {period_start.strftime('%B %d, %Y')} - "
         f"{period_end.strftime('%B %d, %Y')}",
         "",
         f"{'ID':<10}{'Name':<25}{'Type':<12}{'Hours':>8}{'Rate':>10}{'Pay':>10}",
@@ -28,7 +28,7 @@ def send_report_email(period_start, period_end, rows):
         )
         total_pay += r["pay"]
     lines.append("")
-    lines.append(f"Total payroll: ${total_pay:,.2f}")
+    lines.append(f"Total: ${total_pay:,.2f}")
 
     body = "\n".join(lines)
 

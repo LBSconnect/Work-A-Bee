@@ -26,7 +26,7 @@
     </select>
 
     <label>Hourly rate ($)</label>
-    <input type="number" step="0.01" min="0" name="hourly_rate" value="{{ employee.hourly_rate if employee else '' }}" required>
+    <input type="number" step="0.01" min="0" name="hourly_rate" value="{{ employee.hourly_rate if employee else (default_rate or '16.00') }}" required>
 
     <label>{% if employee %}New PIN (leave blank to keep current){% else %}PIN{% endif %}</label>
     <input type="password" name="pin" inputmode="numeric" {% if not employee %}required{% endif %}>

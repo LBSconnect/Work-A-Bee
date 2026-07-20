@@ -188,11 +188,11 @@ def admin_employee_new():
             rate = float(request.form["hourly_rate"])
         except ValueError:
             flash("Hourly rate must be a number.")
-            return render_template("admin_employee_form.html", employee=None)
+            return render_template("admin_employee_form.html", employee=None, default_rate=config.DEFAULT_HOURLY_RATE)
 
         if not code or not name or not pin:
             flash("Employee ID, name, and PIN are all required.")
-            return render_template("admin_employee_form.html", employee=None)
+            return render_template("admin_employee_form.html", employee=None, default_rate=config.DEFAULT_HOURLY_RATE)
 
         try:
             with get_db() as conn:
@@ -204,7 +204,7 @@ def admin_employee_new():
                 conn.commit()
         except Exception:
             flash(f"Employee ID '{code}' is already in use.")
-            return render_template("admin_employee_form.html", employee=None)
+            return render_template("admin_employee_form.html", employee=None, default_rate=config.DEFAULT_HOURLY_RATE)
 
         flash(f"Added {name}.")
         return redirect(url_for("admin_employees"))
