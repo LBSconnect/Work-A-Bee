@@ -5,15 +5,15 @@ from email.mime.text import MIMEText
 import config
 
 
-def send_report_email(period_start, period_end, rows):
+def send_report_email(org_name, recipients, period_start, period_end, rows):
     subject = (
-        f"Weekly hours report: {period_start.strftime('%b %d, %Y')} - "
+        f"{org_name} weekly hours report: {period_start.strftime('%b %d, %Y')} - "
         f"{period_end.strftime('%b %d, %Y')}"
     )
 
     lines = [
-        f"Weekly hours report for {period_start.strftime('%B %d, %Y')} - "
-        f"{period_end.strftime('%B %d, %Y')}",
+        f"Weekly hours report for {org_name}",
+        f"{period_start.strftime('%B %d, %Y')} - {period_end.strftime('%B %d, %Y')}",
         "",
         f"{'ID':<10}{'Name':<25}{'Type':<12}{'Hours':>8}{'Rate':>10}{'Pay':>10}",
     ]
@@ -35,10 +35,10 @@ def send_report_email(period_start, period_end, rows):
     msg = MIMEMultipart()
     msg["Subject"] = subject
     msg["From"] = config.SMTP_USERNAME
-    msg["To"] = config.REPORT_RECIPIENT
+    msg["To"] = ", ".join(recipients)
     msg.attach(MIMEText(body, "plain"))
 
     with smtplib.SMTP(config.SMTP_SERVER, config.SMTP_PORT) as server:
         server.starttls()
         server.login(config.SMTP_USERNAME, config.SMTP_PASSWORD)
-        server.sendmail(config.SMTP_USERNAME, [config.REPORT_RECIPIENT], msg.as_string())
+        server.sendmail(config.SMTP_USERNAME, recipients, msg.as_string())

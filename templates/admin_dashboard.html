@@ -9,6 +9,7 @@
     <a href="{{ url_for('admin_logout') }}">Log out</a>
   </div>
 
+  <p class="muted">{{ g.org.name }}</p>
   <h1>This week's hours</h1>
   <p>{{ period_start.strftime('%B %d, %Y') }} &ndash; {{ period_end.strftime('%B %d, %Y') }}</p>
   <p class="muted">{{ next_report_note }}</p>
