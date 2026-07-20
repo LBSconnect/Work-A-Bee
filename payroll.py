@@ -1,5 +1,7 @@
 from datetime import date, datetime, timedelta
 
+from tz import now_central
+
 
 def get_period_bounds(reference_date: date):
     """Monday-Friday bounds of the week containing reference_date."""
@@ -12,7 +14,7 @@ def get_period_bounds(reference_date: date):
 def calculate_payroll(conn, period_start: date, period_end: date):
     period_start_dt = datetime.combine(period_start, datetime.min.time())
     period_end_dt = datetime.combine(period_end, datetime.max.time())
-    now = datetime.now()
+    now = now_central()
 
     employees = conn.execute(
         "SELECT * FROM employees WHERE active=1 ORDER BY name"

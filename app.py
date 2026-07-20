@@ -1,6 +1,5 @@
 import os
 from functools import wraps
-from datetime import datetime, date
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -11,6 +10,7 @@ import config
 from models import init_db, get_db
 from payroll import get_period_bounds, calculate_payroll
 from email_report import send_report_email
+from tz import now_central, today_central
 
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
@@ -61,7 +61,7 @@ def clock_action():
         ).fetchone()
 
         if request.method == "POST":
-            now = datetime.now()
+            now = now_central()
             if open_entry:
                 conn.execute(
                     "UPDATE time_entries SET clock_out=%s WHERE id=%s",
@@ -164,7 +164,7 @@ def admin_logout():
 @app.route("/admin")
 @admin_required
 def admin_dashboard():
-    today = date.today()
+    today = today_central()
     period_start, period_end = get_period_bounds(today)
     with get_db() as conn:
         rows = calculate_payroll(conn, period_start, period_end)
@@ -263,7 +263,7 @@ def admin_employee_edit(emp_id):
 
 
 def _send_current_period_report():
-    today = date.today()
+    today = today_central()
     period_start, period_end = get_period_bounds(today)
     with get_db() as conn:
         rows = calculate_payroll(conn, period_start, period_end)
@@ -289,7 +289,7 @@ def cron_send_report():
         abort(403)
 
     from scheduler import is_report_day
-    today = date.today()
+    today = today_central()
     if not is_report_day(today):
         return {"status": "skipped", "reason": "not a report day", "date": str(today)}, 200
 
