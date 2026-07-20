@@ -83,6 +83,18 @@ def clock_action():
             (emp_id,),
         ).fetchall()
 
+        period_start, _ = get_period_bounds(today_central())
+        weekly_history = []
+        for start, end in get_prior_periods(period_start, count=4):
+            rows = calculate_payroll(conn, start, end)
+            mine = next((r for r in rows if r["employee_code"] == emp["employee_code"]), None)
+            weekly_history.append({
+                "period_start": start,
+                "period_end": end,
+                "hours": mine["total_hours"] if mine else 0.0,
+                "pay": mine["pay"] if mine else 0.0,
+            })
+
     history = []
     for e in recent_entries:
         hours = None
@@ -91,7 +103,11 @@ def clock_action():
         history.append({"clock_in": e["clock_in"], "clock_out": e["clock_out"], "hours": hours})
 
     return render_template(
-        "clock.html", employee=emp, is_clocked_in=bool(open_entry), history=history
+        "clock.html",
+        employee=emp,
+        is_clocked_in=bool(open_entry),
+        history=history,
+        weekly_history=weekly_history,
     )
 
 
