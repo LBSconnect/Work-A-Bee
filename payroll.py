@@ -12,6 +12,7 @@ def get_period_bounds(reference_date: date):
 def calculate_payroll(conn, period_start: date, period_end: date):
     period_start_dt = datetime.combine(period_start, datetime.min.time())
     period_end_dt = datetime.combine(period_end, datetime.max.time())
+    now = datetime.now()
 
     employees = conn.execute(
         "SELECT * FROM employees WHERE active=1 ORDER BY name"
@@ -32,6 +33,9 @@ def calculate_payroll(conn, period_start: date, period_end: date):
                 total_seconds += (e["clock_out"] - clock_in).total_seconds()
             else:
                 incomplete = True
+                accrued_through = min(now, period_end_dt)
+                if accrued_through > clock_in:
+                    total_seconds += (accrued_through - clock_in).total_seconds()
 
         total_hours = round(total_seconds / 3600, 2)
         pay = round(total_hours * emp["hourly_rate"], 2)

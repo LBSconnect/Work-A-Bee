@@ -78,7 +78,21 @@ def clock_action():
             session.pop("employee_id", None)
             return redirect(url_for("clock_home"))
 
-    return render_template("clock.html", employee=emp, is_clocked_in=bool(open_entry))
+        recent_entries = conn.execute(
+            "SELECT * FROM time_entries WHERE employee_id=%s ORDER BY clock_in DESC LIMIT 10",
+            (emp_id,),
+        ).fetchall()
+
+    history = []
+    for e in recent_entries:
+        hours = None
+        if e["clock_out"]:
+            hours = round((e["clock_out"] - e["clock_in"]).total_seconds() / 3600, 2)
+        history.append({"clock_in": e["clock_in"], "clock_out": e["clock_out"], "hours": hours})
+
+    return render_template(
+        "clock.html", employee=emp, is_clocked_in=bool(open_entry), history=history
+    )
 
 
 def admin_required(f):
