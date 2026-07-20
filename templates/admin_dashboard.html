@@ -74,4 +74,28 @@
   {% else %}
     <p class="muted">No active employees yet.</p>
   {% endfor %}
+
+  <h1 style="margin-top:40px;">Prior 4 weeks</h1>
+  {% for w in history %}
+    <h2>{{ w.period_start.strftime('%B %d') }} &ndash; {{ w.period_end.strftime('%B %d, %Y') }}</h2>
+    <table>
+      <tr>
+        <th>Employee ID</th><th>Name</th><th>Type</th><th>Hours</th><th>Rate</th><th>Pay</th>
+      </tr>
+      {% for r in w.rows %}
+      <tr>
+        <td>{{ r.employee_code }}</td>
+        <td>{{ r.name }}</td>
+        <td>{{ r.worker_type|capitalize }}</td>
+        <td>{{ "%.2f"|format(r.total_hours) }}</td>
+        <td>${{ "%.2f"|format(r.hourly_rate) }}</td>
+        <td>${{ "%.2f"|format(r.pay) }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="muted">No active employees.</td></tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p class="muted">No prior weeks yet.</p>
+  {% endfor %}
 {% endblock %}
