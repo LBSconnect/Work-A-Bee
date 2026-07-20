@@ -17,5 +17,31 @@
       <button type="submit">&#10004; CLOCK IN</button>
     {% endif %}
   </form>
+  <form method="post" action="{{ url_for('submit_hours') }}" style="margin-top:16px;"
+        onsubmit="return confirm('Email this week\'s hours report to the office now?');">
+    <button type="submit" class="btn secondary">Submit my hours</button>
+  </form>
+
   <p class="muted" style="margin-top:24px;"><a href="{{ url_for('clock_home') }}">Cancel</a></p>
+
+  {% if history %}
+    <h2 style="margin-top:32px; font-size:16px;">Recent activity</h2>
+    <table>
+      <tr><th>Date</th><th>Clock in</th><th>Clock out</th><th>Hours</th></tr>
+      {% for h in history %}
+      <tr>
+        <td>{{ h.clock_in.strftime('%b %d') }}</td>
+        <td>{{ h.clock_in.strftime('%I:%M %p') }}</td>
+        <td>
+          {% if h.clock_out %}
+            {{ h.clock_out.strftime('%I:%M %p') }}
+          {% else %}
+            <span class="muted">In progress</span>
+          {% endif %}
+        </td>
+        <td>{% if h.hours is not none %}{{ "%.2f"|format(h.hours) }}{% else %}&mdash;{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
 {% endblock %}

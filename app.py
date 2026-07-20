@@ -1,6 +1,5 @@
 import os
 from functools import wraps
-from datetime import datetime, date
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -11,6 +10,7 @@ import config
 from models import init_db, get_db
 from payroll import get_period_bounds, calculate_payroll
 from email_report import send_report_email
+from tz import now_central, today_central
 
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
@@ -61,7 +61,7 @@ def clock_action():
         ).fetchone()
 
         if request.method == "POST":
-            now = datetime.now()
+            now = now_central()
             if open_entry:
                 conn.execute(
                     "UPDATE time_entries SET clock_out=%s WHERE id=%s",
@@ -78,7 +78,44 @@ def clock_action():
             session.pop("employee_id", None)
             return redirect(url_for("clock_home"))
 
-    return render_template("clock.html", employee=emp, is_clocked_in=bool(open_entry))
+        recent_entries = conn.execute(
+            "SELECT * FROM time_entries WHERE employee_id=%s ORDER BY clock_in DESC LIMIT 10",
+            (emp_id,),
+        ).fetchall()
+
+    history = []
+    for e in recent_entries:
+        hours = None
+        if e["clock_out"]:
+            hours = round((e["clock_out"] - e["clock_in"]).total_seconds() / 3600, 2)
+        history.append({"clock_in": e["clock_in"], "clock_out": e["clock_out"], "hours": hours})
+
+    return render_template(
+        "clock.html", employee=emp, is_clocked_in=bool(open_entry), history=history
+    )
+
+
+@app.route("/clock/submit-hours", methods=["POST"])
+@limiter.limit("5 per hour")
+def submit_hours():
+    emp_id = session.get("employee_id")
+    if not emp_id:
+        return redirect(url_for("clock_home"))
+
+    with get_db() as conn:
+        emp = conn.execute("SELECT * FROM employees WHERE id=%s", (emp_id,)).fetchone()
+    if emp is None:
+        session.pop("employee_id", None)
+        return redirect(url_for("clock_home"))
+
+    try:
+        _send_current_period_report()
+        flash(f"Thanks, {emp['name']} - this week's hours report was emailed to the office.")
+    except Exception as e:
+        flash(f"Couldn't submit hours: {e}")
+
+    session.pop("employee_id", None)
+    return redirect(url_for("clock_home"))
 
 
 def admin_required(f):
@@ -150,7 +187,7 @@ def admin_logout():
 @app.route("/admin")
 @admin_required
 def admin_dashboard():
-    today = date.today()
+    today = today_central()
     period_start, period_end = get_period_bounds(today)
     with get_db() as conn:
         rows = calculate_payroll(conn, period_start, period_end)
@@ -249,7 +286,7 @@ def admin_employee_edit(emp_id):
 
 
 def _send_current_period_report():
-    today = date.today()
+    today = today_central()
     period_start, period_end = get_period_bounds(today)
     with get_db() as conn:
         rows = calculate_payroll(conn, period_start, period_end)
@@ -275,7 +312,7 @@ def cron_send_report():
         abort(403)
 
     from scheduler import is_report_day
-    today = date.today()
+    today = today_central()
     if not is_report_day(today):
         return {"status": "skipped", "reason": "not a report day", "date": str(today)}, 200
 

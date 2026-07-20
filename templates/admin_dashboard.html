@@ -12,6 +12,7 @@
   <h1>This week's hours</h1>
   <p>{{ period_start.strftime('%B %d, %Y') }} &ndash; {{ period_end.strftime('%B %d, %Y') }}</p>
   <p class="muted">{{ next_report_note }}</p>
+  <p class="muted">Hours for anyone currently clocked in include time accrued so far and update each time you reload this page.</p>
 
   <table>
     <tr>
@@ -25,7 +26,7 @@
       <td>{{ "%.2f"|format(r.total_hours) }}</td>
       <td>${{ "%.2f"|format(r.hourly_rate) }}</td>
       <td>${{ "%.2f"|format(r.pay) }}</td>
-      <td class="muted">{% if r.incomplete %}&#9888; still clocked in{% endif %}</td>
+      <td class="muted">{% if r.incomplete %}&#9888; still clocked in (running){% endif %}</td>
     </tr>
     {% else %}
     <tr><td colspan="7" class="muted">No active employees yet. Add some on the Employees page.</td></tr>
