@@ -26,9 +26,14 @@ limiter = Limiter(get_remote_address, app=app, default_limits=[])
 init_db()
 
 
-@app.route("/", methods=["GET", "POST"])
-@limiter.limit("10 per minute")
+@app.route("/")
 def clock_home():
+    return render_template("login.html")
+
+
+@app.route("/staff/login", methods=["GET", "POST"])
+@limiter.limit("10 per minute")
+def staff_login():
     if request.method == "POST":
         code = request.form.get("employee_code", "").strip()
         pin = request.form.get("pin", "").strip()
@@ -40,20 +45,20 @@ def clock_home():
             session["employee_id"] = emp["id"]
             return redirect(url_for("clock_action"))
         flash("Employee ID or PIN not recognized.")
-    return render_template("login.html")
+    return render_template("staff_login.html")
 
 
 @app.route("/clock", methods=["GET", "POST"])
 def clock_action():
     emp_id = session.get("employee_id")
     if not emp_id:
-        return redirect(url_for("clock_home"))
+        return redirect(url_for("staff_login"))
 
     with get_db() as conn:
         emp = conn.execute("SELECT * FROM employees WHERE id=%s", (emp_id,)).fetchone()
         if emp is None:
             session.pop("employee_id", None)
-            return redirect(url_for("clock_home"))
+            return redirect(url_for("staff_login"))
 
         open_entry = conn.execute(
             "SELECT * FROM time_entries WHERE employee_id=%s AND clock_out IS NULL",
@@ -76,7 +81,7 @@ def clock_action():
                 flash(f"Clocked IN at {now.strftime('%I:%M %p')}. Welcome, {emp['name']}!")
             conn.commit()
             session.pop("employee_id", None)
-            return redirect(url_for("clock_home"))
+            return redirect(url_for("staff_login"))
 
         recent_entries = conn.execute(
             "SELECT * FROM time_entries WHERE employee_id=%s ORDER BY clock_in DESC LIMIT 10",
@@ -116,13 +121,13 @@ def clock_action():
 def submit_hours():
     emp_id = session.get("employee_id")
     if not emp_id:
-        return redirect(url_for("clock_home"))
+        return redirect(url_for("staff_login"))
 
     with get_db() as conn:
         emp = conn.execute("SELECT * FROM employees WHERE id=%s", (emp_id,)).fetchone()
     if emp is None:
         session.pop("employee_id", None)
-        return redirect(url_for("clock_home"))
+        return redirect(url_for("staff_login"))
 
     try:
         _send_current_period_report()
@@ -131,7 +136,7 @@ def submit_hours():
         flash(f"Couldn't submit hours: {e}")
 
     session.pop("employee_id", None)
-    return redirect(url_for("clock_home"))
+    return redirect(url_for("staff_login"))
 
 
 def admin_required(f):
