@@ -5,3 +5,4 @@ psycopg2-binary==2.9.12
 python-dotenv==1.0.1
 gunicorn==23.0.0
 tzdata==2026.3
+requests==2.32.3

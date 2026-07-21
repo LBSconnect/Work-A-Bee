@@ -23,13 +23,13 @@ services:
         value: "0"
       - key: DEFAULT_HOURLY_RATE
         value: "16.00"
-      - key: SMTP_SERVER
-        value: "smtp.office365.com"
-      - key: SMTP_PORT
-        value: "587"
-      - key: SMTP_USERNAME
+      - key: MS_TENANT_ID
         sync: false
-      - key: SMTP_PASSWORD
+      - key: MS_CLIENT_ID
+        sync: false
+      - key: MS_CLIENT_SECRET
+        sync: false
+      - key: MS_SENDER_EMAIL
         sync: false
       - key: REPORT_RECIPIENT
         value: "info@lbsconnect.net"

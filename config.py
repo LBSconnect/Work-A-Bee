@@ -9,9 +9,9 @@ DATABASE_URL = os.environ.get("DATABASE_URL", "")
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.office365.com")
-SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
-SMTP_USERNAME = os.environ.get("SMTP_USERNAME", "")
-SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
+MS_TENANT_ID = os.environ.get("MS_TENANT_ID", "")
+MS_CLIENT_ID = os.environ.get("MS_CLIENT_ID", "")
+MS_CLIENT_SECRET = os.environ.get("MS_CLIENT_SECRET", "")
+MS_SENDER_EMAIL = os.environ.get("MS_SENDER_EMAIL", "")
 
 ON_RENDER = os.environ.get("RENDER", "") != ""
