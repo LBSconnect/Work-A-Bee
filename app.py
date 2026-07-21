@@ -44,7 +44,7 @@ def _active_companies():
 
 @app.route("/")
 def clock_home():
-    return render_template("login.html")
+    return render_template("templates/index.html")
 
 
 @app.route("/staff/login", methods=["GET", "POST"])
