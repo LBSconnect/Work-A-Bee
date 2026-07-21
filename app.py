@@ -352,7 +352,7 @@ def admin_dashboard():
     }
 
     checklist = None
-    if g.org["onboarding_completed_at"]:
+    if g.org.get("onboarding_completed_at"):
         checklist = [
             {"label": "Company Created", "done": True, "url": None},
             {"label": "Payroll Configured", "done": True, "url": None},
