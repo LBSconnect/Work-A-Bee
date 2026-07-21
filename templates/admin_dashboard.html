@@ -88,7 +88,7 @@
       </tr>
       {% for e in d.entries %}
       <tr>
-        <td>{{ e.clock_in.strftime('%a %b %d, %I:%M %p') }}</td>
+        <td>{{ e.clock_in.strftime('%a %b %d, %I:%M %p') }}{% if e.is_manual %} <span class="muted">(manual)</span>{% endif %}</td>
         <td>
           {% if e.clock_out %}
             {{ e.clock_out.strftime('%a %b %d, %I:%M %p') }}

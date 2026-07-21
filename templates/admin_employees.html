@@ -22,7 +22,11 @@
       <td>{{ e.worker_type|capitalize }}</td>
       <td>${{ "%.2f"|format(e.hourly_rate) }}/hr</td>
       <td>{% if e.active %}Active{% else %}Inactive{% endif %}</td>
-      <td><a href="{{ url_for('admin_employee_edit', emp_id=e.id) }}">Edit</a></td>
+      <td>
+        <a href="{{ url_for('admin_employee_edit', emp_id=e.id) }}">Edit</a>
+        &middot;
+        <a href="{{ url_for('admin_time_entry_new', emp_id=e.id) }}">Add entry</a>
+      </td>
     </tr>
     {% else %}
     <tr><td colspan="6" class="muted">No employees yet.</td></tr>

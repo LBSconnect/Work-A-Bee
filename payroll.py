@@ -98,6 +98,7 @@ def get_period_entries(conn, org, period_start: date, period_end: date):
                 "hours": round(hours, 2),
                 "running_hours": round(running_hours, 2),
                 "running_due": round(running_hours * emp["hourly_rate"], 2),
+                "is_manual": bool(e.get("is_manual")),
             })
 
         total_hours = round(running_hours, 2)

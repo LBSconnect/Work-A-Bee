@@ -221,6 +221,11 @@ def init_db():
                     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
                 )
             """)
+            conn.execute("""
+                ALTER TABLE time_entries
+                    ADD COLUMN IF NOT EXISTS is_manual BOOLEAN NOT NULL DEFAULT FALSE,
+                    ADD COLUMN IF NOT EXISTS created_by_admin_id INTEGER REFERENCES admin_users(id)
+            """)
             conn.commit()
     except Exception:
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")

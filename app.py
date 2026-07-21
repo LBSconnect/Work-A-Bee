@@ -1,5 +1,6 @@
 import os
 import traceback
+from datetime import datetime
 from functools import wraps
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g, Response, make_response
@@ -445,6 +446,55 @@ def admin_employee_edit(emp_id):
             return redirect(url_for("admin_employees"))
 
     return render_template("admin_employee_form.html", employee=emp)
+
+
+@app.route("/admin/employees/<int:emp_id>/time-entries/new", methods=["GET", "POST"])
+@admin_required
+def admin_time_entry_new(emp_id):
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, g.org["id"])
+        ).fetchone()
+    if emp is None:
+        flash("Employee not found.")
+        return redirect(url_for("admin_employees"))
+
+    if request.method == "POST":
+        clock_in_raw = request.form.get("clock_in", "").strip()
+        clock_out_raw = request.form.get("clock_out", "").strip()
+
+        try:
+            clock_in = datetime.strptime(clock_in_raw, "%Y-%m-%dT%H:%M")
+        except ValueError:
+            flash("Enter a valid clock-in date and time.")
+            return render_template("admin_time_entry_form.html", employee=emp)
+
+        clock_out = None
+        if clock_out_raw:
+            try:
+                clock_out = datetime.strptime(clock_out_raw, "%Y-%m-%dT%H:%M")
+            except ValueError:
+                flash("Enter a valid clock-out date and time, or leave it blank.")
+                return render_template("admin_time_entry_form.html", employee=emp)
+            if clock_out <= clock_in:
+                flash("Clock-out must be after clock-in.")
+                return render_template("admin_time_entry_form.html", employee=emp)
+
+        with get_db() as conn:
+            conn.execute(
+                "INSERT INTO time_entries (employee_id, clock_in, clock_out, is_manual, created_by_admin_id) "
+                "VALUES (%s, %s, %s, TRUE, %s)",
+                (emp_id, clock_in, clock_out, g.admin["id"]),
+            )
+            audit.log(
+                conn, g.org["id"], "admin", g.admin["id"], "time_entry.manual_added",
+                f"{emp['name']} ({emp['employee_code']}): {clock_in} - {clock_out or 'open'}",
+            )
+            conn.commit()
+        flash(f"Manual time entry added for {emp['name']}.")
+        return redirect(url_for("admin_dashboard"))
+
+    return render_template("admin_time_entry_form.html", employee=emp)
 
 
 def _send_current_period_report(org):
