@@ -169,36 +169,6 @@ def clock_action():
     )
 
 
-@app.route("/clock/submit-hours", methods=["POST"])
-@limiter.limit("5 per hour")
-def submit_hours():
-    emp_id = session.get("employee_id")
-    org_id = session.get("org_id")
-    if not emp_id or not org_id:
-        return redirect(url_for("staff_login"))
-
-    with get_db() as conn:
-        emp = conn.execute(
-            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
-        ).fetchone()
-        org = conn.execute(
-            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
-        ).fetchone()
-    if emp is None or org is None:
-        session.pop("employee_id", None)
-        return redirect(url_for("staff_login"))
-
-    try:
-        _send_current_period_report(org)
-        flash(f"Thanks, {emp['name']} - this week's hours report was emailed to the office.")
-    except Exception:
-        traceback.print_exc()
-        flash("Couldn't send the report right now - please let your administrator know.")
-
-    session.pop("employee_id", None)
-    return redirect(url_for("staff_login"))
-
-
 def admin_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -343,12 +313,6 @@ def admin_dashboard():
         }
         for d in detail
     ]
-    next_report_note = (
-        f"Next automatic email: {period_end.strftime('%A, %B %d, %Y')} at "
-        f"{g.org['report_hour'] % 12 or 12}:{g.org['report_minute']:02d} "
-        f"{'PM' if g.org['report_hour'] >= 12 else 'AM'} ({g.org['timezone']})"
-    )
-
     active_today = [d for d in detail if any(e["clock_in"].date() == today for e in d["entries"])]
     clocked_in_now = [d for d in detail if d["incomplete"]]
     stats = {
@@ -382,7 +346,6 @@ def admin_dashboard():
         history=history,
         period_start=period_start,
         period_end=period_end,
-        next_report_note=next_report_note,
         stats=stats,
         checklist=checklist,
         welcome_company_code=welcome_company_code,
@@ -558,52 +521,6 @@ def org_logo(org_id):
     if org is None or not org["logo_data"]:
         abort(404)
     return Response(bytes(org["logo_data"]), mimetype=org["logo_mime"] or "image/png")
-
-
-def _maybe_send_report_for_org(org):
-    now = now_in(org["timezone"])
-    if now.weekday() != org["report_weekday"] or now.hour != org["report_hour"]:
-        return {"org_id": org["id"], "status": "skipped", "reason": "not report time"}
-
-    today = now.date()
-    with get_db() as conn:
-        already_sent = conn.execute(
-            "SELECT 1 FROM report_log WHERE org_id=%s AND report_date=%s",
-            (org["id"], today),
-        ).fetchone()
-    if already_sent:
-        return {"org_id": org["id"], "status": "skipped", "reason": "already sent today"}
-
-    try:
-        period_start, period_end = _send_current_period_report(org)
-    except Exception as e:
-        return {"org_id": org["id"], "status": "error", "message": str(e)}
-
-    with get_db() as conn:
-        conn.execute(
-            "INSERT INTO report_log (org_id, report_date) VALUES (%s, %s) ON CONFLICT DO NOTHING",
-            (org["id"], today),
-        )
-        conn.commit()
-
-    return {
-        "org_id": org["id"],
-        "status": "sent",
-        "period_start": str(period_start),
-        "period_end": str(period_end),
-    }
-
-
-@app.route("/cron/send-report")
-def cron_send_report():
-    token = request.args.get("token", "")
-    if not config.REPORT_TOKEN or token != config.REPORT_TOKEN:
-        abort(403)
-
-    with get_db() as conn:
-        orgs = conn.execute("SELECT * FROM organizations WHERE status='active'").fetchall()
-
-    return {"status": "ok", "orgs": [_maybe_send_report_for_org(org) for org in orgs]}, 200
 
 
 if __name__ == "__main__":
