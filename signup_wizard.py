@@ -6,7 +6,7 @@ import traceback
 
 import psycopg2
 import psycopg2.errors
-from flask import Blueprint, request, redirect, url_for, render_template, flash, session, make_response
+from flask import Blueprint, request, redirect, url_for, render_template, flash, session, make_response, jsonify
 from werkzeug.security import generate_password_hash
 
 import audit
@@ -416,6 +416,29 @@ def step_devices():
         "wizard/step6_devices.html", device=device, user_agent=user_agent,
         remote_addr=remote_addr, step_num=6,
     ))
+
+
+@wizard.route("/signup/debug")
+def signup_debug():
+    """Temporary diagnostic: dumps this browser's own draft via the app's own DB
+    connection, so there's no ambiguity about which database/session is being read."""
+    token = request.cookies.get(COOKIE_NAME)
+    if not token:
+        return jsonify({"error": "no wizard_token cookie on this request"})
+    with get_db() as conn:
+        row = conn.execute(
+            "SELECT id, draft_token, current_step, updated_at, data FROM signup_drafts WHERE draft_token=%s",
+            (token,),
+        ).fetchone()
+    if row is None:
+        return jsonify({"error": "cookie present but no matching draft row", "token_prefix": token[:8]})
+    return jsonify({
+        "draft_id": row["id"],
+        "token_prefix": row["draft_token"][:8],
+        "current_step": row["current_step"],
+        "updated_at": str(row["updated_at"]),
+        "data": row["data"],
+    })
 
 
 @wizard.route("/signup/review", methods=["GET", "POST"])
