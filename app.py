@@ -83,6 +83,12 @@ def staff_login():
     return render_template("staff_login.html", org=org, companies=_active_companies())
 
 
+@app.route("/clock/exit")
+def clock_exit():
+    session.pop("employee_id", None)
+    return redirect(url_for("staff_login"))
+
+
 @app.route("/clock", methods=["GET", "POST"])
 def clock_action():
     emp_id = session.get("employee_id")
