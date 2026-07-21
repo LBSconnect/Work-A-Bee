@@ -99,4 +99,120 @@ def init_db():
                 UNIQUE (org_id, report_date)
             )
         """)
+
+        # --- Onboarding wizard additions (additive, defaults preserve existing behavior) ---
+        conn.execute("""
+            ALTER TABLE organizations
+                ADD COLUMN IF NOT EXISTS dba_name TEXT,
+                ADD COLUMN IF NOT EXISTS business_type TEXT,
+                ADD COLUMN IF NOT EXISTS industry TEXT,
+                ADD COLUMN IF NOT EXISTS address_line1 TEXT,
+                ADD COLUMN IF NOT EXISTS city TEXT,
+                ADD COLUMN IF NOT EXISTS state TEXT,
+                ADD COLUMN IF NOT EXISTS zip TEXT,
+                ADD COLUMN IF NOT EXISTS country TEXT,
+                ADD COLUMN IF NOT EXISTS phone TEXT,
+                ADD COLUMN IF NOT EXISTS website TEXT,
+                ADD COLUMN IF NOT EXISTS logo_data BYTEA,
+                ADD COLUMN IF NOT EXISTS logo_mime TEXT,
+                ADD COLUMN IF NOT EXISTS currency TEXT NOT NULL DEFAULT 'USD',
+                ADD COLUMN IF NOT EXISTS week_starts_on TEXT NOT NULL DEFAULT 'monday',
+                ADD COLUMN IF NOT EXISTS payroll_frequency TEXT NOT NULL DEFAULT 'weekly',
+                ADD COLUMN IF NOT EXISTS default_shift_minutes INTEGER NOT NULL DEFAULT 480,
+                ADD COLUMN IF NOT EXISTS overtime_rule TEXT NOT NULL DEFAULT 'none',
+                ADD COLUMN IF NOT EXISTS overtime_threshold_hours REAL,
+                ADD COLUMN IF NOT EXISTS round_clock_minutes INTEGER NOT NULL DEFAULT 0,
+                ADD COLUMN IF NOT EXISTS auto_lunch_deduction BOOLEAN NOT NULL DEFAULT FALSE,
+                ADD COLUMN IF NOT EXISTS lunch_duration_minutes INTEGER NOT NULL DEFAULT 30,
+                ADD COLUMN IF NOT EXISTS allow_paid_breaks BOOLEAN NOT NULL DEFAULT FALSE,
+                ADD COLUMN IF NOT EXISTS allow_employee_specific_rates BOOLEAN NOT NULL DEFAULT TRUE,
+                ADD COLUMN IF NOT EXISTS onboarding_completed_at TIMESTAMP
+        """)
+        conn.execute("""
+            ALTER TABLE admin_users
+                ADD COLUMN IF NOT EXISTS first_name TEXT,
+                ADD COLUMN IF NOT EXISTS last_name TEXT,
+                ADD COLUMN IF NOT EXISTS job_title TEXT,
+                ADD COLUMN IF NOT EXISTS email TEXT,
+                ADD COLUMN IF NOT EXISTS mobile_phone TEXT,
+                ADD COLUMN IF NOT EXISTS terms_accepted_at TIMESTAMP,
+                ADD COLUMN IF NOT EXISTS created_at TIMESTAMP NOT NULL DEFAULT NOW()
+        """)
+        conn.execute("""
+            DO $$
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM pg_constraint WHERE conname = 'admin_users_email_key'
+                ) THEN
+                    ALTER TABLE admin_users ADD CONSTRAINT admin_users_email_key UNIQUE (email);
+                END IF;
+            END $$;
+        """)
+        conn.execute("""
+            ALTER TABLE employees
+                ADD COLUMN IF NOT EXISTS first_name TEXT,
+                ADD COLUMN IF NOT EXISTS last_name TEXT,
+                ADD COLUMN IF NOT EXISTS email TEXT,
+                ADD COLUMN IF NOT EXISTS phone TEXT,
+                ADD COLUMN IF NOT EXISTS department_id INTEGER,
+                ADD COLUMN IF NOT EXISTS job_title TEXT,
+                ADD COLUMN IF NOT EXISTS manager_id INTEGER REFERENCES employees(id),
+                ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'employee'
+        """)
+
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS departments (
+                id SERIAL PRIMARY KEY,
+                org_id INTEGER NOT NULL REFERENCES organizations(id),
+                name TEXT NOT NULL,
+                created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                UNIQUE (org_id, name)
+            )
+        """)
+        conn.execute("""
+            DO $$
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM pg_constraint WHERE conname = 'employees_department_id_fkey'
+                ) THEN
+                    ALTER TABLE employees
+                        ADD CONSTRAINT employees_department_id_fkey
+                        FOREIGN KEY (department_id) REFERENCES departments(id);
+                END IF;
+            END $$;
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS devices (
+                id SERIAL PRIMARY KEY,
+                org_id INTEGER NOT NULL REFERENCES organizations(id),
+                device_name TEXT NOT NULL,
+                token_hash TEXT NOT NULL,
+                registered_by_admin_id INTEGER REFERENCES admin_users(id),
+                created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                last_seen_at TIMESTAMP,
+                last_seen_ip TEXT,
+                status TEXT NOT NULL DEFAULT 'active'
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS audit_log (
+                id SERIAL PRIMARY KEY,
+                org_id INTEGER NOT NULL REFERENCES organizations(id),
+                actor_type TEXT NOT NULL,
+                actor_id INTEGER,
+                action TEXT NOT NULL,
+                detail TEXT,
+                created_at TIMESTAMP NOT NULL DEFAULT NOW()
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS signup_drafts (
+                id SERIAL PRIMARY KEY,
+                draft_token TEXT UNIQUE NOT NULL,
+                data JSONB NOT NULL DEFAULT '{}'::jsonb,
+                current_step INTEGER NOT NULL DEFAULT 1,
+                created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+            )
+        """)
         conn.commit()

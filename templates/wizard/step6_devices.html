@@ -1,0 +1,31 @@
+{% extends "wizard/base.html" %}
+{% block title %}Sign Up — Office Devices{% endblock %}
+{% block step_content %}
+  <h1>Authorized Office Devices</h1>
+  <p class="muted">Only registered office computers may access employee clock-in and clock-out. This prevents employees from clocking in from home or on unauthorized devices.</p>
+  <p class="muted">A browser can't read a computer's Windows username or hardware ID for security reasons — what we <em>can</em> register is this browser, identified below by what it reports about itself. Any admin can register more office computers later from Admin &rarr; Devices.</p>
+
+  <h2>This Computer</h2>
+  <table>
+    <tr><th>Reported by browser</th><td>{{ user_agent }}</td></tr>
+    <tr><th>IP Address</th><td>{{ remote_addr }}</td></tr>
+  </table>
+
+  <form method="post" style="margin-top:16px;">
+    <input type="hidden" name="action" value="register">
+    <label>Device Name</label>
+    <input type="text" name="device_name" list="device-suggestions" placeholder="e.g. Reception PC" value="{{ device.name or '' }}">
+    <datalist id="device-suggestions">
+      <option value="Reception PC"><option value="Warehouse PC"><option value="HR Office">
+      <option value="Production Floor"><option value="Conference Room"><option value="Server Room">
+      <option value="Management Office">
+    </datalist>
+    <button type="submit">Register This Computer</button>
+  </form>
+
+  <form method="post" style="margin-top:12px;">
+    <input type="hidden" name="action" value="skip">
+    <button type="submit" class="secondary">Skip for now</button>
+  </form>
+  <p class="muted" style="margin-top:16px;"><a href="{{ url_for('wizard.step_employees') }}">Back</a></p>
+{% endblock %}

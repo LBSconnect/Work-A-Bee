@@ -1,0 +1,72 @@
+{% extends "wizard/base.html" %}
+{% block title %}Sign Up — Company Information{% endblock %}
+{% block step_content %}
+  <h1>Welcome to LBS TimeKeeper</h1>
+  <p class="muted">Let's set up your company in just a few minutes.</p>
+
+  <form method="post" enctype="multipart/form-data">
+    <label>Company Name *</label>
+    <input type="text" name="company_name" value="{{ data.name or '' }}" autofocus required>
+    {% if errors.company_name %}<p class="field-error">{{ errors.company_name }}</p>{% endif %}
+
+    <label>DBA Name</label>
+    <input type="text" name="dba_name" value="{{ data.dba_name or '' }}">
+
+    <label>Business Type</label>
+    <select name="business_type">
+      <option value="">Select...</option>
+      {% for bt in choices.BUSINESS_TYPE_CHOICES %}
+        <option value="{{ bt }}" {% if data.business_type == bt %}selected{% endif %}>{{ bt }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Industry</label>
+    <select name="industry">
+      <option value="">Select...</option>
+      {% for ind in choices.INDUSTRY_CHOICES %}
+        <option value="{{ ind }}" {% if data.industry == ind %}selected{% endif %}>{{ ind }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Business Address *</label>
+    <input type="text" name="address_line1" value="{{ data.address_line1 or '' }}" required>
+    {% if errors.address_line1 %}<p class="field-error">{{ errors.address_line1 }}</p>{% endif %}
+
+    <div class="wizard-row wizard-row-3">
+      <div>
+        <label>City</label>
+        <input type="text" name="city" value="{{ data.city or '' }}">
+      </div>
+      <div>
+        <label>State</label>
+        <input type="text" name="state" value="{{ data.state or '' }}">
+      </div>
+      <div>
+        <label>ZIP Code</label>
+        <input type="text" name="zip" value="{{ data.zip or '' }}">
+      </div>
+    </div>
+
+    <label>Country</label>
+    <select name="country">
+      {% for c in choices.COUNTRY_CHOICES %}
+        <option value="{{ c }}" {% if (data.country or 'United States') == c %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Phone Number *</label>
+    <input type="text" name="phone" value="{{ data.phone or '' }}" required>
+    {% if errors.phone %}<p class="field-error">{{ errors.phone }}</p>{% endif %}
+
+    <label>Company Website</label>
+    <input type="text" name="website" value="{{ data.website or '' }}">
+
+    <label>Company Logo</label>
+    <input type="file" name="logo" accept="image/png,image/jpeg,image/svg+xml">
+    {% if data.logo_b64 %}<p class="muted">Logo already uploaded — choose a new file to replace it.</p>{% endif %}
+    {% if errors.logo %}<p class="field-error">{{ errors.logo }}</p>{% endif %}
+
+    <button type="submit">Continue</button>
+  </form>
+  <p class="muted" style="margin-top:16px;"><a href="{{ url_for('clock_home') }}">Cancel</a></p>
+{% endblock %}

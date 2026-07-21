@@ -130,3 +130,70 @@ th { background: #f9fafb; }
 .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
 .badge.in { background: #dcfce7; color: #166534; }
 .badge.out { background: #f3f4f6; color: #374151; }
+
+/* Onboarding wizard */
+.wizard-progress {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.wizard-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.wizard-pill-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+.wizard-pill.active .wizard-pill-num { background: var(--bee-yellow); color: var(--bee-black); }
+.wizard-pill.done .wizard-pill-num { background: var(--bee-black); color: var(--bee-yellow); }
+.wizard-pill-label { font-size: 11px; color: #6b7280; white-space: nowrap; }
+.wizard-pill.active .wizard-pill-label { color: #1f2937; font-weight: 600; }
+.wizard-connector { flex: 1 0 20px; height: 2px; background: #e5e7eb; margin: 0 4px 18px; min-width: 20px; }
+.wizard-connector.done { background: var(--bee-black); }
+
+.wizard-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.wizard-row-3 { grid-template-columns: 1fr 1fr 1fr; }
+.wizard-row label { margin-top: 0; }
+
+.field-error { color: #b91c1c; font-size: 13px; margin: 4px 0 0; }
+.checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: 400; margin-top: 12px; }
+
+.password-rules { list-style: none; padding: 0; margin: 10px 0; font-size: 13px; }
+.password-rules li { color: #6b7280; padding: 2px 0; }
+.password-rules li::before { content: "\25CB  "; }
+.password-rules li.met { color: #166534; }
+.password-rules li.met::before { content: "\2713  "; }
+.password-strength-meter { height: 6px; border-radius: 3px; background: #e5e7eb; overflow: hidden; margin-bottom: 8px; }
+.password-strength-fill { height: 100%; width: 0; background: #dc2626; transition: width 0.2s; }
+.password-strength-fill.medium { background: #f59e0b; }
+.password-strength-fill.strong { background: #16a34a; }
+
+.checklist { list-style: none; padding: 0; margin: 12px 0; }
+.checklist li { padding: 6px 0; font-size: 14px; }
+.checklist li.done { color: #166534; }
+.checklist li.todo { color: #1f2937; }
+.checklist li a { font-weight: 600; }
+
+.stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0 24px; }
+.stat-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; }
+.stat-card-value { font-size: 24px; font-weight: 700; color: #1f2937; }
+.stat-card-label { font-size: 12px; color: #6b7280; margin-top: 2px; }
+
+@media (max-width: 640px) {
+  .wizard-row, .wizard-row-3 { grid-template-columns: 1fr; }
+  .wizard-pill-label { display: none; }
+}

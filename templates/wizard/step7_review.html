@@ -1,0 +1,56 @@
+{% extends "wizard/base.html" %}
+{% block title %}Sign Up — Review & Launch{% endblock %}
+{% block step_content %}
+  <h1>Review &amp; Launch</h1>
+
+  <h2>Company</h2>
+  <table>
+    <tr><th>Name</th><td>{{ company.name }}{% if company.dba_name %} (DBA {{ company.dba_name }}){% endif %}</td></tr>
+    <tr><th>Type / Industry</th><td>{{ company.business_type or '-' }} / {{ company.industry or '-' }}</td></tr>
+    <tr><th>Address</th><td>{{ company.address_line1 }}, {{ company.city }} {{ company.state }} {{ company.zip }}</td></tr>
+    <tr><th>Phone</th><td>{{ company.phone }}</td></tr>
+    <tr><th>Website</th><td>{{ company.website or '-' }}</td></tr>
+  </table>
+
+  <h2 style="margin-top:24px;">Administrator</h2>
+  <table>
+    <tr><th>Name</th><td>{{ admin.first_name }} {{ admin.last_name }}</td></tr>
+    <tr><th>Email</th><td>{{ admin.email }}</td></tr>
+    <tr><th>Job Title</th><td>{{ admin.job_title or '-' }}</td></tr>
+  </table>
+
+  <h2 style="margin-top:24px;">Business Settings</h2>
+  <table>
+    <tr><th>Timezone</th><td>{{ settings.timezone }}</td></tr>
+    <tr><th>Currency</th><td>{{ settings.currency }}</td></tr>
+    <tr><th>Payroll Frequency</th><td>{{ settings.payroll_frequency|capitalize }}</td></tr>
+    <tr><th>Overtime Rule</th><td>{{ settings.overtime_rule }}</td></tr>
+  </table>
+
+  <h2 style="margin-top:24px;">Payroll</h2>
+  <table>
+    <tr><th>Default Rate</th><td>${{ '%.2f'|format(payroll.default_hourly_rate or 16.00) }}/hr</td></tr>
+    <tr><th>Rounding</th><td>{{ payroll.round_clock_minutes or 0 }} min</td></tr>
+    <tr><th>Auto Lunch Deduction</th><td>{{ 'Yes' if payroll.auto_lunch_deduction else 'No' }}</td></tr>
+  </table>
+
+  <h2 style="margin-top:24px;">Employees ({{ employees|length }})</h2>
+  {% if employees %}
+  <table>
+    <tr><th>Name</th><th>ID</th><th>Role</th></tr>
+    {% for e in employees %}
+      <tr><td>{{ e.first_name }} {{ e.last_name }}</td><td>{{ e.employee_code }}</td><td>{{ e.role|capitalize }}</td></tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">None added — you can add employees after launch.</p>
+  {% endif %}
+
+  <h2 style="margin-top:24px;">Authorized Devices</h2>
+  <p class="muted">{% if device.register %}{{ device.name }} (this computer){% else %}None registered yet — clock-in stays open until you register a device.{% endif %}</p>
+
+  <form method="post" style="margin-top:32px;">
+    <button type="submit">Create Company</button>
+  </form>
+  <p class="muted" style="margin-top:16px;"><a href="{{ url_for('wizard.step_devices') }}">Back</a></p>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Devices{% endblock %}
+{% block wrapclass %}wide{% endblock %}
+{% block content %}
+  <div class="nav">
+    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('admin_employees') }}">Employees</a>
+    <a href="{{ url_for('admin_devices') }}">Devices</a>
+    <a href="{{ url_for('staff_login') }}">Clock in/out screen</a>
+    <a href="{{ url_for('admin_logout') }}">Log out</a>
+  </div>
+
+  <h1>Authorized Office Devices</h1>
+  <p class="muted">Only registered office computers may clock in or out. If no devices are registered, clock-in stays open on any computer.</p>
+
+  {% if devices %}
+  <table>
+    <tr><th>Device</th><th>Registered</th><th>Last Active</th><th>Last IP</th><th>Status</th><th></th></tr>
+    {% for d in devices %}
+    <tr>
+      <td>{{ d.device_name }}</td>
+      <td>{{ d.created_at.strftime('%b %d, %Y') }}</td>
+      <td>{{ d.last_seen_at.strftime('%b %d, %Y %I:%M %p') if d.last_seen_at else 'Never' }}</td>
+      <td>{{ d.last_seen_ip or '-' }}</td>
+      <td>{{ d.status|capitalize }}</td>
+      <td>
+        {% if d.status == 'active' %}
+        <form method="post" style="display:inline;">
+          <input type="hidden" name="action" value="disable">
+          <input type="hidden" name="device_id" value="{{ d.id }}">
+          <button type="submit" class="secondary" style="margin:0; padding:6px 10px; font-size:13px;">Disable</button>
+        </form>
+        {% endif %}
+        <form method="post" style="display:inline;" onsubmit="return confirm('Remove this device?');">
+          <input type="hidden" name="action" value="remove">
+          <input type="hidden" name="device_id" value="{{ d.id }}">
+          <button type="submit" class="secondary" style="margin:0; padding:6px 10px; font-size:13px;">Remove</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="muted">No devices registered yet.</p>
+  {% endif %}
+
+  <h2 style="margin-top:32px;">Register this computer</h2>
+  <p class="muted">Sit at the office PC you want to authorize, then click below on that PC's browser.</p>
+  <p class="muted">Reported by browser: {{ user_agent }}</p>
+  <form method="post">
+    <input type="hidden" name="action" value="register">
+    <label>Device Name</label>
+    <input type="text" name="device_name" list="device-suggestions" placeholder="e.g. Reception PC">
+    <datalist id="device-suggestions">
+      <option value="Reception PC"><option value="Warehouse PC"><option value="HR Office">
+      <option value="Production Floor"><option value="Conference Room"><option value="Server Room">
+      <option value="Management Office">
+    </datalist>
+    <button type="submit">Register This Computer</button>
+  </form>
+{% endblock %}

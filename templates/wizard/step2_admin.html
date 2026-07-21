@@ -1,0 +1,82 @@
+{% extends "wizard/base.html" %}
+{% block title %}Sign Up — Administrator Account{% endblock %}
+{% block step_content %}
+  <h1>Create Your Administrator Account</h1>
+  <form method="post">
+    <div class="wizard-row">
+      <div>
+        <label>First Name *</label>
+        <input type="text" name="first_name" value="{{ data.first_name or '' }}" autofocus required>
+        {% if errors.first_name %}<p class="field-error">{{ errors.first_name }}</p>{% endif %}
+      </div>
+      <div>
+        <label>Last Name *</label>
+        <input type="text" name="last_name" value="{{ data.last_name or '' }}" required>
+        {% if errors.last_name %}<p class="field-error">{{ errors.last_name }}</p>{% endif %}
+      </div>
+    </div>
+
+    <label>Job Title</label>
+    <input type="text" name="job_title" value="{{ data.job_title or '' }}">
+
+    <label>Email *</label>
+    <input type="text" name="email" value="{{ data.email or '' }}" required>
+    {% if errors.email %}<p class="field-error">{{ errors.email }}</p>{% endif %}
+
+    <label>Mobile Number</label>
+    <input type="text" name="mobile_phone" value="{{ data.mobile_phone or '' }}">
+
+    <label>Password *</label>
+    <input type="password" name="password" id="password" required>
+    {% if errors.password %}<p class="field-error">{{ errors.password }}</p>{% endif %}
+
+    <ul class="password-rules" id="password-rules">
+      {% for key, label, _ in rules %}
+        <li data-rule="{{ key }}" class="{{ 'met' if checks.get(key) else '' }}">{{ label }}</li>
+      {% endfor %}
+    </ul>
+    <div class="password-strength-meter"><div class="password-strength-fill" id="strength-fill"></div></div>
+
+    <label>Confirm Password *</label>
+    <input type="password" name="confirm_password" required>
+    {% if errors.confirm_password %}<p class="field-error">{{ errors.confirm_password }}</p>{% endif %}
+
+    <label class="checkbox-label">
+      <input type="checkbox" name="terms" style="width:auto;"> I agree to the Terms of Service
+    </label>
+    <label class="checkbox-label">
+      <input type="checkbox" name="privacy" style="width:auto;"> I agree to the Privacy Policy
+    </label>
+    {% if errors.terms %}<p class="field-error">{{ errors.terms }}</p>{% endif %}
+
+    <button type="submit">Continue</button>
+  </form>
+  <p class="muted" style="margin-top:16px;"><a href="{{ url_for('wizard.step_company') }}">Back</a></p>
+
+  <script>
+    (function () {
+      var pw = document.getElementById('password');
+      if (!pw) return;
+      var rules = {
+        length: function (v) { return v.length >= 12; },
+        upper: function (v) { return /[A-Z]/.test(v); },
+        lower: function (v) { return /[a-z]/.test(v); },
+        number: function (v) { return /[0-9]/.test(v); },
+        symbol: function (v) { return /[^A-Za-z0-9]/.test(v); }
+      };
+      pw.addEventListener('input', function () {
+        var v = pw.value, met = 0, total = 0;
+        document.querySelectorAll('#password-rules li').forEach(function (li) {
+          var rule = li.getAttribute('data-rule');
+          total++;
+          if (rules[rule] && rules[rule](v)) { li.classList.add('met'); met++; }
+          else { li.classList.remove('met'); }
+        });
+        var pct = total ? Math.round((met / total) * 100) : 0;
+        var fill = document.getElementById('strength-fill');
+        fill.style.width = pct + '%';
+        fill.className = 'password-strength-fill' + (pct >= 100 ? ' strong' : pct >= 60 ? ' medium' : ' weak');
+      });
+    })();
+  </script>
+{% endblock %}

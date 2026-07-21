@@ -5,11 +5,50 @@
   <div class="nav">
     <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
     <a href="{{ url_for('admin_employees') }}">Employees</a>
+    <a href="{{ url_for('admin_devices') }}">Devices</a>
     <a href="{{ url_for('staff_login') }}">Clock in/out screen</a>
     <a href="{{ url_for('admin_logout') }}">Log out</a>
   </div>
 
-  <p class="muted">{{ g.org.name }}</p>
+  {% if welcome_company_code %}
+  <div class="flash">
+    <strong>{{ g.org.name }} is set up! Your Company Code is {{ welcome_company_code }}</strong> — write it down, employees and admins will need it to log in.
+    {% if welcome_admin_creds %}
+      <br><br>Additional administrator logins created:
+      {% for c in welcome_admin_creds %}
+        <br>{{ c.email }} — temporary password: <code>{{ c.temp_password }}</code> (have them log in and note it down)
+      {% endfor %}
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if checklist %}
+  <div class="flash">
+    <strong>Getting started</strong>
+    <ul class="checklist">
+      {% for item in checklist %}
+        <li class="{{ 'done' if item.done else 'todo' }}">
+          {{ '✔' if item.done else '□' }}
+          {% if item.url and not item.done %}<a href="{{ item.url }}">{{ item.label }}</a>{% else %}{{ item.label }}{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <p class="muted">
+    {% if g.org.logo_data %}<img src="{{ url_for('org_logo', org_id=g.org.id) }}" alt="{{ g.org.name }}" style="height:32px; vertical-align:middle; margin-right:8px;">{% endif %}
+    {{ g.org.name }}
+  </p>
+
+  <div class="stat-cards">
+    <div class="stat-card"><div class="stat-card-value">{{ stats.employees }}</div><div class="stat-card-label">Employees</div></div>
+    <div class="stat-card"><div class="stat-card-value">{{ stats.active_today }}</div><div class="stat-card-label">Active Today</div></div>
+    <div class="stat-card"><div class="stat-card-value">{{ stats.clocked_in_now|length }}</div><div class="stat-card-label">Who's Clocked In</div></div>
+    <div class="stat-card"><div class="stat-card-value">{{ "%.1f"|format(stats.hours_this_week) }}</div><div class="stat-card-label">Hours This Week</div></div>
+    <div class="stat-card"><div class="stat-card-value">${{ "%.2f"|format(stats.weekly_payroll) }}</div><div class="stat-card-label">Weekly Payroll</div></div>
+  </div>
+
   <h1>This week's hours</h1>
   <p>{{ period_start.strftime('%B %d, %Y') }} &ndash; {{ period_end.strftime('%B %d, %Y') }}</p>
   <p class="muted">{{ next_report_note }}</p>

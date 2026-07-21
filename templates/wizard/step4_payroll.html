@@ -1,0 +1,45 @@
+{% extends "wizard/base.html" %}
+{% block title %}Sign Up — Payroll Configuration{% endblock %}
+{% block step_content %}
+  <h1>Payroll Settings</h1>
+  <form method="post">
+    <label>Default Hourly Rate ($)</label>
+    <input type="number" step="0.01" min="0" name="default_hourly_rate" value="{{ data.default_hourly_rate or '16.00' }}">
+    {% if errors.default_hourly_rate %}<p class="field-error">{{ errors.default_hourly_rate }}</p>{% endif %}
+
+    <label>Allow Employee-Specific Pay Rates</label>
+    <select name="allow_employee_specific_rates">
+      <option value="yes" {% if data.get('allow_employee_specific_rates', True) %}selected{% endif %}>Yes</option>
+      <option value="no" {% if not data.get('allow_employee_specific_rates', True) %}selected{% endif %}>No</option>
+    </select>
+
+    <label>Round Clock Times</label>
+    <select name="round_clock_minutes">
+      {% for value, label in choices.ROUND_CLOCK_CHOICES %}
+        <option value="{{ value }}" {% if data.round_clock_minutes == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Automatic Lunch Deduction</label>
+    <select name="auto_lunch_deduction">
+      <option value="no" {% if not data.get('auto_lunch_deduction') %}selected{% endif %}>No</option>
+      <option value="yes" {% if data.get('auto_lunch_deduction') %}selected{% endif %}>Yes</option>
+    </select>
+
+    <label>Lunch Duration (minutes)</label>
+    <select name="lunch_duration_minutes">
+      {% for m in choices.LUNCH_DURATION_CHOICES %}
+        <option value="{{ m }}" {% if data.lunch_duration_minutes == m %}selected{% endif %}>{{ m }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Allow Paid Breaks</label>
+    <select name="allow_paid_breaks">
+      <option value="no" {% if not data.get('allow_paid_breaks') %}selected{% endif %}>No</option>
+      <option value="yes" {% if data.get('allow_paid_breaks') %}selected{% endif %}>Yes</option>
+    </select>
+
+    <button type="submit">Continue</button>
+  </form>
+  <p class="muted" style="margin-top:16px;"><a href="{{ url_for('wizard.step_settings') }}">Back</a></p>
+{% endblock %}
