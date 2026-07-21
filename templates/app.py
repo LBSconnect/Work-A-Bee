@@ -1,0 +1,654 @@
+import os
+import traceback
+from datetime import datetime
+from functools import wraps
+
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g, Response, make_response
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+import audit
+import choices
+import config
+import devices as devices_mod
+from models import init_db, get_db
+from orgs import get_active_org, normalize_company_code
+from payroll import get_period_bounds, calculate_payroll, get_period_entries, get_prior_periods
+from email_report import send_report_email
+from signup_wizard import wizard as wizard_blueprint
+from tz import now_in, today_in
+
+app = Flask(__name__)
+app.secret_key = config.SECRET_KEY
+
+app.config.update(
+    SESSION_COOKIE_SECURE=config.ON_RENDER,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+)
+
+limiter = Limiter(get_remote_address, app=app, default_limits=[])
+
+init_db()
+
+app.register_blueprint(wizard_blueprint)
+
+
+def _active_companies():
+    with get_db() as conn:
+        return conn.execute(
+            "SELECT company_code, name FROM organizations WHERE status='active' ORDER BY name"
+        ).fetchall()
+
+
+@app.route("/")
+def clock_home():
+    return render_template("index.html")
+
+
+@app.route("/staff/login", methods=["GET", "POST"])
+@limiter.limit("10 per minute")
+def staff_login():
+    if request.args.get("switch"):
+        session.pop("org_id", None)
+
+    org = None
+    org_id = session.get("org_id")
+    if org_id:
+        with get_db() as conn:
+            org = conn.execute(
+                "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+            ).fetchone()
+
+    if request.method == "POST":
+        if org is None:
+            with get_db() as conn:
+                org = get_active_org(conn, request.form.get("company_code", ""))
+            if org is None:
+                flash("Company not found, or Employee ID/PIN not recognized.")
+                return render_template("staff_login.html", org=None, companies=_active_companies())
+
+        code = request.form.get("employee_code", "").strip()
+        pin = request.form.get("pin", "").strip()
+        with get_db() as conn:
+            emp = conn.execute(
+                "SELECT * FROM employees WHERE org_id=%s AND employee_code=%s AND active=1",
+                (org["id"], code),
+            ).fetchone()
+        if emp and check_password_hash(emp["pin_hash"], pin):
+            session["org_id"] = org["id"]
+            session["employee_id"] = emp["id"]
+            return redirect(url_for("clock_action"))
+        flash("Company not found, or Employee ID/PIN not recognized.")
+        return render_template("staff_login.html", org=org, companies=_active_companies())
+
+    return render_template("staff_login.html", org=org, companies=_active_companies())
+
+
+@app.route("/clock/exit")
+def clock_exit():
+    session.pop("employee_id", None)
+    return redirect(url_for("staff_login"))
+
+
+@app.route("/clock", methods=["GET", "POST"])
+def clock_action():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if emp is None or org is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        if not devices_mod.is_trusted_device(request, org["id"], conn):
+            session.pop("employee_id", None)
+            flash("This computer isn't authorized to clock in/out for this company. Ask your administrator to register it under Admin > Devices.")
+            return redirect(url_for("staff_login"))
+
+        open_entry = conn.execute(
+            "SELECT * FROM time_entries WHERE employee_id=%s AND clock_out IS NULL",
+            (emp_id,),
+        ).fetchone()
+
+        if request.method == "POST":
+            now = now_in(org["timezone"])
+            if open_entry:
+                conn.execute(
+                    "UPDATE time_entries SET clock_out=%s WHERE id=%s",
+                    (now, open_entry["id"]),
+                )
+                flash(f"Clocked OUT at {now.strftime('%I:%M %p')}. Have a good one, {emp['name']}!")
+            else:
+                conn.execute(
+                    "INSERT INTO time_entries (employee_id, clock_in) VALUES (%s, %s)",
+                    (emp_id, now),
+                )
+                flash(f"Clocked IN at {now.strftime('%I:%M %p')}. Welcome, {emp['name']}!")
+            conn.commit()
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        recent_entries = conn.execute(
+            "SELECT * FROM time_entries WHERE employee_id=%s ORDER BY clock_in DESC LIMIT 10",
+            (emp_id,),
+        ).fetchall()
+
+        period_start, _ = get_period_bounds(today_in(org["timezone"]))
+        weekly_history = []
+        for start, end in get_prior_periods(period_start, count=4):
+            rows = calculate_payroll(conn, org, start, end)
+            mine = next((r for r in rows if r["employee_code"] == emp["employee_code"]), None)
+            weekly_history.append({
+                "period_start": start,
+                "period_end": end,
+                "hours": mine["total_hours"] if mine else 0.0,
+                "pay": mine["pay"] if mine else 0.0,
+            })
+
+    history = []
+    for e in recent_entries:
+        hours = None
+        if e["clock_out"]:
+            hours = round((e["clock_out"] - e["clock_in"]).total_seconds() / 3600, 2)
+        history.append({"clock_in": e["clock_in"], "clock_out": e["clock_out"], "hours": hours})
+
+    return render_template(
+        "clock.html",
+        employee=emp,
+        is_clocked_in=bool(open_entry),
+        history=history,
+        weekly_history=weekly_history,
+    )
+
+
+def admin_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        admin_id = session.get("admin_id")
+        org_id = session.get("org_id")
+        if not admin_id or not org_id:
+            return redirect(url_for("admin_login"))
+        with get_db() as conn:
+            admin = conn.execute(
+                "SELECT * FROM admin_users WHERE id=%s AND org_id=%s", (admin_id, org_id)
+            ).fetchone()
+            org = conn.execute(
+                "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+            ).fetchone()
+        if admin is None or org is None:
+            session.pop("admin_id", None)
+            session.pop("org_id", None)
+            return redirect(url_for("admin_login"))
+        g.admin = admin
+        g.org = org
+        return f(*args, **kwargs)
+    return wrapper
+
+
+@app.route("/admin/setup", methods=["GET", "POST"])
+def admin_setup():
+    company_code = request.values.get("company_code", "")
+
+    with get_db() as conn:
+        org = get_active_org(conn, company_code)
+    if org is not None:
+        with get_db() as conn:
+            existing = conn.execute(
+                "SELECT COUNT(*) AS c FROM admin_users WHERE org_id=%s", (org["id"],)
+            ).fetchone()["c"]
+        if existing > 0:
+            return redirect(url_for("admin_login"))
+
+    if request.method == "POST":
+        username = request.form["username"].strip()
+        password = request.form["password"]
+        confirm = request.form["confirm_password"]
+
+        if org is None:
+            flash("Company code not recognized. Contact support to set up your organization.")
+            return render_template("admin_setup.html", company_code=company_code)
+
+        if not username or not password:
+            flash("Username and password are required.")
+        elif password != confirm:
+            flash("Passwords don't match.")
+        elif len(password) < 8:
+            flash("Password should be at least 8 characters.")
+        else:
+            with get_db() as conn:
+                conn.execute(
+                    "INSERT INTO admin_users (org_id, username, password_hash) VALUES (%s, %s, %s)",
+                    (org["id"], username, generate_password_hash(password)),
+                )
+                conn.commit()
+            flash("Admin account created. Please log in.")
+            return redirect(url_for("admin_login"))
+        return render_template("admin_setup.html", company_code=company_code)
+
+    return render_template("admin_setup.html", company_code=company_code)
+
+
+@app.route("/admin/login", methods=["GET", "POST"])
+@limiter.limit("10 per minute")
+def admin_login():
+    if request.method == "POST":
+        company_code = request.form.get("company_code", "")
+        username = request.form["username"].strip()
+        password = request.form["password"]
+
+        with get_db() as conn:
+            org = get_active_org(conn, company_code)
+        if org is None:
+            flash("Company not found, or username/password not recognized.")
+            return render_template("admin_login.html", companies=_active_companies())
+
+        with get_db() as conn:
+            existing = conn.execute(
+                "SELECT COUNT(*) AS c FROM admin_users WHERE org_id=%s", (org["id"],)
+            ).fetchone()["c"]
+        if existing == 0:
+            return redirect(url_for("admin_setup", company_code=normalize_company_code(company_code)))
+
+        with get_db() as conn:
+            admin = conn.execute(
+                "SELECT * FROM admin_users WHERE org_id=%s AND username=%s", (org["id"], username)
+            ).fetchone()
+        if admin and check_password_hash(admin["password_hash"], password):
+            session["admin_id"] = admin["id"]
+            session["org_id"] = org["id"]
+            return redirect(url_for("admin_dashboard"))
+        flash("Company not found, or username/password not recognized.")
+    return render_template("admin_login.html", companies=_active_companies())
+
+
+@app.route("/admin/logout")
+def admin_logout():
+    session.pop("admin_id", None)
+    return redirect(url_for("admin_login"))
+
+
+@app.route("/admin")
+@admin_required
+def admin_dashboard():
+    today = today_in(g.org["timezone"])
+    period_start, period_end = get_period_bounds(today)
+    with get_db() as conn:
+        detail = get_period_entries(conn, g.org, period_start, period_end)
+        history = [
+            {
+                "period_start": start,
+                "period_end": end,
+                "rows": calculate_payroll(conn, g.org, start, end),
+            }
+            for start, end in get_prior_periods(period_start, count=4)
+        ]
+        employee_count = conn.execute(
+            "SELECT COUNT(*) AS c FROM employees WHERE org_id=%s AND active=1", (g.org["id"],)
+        ).fetchone()["c"]
+        has_clocked_in_ever = conn.execute(
+            "SELECT 1 FROM time_entries te JOIN employees e ON te.employee_id=e.id "
+            "WHERE e.org_id=%s LIMIT 1", (g.org["id"],)
+        ).fetchone() is not None
+        has_sent_report = conn.execute(
+            "SELECT 1 FROM report_log WHERE org_id=%s LIMIT 1", (g.org["id"],)
+        ).fetchone() is not None
+
+    rows = [
+        {
+            "employee_code": d["employee_code"],
+            "name": d["name"],
+            "worker_type": d["worker_type"],
+            "hourly_rate": d["hourly_rate"],
+            "total_hours": d["total_hours"],
+            "pay": d["total_due"],
+            "incomplete": d["incomplete"],
+        }
+        for d in detail
+    ]
+    active_today = [d for d in detail if any(e["clock_in"].date() == today for e in d["entries"])]
+    clocked_in_now = [d for d in detail if d["incomplete"]]
+    stats = {
+        "employees": employee_count,
+        "active_today": len(active_today),
+        "clocked_in_now": clocked_in_now,
+        "hours_this_week": round(sum(d["total_hours"] for d in detail), 2),
+        "weekly_payroll": round(sum(d["total_due"] for d in detail), 2),
+    }
+
+    checklist = None
+    if g.org.get("onboarding_completed_at"):
+        checklist = [
+            {"label": "Company Created", "done": True, "url": None},
+            {"label": "Payroll Configured", "done": True, "url": None},
+            {"label": "Add More Employees", "done": employee_count > 0, "url": url_for("admin_employees")},
+            {"label": "Test Clock In", "done": has_clocked_in_ever, "url": url_for("staff_login")},
+            {"label": "Configure Reports", "done": True, "url": url_for("admin_dashboard")},
+            {"label": "Generate First Payroll Report", "done": has_sent_report, "url": url_for("admin_send_report_now")},
+        ]
+        if all(item["done"] for item in checklist):
+            checklist = None
+
+    welcome_company_code = session.pop("welcome_company_code", None)
+    welcome_admin_creds = session.pop("welcome_admin_creds", None)
+
+    return render_template(
+        "admin_dashboard.html",
+        rows=rows,
+        detail=detail,
+        history=history,
+        period_start=period_start,
+        period_end=period_end,
+        stats=stats,
+        checklist=checklist,
+        welcome_company_code=welcome_company_code,
+        welcome_admin_creds=welcome_admin_creds,
+    )
+
+
+@app.route("/admin/employees")
+@admin_required
+def admin_employees():
+    with get_db() as conn:
+        employees = conn.execute(
+            "SELECT * FROM employees WHERE org_id=%s ORDER BY name", (g.org["id"],)
+        ).fetchall()
+    return render_template("admin_employees.html", employees=employees)
+
+
+@app.route("/admin/employees/new", methods=["GET", "POST"])
+@admin_required
+def admin_employee_new():
+    if request.method == "POST":
+        code = request.form["employee_code"].strip()
+        name = request.form["name"].strip()
+        worker_type = request.form["worker_type"]
+        pin = request.form["pin"].strip()
+        try:
+            rate = float(request.form["hourly_rate"])
+        except ValueError:
+            flash("Hourly rate must be a number.")
+            return render_template(
+                "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"]
+            )
+
+        if not code or not name or not pin:
+            flash("Employee ID, name, and PIN are all required.")
+            return render_template(
+                "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"]
+            )
+
+        try:
+            with get_db() as conn:
+                conn.execute(
+                    "INSERT INTO employees (org_id, employee_code, name, pin_hash, hourly_rate, worker_type) "
+                    "VALUES (%s, %s, %s, %s, %s, %s)",
+                    (g.org["id"], code, name, generate_password_hash(pin), rate, worker_type),
+                )
+                conn.commit()
+        except Exception:
+            flash(f"Employee ID '{code}' is already in use.")
+            return render_template(
+                "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"]
+            )
+
+        flash(f"Added {name}.")
+        return redirect(url_for("admin_employees"))
+    return render_template(
+        "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"]
+    )
+
+
+@app.route("/admin/employees/<int:emp_id>/edit", methods=["GET", "POST"])
+@admin_required
+def admin_employee_edit(emp_id):
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, g.org["id"])
+        ).fetchone()
+        if emp is None:
+            flash("Employee not found.")
+            return redirect(url_for("admin_employees"))
+
+        if request.method == "POST":
+            name = request.form["name"].strip()
+            worker_type = request.form["worker_type"]
+            active = 1 if request.form.get("active") == "on" else 0
+            pin = request.form.get("pin", "").strip()
+            try:
+                rate = float(request.form["hourly_rate"])
+            except ValueError:
+                flash("Hourly rate must be a number.")
+                return render_template("admin_employee_form.html", employee=emp)
+
+            if pin:
+                conn.execute(
+                    "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s, pin_hash=%s "
+                    "WHERE id=%s AND org_id=%s",
+                    (name, rate, worker_type, active, generate_password_hash(pin), emp_id, g.org["id"]),
+                )
+            else:
+                conn.execute(
+                    "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s "
+                    "WHERE id=%s AND org_id=%s",
+                    (name, rate, worker_type, active, emp_id, g.org["id"]),
+                )
+            conn.commit()
+            flash("Updated.")
+            return redirect(url_for("admin_employees"))
+
+    return render_template("admin_employee_form.html", employee=emp)
+
+
+@app.route("/admin/employees/<int:emp_id>/time-entries/new", methods=["GET", "POST"])
+@admin_required
+def admin_time_entry_new(emp_id):
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, g.org["id"])
+        ).fetchone()
+    if emp is None:
+        flash("Employee not found.")
+        return redirect(url_for("admin_employees"))
+
+    if request.method == "POST":
+        clock_in_raw = request.form.get("clock_in", "").strip()
+        clock_out_raw = request.form.get("clock_out", "").strip()
+
+        try:
+            clock_in = datetime.strptime(clock_in_raw, "%Y-%m-%dT%H:%M")
+        except ValueError:
+            flash("Enter a valid clock-in date and time.")
+            return render_template("admin_time_entry_form.html", employee=emp)
+
+        clock_out = None
+        if clock_out_raw:
+            try:
+                clock_out = datetime.strptime(clock_out_raw, "%Y-%m-%dT%H:%M")
+            except ValueError:
+                flash("Enter a valid clock-out date and time, or leave it blank.")
+                return render_template("admin_time_entry_form.html", employee=emp)
+            if clock_out <= clock_in:
+                flash("Clock-out must be after clock-in.")
+                return render_template("admin_time_entry_form.html", employee=emp)
+
+        with get_db() as conn:
+            conn.execute(
+                "INSERT INTO time_entries (employee_id, clock_in, clock_out, is_manual, created_by_admin_id) "
+                "VALUES (%s, %s, %s, TRUE, %s)",
+                (emp_id, clock_in, clock_out, g.admin["id"]),
+            )
+            audit.log(
+                conn, g.org["id"], "admin", g.admin["id"], "time_entry.manual_added",
+                f"{emp['name']} ({emp['employee_code']}): {clock_in} - {clock_out or 'open'}",
+            )
+            conn.commit()
+        flash(f"Manual time entry added for {emp['name']}.")
+        return redirect(url_for("admin_dashboard"))
+
+    return render_template("admin_time_entry_form.html", employee=emp)
+
+
+def _send_current_period_report(org):
+    recipients = [r.strip() for r in (org["report_recipients"] or "").split(",") if r.strip()]
+    if not recipients:
+        raise RuntimeError("No report recipients configured for this organization.")
+    today = today_in(org["timezone"])
+    period_start, period_end = get_period_bounds(today)
+    with get_db() as conn:
+        rows = calculate_payroll(conn, org, period_start, period_end)
+    send_report_email(org["name"], recipients, period_start, period_end, rows)
+    return period_start, period_end
+
+
+@app.route("/admin/report/send-now")
+@admin_required
+def admin_send_report_now():
+    try:
+        _send_current_period_report(g.org)
+        flash("Report emailed successfully.")
+    except Exception as e:
+        flash(f"Failed to send report: {e}")
+    return redirect(url_for("admin_dashboard"))
+
+
+@app.route("/admin/devices", methods=["GET", "POST"])
+@admin_required
+def admin_devices():
+    if request.method == "POST":
+        action = request.form.get("action")
+        with get_db() as conn:
+            if action == "register":
+                name = request.form.get("device_name", "").strip() or "Office Computer"
+                dev_id, raw_token = devices_mod.register_device(conn, g.org["id"], name, g.admin["id"])
+                audit.log(conn, g.org["id"], "admin", g.admin["id"], "device.registered", name)
+                conn.commit()
+                resp = make_response(redirect(url_for("admin_devices")))
+                resp = devices_mod.issue_device_cookie(resp, g.org["id"], raw_token)
+                flash(f"'{name}' registered as a trusted device for this browser.")
+                return resp
+            elif action in ("disable", "remove"):
+                device_id = request.form.get("device_id", "")
+                if device_id.isdigit():
+                    if action == "disable":
+                        conn.execute(
+                            "UPDATE devices SET status='disabled' WHERE id=%s AND org_id=%s",
+                            (device_id, g.org["id"]),
+                        )
+                        audit.log(conn, g.org["id"], "admin", g.admin["id"], "device.disabled", device_id)
+                    else:
+                        conn.execute(
+                            "DELETE FROM devices WHERE id=%s AND org_id=%s", (device_id, g.org["id"])
+                        )
+                        audit.log(conn, g.org["id"], "admin", g.admin["id"], "device.removed", device_id)
+                    conn.commit()
+        return redirect(url_for("admin_devices"))
+
+    with get_db() as conn:
+        device_list = conn.execute(
+            "SELECT * FROM devices WHERE org_id=%s ORDER BY created_at DESC", (g.org["id"],)
+        ).fetchall()
+    return render_template(
+        "admin_devices.html", devices=device_list,
+        user_agent=request.headers.get("User-Agent", "Unknown device"),
+    )
+
+
+@app.route("/admin/settings", methods=["GET", "POST"])
+@admin_required
+def admin_settings():
+    org = dict(g.org)
+    errors = {}
+
+    if request.method == "POST":
+        fields = {
+            "name": request.form.get("company_name", "").strip(),
+            "dba_name": request.form.get("dba_name", "").strip(),
+            "business_type": request.form.get("business_type", "").strip(),
+            "industry": request.form.get("industry", "").strip(),
+            "address_line1": request.form.get("address_line1", "").strip(),
+            "city": request.form.get("city", "").strip(),
+            "state": request.form.get("state", "").strip(),
+            "zip": request.form.get("zip", "").strip(),
+            "country": request.form.get("country", "United States").strip() or "United States",
+            "phone": request.form.get("phone", "").strip(),
+            "website": request.form.get("website", "").strip(),
+            "report_recipients": request.form.get("report_recipients", "").strip(),
+        }
+        if not fields["name"]:
+            errors["company_name"] = "Company name is required."
+        if not fields["address_line1"]:
+            errors["address_line1"] = "Address is required."
+        if not fields["phone"]:
+            errors["phone"] = "Phone number is required."
+        if not fields["report_recipients"] or "@" not in fields["report_recipients"]:
+            errors["report_recipients"] = "Enter a valid notification email address."
+
+        logo_data, logo_mime = None, None
+        logo_file = request.files.get("logo")
+        if logo_file and logo_file.filename:
+            raw = logo_file.read()
+            if len(raw) > 500 * 1024:
+                errors["logo"] = "Logo must be 500KB or smaller."
+            elif logo_file.mimetype not in ("image/png", "image/jpeg", "image/svg+xml"):
+                errors["logo"] = "Logo must be a PNG, JPEG, or SVG file."
+            else:
+                logo_data, logo_mime = raw, logo_file.mimetype
+
+        if errors:
+            return render_template(
+                "admin_settings.html", org={**org, **fields}, errors=errors, choices=choices
+            )
+
+        with get_db() as conn:
+            if logo_data is not None:
+                conn.execute(
+                    "UPDATE organizations SET name=%s, dba_name=%s, business_type=%s, industry=%s, "
+                    "address_line1=%s, city=%s, state=%s, zip=%s, country=%s, phone=%s, website=%s, "
+                    "report_recipients=%s, logo_data=%s, logo_mime=%s WHERE id=%s",
+                    (fields["name"], fields["dba_name"] or None, fields["business_type"] or None,
+                     fields["industry"] or None, fields["address_line1"], fields["city"] or None,
+                     fields["state"] or None, fields["zip"] or None, fields["country"], fields["phone"],
+                     fields["website"] or None, fields["report_recipients"], logo_data, logo_mime, org["id"]),
+                )
+            else:
+                conn.execute(
+                    "UPDATE organizations SET name=%s, dba_name=%s, business_type=%s, industry=%s, "
+                    "address_line1=%s, city=%s, state=%s, zip=%s, country=%s, phone=%s, website=%s, "
+                    "report_recipients=%s WHERE id=%s",
+                    (fields["name"], fields["dba_name"] or None, fields["business_type"] or None,
+                     fields["industry"] or None, fields["address_line1"], fields["city"] or None,
+                     fields["state"] or None, fields["zip"] or None, fields["country"], fields["phone"],
+                     fields["website"] or None, fields["report_recipients"], org["id"]),
+                )
+            audit.log(conn, org["id"], "admin", g.admin["id"], "org.settings_updated", fields["name"])
+            conn.commit()
+        flash("Company profile updated.")
+        return redirect(url_for("admin_settings"))
+
+    return render_template("admin_settings.html", org=org, errors=errors, choices=choices)
+
+
+@app.route("/org/<int:org_id>/logo")
+def org_logo(org_id):
+    with get_db() as conn:
+        org = conn.execute(
+            "SELECT logo_data, logo_mime FROM organizations WHERE id=%s", (org_id,)
+        ).fetchone()
+    if org is None or not org["logo_data"]:
+        abort(404)
+    return Response(bytes(org["logo_data"]), mimetype=org["logo_mime"] or "image/png")
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
