@@ -1,5 +1,6 @@
 import os
 import traceback
+from datetime import datetime
 from functools import wraps
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g, Response, make_response
@@ -8,6 +9,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
 import audit
+import choices
 import config
 import devices as devices_mod
 from models import init_db, get_db
@@ -447,6 +449,55 @@ def admin_employee_edit(emp_id):
     return render_template("admin_employee_form.html", employee=emp)
 
 
+@app.route("/admin/employees/<int:emp_id>/time-entries/new", methods=["GET", "POST"])
+@admin_required
+def admin_time_entry_new(emp_id):
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, g.org["id"])
+        ).fetchone()
+    if emp is None:
+        flash("Employee not found.")
+        return redirect(url_for("admin_employees"))
+
+    if request.method == "POST":
+        clock_in_raw = request.form.get("clock_in", "").strip()
+        clock_out_raw = request.form.get("clock_out", "").strip()
+
+        try:
+            clock_in = datetime.strptime(clock_in_raw, "%Y-%m-%dT%H:%M")
+        except ValueError:
+            flash("Enter a valid clock-in date and time.")
+            return render_template("admin_time_entry_form.html", employee=emp)
+
+        clock_out = None
+        if clock_out_raw:
+            try:
+                clock_out = datetime.strptime(clock_out_raw, "%Y-%m-%dT%H:%M")
+            except ValueError:
+                flash("Enter a valid clock-out date and time, or leave it blank.")
+                return render_template("admin_time_entry_form.html", employee=emp)
+            if clock_out <= clock_in:
+                flash("Clock-out must be after clock-in.")
+                return render_template("admin_time_entry_form.html", employee=emp)
+
+        with get_db() as conn:
+            conn.execute(
+                "INSERT INTO time_entries (employee_id, clock_in, clock_out, is_manual, created_by_admin_id) "
+                "VALUES (%s, %s, %s, TRUE, %s)",
+                (emp_id, clock_in, clock_out, g.admin["id"]),
+            )
+            audit.log(
+                conn, g.org["id"], "admin", g.admin["id"], "time_entry.manual_added",
+                f"{emp['name']} ({emp['employee_code']}): {clock_in} - {clock_out or 'open'}",
+            )
+            conn.commit()
+        flash(f"Manual time entry added for {emp['name']}.")
+        return redirect(url_for("admin_dashboard"))
+
+    return render_template("admin_time_entry_form.html", employee=emp)
+
+
 def _send_current_period_report(org):
     recipients = [r.strip() for r in (org["report_recipients"] or "").split(",") if r.strip()]
     if not recipients:
@@ -510,6 +561,81 @@ def admin_devices():
         "admin_devices.html", devices=device_list,
         user_agent=request.headers.get("User-Agent", "Unknown device"),
     )
+
+
+@app.route("/admin/settings", methods=["GET", "POST"])
+@admin_required
+def admin_settings():
+    org = dict(g.org)
+    errors = {}
+
+    if request.method == "POST":
+        fields = {
+            "name": request.form.get("company_name", "").strip(),
+            "dba_name": request.form.get("dba_name", "").strip(),
+            "business_type": request.form.get("business_type", "").strip(),
+            "industry": request.form.get("industry", "").strip(),
+            "address_line1": request.form.get("address_line1", "").strip(),
+            "city": request.form.get("city", "").strip(),
+            "state": request.form.get("state", "").strip(),
+            "zip": request.form.get("zip", "").strip(),
+            "country": request.form.get("country", "United States").strip() or "United States",
+            "phone": request.form.get("phone", "").strip(),
+            "website": request.form.get("website", "").strip(),
+            "report_recipients": request.form.get("report_recipients", "").strip(),
+        }
+        if not fields["name"]:
+            errors["company_name"] = "Company name is required."
+        if not fields["address_line1"]:
+            errors["address_line1"] = "Address is required."
+        if not fields["phone"]:
+            errors["phone"] = "Phone number is required."
+        if not fields["report_recipients"] or "@" not in fields["report_recipients"]:
+            errors["report_recipients"] = "Enter a valid notification email address."
+
+        logo_data, logo_mime = None, None
+        logo_file = request.files.get("logo")
+        if logo_file and logo_file.filename:
+            raw = logo_file.read()
+            if len(raw) > 500 * 1024:
+                errors["logo"] = "Logo must be 500KB or smaller."
+            elif logo_file.mimetype not in ("image/png", "image/jpeg", "image/svg+xml"):
+                errors["logo"] = "Logo must be a PNG, JPEG, or SVG file."
+            else:
+                logo_data, logo_mime = raw, logo_file.mimetype
+
+        if errors:
+            return render_template(
+                "admin_settings.html", org={**org, **fields}, errors=errors, choices=choices
+            )
+
+        with get_db() as conn:
+            if logo_data is not None:
+                conn.execute(
+                    "UPDATE organizations SET name=%s, dba_name=%s, business_type=%s, industry=%s, "
+                    "address_line1=%s, city=%s, state=%s, zip=%s, country=%s, phone=%s, website=%s, "
+                    "report_recipients=%s, logo_data=%s, logo_mime=%s WHERE id=%s",
+                    (fields["name"], fields["dba_name"] or None, fields["business_type"] or None,
+                     fields["industry"] or None, fields["address_line1"], fields["city"] or None,
+                     fields["state"] or None, fields["zip"] or None, fields["country"], fields["phone"],
+                     fields["website"] or None, fields["report_recipients"], logo_data, logo_mime, org["id"]),
+                )
+            else:
+                conn.execute(
+                    "UPDATE organizations SET name=%s, dba_name=%s, business_type=%s, industry=%s, "
+                    "address_line1=%s, city=%s, state=%s, zip=%s, country=%s, phone=%s, website=%s, "
+                    "report_recipients=%s WHERE id=%s",
+                    (fields["name"], fields["dba_name"] or None, fields["business_type"] or None,
+                     fields["industry"] or None, fields["address_line1"], fields["city"] or None,
+                     fields["state"] or None, fields["zip"] or None, fields["country"], fields["phone"],
+                     fields["website"] or None, fields["report_recipients"], org["id"]),
+                )
+            audit.log(conn, org["id"], "admin", g.admin["id"], "org.settings_updated", fields["name"])
+            conn.commit()
+        flash("Company profile updated.")
+        return redirect(url_for("admin_settings"))
+
+    return render_template("admin_settings.html", org=org, errors=errors, choices=choices)
 
 
 @app.route("/org/<int:org_id>/logo")
