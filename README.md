@@ -4,23 +4,15 @@ A web app for employee clock in/out, with an hours &amp; pay report
 (hours x rate per person) an admin can email to themselves any time
 from the dashboard.
 
-Deployed on **Render** (free tier to start) with a **Postgres** database,
-so it's reachable from a browser on any office computer - no local
-install required.
+Deployed on **Render** with a **Postgres** database, so it's reachable
+from a browser on any office computer - no local install required.
 
 ---
 
-## Cost (free tier, as chosen)
+## Hosting plan
 
-- **Web service:** free. Sleeps after 15 minutes idle; wakes on the next
-  request within about a minute. Fine for occasional admin/clock-in use.
-- **Database:** free Postgres, but **it expires after 90 days** on the
-  free plan. Put a reminder on your calendar for ~day 80 to either
-  upgrade the database to a paid plan ($7/mo) or export/re-import your
-  data before it's deleted.
-If reliability becomes more important than cost later, upgrading the web
-service to Starter ($7/mo) removes the sleep delay, and upgrading the
-database removes the 90-day expiration.
+- **Web service:** Starter plan - always on, no sleep/cold-start delay.
+- **Database:** Basic-256mb Postgres - persistent, no expiration.
 
 ## 1. This project on GitHub
 
