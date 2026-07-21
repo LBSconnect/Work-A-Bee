@@ -22,7 +22,7 @@
     <button type="submit" class="btn secondary">Submit my hours</button>
   </form>
 
-  <p class="muted" style="margin-top:24px;"><a href="{{ url_for('staff_login') }}">Cancel</a></p>
+  <a class="btn secondary" style="margin-top:16px;" href="{{ url_for('clock_exit') }}">Exit</a>
 
   {% if history %}
     <h2 style="margin-top:32px; font-size:16px;">Recent activity</h2>
