@@ -1,0 +1,56 @@
+{% extends "wizard/base.html" %}
+{% block title %}Sign Up — Business Settings{% endblock %}
+{% block step_content %}
+  <h1>Business Settings</h1>
+  <form method="post">
+    <label>Choose Your Time Zone</label>
+    <select name="timezone">
+      {% for value, label in choices.TIMEZONE_CHOICES %}
+        <option value="{{ value }}" {% if data.timezone == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Choose Currency</label>
+    <select name="currency">
+      {% for value, label in choices.CURRENCY_CHOICES %}
+        <option value="{{ value }}" {% if data.currency == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Week Starts On</label>
+    <select name="week_starts_on">
+      {% for value, label in choices.WEEK_START_CHOICES %}
+        <option value="{{ value }}" {% if data.week_starts_on == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Payroll Frequency</label>
+    <select name="payroll_frequency">
+      {% for value, label in choices.PAYROLL_FREQUENCY_CHOICES %}
+        <option value="{{ value }}" {% if data.payroll_frequency == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Choose Default Shift Length</label>
+    <select name="default_shift_minutes">
+      {% for value, label in choices.SHIFT_LENGTH_CHOICES %}
+        <option value="{{ value }}" {% if data.default_shift_minutes == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+      <option value="custom" {% if data.default_shift_minutes and data.default_shift_minutes not in [480,600,720] %}selected{% endif %}>Custom</option>
+    </select>
+    <input type="number" step="0.5" min="1" name="custom_shift_hours" placeholder="Custom shift length (hours)" style="margin-top:8px;"
+           value="{% if data.default_shift_minutes and data.default_shift_minutes not in [480,600,720] %}{{ (data.default_shift_minutes / 60)|round(1) }}{% endif %}">
+
+    <label>Choose Overtime Rule</label>
+    <select name="overtime_rule">
+      {% for value, label in choices.OVERTIME_RULE_CHOICES %}
+        <option value="{{ value }}" {% if data.overtime_rule == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <input type="number" step="0.5" min="1" name="overtime_custom_hours" placeholder="Custom weekly overtime threshold (hours)" style="margin-top:8px;"
+           value="{{ data.overtime_threshold_hours or '' }}">
+
+    <button type="submit">Continue</button>
+  </form>
+  <p class="muted" style="margin-top:16px;"><a href="{{ url_for('wizard.step_admin') }}">Back</a></p>
+{% endblock %}

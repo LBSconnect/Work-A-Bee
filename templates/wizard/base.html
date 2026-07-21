@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block wrapclass %}wide{% endblock %}
+{% block content %}
+  <div class="wizard-progress">
+    {% for n, label in [(1,'Company'),(2,'Admin'),(3,'Settings'),(4,'Payroll'),(5,'Employees'),(6,'Devices'),(7,'Review')] %}
+      <div class="wizard-pill {% if n == step_num %}active{% elif n < step_num %}done{% endif %}">
+        <span class="wizard-pill-num">{% if n < step_num %}&#10003;{% else %}{{ n }}{% endif %}</span>
+        <span class="wizard-pill-label">{{ label }}</span>
+      </div>
+      {% if not loop.last %}<div class="wizard-connector {% if n < step_num %}done{% endif %}"></div>{% endif %}
+    {% endfor %}
+  </div>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
+    {% endif %}
+  {% endwith %}
+  {% block step_content %}{% endblock %}
+{% endblock %}

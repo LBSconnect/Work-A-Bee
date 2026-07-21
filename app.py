@@ -1,17 +1,19 @@
 import os
-import traceback
 from functools import wraps
 
-from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g, Response, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
+import audit
 import config
+import devices as devices_mod
 from models import init_db, get_db
 from orgs import get_active_org, normalize_company_code
 from payroll import get_period_bounds, calculate_payroll, get_period_entries, get_prior_periods
 from email_report import send_report_email
+from signup_wizard import wizard as wizard_blueprint
 from tz import now_in, today_in
 
 app = Flask(__name__)
@@ -27,15 +29,7 @@ limiter = Limiter(get_remote_address, app=app, default_limits=[])
 
 init_db()
 
-
-TIMEZONE_CHOICES = [
-    ("America/New_York", "Eastern"),
-    ("America/Chicago", "Central"),
-    ("America/Denver", "Mountain"),
-    ("America/Los_Angeles", "Pacific"),
-    ("America/Anchorage", "Alaska"),
-    ("Pacific/Honolulu", "Hawaii"),
-]
+app.register_blueprint(wizard_blueprint)
 
 
 def _active_companies():
@@ -48,51 +42,6 @@ def _active_companies():
 @app.route("/")
 def clock_home():
     return render_template("login.html")
-
-
-@app.route("/signup", methods=["GET", "POST"])
-@limiter.limit("30 per hour")
-def signup():
-    form = {
-        "company_name": request.form.get("company_name", ""),
-        "report_recipients": request.form.get("report_recipients", ""),
-        "timezone": request.form.get("timezone", "America/Chicago"),
-    }
-
-    if request.method == "POST":
-        company_name = form["company_name"].strip()
-        report_recipients = form["report_recipients"].strip()
-        timezone = form["timezone"] if form["timezone"] in dict(TIMEZONE_CHOICES) else "America/Chicago"
-
-        if not company_name:
-            flash("Company name is required.")
-        elif "@" not in report_recipients:
-            flash("Please enter a valid notification email address.")
-        else:
-            try:
-                with get_db() as conn:
-                    next_id = conn.execute(
-                        "SELECT nextval(pg_get_serial_sequence('organizations', 'id')) AS n"
-                    ).fetchone()["n"]
-                    code = f"cc{next_id:03d}"
-                    conn.execute(
-                        "INSERT INTO organizations (id, company_code, name, timezone, report_recipients) "
-                        "VALUES (%s, %s, %s, %s, %s)",
-                        (next_id, code, company_name, timezone, report_recipients),
-                    )
-                    conn.commit()
-            except Exception:
-                traceback.print_exc()
-                flash("Something went wrong creating your company. Please try again.")
-                return render_template("signup.html", timezone_choices=TIMEZONE_CHOICES, **form)
-
-            flash(
-                f"'{company_name}' is set up! Your Company Code is {code.upper()} - "
-                "write it down, you'll need it to log in. Now create your admin login below."
-            )
-            return redirect(url_for("admin_setup", company_code=code))
-
-    return render_template("signup.html", timezone_choices=TIMEZONE_CHOICES, **form)
 
 
 @app.route("/staff/login", methods=["GET", "POST"])
@@ -152,6 +101,11 @@ def clock_action():
             session.pop("employee_id", None)
             return redirect(url_for("staff_login"))
 
+        if not devices_mod.is_trusted_device(request, org["id"], conn):
+            session.pop("employee_id", None)
+            flash("This computer isn't authorized to clock in/out for this company. Ask your administrator to register it under Admin > Devices.")
+            return redirect(url_for("staff_login"))
+
         open_entry = conn.execute(
             "SELECT * FROM time_entries WHERE employee_id=%s AND clock_out IS NULL",
             (emp_id,),
@@ -183,7 +137,7 @@ def clock_action():
         period_start, _ = get_period_bounds(today_in(org["timezone"]))
         weekly_history = []
         for start, end in get_prior_periods(period_start, count=4):
-            rows = calculate_payroll(conn, org["id"], org["timezone"], start, end)
+            rows = calculate_payroll(conn, org, start, end)
             mine = next((r for r in rows if r["employee_code"] == emp["employee_code"]), None)
             weekly_history.append({
                 "period_start": start,
@@ -349,15 +303,26 @@ def admin_dashboard():
     today = today_in(g.org["timezone"])
     period_start, period_end = get_period_bounds(today)
     with get_db() as conn:
-        detail = get_period_entries(conn, g.org["id"], g.org["timezone"], period_start, period_end)
+        detail = get_period_entries(conn, g.org, period_start, period_end)
         history = [
             {
                 "period_start": start,
                 "period_end": end,
-                "rows": calculate_payroll(conn, g.org["id"], g.org["timezone"], start, end),
+                "rows": calculate_payroll(conn, g.org, start, end),
             }
             for start, end in get_prior_periods(period_start, count=4)
         ]
+        employee_count = conn.execute(
+            "SELECT COUNT(*) AS c FROM employees WHERE org_id=%s AND active=1", (g.org["id"],)
+        ).fetchone()["c"]
+        has_clocked_in_ever = conn.execute(
+            "SELECT 1 FROM time_entries te JOIN employees e ON te.employee_id=e.id "
+            "WHERE e.org_id=%s LIMIT 1", (g.org["id"],)
+        ).fetchone() is not None
+        has_sent_report = conn.execute(
+            "SELECT 1 FROM report_log WHERE org_id=%s LIMIT 1", (g.org["id"],)
+        ).fetchone() is not None
+
     rows = [
         {
             "employee_code": d["employee_code"],
@@ -375,6 +340,33 @@ def admin_dashboard():
         f"{g.org['report_hour'] % 12 or 12}:{g.org['report_minute']:02d} "
         f"{'PM' if g.org['report_hour'] >= 12 else 'AM'} ({g.org['timezone']})"
     )
+
+    active_today = [d for d in detail if any(e["clock_in"].date() == today for e in d["entries"])]
+    clocked_in_now = [d for d in detail if d["incomplete"]]
+    stats = {
+        "employees": employee_count,
+        "active_today": len(active_today),
+        "clocked_in_now": clocked_in_now,
+        "hours_this_week": round(sum(d["total_hours"] for d in detail), 2),
+        "weekly_payroll": round(sum(d["total_due"] for d in detail), 2),
+    }
+
+    checklist = None
+    if g.org["onboarding_completed_at"]:
+        checklist = [
+            {"label": "Company Created", "done": True, "url": None},
+            {"label": "Payroll Configured", "done": True, "url": None},
+            {"label": "Add More Employees", "done": employee_count > 0, "url": url_for("admin_employees")},
+            {"label": "Test Clock In", "done": has_clocked_in_ever, "url": url_for("staff_login")},
+            {"label": "Configure Reports", "done": True, "url": url_for("admin_dashboard")},
+            {"label": "Generate First Payroll Report", "done": has_sent_report, "url": url_for("admin_send_report_now")},
+        ]
+        if all(item["done"] for item in checklist):
+            checklist = None
+
+    welcome_company_code = session.pop("welcome_company_code", None)
+    welcome_admin_creds = session.pop("welcome_admin_creds", None)
+
     return render_template(
         "admin_dashboard.html",
         rows=rows,
@@ -383,6 +375,10 @@ def admin_dashboard():
         period_start=period_start,
         period_end=period_end,
         next_report_note=next_report_note,
+        stats=stats,
+        checklist=checklist,
+        welcome_company_code=welcome_company_code,
+        welcome_admin_creds=welcome_admin_creds,
     )
 
 
@@ -487,7 +483,7 @@ def _send_current_period_report(org):
     today = today_in(org["timezone"])
     period_start, period_end = get_period_bounds(today)
     with get_db() as conn:
-        rows = calculate_payroll(conn, org["id"], org["timezone"], period_start, period_end)
+        rows = calculate_payroll(conn, org, period_start, period_end)
     send_report_email(org["name"], recipients, period_start, period_end, rows)
     return period_start, period_end
 
@@ -501,6 +497,59 @@ def admin_send_report_now():
     except Exception as e:
         flash(f"Failed to send report: {e}")
     return redirect(url_for("admin_dashboard"))
+
+
+@app.route("/admin/devices", methods=["GET", "POST"])
+@admin_required
+def admin_devices():
+    if request.method == "POST":
+        action = request.form.get("action")
+        with get_db() as conn:
+            if action == "register":
+                name = request.form.get("device_name", "").strip() or "Office Computer"
+                dev_id, raw_token = devices_mod.register_device(conn, g.org["id"], name, g.admin["id"])
+                audit.log(conn, g.org["id"], "admin", g.admin["id"], "device.registered", name)
+                conn.commit()
+                resp = make_response(redirect(url_for("admin_devices")))
+                resp = devices_mod.issue_device_cookie(resp, g.org["id"], raw_token)
+                flash(f"'{name}' registered as a trusted device for this browser.")
+                return resp
+            elif action in ("disable", "remove"):
+                device_id = request.form.get("device_id", "")
+                if device_id.isdigit():
+                    if action == "disable":
+                        conn.execute(
+                            "UPDATE devices SET status='disabled' WHERE id=%s AND org_id=%s",
+                            (device_id, g.org["id"]),
+                        )
+                        audit.log(conn, g.org["id"], "admin", g.admin["id"], "device.disabled", device_id)
+                    else:
+                        conn.execute(
+                            "DELETE FROM devices WHERE id=%s AND org_id=%s", (device_id, g.org["id"])
+                        )
+                        audit.log(conn, g.org["id"], "admin", g.admin["id"], "device.removed", device_id)
+                    conn.commit()
+        return redirect(url_for("admin_devices"))
+
+    with get_db() as conn:
+        device_list = conn.execute(
+            "SELECT * FROM devices WHERE org_id=%s ORDER BY created_at DESC", (g.org["id"],)
+        ).fetchall()
+    return render_template(
+        "admin_devices.html", devices=device_list,
+        user_agent=request.headers.get("User-Agent", "Unknown device"),
+    )
+
+
+@app.route("/org/<int:org_id>/logo")
+def org_logo(org_id):
+    with get_db() as conn:
+        org = conn.execute(
+            "SELECT logo_data, logo_mime FROM organizations WHERE id=%s", (org_id,)
+        ).fetchone()
+    if org is None or not org["logo_data"]:
+        abort(404)
+    return Response(bytes(org["logo_data"]), mimetype=org["logo_mime"] or "image/png")
 
 
 def _maybe_send_report_for_org(org):
