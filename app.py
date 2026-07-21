@@ -1,4 +1,5 @@
 import os
+import traceback
 from functools import wraps
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g, Response, make_response
@@ -190,8 +191,9 @@ def submit_hours():
     try:
         _send_current_period_report(org)
         flash(f"Thanks, {emp['name']} - this week's hours report was emailed to the office.")
-    except Exception as e:
-        flash(f"Couldn't submit hours: {e}")
+    except Exception:
+        traceback.print_exc()
+        flash("Couldn't send the report right now - please let your administrator know.")
 
     session.pop("employee_id", None)
     return redirect(url_for("staff_login"))
