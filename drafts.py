@@ -20,11 +20,13 @@ def get_or_create_draft(request):
         row = load_draft(token)
         if row:
             return token, row, False
+        print(f"[wizard] cookie present ({token[:8]}...) but no matching draft row - starting a new one")
 
     token = _new_token()
     with get_db() as conn:
         conn.execute("INSERT INTO signup_drafts (draft_token) VALUES (%s)", (token,))
         conn.commit()
+    print(f"[wizard] created new draft, token={token[:8]}...")
     return token, load_draft(token), True
 
 
@@ -55,6 +57,7 @@ def save_step(token, fields, next_step=None):
             (Json(data), step, token),
         )
         conn.commit()
+    print(f"[wizard] saved step (token={token[:8]}..., now at step {step}, keys={list(data.keys())})")
     return data
 
 
