@@ -1,6 +1,6 @@
 databases:
   - name: time-keeper-db
-    plan: free
+    plan: basic-256mb
     postgresMajorVersion: 16
 
 services:
