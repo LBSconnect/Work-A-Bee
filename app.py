@@ -9,6 +9,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
 import audit
+import choices
 import config
 import devices as devices_mod
 from models import init_db, get_db
@@ -560,6 +561,81 @@ def admin_devices():
         "admin_devices.html", devices=device_list,
         user_agent=request.headers.get("User-Agent", "Unknown device"),
     )
+
+
+@app.route("/admin/settings", methods=["GET", "POST"])
+@admin_required
+def admin_settings():
+    org = dict(g.org)
+    errors = {}
+
+    if request.method == "POST":
+        fields = {
+            "name": request.form.get("company_name", "").strip(),
+            "dba_name": request.form.get("dba_name", "").strip(),
+            "business_type": request.form.get("business_type", "").strip(),
+            "industry": request.form.get("industry", "").strip(),
+            "address_line1": request.form.get("address_line1", "").strip(),
+            "city": request.form.get("city", "").strip(),
+            "state": request.form.get("state", "").strip(),
+            "zip": request.form.get("zip", "").strip(),
+            "country": request.form.get("country", "United States").strip() or "United States",
+            "phone": request.form.get("phone", "").strip(),
+            "website": request.form.get("website", "").strip(),
+            "report_recipients": request.form.get("report_recipients", "").strip(),
+        }
+        if not fields["name"]:
+            errors["company_name"] = "Company name is required."
+        if not fields["address_line1"]:
+            errors["address_line1"] = "Address is required."
+        if not fields["phone"]:
+            errors["phone"] = "Phone number is required."
+        if not fields["report_recipients"] or "@" not in fields["report_recipients"]:
+            errors["report_recipients"] = "Enter a valid notification email address."
+
+        logo_data, logo_mime = None, None
+        logo_file = request.files.get("logo")
+        if logo_file and logo_file.filename:
+            raw = logo_file.read()
+            if len(raw) > 500 * 1024:
+                errors["logo"] = "Logo must be 500KB or smaller."
+            elif logo_file.mimetype not in ("image/png", "image/jpeg", "image/svg+xml"):
+                errors["logo"] = "Logo must be a PNG, JPEG, or SVG file."
+            else:
+                logo_data, logo_mime = raw, logo_file.mimetype
+
+        if errors:
+            return render_template(
+                "admin_settings.html", org={**org, **fields}, errors=errors, choices=choices
+            )
+
+        with get_db() as conn:
+            if logo_data is not None:
+                conn.execute(
+                    "UPDATE organizations SET name=%s, dba_name=%s, business_type=%s, industry=%s, "
+                    "address_line1=%s, city=%s, state=%s, zip=%s, country=%s, phone=%s, website=%s, "
+                    "report_recipients=%s, logo_data=%s, logo_mime=%s WHERE id=%s",
+                    (fields["name"], fields["dba_name"] or None, fields["business_type"] or None,
+                     fields["industry"] or None, fields["address_line1"], fields["city"] or None,
+                     fields["state"] or None, fields["zip"] or None, fields["country"], fields["phone"],
+                     fields["website"] or None, fields["report_recipients"], logo_data, logo_mime, org["id"]),
+                )
+            else:
+                conn.execute(
+                    "UPDATE organizations SET name=%s, dba_name=%s, business_type=%s, industry=%s, "
+                    "address_line1=%s, city=%s, state=%s, zip=%s, country=%s, phone=%s, website=%s, "
+                    "report_recipients=%s WHERE id=%s",
+                    (fields["name"], fields["dba_name"] or None, fields["business_type"] or None,
+                     fields["industry"] or None, fields["address_line1"], fields["city"] or None,
+                     fields["state"] or None, fields["zip"] or None, fields["country"], fields["phone"],
+                     fields["website"] or None, fields["report_recipients"], org["id"]),
+                )
+            audit.log(conn, org["id"], "admin", g.admin["id"], "org.settings_updated", fields["name"])
+            conn.commit()
+        flash("Company profile updated.")
+        return redirect(url_for("admin_settings"))
+
+    return render_template("admin_settings.html", org=org, errors=errors, choices=choices)
 
 
 @app.route("/org/<int:org_id>/logo")
