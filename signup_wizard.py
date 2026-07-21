@@ -418,29 +418,6 @@ def step_devices():
     ))
 
 
-@wizard.route("/signup/debug")
-def signup_debug():
-    """Temporary diagnostic: dumps this browser's own draft via the app's own DB
-    connection, so there's no ambiguity about which database/session is being read."""
-    token = request.cookies.get(COOKIE_NAME)
-    if not token:
-        return jsonify({"error": "no wizard_token cookie on this request"})
-    with get_db() as conn:
-        row = conn.execute(
-            "SELECT id, draft_token, current_step, updated_at, data FROM signup_drafts WHERE draft_token=%s",
-            (token,),
-        ).fetchone()
-    if row is None:
-        return jsonify({"error": "cookie present but no matching draft row", "token_prefix": token[:8]})
-    return jsonify({
-        "draft_id": row["id"],
-        "token_prefix": row["draft_token"][:8],
-        "current_step": row["current_step"],
-        "updated_at": str(row["updated_at"]),
-        "data": row["data"],
-    })
-
-
 @wizard.route("/signup/review", methods=["GET", "POST"])
 def step_review():
     token, draft = _ensure_draft()
