@@ -1,8 +1,24 @@
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+import requests
 
 import config
+
+TOKEN_URL = "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token"
+SEND_MAIL_URL = "https://graph.microsoft.com/v1.0/users/{sender}/sendMail"
+
+
+def _get_access_token():
+    resp = requests.post(
+        TOKEN_URL.format(tenant=config.MS_TENANT_ID),
+        data={
+            "grant_type": "client_credentials",
+            "client_id": config.MS_CLIENT_ID,
+            "client_secret": config.MS_CLIENT_SECRET,
+            "scope": "https://graph.microsoft.com/.default",
+        },
+        timeout=15,
+    )
+    resp.raise_for_status()
+    return resp.json()["access_token"]
 
 
 def send_report_email(org_name, recipients, period_start, period_end, rows):
@@ -32,13 +48,19 @@ def send_report_email(org_name, recipients, period_start, period_end, rows):
 
     body = "\n".join(lines)
 
-    msg = MIMEMultipart()
-    msg["Subject"] = subject
-    msg["From"] = config.SMTP_USERNAME
-    msg["To"] = ", ".join(recipients)
-    msg.attach(MIMEText(body, "plain"))
-
-    with smtplib.SMTP(config.SMTP_SERVER, config.SMTP_PORT) as server:
-        server.starttls()
-        server.login(config.SMTP_USERNAME, config.SMTP_PASSWORD)
-        server.sendmail(config.SMTP_USERNAME, recipients, msg.as_string())
+    access_token = _get_access_token()
+    message = {
+        "message": {
+            "subject": subject,
+            "body": {"contentType": "Text", "content": body},
+            "toRecipients": [{"emailAddress": {"address": addr}} for addr in recipients],
+        },
+        "saveToSentItems": "false",
+    }
+    resp = requests.post(
+        SEND_MAIL_URL.format(sender=config.MS_SENDER_EMAIL),
+        headers={"Authorization": f"Bearer {access_token}"},
+        json=message,
+        timeout=15,
+    )
+    resp.raise_for_status()

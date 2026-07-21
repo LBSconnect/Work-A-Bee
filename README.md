@@ -47,23 +47,24 @@ Render won't have wired up the database or env vars for you. You'll need to:
 
 ## 3. Fill in email settings
 
-1. In the Render dashboard, open your web service.
-2. Go to the **Environment** tab.
+Email is sent via the Microsoft Graph API using an app registration
+(OAuth), not SMTP/basic auth - this avoids Microsoft 365's Security
+Defaults policy, which blocks basic auth entirely regardless of
+per-mailbox settings.
+
+1. In Microsoft Entra admin center, register an app, grant it
+   **Microsoft Graph -> Application permission -> Mail.Send**, and
+   grant admin consent. See the app registration steps documented
+   separately (ask whoever set this up if you need to redo it).
+2. In the Render dashboard, open your web service -> **Environment** tab.
 3. Fill in:
-   - `SMTP_USERNAME` - your Outlook/Microsoft 365 email address
-   - `SMTP_PASSWORD` - see note below
+   - `MS_TENANT_ID` - the app registration's Directory (tenant) ID
+   - `MS_CLIENT_ID` - the app registration's Application (client) ID
+   - `MS_CLIENT_SECRET` - a client secret value from that app registration
+   - `MS_SENDER_EMAIL` - the mailbox address to send from
    - `REPORT_RECIPIENT` - already defaults to `info@lbsconnect.net`;
      only set this if you want it sent somewhere else.
 4. Save changes (this triggers a quick redeploy).
-
-**About the password:** if your Microsoft 365/Outlook account has
-multi-factor authentication on (most business accounts do), your normal
-password won't work for SMTP. Generate an **app password** instead at
-https://account.microsoft.com/security under "App passwords," and use
-that as `SMTP_PASSWORD`. If your organization has SMTP AUTH disabled
-entirely, a Microsoft 365 admin needs to enable it for your mailbox, or
-you can point `SMTP_SERVER`/`SMTP_PORT`/credentials at a different
-provider like Gmail instead.
 
 ## 4. Create your admin account
 
