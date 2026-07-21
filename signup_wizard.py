@@ -443,9 +443,11 @@ def step_review():
                 payroll=payroll, employees=employees, device=device, step_num=7,
             ))
 
+        print(f"[wizard] launch attempt starting - token={token} employees={len(employees)} device_register={bool(device.get('register'))}")
         try:
             with get_db() as conn:
                 next_id, code = next_company_code(conn)
+                print(f"[wizard] checkpoint: got company code {code}")
                 logo_bytes = base64.b64decode(company["logo_b64"]) if company.get("logo_b64") else None
                 conn.execute(
                     "INSERT INTO organizations (id, company_code, name, dba_name, business_type, industry, "
@@ -470,6 +472,7 @@ def step_review():
                      payroll.get("allow_paid_breaks", False), admin.get("email")),
                 )
                 org_id = next_id
+                print(f"[wizard] checkpoint: organizations insert OK, org_id={org_id}")
                 audit.log(conn, org_id, "system", None, "org.created", company["name"])
 
                 admin_row = conn.execute(
@@ -481,6 +484,7 @@ def step_review():
                      admin.get("mobile_phone") or None),
                 ).fetchone()
                 admin_id = admin_row["id"]
+                print(f"[wizard] checkpoint: admin_users insert OK, admin_id={admin_id}")
                 audit.log(conn, org_id, "admin", admin_id, "admin.created", admin["email"])
 
                 dept_ids = {}
@@ -492,6 +496,7 @@ def step_review():
                     ).fetchone()
                     dept_ids[dname] = d["id"]
                     audit.log(conn, org_id, "admin", admin_id, "department.created", dname)
+                print(f"[wizard] checkpoint: departments OK, count={len(dept_ids)}")
 
                 emp_ids = []
                 for e in employees:
@@ -510,6 +515,7 @@ def step_review():
                     ).fetchone()
                     emp_ids.append(row["id"])
                     audit.log(conn, org_id, "admin", admin_id, "employee.created", name)
+                print(f"[wizard] checkpoint: employees insert OK, count={len(emp_ids)}")
 
                 for idx, e in enumerate(employees):
                     mgr_idx = e.get("manager_index")
@@ -518,6 +524,7 @@ def step_review():
                             "UPDATE employees SET manager_id=%s WHERE id=%s",
                             (emp_ids[mgr_idx], emp_ids[idx]),
                         )
+                print("[wizard] checkpoint: manager_id backfill OK")
 
                 secondary_admin_creds = []
                 for e in employees:
@@ -532,6 +539,7 @@ def step_review():
                         )
                         secondary_admin_creds.append({"email": e["email"], "temp_password": temp_password})
                         audit.log(conn, org_id, "admin", admin_id, "admin.created", f"{e['email']} (secondary)")
+                print(f"[wizard] checkpoint: secondary admins OK, count={len(secondary_admin_creds)}")
 
                 raw_device_token = None
                 if device.get("register"):
@@ -539,10 +547,14 @@ def step_review():
                         conn, org_id, device.get("name") or "Office Computer", admin_id
                     )
                     audit.log(conn, org_id, "admin", admin_id, "device.registered", device.get("name"))
+                print(f"[wizard] checkpoint: device registration OK, registered={bool(raw_device_token)}")
 
                 delete_draft(conn, token)
+                print("[wizard] checkpoint: draft deleted, about to commit")
                 conn.commit()
+                print(f"[wizard] SUCCESS: org_id={org_id} code={code} committed")
         except psycopg2.errors.UniqueViolation as e:
+            print("[wizard] FAILED with UniqueViolation:")
             traceback.print_exc()
             constraint = getattr(e.diag, "constraint_name", "") or ""
             if "email" in constraint:
@@ -554,6 +566,7 @@ def step_review():
                 payroll=payroll, employees=employees, device=device, step_num=7,
             ))
         except Exception:
+            print("[wizard] FAILED with generic Exception:")
             traceback.print_exc()
             flash("Something went wrong creating your company. Your progress is saved — please try again.")
             return _wrap(token, render_template(
