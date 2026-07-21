@@ -1,6 +1,6 @@
 databases:
   - name: time-keeper-db
-    plan: free
+    plan: basic-256mb
     postgresMajorVersion: 16
 
 services:
@@ -12,8 +12,6 @@ services:
     startCommand: "gunicorn app:app --bind 0.0.0.0:$PORT"
     envVars:
       - key: SECRET_KEY
-        generateValue: true
-      - key: REPORT_TOKEN
         generateValue: true
       - key: DATABASE_URL
         fromDatabase:
