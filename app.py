@@ -536,6 +536,30 @@ def admin_time_entry_new(emp_id):
     return render_template("admin_time_entry_form.html", employee=emp)
 
 
+@app.route("/admin/time-entries/<int:entry_id>/delete", methods=["POST"])
+@admin_required
+def admin_time_entry_delete(entry_id):
+    with get_db() as conn:
+        entry = conn.execute(
+            "SELECT te.*, e.name AS employee_name, e.employee_code FROM time_entries te "
+            "JOIN employees e ON te.employee_id = e.id "
+            "WHERE te.id=%s AND e.org_id=%s",
+            (entry_id, g.org["id"]),
+        ).fetchone()
+        if entry is None:
+            flash("Time entry not found.")
+            return redirect(url_for("admin_dashboard"))
+
+        conn.execute("DELETE FROM time_entries WHERE id=%s", (entry_id,))
+        audit.log(
+            conn, g.org["id"], "admin", g.admin["id"], "time_entry.deleted",
+            f"{entry['employee_name']} ({entry['employee_code']}): {entry['clock_in']} - {entry['clock_out'] or 'open'}",
+        )
+        conn.commit()
+    flash("Time entry deleted.")
+    return redirect(url_for("admin_dashboard") + "#timesheets")
+
+
 def _send_current_period_report(org):
     recipients = [r.strip() for r in (org["report_recipients"] or "").split(",") if r.strip()]
     if not recipients:
