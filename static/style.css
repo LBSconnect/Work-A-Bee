@@ -278,3 +278,15 @@ th { background: #f9fafb; }
   .admin-sidebar-logout { margin-top: 0; border-top: none; }
   .admin-panels-row { grid-template-columns: 1fr; }
 }
+
+/* Collapsible sections (Prior 4 weeks) */
+.collapsible > summary { cursor: pointer; list-style: none; }
+.collapsible > summary::-webkit-details-marker { display: none; }
+.collapsible > summary h1, .collapsible > summary h2 { display: inline-block; margin: 0; }
+.collapsible > summary::before {
+  content: "▸"; display: inline-block; margin-right: 8px;
+  font-size: 14px; color: #6b7280; transition: transform .15s;
+}
+.collapsible[open] > summary::before { transform: rotate(90deg); }
+.collapsible-week { margin: 16px 0; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 16px; }
+.collapsible-week table { margin-top: 12px; }

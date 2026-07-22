@@ -93,6 +93,7 @@ def get_period_entries(conn, org, period_start: date, period_end: date):
             running_hours += hours
             hours_by_day[clock_in.date()] = hours_by_day.get(clock_in.date(), 0.0) + hours
             entries.append({
+                "id": e["id"],
                 "clock_in": e["clock_in"],
                 "clock_out": e["clock_out"],
                 "hours": round(hours, 2),

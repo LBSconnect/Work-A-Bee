@@ -121,7 +121,7 @@
     {% if d.entries %}
     <table>
       <tr>
-        <th>Clock in</th><th>Clock out</th><th>Hours</th><th>Running hours</th><th>Running total due</th>
+        <th>Clock in</th><th>Clock out</th><th>Hours</th><th>Running hours</th><th>Running total due</th><th></th>
       </tr>
       {% for e in d.entries %}
       <tr>
@@ -136,12 +136,19 @@
         <td>{{ "%.2f"|format(e.hours) }}</td>
         <td>{{ "%.2f"|format(e.running_hours) }}</td>
         <td>${{ "%.2f"|format(e.running_due) }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin_time_entry_delete', entry_id=e.id) }}"
+                onsubmit="return confirm('Delete this time entry? This cannot be undone.');" style="display:inline;">
+            <button type="submit" class="secondary" style="margin:0; padding:4px 10px; font-size:12px;">Delete</button>
+          </form>
+        </td>
       </tr>
       {% endfor %}
       <tr>
         <td colspan="3"></td>
         <td><strong>{{ "%.2f"|format(d.total_hours) }}</strong></td>
         <td><strong>${{ "%.2f"|format(d.total_due) }}</strong></td>
+        <td></td>
       </tr>
     </table>
     {% else %}
@@ -151,27 +158,31 @@
     <p class="muted">No active employees yet.</p>
   {% endfor %}
 
-  <h1 id="payroll" style="margin-top:40px;">Prior 4 weeks</h1>
-  {% for w in history %}
-    <h2>{{ w.period_start.strftime('%B %d') }} &ndash; {{ w.period_end.strftime('%B %d, %Y') }}</h2>
-    <table>
-      <tr>
-        <th>Employee ID</th><th>Name</th><th>Type</th><th>Hours</th><th>Rate</th><th>Pay</th>
-      </tr>
-      {% for r in w.rows %}
-      <tr>
-        <td>{{ r.employee_code }}</td>
-        <td>{{ r.name }}</td>
-        <td>{{ r.worker_type|capitalize }}</td>
-        <td>{{ "%.2f"|format(r.total_hours) }}</td>
-        <td>${{ "%.2f"|format(r.hourly_rate) }}</td>
-        <td>${{ "%.2f"|format(r.pay) }}</td>
-      </tr>
-      {% else %}
-      <tr><td colspan="6" class="muted">No active employees.</td></tr>
-      {% endfor %}
-    </table>
-  {% else %}
-    <p class="muted">No prior weeks yet.</p>
-  {% endfor %}
+  <details id="payroll" class="collapsible" style="margin-top:40px;">
+    <summary><h1>Prior 4 weeks</h1></summary>
+    {% for w in history %}
+      <details class="collapsible collapsible-week">
+        <summary><h2>{{ w.period_start.strftime('%B %d') }} &ndash; {{ w.period_end.strftime('%B %d, %Y') }}</h2></summary>
+        <table>
+          <tr>
+            <th>Employee ID</th><th>Name</th><th>Type</th><th>Hours</th><th>Rate</th><th>Pay</th>
+          </tr>
+          {% for r in w.rows %}
+          <tr>
+            <td>{{ r.employee_code }}</td>
+            <td>{{ r.name }}</td>
+            <td>{{ r.worker_type|capitalize }}</td>
+            <td>{{ "%.2f"|format(r.total_hours) }}</td>
+            <td>${{ "%.2f"|format(r.hourly_rate) }}</td>
+            <td>${{ "%.2f"|format(r.pay) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="muted">No active employees.</td></tr>
+          {% endfor %}
+        </table>
+      </details>
+    {% else %}
+      <p class="muted">No prior weeks yet.</p>
+    {% endfor %}
+  </details>
 {% endblock %}
