@@ -1,16 +1,6 @@
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
 {% block title %}Admin Dashboard{% endblock %}
-{% block wrapclass %}wide{% endblock %}
-{% block content %}
-  <div class="nav">
-    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
-    <a href="{{ url_for('admin_employees') }}">Employees</a>
-    <a href="{{ url_for('admin_devices') }}">Devices</a>
-    <a href="{{ url_for('admin_settings') }}">Company Settings</a>
-    <a href="{{ url_for('staff_login') }}">Clock in/out screen</a>
-    <a href="{{ url_for('admin_logout') }}">Log out</a>
-  </div>
-
+{% block admin_content %}
   {% if welcome_company_code %}
   <div class="flash">
     <strong>{{ g.org.name }} is set up! Your Company Code is {{ welcome_company_code }}</strong> — write it down, employees and admins will need it to log in.
@@ -37,20 +27,62 @@
   </div>
   {% endif %}
 
-  <p class="muted">
-    {% if g.org.logo_data %}<img src="{{ url_for('org_logo', org_id=g.org.id) }}" alt="{{ g.org.name }}" style="height:32px; vertical-align:middle; margin-right:8px;">{% endif %}
-    {{ g.org.name }}
-  </p>
-
-  <div class="stat-cards">
-    <div class="stat-card"><div class="stat-card-value">{{ stats.employees }}</div><div class="stat-card-label">Employees</div></div>
-    <div class="stat-card"><div class="stat-card-value">{{ stats.active_today }}</div><div class="stat-card-label">Active Today</div></div>
-    <div class="stat-card"><div class="stat-card-value">{{ stats.clocked_in_now|length }}</div><div class="stat-card-label">Who's Clocked In</div></div>
-    <div class="stat-card"><div class="stat-card-value">{{ "%.1f"|format(stats.hours_this_week) }}</div><div class="stat-card-label">Hours This Week</div></div>
-    <div class="stat-card"><div class="stat-card-value">${{ "%.2f"|format(stats.weekly_payroll) }}</div><div class="stat-card-label">Weekly Payroll</div></div>
+  <div class="dash-welcome">
+    <h1>Welcome back, {{ g.admin.username }}! 👋</h1>
+    <p class="muted">Here's what's happening with your team today.</p>
   </div>
 
-  <h1>This week's hours</h1>
+  <div class="stat-cards admin-stat-cards">
+    <div class="stat-card">
+      <div class="stat-card-label">Total Employees</div>
+      <div class="stat-card-value">{{ stats.employees }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Active Today</div>
+      <div class="stat-card-value">{{ stats.active_today }}</div>
+      <div class="stat-card-sub">{{ stats.active_today_pct }}% of team</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Clocked In</div>
+      <div class="stat-card-value">{{ stats.clocked_in_now|length }}</div>
+      <div class="stat-card-sub">As of now</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Hours This Week</div>
+      <div class="stat-card-value">{{ "%.0f"|format(stats.hours_this_week) }}</div>
+      <div class="stat-card-sub">Total Hours</div>
+    </div>
+  </div>
+
+  <div class="admin-panels-row">
+    <div class="dash-panel">
+      <div class="dash-panel-title">Who's Clocked In</div>
+      {% for d in stats.clocked_in_now %}
+        <div class="clocked-row">
+          <div class="clocked-avatar" style="background: {{ d.name|avatar_color }};">{{ d.name|initials }}</div>
+          <div class="clocked-name">{{ d.name }}</div>
+          <div class="clocked-time">{{ d.entries[-1].clock_in.strftime('%I:%M %p').lstrip('0') }}</div>
+        </div>
+      {% else %}
+        <p class="muted">No one's clocked in right now.</p>
+      {% endfor %}
+      <div class="dash-panel-footer"><a href="{{ url_for('admin_employees') }}">View all employees →</a></div>
+    </div>
+
+    <div class="dash-panel">
+      <div class="dash-panel-title">Hours This Week</div>
+      <div class="bar-chart">
+        {% for day in chart_days %}
+        <div class="bar-chart-col">
+          <div class="bar-chart-bar" style="height: {{ day.pct }}%;" title="{{ day.hours }} hrs"></div>
+          <div class="bar-chart-label">{{ day.label }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <h1 id="timesheets" style="margin-top:40px;">This week's hours</h1>
   <p>{{ period_start.strftime('%B %d, %Y') }} &ndash; {{ period_end.strftime('%B %d, %Y') }}</p>
   <p class="muted">Hours for anyone currently clocked in include time accrued so far and update each time you reload this page.</p>
 
@@ -73,8 +105,12 @@
     {% endfor %}
   </table>
 
-  <a class="btn" style="margin-top:24px;" href="{{ url_for('admin_send_report_now') }}"
-     onclick="return confirm('Email this week\'s hours report now?');">Send report now</a>
+  <div id="reports" style="margin-top:40px;">
+    <h1>Reports</h1>
+    <p class="muted">Email the current pay period's hours and pay to your configured report recipients.</p>
+    <a class="btn" href="{{ url_for('admin_send_report_now') }}"
+       onclick="return confirm('Email this week\'s hours report now?');">Send report now</a>
+  </div>
 
   <h1 style="margin-top:40px;">Clock in/out details &amp; running total due</h1>
   {% for d in detail %}
@@ -115,7 +151,7 @@
     <p class="muted">No active employees yet.</p>
   {% endfor %}
 
-  <h1 style="margin-top:40px;">Prior 4 weeks</h1>
+  <h1 id="payroll" style="margin-top:40px;">Prior 4 weeks</h1>
   {% for w in history %}
     <h2>{{ w.period_start.strftime('%B %d') }} &ndash; {{ w.period_end.strftime('%B %d, %Y') }}</h2>
     <table>

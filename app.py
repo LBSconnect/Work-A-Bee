@@ -1,6 +1,7 @@
 import os
 import traceback
-from datetime import datetime
+import zlib
+from datetime import datetime, timedelta
 from functools import wraps
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g, Response, make_response
@@ -33,6 +34,25 @@ limiter = Limiter(get_remote_address, app=app, default_limits=[])
 init_db()
 
 app.register_blueprint(wizard_blueprint)
+
+AVATAR_COLORS = ["#4f46e5", "#059669", "#dc2626", "#d97706", "#7c3aed", "#0ea5e9", "#db2777", "#65a30d"]
+
+
+def avatar_initials(name):
+    parts = [p for p in (name or "").split() if p]
+    if not parts:
+        return "?"
+    if len(parts) == 1:
+        return parts[0][:2].upper()
+    return (parts[0][0] + parts[-1][0]).upper()
+
+
+def avatar_color(key):
+    return AVATAR_COLORS[zlib.crc32((key or "").encode()) % len(AVATAR_COLORS)]
+
+
+app.jinja_env.filters["initials"] = avatar_initials
+app.jinja_env.filters["avatar_color"] = avatar_color
 
 
 def _active_companies():
@@ -320,10 +340,27 @@ def admin_dashboard():
     stats = {
         "employees": employee_count,
         "active_today": len(active_today),
+        "active_today_pct": round(len(active_today) / employee_count * 100) if employee_count else 0,
         "clocked_in_now": clocked_in_now,
         "hours_this_week": round(sum(d["total_hours"] for d in detail), 2),
         "weekly_payroll": round(sum(d["total_due"] for d in detail), 2),
     }
+
+    day_totals = {period_start + timedelta(days=i): 0.0 for i in range(5)}
+    for d in detail:
+        for e in d["entries"]:
+            day = e["clock_in"].date()
+            if day in day_totals:
+                day_totals[day] += e["hours"]
+    max_day_hours = max(day_totals.values()) if day_totals else 0
+    chart_days = [
+        {
+            "label": day.strftime("%a"),
+            "hours": round(hours, 1),
+            "pct": round(hours / max_day_hours * 100) if max_day_hours > 0 else 0,
+        }
+        for day, hours in sorted(day_totals.items())
+    ]
 
     checklist = None
     if g.org.get("onboarding_completed_at"):
@@ -349,6 +386,7 @@ def admin_dashboard():
         period_start=period_start,
         period_end=period_end,
         stats=stats,
+        chart_days=chart_days,
         checklist=checklist,
         welcome_company_code=welcome_company_code,
         welcome_admin_creds=welcome_admin_creds,

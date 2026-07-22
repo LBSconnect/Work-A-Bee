@@ -1,15 +1,6 @@
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
 {% block title %}Add Manual Time Entry{% endblock %}
-{% block content %}
-  <div class="nav">
-    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
-    <a href="{{ url_for('admin_employees') }}">Employees</a>
-    <a href="{{ url_for('admin_devices') }}">Devices</a>
-    <a href="{{ url_for('admin_settings') }}">Company Settings</a>
-    <a href="{{ url_for('staff_login') }}">Clock in/out screen</a>
-    <a href="{{ url_for('admin_logout') }}">Log out</a>
-  </div>
-
+{% block admin_content %}
   <h1>Add manual time entry</h1>
   <p class="muted">For {{ employee.name }} ({{ employee.employee_code }}) - use this if they forgot to clock in or out.</p>
 

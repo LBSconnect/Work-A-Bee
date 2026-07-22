@@ -1,16 +1,6 @@
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
 {% block title %}Employees{% endblock %}
-{% block wrapclass %}wide{% endblock %}
-{% block content %}
-  <div class="nav">
-    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
-    <a href="{{ url_for('admin_employees') }}">Employees</a>
-    <a href="{{ url_for('admin_devices') }}">Devices</a>
-    <a href="{{ url_for('admin_settings') }}">Company Settings</a>
-    <a href="{{ url_for('staff_login') }}">Clock in/out screen</a>
-    <a href="{{ url_for('admin_logout') }}">Log out</a>
-  </div>
-
+{% block admin_content %}
   <h1>Employees &amp; contractors</h1>
   <a class="btn" href="{{ url_for('admin_employee_new') }}">+ Add employee</a>
 

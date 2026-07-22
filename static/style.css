@@ -197,3 +197,84 @@ th { background: #f9fafb; }
   .wizard-row, .wizard-row-3 { grid-template-columns: 1fr; }
   .wizard-pill-label { display: none; }
 }
+
+/* Admin app shell */
+.admin-body { background: #f9fafb; }
+.admin-shell { display: flex; flex-direction: column; min-height: 100vh; }
+
+.admin-topbar {
+  background: #111827; padding: 12px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.admin-topbar-left { display: flex; align-items: center; gap: 10px; }
+.admin-topbar-left img { height: 28px; display: block; }
+.admin-topbar-left span { color: var(--bee-yellow); font-size: 15px; font-weight: 700; }
+.admin-topbar-right { display: flex; align-items: center; gap: 12px; }
+.admin-topbar-right span { color: #9ca3af; font-size: 13px; }
+.admin-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--bee-yellow); color: var(--bee-black);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; flex-shrink: 0;
+}
+
+.admin-body-row { display: flex; flex: 1; }
+
+.admin-sidebar {
+  width: 220px; background: #111827; padding: 16px 0;
+  flex-shrink: 0; display: flex; flex-direction: column;
+}
+.admin-sidebar-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 24px; font-size: 14px; font-weight: 500;
+  color: #9ca3af; text-decoration: none; transition: background .15s;
+}
+.admin-sidebar-item:hover { background: rgba(255,255,255,.05); color: #e5e7eb; }
+.admin-sidebar-item.active { background: rgba(255,193,7,.15); color: var(--bee-yellow); font-weight: 700; }
+.admin-si { font-size: 15px; }
+.admin-sidebar-logout { margin-top: auto; border-top: 1px solid #1f2937; }
+
+.admin-main {
+  flex: 1; padding: 32px; max-width: 1100px;
+}
+
+.dash-welcome h1 { margin-bottom: 2px; }
+.dash-welcome p { margin: 0 0 20px; }
+
+.admin-stat-cards { margin-bottom: 8px; }
+.stat-card-sub { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+
+.admin-panels-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 8px 0 8px; }
+.dash-panel {
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px;
+}
+.dash-panel-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: #1f2937; }
+.dash-panel-footer { margin-top: 10px; font-size: 12px; }
+.dash-panel-footer a { font-weight: 600; }
+
+.clocked-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid #f3f4f6;
+}
+.clocked-row:last-child { border-bottom: none; }
+.clocked-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.clocked-name { font-size: 13px; font-weight: 600; flex: 1; }
+.clocked-time { font-size: 12px; color: #6b7280; }
+
+.bar-chart { display: flex; align-items: flex-end; gap: 12px; height: 120px; margin-top: 8px; }
+.bar-chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.bar-chart-bar { width: 100%; max-width: 32px; background: var(--bee-yellow); border-radius: 4px 4px 0 0; min-height: 3px; }
+.bar-chart-label { font-size: 11px; color: #6b7280; margin-top: 6px; }
+
+@media (max-width: 800px) {
+  .admin-body-row { flex-direction: column; }
+  .admin-sidebar { width: 100%; flex-direction: row; overflow-x: auto; padding: 8px; }
+  .admin-sidebar-item { padding: 8px 14px; white-space: nowrap; }
+  .admin-sidebar-logout { margin-top: 0; border-top: none; }
+  .admin-panels-row { grid-template-columns: 1fr; }
+}
