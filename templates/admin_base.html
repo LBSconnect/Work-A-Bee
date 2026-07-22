@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Work-A-Bee Admin{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo-workabee.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <div class="admin-topbar">
+      <div class="admin-topbar-left">
+        <img src="{{ url_for('static', filename='logo-workabee.svg') }}" alt="Work-A-Bee">
+        <span>Work-A-Beez</span>
+      </div>
+      <div class="admin-topbar-right">
+        <span>{{ g.org.name }}</span>
+        <div class="admin-avatar">{{ (g.admin.username or "?")[:1]|upper }}</div>
+      </div>
+    </div>
+
+    <div class="admin-body-row">
+      <div class="admin-sidebar">
+        <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_dashboard' else '' }}" href="{{ url_for('admin_dashboard') }}"><span class="admin-si">📊</span> Dashboard</a>
+        <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_employees' else '' }}" href="{{ url_for('admin_employees') }}"><span class="admin-si">👥</span> Employees</a>
+        <a class="admin-sidebar-item" href="{{ url_for('staff_login') }}"><span class="admin-si">🕐</span> Time Clock</a>
+        <a class="admin-sidebar-item" href="{{ url_for('admin_dashboard') }}#timesheets"><span class="admin-si">📋</span> Timesheets</a>
+        <a class="admin-sidebar-item" href="{{ url_for('admin_dashboard') }}#reports"><span class="admin-si">📈</span> Reports</a>
+        <a class="admin-sidebar-item" href="{{ url_for('admin_dashboard') }}#payroll"><span class="admin-si">💰</span> Payroll</a>
+        <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_devices' else '' }}" href="{{ url_for('admin_devices') }}"><span class="admin-si">💻</span> Devices</a>
+        <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_settings' else '' }}" href="{{ url_for('admin_settings') }}"><span class="admin-si">⚙️</span> Settings</a>
+        <a class="admin-sidebar-item admin-sidebar-logout" href="{{ url_for('admin_logout') }}"><span class="admin-si">🚪</span> Log out</a>
+      </div>
+
+      <div class="admin-main">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
+          {% endif %}
+        {% endwith %}
+        {% block admin_content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+</body>
+</html>

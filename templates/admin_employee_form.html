@@ -1,11 +1,6 @@
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
 {% block title %}{% if employee %}Edit Employee{% else %}Add Employee{% endif %}{% endblock %}
-{% block content %}
-  <div class="nav">
-    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
-    <a href="{{ url_for('admin_employees') }}">Employees</a>
-  </div>
-
+{% block admin_content %}
   <h1>{% if employee %}Edit {{ employee.name }}{% else %}Add employee or contractor{% endif %}</h1>
 
   <form method="post">
