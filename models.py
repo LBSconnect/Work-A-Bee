@@ -314,6 +314,20 @@ def init_db():
                     created_at TIMESTAMP NOT NULL DEFAULT NOW()
                 )
             """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS notifications (
+                    id SERIAL PRIMARY KEY,
+                    org_id INTEGER NOT NULL REFERENCES organizations(id),
+                    employee_id INTEGER REFERENCES employees(id),
+                    admin_id INTEGER REFERENCES admin_users(id),
+                    kind TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    body TEXT,
+                    link TEXT,
+                    read_at TIMESTAMP,
+                    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+                )
+            """)
             conn.commit()
     except Exception:
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")

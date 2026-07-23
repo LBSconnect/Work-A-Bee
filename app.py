@@ -16,6 +16,7 @@ import billing
 import choices
 import config
 import devices as devices_mod
+import notifications
 import performance
 import plans
 import recognition
@@ -64,7 +65,10 @@ app.jinja_env.filters["avatar_color"] = avatar_color
 
 @app.context_processor
 def inject_unread_message_counts():
-    ctx = {"unread_messages_count": 0, "unread_admin_messages_count": 0}
+    ctx = {
+        "unread_messages_count": 0, "unread_admin_messages_count": 0,
+        "unread_notifications_count": 0, "unread_admin_notifications_count": 0,
+    }
     org_id = session.get("org_id")
     if not org_id:
         return ctx
@@ -82,6 +86,11 @@ def inject_unread_message_counts():
                     (emp_id,),
                 ).fetchone()
                 ctx["unread_messages_count"] = row["c"] if row else 0
+                row = conn.execute(
+                    "SELECT COUNT(*) AS c FROM notifications WHERE employee_id=%s AND read_at IS NULL",
+                    (emp_id,),
+                ).fetchone()
+                ctx["unread_notifications_count"] = row["c"] if row else 0
             if admin_id:
                 row = conn.execute(
                     "SELECT COUNT(*) AS c FROM messages m JOIN employees e ON m.employee_id = e.id "
@@ -90,6 +99,11 @@ def inject_unread_message_counts():
                     (org_id,),
                 ).fetchone()
                 ctx["unread_admin_messages_count"] = row["c"] if row else 0
+                row = conn.execute(
+                    "SELECT COUNT(*) AS c FROM notifications WHERE admin_id=%s AND read_at IS NULL",
+                    (admin_id,),
+                ).fetchone()
+                ctx["unread_admin_notifications_count"] = row["c"] if row else 0
     except Exception:
         pass
     return ctx
@@ -491,6 +505,10 @@ def messages_page():
                 "INSERT INTO messages (org_id, employee_id, sender_type, body) VALUES (%s,%s,'employee',%s)",
                 (org_id, emp_id, body),
             )
+            notifications.notify_admins(
+                conn, org_id, "message_from_employee", f"New message from {emp['name']}",
+                body=body[:200], link=url_for("admin_message_thread", employee_id=emp_id),
+            )
             conn.commit()
             return redirect(url_for("messages_page"))
 
@@ -565,6 +583,33 @@ def recognition_page():
         "recognition.html", employee=emp, earned_badges=earned, kudos=kudos,
         badge_types=recognition.BADGE_TYPES,
     )
+
+
+@app.route("/notifications")
+def notifications_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        if emp is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        items = conn.execute(
+            "SELECT * FROM notifications WHERE employee_id=%s ORDER BY created_at DESC LIMIT 50",
+            (emp_id,),
+        ).fetchall()
+        conn.execute(
+            "UPDATE notifications SET read_at=NOW() WHERE employee_id=%s AND read_at IS NULL", (emp_id,)
+        )
+        conn.commit()
+
+    return render_template("notifications.html", employee=emp, items=items)
 
 
 @app.route("/shifts/<int:shift_id>/offer-swap", methods=["POST"])
@@ -645,6 +690,9 @@ def shift_swap_claim(swap_id):
             flash("You can't claim your own shift offer.")
             return redirect(url_for("shift_marketplace"))
 
+        claimer = conn.execute("SELECT name FROM employees WHERE id=%s", (emp_id,)).fetchone()
+        shift = conn.execute("SELECT * FROM shifts WHERE id=%s", (swap["shift_id"],)).fetchone()
+
         conn.execute("UPDATE shifts SET employee_id=%s WHERE id=%s", (emp_id, swap["shift_id"]))
         conn.execute(
             "UPDATE shift_swap_requests SET status='claimed', claimed_by_employee_id=%s, claimed_at=NOW() "
@@ -652,6 +700,13 @@ def shift_swap_claim(swap_id):
             (emp_id, swap_id),
         )
         audit.log(conn, org_id, "employee", emp_id, "shift.swap_claimed", f"shift {swap['shift_id']}")
+        notifications.notify_employee(
+            conn, org_id, swap["requested_by_employee_id"], "shift_claimed",
+            f"{claimer['name']} claimed your {shift['shift_start'].strftime('%a %b %d')} shift",
+            body=f"{claimer['name']} picked up the shift you offered for swap "
+                 f"({shift['shift_start'].strftime('%I:%M %p')} - {shift['shift_end'].strftime('%I:%M %p')}).",
+            link=url_for("clock_action"),
+        )
         conn.commit()
     flash("Shift claimed! It's now on your schedule.")
     return redirect(url_for("shift_marketplace"))
@@ -1398,6 +1453,12 @@ def admin_pto_approve(request_id):
             (req["hours"], req["employee_id"]),
         )
         audit.log(conn, g.org["id"], "admin", g.admin["id"], "pto.approved", f"{req['employee_name']}: {req['hours']}h")
+        notifications.notify_employee(
+            conn, g.org["id"], req["employee_id"], "pto_approved",
+            "Your time off request was approved",
+            body=f"{req['start_date'].strftime('%b %d')} - {req['end_date'].strftime('%b %d')} ({req['hours']}h) approved.",
+            link=url_for("pto_requests_page"),
+        )
         conn.commit()
     flash(f"Approved {req['employee_name']}'s time off request.")
     return redirect(url_for("admin_pto"))
@@ -1421,6 +1482,12 @@ def admin_pto_deny(request_id):
             (g.admin["id"], request_id),
         )
         audit.log(conn, g.org["id"], "admin", g.admin["id"], "pto.denied", f"{req['employee_name']}: {req['hours']}h")
+        notifications.notify_employee(
+            conn, g.org["id"], req["employee_id"], "pto_denied",
+            "Your time off request was denied",
+            body=f"{req['start_date'].strftime('%b %d')} - {req['end_date'].strftime('%b %d')} ({req['hours']}h) denied.",
+            link=url_for("pto_requests_page"),
+        )
         conn.commit()
     flash(f"Denied {req['employee_name']}'s time off request.")
     return redirect(url_for("admin_pto"))
@@ -1465,6 +1532,10 @@ def admin_message_thread(employee_id):
                 "INSERT INTO messages (org_id, employee_id, sender_type, sender_admin_id, body) "
                 "VALUES (%s,%s,'admin',%s,%s)",
                 (g.org["id"], employee_id, g.admin["id"], body),
+            )
+            notifications.notify_employee(
+                conn, g.org["id"], employee_id, "message_from_admin", "New message from your manager",
+                body=body[:200], link=url_for("messages_page"),
             )
             conn.commit()
             return redirect(url_for("admin_message_thread", employee_id=employee_id))
@@ -1537,6 +1608,12 @@ def admin_recognition():
             )
             audit.log(conn, g.org["id"], "admin", g.admin["id"], "recognition.given",
                        f"{emp['name']}: {recognition.BADGE_TYPES[badge_type]['label']}")
+            badge_label = recognition.BADGE_TYPES[badge_type]["label"]
+            notifications.notify_employee(
+                conn, g.org["id"], employee_id, "recognition_given",
+                f"You earned the {badge_label} badge!",
+                body=note or None, link=url_for("recognition_page"),
+            )
             conn.commit()
         flash(f"Gave {emp['name']} the {recognition.BADGE_TYPES[badge_type]['label']} badge.")
         return redirect(url_for("admin_recognition"))
@@ -1556,6 +1633,21 @@ def admin_recognition():
     return render_template(
         "admin_recognition.html", employees=employees, feed=feed, badge_types=recognition.BADGE_TYPES,
     )
+
+
+@app.route("/admin/notifications")
+@admin_required
+def admin_notifications():
+    with get_db() as conn:
+        items = conn.execute(
+            "SELECT * FROM notifications WHERE admin_id=%s ORDER BY created_at DESC LIMIT 50",
+            (g.admin["id"],),
+        ).fetchall()
+        conn.execute(
+            "UPDATE notifications SET read_at=NOW() WHERE admin_id=%s AND read_at IS NULL", (g.admin["id"],)
+        )
+        conn.commit()
+    return render_template("admin_notifications.html", items=items)
 
 
 @app.route("/admin/settings", methods=["GET", "POST"])
