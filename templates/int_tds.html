@@ -1,0 +1,1164 @@
+{% extends "internal_base.html" %}
+{% block title %}Work-A-Beez Technical Design Specification (TDS){% endblock %}
+{% block internal_content %}
+  <h1>Work-A-Beez Technical Design Specification (TDS)</h1>
+  <p class="muted">Status: Complete &middot; Classification: Internal Confidential &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+
+<h3>Part 1 – System Architecture, Core Platform, and Technology Standards</h3>
+<p><strong>Version:</strong> 1.0<br />
+<strong>Effective Date:</strong> July 23, 2026<br />
+<strong>Classification:</strong> Internal Engineering Document</p>
+<hr />
+<h2>1. Purpose</h2>
+<p>This Technical Design Specification (TDS) defines the target architecture, technology standards, engineering principles, and functional components for the Work-A-Bee Software-as-a-Service (SaaS) platform.
+This document serves as the engineering blueprint for:</p>
+<ul>
+<li>Software developers</li>
+<li>Solution architects</li>
+<li>DevOps engineers</li>
+<li>QA engineers</li>
+<li>Security engineers</li>
+<li>Product managers</li>
+<li>Technical reviewers</li>
+</ul>
+<p>Its purpose is to ensure consistent implementation, maintainability, scalability, and security across the Work-A-Bee platform.</p>
+<hr />
+<h2>2. Product Overview</h2>
+<p><strong>Product Name:</strong> Work-A-Bee<br />
+<strong>Company:</strong> Linton Business Solutions, LLC<br />
+<strong>Product Type:</strong>
+Cloud-based SaaS Employee Timekeeping and Workforce Management Platform
+Primary capabilities include:</p>
+<ul>
+<li>Employee clock-in</li>
+<li>Employee clock-out</li>
+<li>Timecard management</li>
+<li>Payroll hour calculations</li>
+<li>Company administration</li>
+<li>Employee management</li>
+<li>Scheduling</li>
+<li>Reporting</li>
+<li>Audit logging</li>
+<li>Subscription management</li>
+</ul>
+<p>The platform supports organizations ranging from small businesses to multi-location enterprises.</p>
+<hr />
+<h2>3. Design Principles</h2>
+<p>The Work-A-Bee platform is designed around the following engineering principles:</p>
+<h3>Security by Design</h3>
+<p>Security controls are integrated throughout the platform lifecycle.</p>
+<h3>Cloud Native</h3>
+<p>Infrastructure is designed for cloud deployment using managed services where practical.</p>
+<h3>Multi-Tenant Architecture</h3>
+<p>Customer organizations share platform infrastructure while maintaining strict logical isolation of data.</p>
+<h3>API First</h3>
+<p>All business functionality should be accessible through secure, versioned APIs.</p>
+<h3>Mobile Responsive</h3>
+<p>The web application supports modern desktop and mobile browsers, while allowing customers to enforce workplace-only usage through policy or network controls where desired.</p>
+<h3>Scalability</h3>
+<p>Architecture supports horizontal scaling without requiring significant redesign.</p>
+<h3>Observability</h3>
+<p>Operational visibility is provided through centralized logging, metrics, monitoring, and alerting.</p>
+<hr />
+<h2>4. High-Level System Architecture</h2>
+<p>The platform consists of the following logical layers:
+<code>Client Applications
+        │
+        ▼
+API Gateway / Load Balancer
+        │
+        ▼
+Authentication Layer
+        │
+        ▼
+Business Services
+        │
+ ┌──────┼───────────────┐
+ │      │               │
+ ▼      ▼               ▼
+Time   Payroll     Reporting
+Engine Engine      Services
+        │
+        ▼
+Data Access Layer
+        │
+        ▼
+PostgreSQL Database
+        │
+        ▼
+Object Storage
+Backups
+Audit Logs</code>
+Each layer should be independently scalable where appropriate.</p>
+<hr />
+<h2>5. Recommended Technology Stack</h2>
+<h3>Frontend</h3>
+<ul>
+<li>React</li>
+<li>Next.js</li>
+<li>TypeScript</li>
+<li>Tailwind CSS</li>
+<li>React Query (or equivalent)</li>
+<li>React Hook Form</li>
+<li>Zod validation</li>
+</ul>
+<hr />
+<h3>Backend</h3>
+<ul>
+<li>Node.js</li>
+<li>NestJS (preferred) or Express</li>
+<li>TypeScript</li>
+<li>Prisma ORM</li>
+</ul>
+<hr />
+<h3>Database</h3>
+<ul>
+<li>PostgreSQL</li>
+<li>Prisma Migrations</li>
+<li>Read replicas (future)</li>
+<li>Automated backups</li>
+</ul>
+<hr />
+<h3>Authentication</h3>
+<ul>
+<li>JWT</li>
+<li>Refresh Tokens</li>
+<li>Multi-Factor Authentication (MFA)</li>
+<li>Role-Based Access Control (RBAC)</li>
+</ul>
+<hr />
+<h3>Infrastructure</h3>
+<p>Recommended cloud providers:</p>
+<ul>
+<li>Microsoft Azure</li>
+<li>Amazon Web Services (AWS)</li>
+<li>Google Cloud Platform (GCP)</li>
+</ul>
+<p>The architecture should remain cloud-portable where feasible.</p>
+<hr />
+<h3>DevOps</h3>
+<ul>
+<li>GitHub</li>
+<li>GitHub Actions</li>
+<li>Docker</li>
+<li>Terraform (preferred)</li>
+<li>Infrastructure-as-Code</li>
+<li>Automated deployments</li>
+</ul>
+<hr />
+<h3>Monitoring</h3>
+<ul>
+<li>Application monitoring</li>
+<li>Infrastructure monitoring</li>
+<li>Error tracking</li>
+<li>Audit logging</li>
+<li>Performance dashboards</li>
+<li>Health checks</li>
+</ul>
+<hr />
+<h2>6. Multi-Tenant Architecture</h2>
+<p>Each customer organization ("Tenant") is logically isolated.
+Each tenant owns:</p>
+<ul>
+<li>Company profile</li>
+<li>Employees</li>
+<li>Departments</li>
+<li>Roles</li>
+<li>Locations</li>
+<li>Time entries</li>
+<li>Payroll configuration</li>
+<li>Reports</li>
+<li>Settings</li>
+<li>Audit history</li>
+</ul>
+<p>All queries must enforce tenant isolation.
+No tenant may access another tenant's data.</p>
+<hr />
+<h2>7. Core Business Modules</h2>
+<p>The platform is organized into modular services.</p>
+<h3>Authentication Service</h3>
+<p>Responsibilities:</p>
+<ul>
+<li>Login</li>
+<li>Logout</li>
+<li>Password reset</li>
+<li>MFA</li>
+<li>Session management</li>
+<li>Token issuance</li>
+</ul>
+<hr />
+<h3>Company Management</h3>
+<p>Responsibilities:</p>
+<ul>
+<li>Company profile</li>
+<li>Branding</li>
+<li>Subscription</li>
+<li>Billing</li>
+<li>Locations</li>
+<li>Departments</li>
+</ul>
+<hr />
+<h3>Employee Management</h3>
+<p>Responsibilities:</p>
+<ul>
+<li>Employee records</li>
+<li>Hourly rates</li>
+<li>Employment status</li>
+<li>Roles</li>
+<li>Supervisors</li>
+<li>Teams</li>
+</ul>
+<hr />
+<h3>Timekeeping Engine</h3>
+<p>Responsibilities:</p>
+<ul>
+<li>Clock-in</li>
+<li>Clock-out</li>
+<li>Break tracking</li>
+<li>Shift duration</li>
+<li>Overtime calculations</li>
+<li>Manual adjustments (authorized users only)</li>
+</ul>
+<hr />
+<h3>Payroll Engine</h3>
+<p>Responsibilities:</p>
+<ul>
+<li>Weekly totals</li>
+<li>Gross pay calculations</li>
+<li>Overtime rules</li>
+<li>Export preparation</li>
+<li>Approval workflows</li>
+</ul>
+<hr />
+<h3>Reporting Engine</h3>
+<p>Responsibilities:</p>
+<ul>
+<li>Employee summaries</li>
+<li>Department reports</li>
+<li>Payroll reports</li>
+<li>Attendance reports</li>
+<li>Audit reports</li>
+<li>CSV and PDF exports</li>
+</ul>
+<hr />
+<h3>Notification Service</h3>
+<p>Responsibilities:</p>
+<ul>
+<li>Email notifications</li>
+<li>Password resets</li>
+<li>Account invitations</li>
+<li>Administrative alerts</li>
+<li>Payroll reminders</li>
+<li>Subscription notifications</li>
+</ul>
+<hr />
+<h3>Audit Service</h3>
+<p>Responsibilities:</p>
+<ul>
+<li>Record system events</li>
+<li>Administrative changes</li>
+<li>Login history</li>
+<li>Payroll approvals</li>
+<li>Configuration changes</li>
+<li>Security events</li>
+</ul>
+<p>Audit records are immutable and retained according to organizational policies.</p>
+<hr />
+<h2>8. User Roles</h2>
+<p>The initial role model includes:</p>
+<h3>System Administrator</h3>
+<ul>
+<li>Full platform administration</li>
+<li>Tenant management</li>
+<li>Billing oversight</li>
+</ul>
+<hr />
+<h3>Company Administrator</h3>
+<ul>
+<li>Manage company configuration</li>
+<li>Employees</li>
+<li>Payroll settings</li>
+<li>Reports</li>
+<li>User access</li>
+</ul>
+<hr />
+<h3>Manager</h3>
+<ul>
+<li>View assigned employees</li>
+<li>Approve timecards</li>
+<li>Run reports</li>
+<li>Manage schedules</li>
+</ul>
+<hr />
+<h3>Payroll Administrator</h3>
+<ul>
+<li>Review payroll</li>
+<li>Approve calculations</li>
+<li>Export payroll data</li>
+</ul>
+<hr />
+<h3>Employee</h3>
+<ul>
+<li>Clock-in</li>
+<li>Clock-out</li>
+<li>View timecards</li>
+<li>Submit corrections</li>
+<li>Update limited personal information</li>
+</ul>
+<p>Permissions are enforced through Role-Based Access Control (RBAC).</p>
+<hr />
+<h2>9. Security Architecture</h2>
+<p>Security controls include:</p>
+<ul>
+<li>HTTPS/TLS encryption</li>
+<li>JWT authentication</li>
+<li>MFA support</li>
+<li>RBAC authorization</li>
+<li>Password hashing</li>
+<li>Secure cookies</li>
+<li>CSRF protection where applicable</li>
+<li>Rate limiting</li>
+<li>Input validation</li>
+<li>Output encoding</li>
+<li>Audit logging</li>
+<li>Encryption of sensitive data at rest where appropriate</li>
+</ul>
+<p>Security controls are applied consistently across all services.</p>
+<hr />
+<h2>10. Engineering Standards</h2>
+<p>Development teams shall follow consistent engineering standards, including:</p>
+<ul>
+<li>TypeScript strict mode</li>
+<li>Modular architecture</li>
+<li>SOLID design principles</li>
+<li>RESTful API conventions</li>
+<li>Semantic versioning</li>
+<li>Automated testing</li>
+<li>Peer code reviews</li>
+<li>Continuous Integration (CI)</li>
+<li>Continuous Deployment (CD)</li>
+<li>Security review before production release</li>
+</ul>
+<hr />
+<h2>11. Non-Functional Requirements</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Availability</td>
+<td>Target 99.9% monthly uptime</td>
+</tr>
+<tr>
+<td>Scalability</td>
+<td>Horizontal application scaling</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Most API responses under 500 ms under normal load</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>TLS, RBAC, MFA support, encrypted secrets</td>
+</tr>
+<tr>
+<td>Reliability</td>
+<td>Automated backups and disaster recovery integration</td>
+</tr>
+<tr>
+<td>Maintainability</td>
+<td>Modular architecture with documented APIs</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>Centralized logs, metrics, alerts, and dashboards</td>
+</tr>
+<tr>
+<td>Portability</td>
+<td>Cloud-provider-neutral architecture where practical</td>
+</tr>
+<tr>
+<td>Accessibility</td>
+<td>Target conformance with WCAG 2.1 AA for customer-facing interfaces</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>12. Document Relationships</h2>
+<p>This Technical Design Specification should be implemented in conjunction with the following Work-A-Bee documentation:</p>
+<ul>
+<li>Product Requirements Specification (PRS)</li>
+<li>Security Policy</li>
+<li>Service Level Agreement (SLA)</li>
+<li>Business Continuity Plan (BCP)</li>
+<li>Disaster Recovery Plan (DRP)</li>
+<li>Incident Response Plan (IRP)</li>
+<li>Data Processing Addendum (DPA)</li>
+<li>Privacy Policy</li>
+<li>Acceptable Use Policy</li>
+<li>Terms of Service</li>
+</ul>
+<p>Together, these documents establish the functional, technical, operational, and governance requirements for the Work-A-Bee platform.</p>
+<h3>Part 2 – Database Architecture, Data Model, APIs, and Business Workflows</h3>
+<p><strong>Version:</strong> 1.0</p>
+<hr />
+<h2>13. Database Architecture</h2>
+<p>Work-A-Bee uses <strong>PostgreSQL</strong> as the primary relational database.</p>
+<p>Design objectives:</p>
+<ul>
+<li>Multi-tenant data isolation</li>
+<li>ACID-compliant transactions</li>
+<li>Referential integrity</li>
+<li>High availability</li>
+<li>Point-in-time recovery (PITR)</li>
+<li>Optimized indexing</li>
+<li>Soft deletes where appropriate</li>
+<li>Auditability</li>
+</ul>
+<p>Each record is associated with a Tenant (Company) unless explicitly designated as global system data.</p>
+<hr />
+<h2>14. Core Database Entities</h2>
+<h3>Company</h3>
+<p>Represents a customer organization.</p>
+<h3>Fields</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td>company_name</td>
+<td>VARCHAR(255)</td>
+</tr>
+<tr>
+<td>legal_name</td>
+<td>VARCHAR(255)</td>
+</tr>
+<tr>
+<td>subscription_plan</td>
+<td>ENUM</td>
+</tr>
+<tr>
+<td>status</td>
+<td>ENUM</td>
+</tr>
+<tr>
+<td>timezone</td>
+<td>VARCHAR(100)</td>
+</tr>
+<tr>
+<td>payroll_week_start</td>
+<td>ENUM</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>TIMESTAMP</td>
+</tr>
+<tr>
+<td>updated_at</td>
+<td>TIMESTAMP</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Location</h3>
+<p>Represents a worksite or office.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td>tenant_id</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td>name</td>
+<td>VARCHAR</td>
+</tr>
+<tr>
+<td>address</td>
+<td></td>
+</tr>
+<tr>
+<td>latitude</td>
+<td></td>
+</tr>
+<tr>
+<td>longitude</td>
+<td></td>
+</tr>
+<tr>
+<td>geofence_radius</td>
+<td></td>
+</tr>
+<tr>
+<td>active</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Department</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td>tenant_id</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td>name</td>
+<td></td>
+</tr>
+<tr>
+<td>manager_id</td>
+<td></td>
+</tr>
+<tr>
+<td>active</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Employee</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td>tenant_id</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td>employee_number</td>
+<td></td>
+</tr>
+<tr>
+<td>first_name</td>
+<td></td>
+</tr>
+<tr>
+<td>last_name</td>
+<td></td>
+</tr>
+<tr>
+<td>email</td>
+<td></td>
+</tr>
+<tr>
+<td>phone</td>
+<td></td>
+</tr>
+<tr>
+<td>hire_date</td>
+<td></td>
+</tr>
+<tr>
+<td>status</td>
+<td></td>
+</tr>
+<tr>
+<td>hourly_rate</td>
+<td></td>
+</tr>
+<tr>
+<td>overtime_rate</td>
+<td></td>
+</tr>
+<tr>
+<td>manager_id</td>
+<td></td>
+</tr>
+<tr>
+<td>department_id</td>
+<td></td>
+</tr>
+<tr>
+<td>role_id</td>
+<td></td>
+</tr>
+<tr>
+<td>location_id</td>
+<td></td>
+</tr>
+<tr>
+<td>created_at</td>
+<td></td>
+</tr>
+<tr>
+<td>updated_at</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Shift</h3>
+<p>Defines scheduled work periods.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td></td>
+</tr>
+<tr>
+<td>tenant_id</td>
+<td></td>
+</tr>
+<tr>
+<td>employee_id</td>
+<td></td>
+</tr>
+<tr>
+<td>scheduled_start</td>
+<td></td>
+</tr>
+<tr>
+<td>scheduled_end</td>
+<td></td>
+</tr>
+<tr>
+<td>break_minutes</td>
+<td></td>
+</tr>
+<tr>
+<td>recurring</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Time Entry</h3>
+<p>The primary timekeeping record.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td></td>
+</tr>
+<tr>
+<td>tenant_id</td>
+<td></td>
+</tr>
+<tr>
+<td>employee_id</td>
+<td></td>
+</tr>
+<tr>
+<td>shift_id</td>
+<td></td>
+</tr>
+<tr>
+<td>clock_in</td>
+<td></td>
+</tr>
+<tr>
+<td>clock_out</td>
+<td></td>
+</tr>
+<tr>
+<td>total_minutes</td>
+<td></td>
+</tr>
+<tr>
+<td>overtime_minutes</td>
+<td></td>
+</tr>
+<tr>
+<td>status</td>
+<td></td>
+</tr>
+<tr>
+<td>approval_status</td>
+<td></td>
+</tr>
+<tr>
+<td>gps_location</td>
+<td></td>
+</tr>
+<tr>
+<td>ip_address</td>
+<td></td>
+</tr>
+<tr>
+<td>created_at</td>
+<td></td>
+</tr>
+<tr>
+<td>updated_at</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Break</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td></td>
+</tr>
+<tr>
+<td>time_entry_id</td>
+<td></td>
+</tr>
+<tr>
+<td>break_start</td>
+<td></td>
+</tr>
+<tr>
+<td>break_end</td>
+<td></td>
+</tr>
+<tr>
+<td>paid</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Payroll Period</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td></td>
+</tr>
+<tr>
+<td>tenant_id</td>
+<td></td>
+</tr>
+<tr>
+<td>start_date</td>
+<td></td>
+</tr>
+<tr>
+<td>end_date</td>
+<td></td>
+</tr>
+<tr>
+<td>status</td>
+<td></td>
+</tr>
+<tr>
+<td>approved_by</td>
+<td></td>
+</tr>
+<tr>
+<td>approved_date</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Payroll Record</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td></td>
+</tr>
+<tr>
+<td>payroll_period_id</td>
+<td></td>
+</tr>
+<tr>
+<td>employee_id</td>
+<td></td>
+</tr>
+<tr>
+<td>regular_hours</td>
+<td></td>
+</tr>
+<tr>
+<td>overtime_hours</td>
+<td></td>
+</tr>
+<tr>
+<td>gross_pay</td>
+<td></td>
+</tr>
+<tr>
+<td>approved</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Role</h3>
+<p>Contains RBAC permissions.</p>
+<hr />
+<h3>Permission</h3>
+<p>Defines individual permissions.</p>
+<hr />
+<h3>Audit Log</h3>
+<p>Stores immutable audit history.</p>
+<hr />
+<h3>Notification</h3>
+<p>Stores email and system notifications.</p>
+<hr />
+<h3>Subscription</h3>
+<p>Stores billing information.</p>
+<hr />
+<h2>15. Entity Relationships</h2>
+<p>```text
+Company
+   │
+   ├──────── Locations
+   ├──────── Departments
+   ├──────── Employees
+   ├──────── Payroll Periods
+   ├──────── Reports
+   ├──────── Settings
+   └──────── Subscription</p>
+<p>Employee
+   │
+   ├──────── Shifts
+   ├──────── Time Entries
+   ├──────── Payroll Records
+   ├──────── Notifications
+   └──────── Audit History</p>
+<p>Time Entry
+   │
+   ├──────── Breaks
+   └──────── Payroll Record
+```</p>
+<hr />
+<h2>16. Recommended Indexes</h2>
+<p>Indexes should include:</p>
+<p>Company</p>
+<ul>
+<li>company_name</li>
+</ul>
+<p>Employee</p>
+<ul>
+<li>employee_number</li>
+<li>email</li>
+<li>tenant_id</li>
+</ul>
+<p>Time Entry</p>
+<ul>
+<li>employee_id</li>
+<li>clock_in</li>
+<li>clock_out</li>
+<li>approval_status</li>
+<li>tenant_id</li>
+</ul>
+<p>Payroll</p>
+<ul>
+<li>period</li>
+<li>employee_id</li>
+</ul>
+<p>Audit Log</p>
+<ul>
+<li>event_date</li>
+<li>user_id</li>
+<li>tenant_id</li>
+</ul>
+<hr />
+<h2>17. REST API Architecture</h2>
+<p>All APIs follow REST conventions.</p>
+<p>Versioning:</p>
+<p><code>text
+/api/v1/</code></p>
+<p>Authentication:</p>
+<p><code>Authorization: Bearer JWT</code></p>
+<p>Responses</p>
+<p><code>json
+{
+  "success": true,
+  "data": {}
+}</code></p>
+<p>Errors</p>
+<p><code>json
+{
+  "success": false,
+  "message": "...",
+  "errors":[]
+}</code></p>
+<hr />
+<h2>18. Authentication APIs</h2>
+<p>POST</p>
+<p><code>/login</code></p>
+<p>POST</p>
+<p><code>/logout</code></p>
+<p>POST</p>
+<p><code>/refresh-token</code></p>
+<p>POST</p>
+<p><code>/forgot-password</code></p>
+<p>POST</p>
+<p><code>/reset-password</code></p>
+<p>POST</p>
+<p><code>/verify-mfa</code></p>
+<p>GET</p>
+<p><code>/me</code></p>
+<hr />
+<h2>19. Company APIs</h2>
+<p><code>GET /companies
+POST /companies
+PUT /companies/{id}
+DELETE /companies/{id}</code></p>
+<hr />
+<h2>20. Employee APIs</h2>
+<p><code>GET /employees
+GET /employees/{id}
+POST /employees
+PUT /employees/{id}
+DELETE /employees/{id}</code></p>
+<p>Additional endpoints:</p>
+<p><code>/employees/import
+/employees/export
+/employees/invite</code></p>
+<hr />
+<h2>21. Timekeeping APIs</h2>
+<p>Clock In</p>
+<p><code>POST /time/clock-in</code></p>
+<p>Clock Out</p>
+<p><code>POST /time/clock-out</code></p>
+<p>Break Start</p>
+<p><code>POST /time/break/start</code></p>
+<p>Break End</p>
+<p><code>POST /time/break/end</code></p>
+<p>Timecards</p>
+<p><code>GET /timecards</code></p>
+<p>Approval</p>
+<p><code>POST /timecards/{id}/approve</code></p>
+<p>Reject</p>
+<p><code>POST /timecards/{id}/reject</code></p>
+<hr />
+<h2>22. Payroll APIs</h2>
+<p><code>POST /payroll/calculate</code></p>
+<p><code>GET /payroll/periods</code></p>
+<p><code>POST /payroll/approve</code></p>
+<p><code>POST /payroll/export</code></p>
+<p><code>GET /payroll/history</code></p>
+<hr />
+<h2>23. Reporting APIs</h2>
+<p><code>GET /reports/payroll</code></p>
+<p><code>GET /reports/attendance</code></p>
+<p><code>GET /reports/overtime</code></p>
+<p><code>GET /reports/employees</code></p>
+<p><code>GET /reports/audit</code></p>
+<p>Exports:</p>
+<ul>
+<li>CSV</li>
+<li>Excel (XLSX)</li>
+<li>PDF</li>
+</ul>
+<hr />
+<h2>24. Employee Clock-In Workflow</h2>
+<p>```text
+Employee Opens App</p>
+<p>↓</p>
+<p>Authentication Check</p>
+<p>↓</p>
+<p>GPS/IP Validation (Optional)</p>
+<p>↓</p>
+<p>Location Validation</p>
+<p>↓</p>
+<p>No Active Shift?</p>
+<p>↓</p>
+<p>Clock-In Allowed</p>
+<p>↓</p>
+<p>Time Entry Created</p>
+<p>↓</p>
+<p>Audit Log Recorded</p>
+<p>↓</p>
+<p>Manager Dashboard Updated
+```</p>
+<hr />
+<h2>25. Employee Clock-Out Workflow</h2>
+<p>```text
+Employee Selects Clock Out</p>
+<p>↓</p>
+<p>Validate Active Shift</p>
+<p>↓</p>
+<p>Close Time Entry</p>
+<p>↓</p>
+<p>Calculate:</p>
+<p>• Worked Time
+• Breaks
+• Overtime
+• Daily Totals</p>
+<p>↓</p>
+<p>Save Record</p>
+<p>↓</p>
+<p>Update Payroll Queue</p>
+<p>↓</p>
+<p>Audit Log
+```</p>
+<hr />
+<h2>26. Payroll Workflow</h2>
+<p>```text
+Weekly Payroll Starts</p>
+<p>↓</p>
+<p>Collect Approved Time Entries</p>
+<p>↓</p>
+<p>Calculate</p>
+<p>Regular Hours</p>
+<p>↓</p>
+<p>Calculate</p>
+<p>Overtime</p>
+<p>↓</p>
+<p>Calculate</p>
+<p>Gross Pay</p>
+<p>↓</p>
+<p>Manager Review</p>
+<p>↓</p>
+<p>Payroll Approval</p>
+<p>↓</p>
+<p>Export Payroll</p>
+<p>↓</p>
+<p>Archive Period
+```</p>
+<hr />
+<h2>27. Approval Workflow</h2>
+<p>Employee submits time</p>
+<p>↓</p>
+<p>Manager reviews</p>
+<p>↓</p>
+<p>Approve</p>
+<p>OR</p>
+<p>Reject</p>
+<p>↓</p>
+<p>Employee notified</p>
+<p>↓</p>
+<p>Payroll recalculated</p>
+<hr />
+<h2>28. Background Jobs</h2>
+<p>Scheduled jobs include:</p>
+<p>Hourly</p>
+<ul>
+<li>Cleanup expired sessions</li>
+<li>Retry notifications</li>
+</ul>
+<p>Daily</p>
+<ul>
+<li>Backup verification</li>
+<li>Report generation</li>
+<li>Subscription checks</li>
+</ul>
+<p>Weekly</p>
+<ul>
+<li>Payroll reminders</li>
+<li>Overtime summaries</li>
+<li>Payroll exports</li>
+</ul>
+<p>Monthly</p>
+<ul>
+<li>Invoice generation</li>
+<li>Usage reports</li>
+<li>Audit archive</li>
+</ul>
+<hr />
+<h2>29. File Storage</h2>
+<p>Files are stored separately from PostgreSQL.</p>
+<p>Supported storage:</p>
+<ul>
+<li>Employee documents</li>
+<li>Company logos</li>
+<li>Payroll exports</li>
+<li>Reports</li>
+<li>Audit exports</li>
+</ul>
+<p>Recommended:</p>
+<p>Azure Blob Storage</p>
+<p>or</p>
+<p>AWS S3</p>
+<p>or</p>
+<p>Google Cloud Storage</p>
+<p>Sensitive files should be encrypted and access-controlled.</p>
+<hr />
+<h2>30. Integration Architecture</h2>
+<p>Planned integrations include:</p>
+<p>Identity</p>
+<ul>
+<li>Microsoft Entra ID (Azure AD)</li>
+<li>Google Workspace</li>
+</ul>
+<p>Payroll</p>
+<ul>
+<li>ADP</li>
+<li>Paychex</li>
+<li>QuickBooks Payroll</li>
+<li>Gusto</li>
+</ul>
+<p>Accounting</p>
+<ul>
+<li>QuickBooks Online</li>
+<li>Xero</li>
+</ul>
+<p>Communication</p>
+<ul>
+<li>SendGrid</li>
+<li>Microsoft 365</li>
+<li>Twilio SMS</li>
+</ul>
+<p>Future APIs should be designed using OpenAPI 3.1 specifications to simplify partner integrations and SDK generation.</p>
+{% endblock %}

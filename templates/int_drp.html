@@ -1,0 +1,959 @@
+{% extends "internal_base.html" %}
+{% block title %}Work-A-Beez Disaster Recovery Plan (DRP){% endblock %}
+{% block internal_content %}
+  <h1>Work-A-Beez Disaster Recovery Plan (DRP)</h1>
+  <p class="muted">Status: Complete &middot; Classification: Internal Confidential &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+
+<p><strong>Version:</strong> 1.0<br />
+<strong>Effective Date:</strong> July 23, 2026<br />
+<strong>Classification:</strong> Internal Confidential<br />
+<strong>Owner:</strong> Linton Business Solutions, LLC (LBS)</p>
+<hr />
+<h2>1. Purpose</h2>
+<p>The purpose of this Disaster Recovery Plan ("DRP") is to define the technical procedures and governance required to recover the Work-A-Bee platform following a disaster or catastrophic event affecting production systems.</p>
+<p>This plan is intended to:</p>
+<ul>
+<li>Restore critical production services.</li>
+<li>Protect Customer Data.</li>
+<li>Minimize operational downtime.</li>
+<li>Support business continuity objectives.</li>
+<li>Provide a structured technical recovery process.</li>
+<li>Establish recovery responsibilities.</li>
+<li>Validate restoration before returning to production.</li>
+</ul>
+<p>This DRP supports the Work-A-Bee:</p>
+<ul>
+<li>Business Continuity Plan (BCP)</li>
+<li>Security Policy</li>
+<li>Incident Response Plan</li>
+<li>Service Level Agreement (SLA)</li>
+</ul>
+<hr />
+<h2>2. Scope</h2>
+<p>This Disaster Recovery Plan applies to:</p>
+<ul>
+<li>Production application infrastructure</li>
+<li>Databases</li>
+<li>Authentication services</li>
+<li>APIs</li>
+<li>Administrative portal</li>
+<li>Employee portal</li>
+<li>Reporting services</li>
+<li>Billing platform</li>
+<li>Monitoring systems</li>
+<li>Backup repositories</li>
+<li>Infrastructure-as-Code (IaC) assets</li>
+<li>Supporting cloud infrastructure</li>
+</ul>
+<p>This plan applies only to production systems supporting the Work-A-Bee SaaS platform.</p>
+<hr />
+<h2>3. Objectives</h2>
+<p>The primary objectives of disaster recovery are to:</p>
+<ul>
+<li>Restore production availability.</li>
+<li>Recover Customer Data.</li>
+<li>Protect system integrity.</li>
+<li>Maintain platform security.</li>
+<li>Minimize Recovery Time Objective (RTO).</li>
+<li>Minimize Recovery Point Objective (RPO).</li>
+<li>Restore critical customer functionality.</li>
+<li>Verify successful recovery before returning to normal operations.</li>
+</ul>
+<hr />
+<h2>4. Disaster Recovery Principles</h2>
+<p>The Work-A-Bee disaster recovery program is based on the following principles:</p>
+<ul>
+<li>Security First</li>
+<li>Customer Data Protection</li>
+<li>Least Downtime</li>
+<li>Documented Recovery Procedures</li>
+<li>Recovery Validation</li>
+<li>Continuous Improvement</li>
+<li>Automation where practical</li>
+<li>Defense in Depth</li>
+</ul>
+<p>Recovery decisions should prioritize data integrity over recovery speed whenever those priorities conflict.</p>
+<hr />
+<h2>5. Disaster Recovery Governance</h2>
+<p>Overall responsibility for disaster recovery rests with executive leadership and designated technical personnel.</p>
+<h3>Executive Management</h3>
+<p>Responsible for:</p>
+<ul>
+<li>Disaster declaration</li>
+<li>Resource authorization</li>
+<li>Customer communications</li>
+<li>Business priorities</li>
+</ul>
+<hr />
+<h3>Disaster Recovery Coordinator</h3>
+<p>Responsible for:</p>
+<ul>
+<li>Coordinating recovery activities</li>
+<li>Managing recovery timelines</li>
+<li>Tracking recovery status</li>
+<li>Reporting progress</li>
+</ul>
+<hr />
+<h3>Engineering Team</h3>
+<p>Responsible for:</p>
+<ul>
+<li>Infrastructure restoration</li>
+<li>Application deployment</li>
+<li>Database recovery</li>
+<li>Validation testing</li>
+</ul>
+<hr />
+<h3>Security Team</h3>
+<p>Responsible for:</p>
+<ul>
+<li>Security validation</li>
+<li>Credential rotation where required</li>
+<li>Threat assessment</li>
+<li>Recovery authorization from a security perspective</li>
+</ul>
+<hr />
+<h3>Customer Success</h3>
+<p>Responsible for:</p>
+<ul>
+<li>Customer communications</li>
+<li>Support coordination</li>
+<li>Service updates</li>
+</ul>
+<hr />
+<h2>6. Recovery Objectives</h2>
+<p>The following recovery objectives guide disaster recovery planning.</p>
+<h3>Recovery Time Objectives (RTO)</h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th style="text-align: right;">Target RTO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Authentication</td>
+<td style="text-align: right;">4 Hours</td>
+</tr>
+<tr>
+<td>Timekeeping Platform</td>
+<td style="text-align: right;">4 Hours</td>
+</tr>
+<tr>
+<td>Payroll Processing</td>
+<td style="text-align: right;">8 Hours</td>
+</tr>
+<tr>
+<td>Administrative Portal</td>
+<td style="text-align: right;">8 Hours</td>
+</tr>
+<tr>
+<td>Reporting Services</td>
+<td style="text-align: right;">24 Hours</td>
+</tr>
+<tr>
+<td>Documentation Portal</td>
+<td style="text-align: right;">48 Hours</td>
+</tr>
+</tbody>
+</table>
+<p>These targets represent planning objectives and are not guarantees.</p>
+<hr />
+<h3>Recovery Point Objectives (RPO)</h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th style="text-align: right;">Target RPO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Timekeeping Database</td>
+<td style="text-align: right;">1 Hour</td>
+</tr>
+<tr>
+<td>Payroll Records</td>
+<td style="text-align: right;">1 Hour</td>
+</tr>
+<tr>
+<td>Customer Configuration</td>
+<td style="text-align: right;">4 Hours</td>
+</tr>
+<tr>
+<td>Analytics Data</td>
+<td style="text-align: right;">24 Hours</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Disaster Scenarios</h2>
+<p>Examples of events that may require activation of this DRP include:</p>
+<h3>Infrastructure Failure</h3>
+<ul>
+<li>Complete cloud region outage</li>
+<li>Storage subsystem failure</li>
+<li>Network failure</li>
+<li>Virtual infrastructure failure</li>
+</ul>
+<hr />
+<h3>Cybersecurity Event</h3>
+<ul>
+<li>Ransomware</li>
+<li>Unauthorized access</li>
+<li>Destructive malware</li>
+<li>Privilege compromise</li>
+<li>Widespread credential theft</li>
+</ul>
+<hr />
+<h3>Data Loss</h3>
+<ul>
+<li>Database corruption</li>
+<li>Accidental deletion</li>
+<li>Storage failure</li>
+<li>Backup corruption</li>
+</ul>
+<hr />
+<h3>Application Failure</h3>
+<ul>
+<li>Critical deployment failure</li>
+<li>Software defect affecting production</li>
+<li>Configuration corruption</li>
+<li>Failed upgrade</li>
+</ul>
+<hr />
+<h3>Third-Party Failure</h3>
+<ul>
+<li>Identity provider outage</li>
+<li>Cloud provider disruption</li>
+<li>DNS provider outage</li>
+<li>Payment processor outage</li>
+<li>Email delivery failure</li>
+</ul>
+<hr />
+<h2>8. Disaster Declaration Criteria</h2>
+<p>A disaster may be declared when one or more of the following conditions exists:</p>
+<ul>
+<li>Extended production outage.</li>
+<li>Loss of critical customer functionality.</li>
+<li>Widespread infrastructure failure.</li>
+<li>Significant data loss.</li>
+<li>Confirmed catastrophic cybersecurity incident.</li>
+<li>Recovery cannot reasonably be completed through standard operational procedures.</li>
+</ul>
+<p>Only authorized executive leadership may declare a disaster.</p>
+<hr />
+<h2>9. Recovery Priorities</h2>
+<p>Recovery activities generally follow this order:</p>
+<h2>1. Personnel safety</h2>
+<h2>2. Incident containment</h2>
+<h2>3. Protection of Customer Data</h2>
+<h2>4. Authentication services</h2>
+<h2>5. Core application infrastructure</h2>
+<h2>6. Timekeeping services</h2>
+<h2>7. Payroll processing</h2>
+<h2>8. Administrative portal</h2>
+<h2>9. Reporting</h2>
+<h2>10. Ancillary services</h2>
+<p>Recovery priorities may be adjusted based on the nature of the disaster and customer impact.</p>
+<hr />
+<h2>10. Recovery Strategy</h2>
+<p>The disaster recovery strategy is designed around the following objectives:</p>
+<ul>
+<li>Restore infrastructure from approved configurations.</li>
+<li>Recover databases from verified backups.</li>
+<li>Deploy the latest validated application release.</li>
+<li>Verify system integrity.</li>
+<li>Validate customer authentication.</li>
+<li>Restore customer functionality.</li>
+<li>Resume production operations.</li>
+</ul>
+<p>Whenever practical, automated deployment and Infrastructure-as-Code processes should be used to reduce recovery time and configuration drift.</p>
+<hr />
+<h2>11. Recovery Dependencies</h2>
+<p>Successful recovery depends on the availability of critical dependencies, including:</p>
+<h3>Cloud Infrastructure</h3>
+<ul>
+<li>Compute resources</li>
+<li>Networking</li>
+<li>Storage</li>
+<li>Managed databases</li>
+<li>Identity services</li>
+</ul>
+<h3>Third-Party Services</h3>
+<ul>
+<li>Payment processing</li>
+<li>Email delivery</li>
+<li>Domain registration</li>
+<li>SSL certificate services</li>
+<li>Monitoring platforms</li>
+<li>Logging services</li>
+</ul>
+<h3>Internal Assets</h3>
+<ul>
+<li>Source code repositories</li>
+<li>Deployment pipelines</li>
+<li>Infrastructure configuration</li>
+<li>Backup repositories</li>
+<li>Secrets management</li>
+<li>Documentation</li>
+</ul>
+<p>Dependencies should be reviewed periodically as the platform architecture evolves.</p>
+<h3>Part 2 – Technical Recovery Procedures and Runbooks</h3>
+<p><strong>Version:</strong> 1.0</p>
+<hr />
+<h2>12. Backup Strategy</h2>
+<p>Linton Business Solutions, LLC ("LBS") maintains backup procedures designed to support recovery from catastrophic failures while minimizing potential data loss.</p>
+<p>The backup strategy is based on the following principles:</p>
+<ul>
+<li>Automated backup creation</li>
+<li>Encryption of backup data</li>
+<li>Multiple recovery points</li>
+<li>Periodic restoration testing</li>
+<li>Restricted administrative access</li>
+<li>Secure storage</li>
+<li>Documented recovery procedures</li>
+</ul>
+<p>Backups are intended to support disaster recovery and are not a substitute for customer-maintained business records.</p>
+<hr />
+<h2>13. Backup Schedule</h2>
+<p>The following represents the standard backup objectives for production systems.</p>
+<table>
+<thead>
+<tr>
+<th>System</th>
+<th>Backup Frequency</th>
+<th style="text-align: right;">Retention Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Production Database</td>
+<td>Hourly incremental</td>
+<td style="text-align: right;">30 days</td>
+</tr>
+<tr>
+<td>Daily Full Database Backup</td>
+<td>Daily</td>
+<td style="text-align: right;">90 days</td>
+</tr>
+<tr>
+<td>File Storage</td>
+<td>Daily</td>
+<td style="text-align: right;">90 days</td>
+</tr>
+<tr>
+<td>Configuration Data</td>
+<td>Daily</td>
+<td style="text-align: right;">90 days</td>
+</tr>
+<tr>
+<td>Infrastructure Configuration</td>
+<td>After approved changes</td>
+<td style="text-align: right;">Current + previous versions</td>
+</tr>
+<tr>
+<td>Application Source Code</td>
+<td>Continuous version control</td>
+<td style="text-align: right;">Permanent while repository is active</td>
+</tr>
+<tr>
+<td>Audit Logs</td>
+<td>Daily archival</td>
+<td style="text-align: right;">365 days</td>
+</tr>
+<tr>
+<td>Monitoring Configuration</td>
+<td>Weekly</td>
+<td style="text-align: right;">180 days</td>
+</tr>
+</tbody>
+</table>
+<p>Retention periods may be adjusted to satisfy legal, contractual, or operational requirements.</p>
+<hr />
+<h2>14. Backup Security</h2>
+<p>Backups should be protected using commercially reasonable security controls.</p>
+<p>Security measures include:</p>
+<ul>
+<li>Encryption at rest</li>
+<li>Encryption during transmission</li>
+<li>Role-based access controls</li>
+<li>Multi-factor authentication for administrative access</li>
+<li>Audit logging of backup operations</li>
+<li>Periodic verification of backup integrity</li>
+</ul>
+<p>Only authorized personnel may access backup repositories.</p>
+<hr />
+<h2>15. Infrastructure Recovery</h2>
+<p>If production infrastructure becomes unavailable, engineering personnel should perform recovery using documented Infrastructure-as-Code (IaC) templates where available.</p>
+<p>Recovery activities generally include:</p>
+<ol>
+<li>Provision networking.</li>
+<li>Deploy compute resources.</li>
+<li>Configure storage.</li>
+<li>Restore infrastructure configuration.</li>
+<li>Deploy monitoring agents.</li>
+<li>Verify security controls.</li>
+<li>Confirm connectivity.</li>
+</ol>
+<p>Infrastructure deployments should use approved configurations to minimize configuration drift.</p>
+<hr />
+<h2>16. Database Recovery</h2>
+<p>Database restoration should follow a controlled process to preserve data integrity.</p>
+<p>Typical steps include:</p>
+<ol>
+<li>Verify backup availability.</li>
+<li>Confirm backup integrity.</li>
+<li>Provision replacement database resources.</li>
+<li>Restore the selected recovery point.</li>
+<li>Validate schema integrity.</li>
+<li>Verify application connectivity.</li>
+<li>Confirm successful authentication.</li>
+<li>Validate critical business data.</li>
+<li>Resume production access after approval.</li>
+</ol>
+<p>Database recovery should be documented for each disaster event.</p>
+<hr />
+<h2>17. Application Recovery</h2>
+<p>Following infrastructure restoration, application services should be redeployed using the latest approved production release.</p>
+<p>Recovery procedures generally include:</p>
+<ul>
+<li>Deploy production application</li>
+<li>Restore configuration settings</li>
+<li>Configure environment variables</li>
+<li>Restore secrets from approved secret management systems</li>
+<li>Verify service dependencies</li>
+<li>Execute smoke tests</li>
+<li>Validate API connectivity</li>
+<li>Verify user authentication</li>
+<li>Enable monitoring</li>
+</ul>
+<p>Only approved production releases should be deployed during disaster recovery.</p>
+<hr />
+<h2>18. Identity and Authentication Recovery</h2>
+<p>Authentication services are considered Tier 1 recovery priorities.</p>
+<p>Recovery procedures may include:</p>
+<ul>
+<li>Restore identity provider connectivity</li>
+<li>Validate authentication endpoints</li>
+<li>Restore administrator access</li>
+<li>Verify Multi-Factor Authentication functionality</li>
+<li>Confirm role-based access permissions</li>
+<li>Validate session management</li>
+<li>Review privileged accounts</li>
+</ul>
+<p>Administrative credentials should be reviewed after significant security incidents.</p>
+<hr />
+<h2>19. Secret Management Recovery</h2>
+<p>Sensitive configuration values should never be manually recreated without authorization.</p>
+<p>Recovery procedures include restoring approved secrets, such as:</p>
+<ul>
+<li>API keys</li>
+<li>Database credentials</li>
+<li>Encryption keys</li>
+<li>Service account credentials</li>
+<li>OAuth client secrets</li>
+<li>SMTP credentials</li>
+<li>Cloud provider credentials</li>
+</ul>
+<p>All restored secrets should be verified prior to production activation.</p>
+<hr />
+<h2>20. Encryption Key Recovery</h2>
+<p>Encryption keys are critical security assets.</p>
+<p>Recovery procedures should ensure:</p>
+<ul>
+<li>Secure restoration</li>
+<li>Access limited to authorized personnel</li>
+<li>Key integrity verification</li>
+<li>Rotation when compromise is suspected</li>
+<li>Documentation of recovery activities</li>
+</ul>
+<p>Compromised keys should be replaced before production services resume where reasonably practicable.</p>
+<hr />
+<h2>21. DNS Recovery</h2>
+<p>If DNS services are affected, recovery should prioritize:</p>
+<ul>
+<li>Administrative portals</li>
+<li>Customer-facing application</li>
+<li>API endpoints</li>
+<li>Status page</li>
+<li>Support portal</li>
+</ul>
+<p>DNS changes should be validated using multiple geographic locations before customer notification.</p>
+<hr />
+<h2>22. Network Recovery</h2>
+<p>Network restoration activities may include:</p>
+<ul>
+<li>Firewall configuration</li>
+<li>Routing validation</li>
+<li>VPN connectivity</li>
+<li>Security group verification</li>
+<li>Load balancer restoration</li>
+<li>SSL certificate validation</li>
+<li>External connectivity testing</li>
+</ul>
+<p>Production access should remain restricted until security validation is complete.</p>
+<hr />
+<h2>23. Monitoring Recovery</h2>
+<p>Operational monitoring should be restored before declaring recovery complete.</p>
+<p>Monitoring restoration includes:</p>
+<ul>
+<li>Infrastructure monitoring</li>
+<li>Application monitoring</li>
+<li>Database monitoring</li>
+<li>Log aggregation</li>
+<li>Alerting systems</li>
+<li>Health checks</li>
+<li>Performance dashboards</li>
+</ul>
+<p>Monitoring confirms that recovered systems continue operating normally after restoration.</p>
+<hr />
+<h2>24. Recovery Validation</h2>
+<p>Technical validation should be completed before returning systems to production.</p>
+<p>Validation includes:</p>
+<h3>Infrastructure</h3>
+<ul>
+<li>Compute resources operational</li>
+<li>Storage healthy</li>
+<li>Networking functional</li>
+<li>Security groups verified</li>
+</ul>
+<h3>Database</h3>
+<ul>
+<li>Recovery point confirmed</li>
+<li>Data integrity validated</li>
+<li>Replication functioning where applicable</li>
+</ul>
+<h3>Application</h3>
+<ul>
+<li>Login successful</li>
+<li>Employee clock-in operational</li>
+<li>Employee clock-out operational</li>
+<li>Time entries saved</li>
+<li>Payroll calculations validated</li>
+<li>Reports generated successfully</li>
+</ul>
+<h3>Security</h3>
+<ul>
+<li>Authentication verified</li>
+<li>MFA operational where enabled</li>
+<li>Administrative access reviewed</li>
+<li>Logging operational</li>
+<li>Monitoring alerts active</li>
+</ul>
+<hr />
+<h2>25. Technical Recovery Runbook</h2>
+<p>The following high-level runbook should guide engineering personnel:</p>
+<ol>
+<li>Confirm disaster declaration.</li>
+<li>Assemble recovery team.</li>
+<li>Assess infrastructure availability.</li>
+<li>Restore networking.</li>
+<li>Restore compute resources.</li>
+<li>Restore storage.</li>
+<li>Restore databases.</li>
+<li>Deploy application services.</li>
+<li>Restore secrets.</li>
+<li>Verify authentication.</li>
+<li>Execute smoke testing.</li>
+<li>Execute regression validation of critical workflows.</li>
+<li>Enable monitoring and alerting.</li>
+<li>Validate backups.</li>
+<li>Obtain recovery approval.</li>
+<li>Resume production operations.</li>
+</ol>
+<p>Each completed step should be documented with timestamps and responsible personnel.</p>
+<hr />
+<h2>26. Recovery Documentation</h2>
+<p>During each disaster recovery event, engineering teams should document:</p>
+<ul>
+<li>Event timeline</li>
+<li>Recovery decisions</li>
+<li>Commands executed (where appropriate)</li>
+<li>Backup versions restored</li>
+<li>Configuration changes</li>
+<li>Validation results</li>
+<li>Outstanding issues</li>
+<li>Lessons learned</li>
+</ul>
+<p>These records support audits, continuous improvement, and future recovery efforts.</p>
+<h3>Part 3 – Testing, Governance, Continuous Improvement, and Appendices</h3>
+<p><strong>Version:</strong> 1.0</p>
+<hr />
+<h2>27. Disaster Recovery Testing Program</h2>
+<p>Disaster recovery procedures must be validated through planned testing to ensure technical readiness and organizational preparedness.</p>
+<p>The objectives of the testing program are to:</p>
+<ul>
+<li>Verify recovery procedures.</li>
+<li>Confirm Recovery Time Objective (RTO) capabilities.</li>
+<li>Confirm Recovery Point Objective (RPO) capabilities.</li>
+<li>Validate backup integrity.</li>
+<li>Measure recovery performance.</li>
+<li>Identify documentation gaps.</li>
+<li>Improve recovery readiness.</li>
+</ul>
+<p>Testing should be documented and reviewed by engineering leadership and executive management.</p>
+<hr />
+<h2>28. Types of Disaster Recovery Tests</h2>
+<p>LBS may perform one or more of the following disaster recovery exercises.</p>
+<h3>Documentation Review</h3>
+<p>Review recovery documentation for:</p>
+<ul>
+<li>Accuracy</li>
+<li>Completeness</li>
+<li>Technical currency</li>
+<li>Contact information</li>
+<li>Recovery procedures</li>
+</ul>
+<hr />
+<h3>Tabletop Exercise</h3>
+<p>Engineering and leadership teams simulate disaster scenarios without affecting production systems.</p>
+<p>Typical scenarios include:</p>
+<ul>
+<li>Cloud provider outage</li>
+<li>Database corruption</li>
+<li>Ransomware attack</li>
+<li>Identity provider failure</li>
+<li>Regional infrastructure outage</li>
+<li>Large-scale deployment failure</li>
+</ul>
+<hr />
+<h3>Component Recovery Test</h3>
+<p>Individual recovery procedures are tested independently.</p>
+<p>Examples include:</p>
+<ul>
+<li>Database restoration</li>
+<li>Infrastructure deployment</li>
+<li>Backup restoration</li>
+<li>DNS recovery</li>
+<li>Authentication recovery</li>
+</ul>
+<hr />
+<h3>Full Disaster Recovery Exercise</h3>
+<p>A complete end-to-end recovery simulation validating:</p>
+<ul>
+<li>Infrastructure restoration</li>
+<li>Database recovery</li>
+<li>Application deployment</li>
+<li>Authentication</li>
+<li>Monitoring</li>
+<li>Customer workflows</li>
+<li>Recovery validation</li>
+</ul>
+<p>Where feasible, these exercises should be conducted in a non-production environment.</p>
+<hr />
+<h2>29. Failover Procedures</h2>
+<p>When supported by the platform architecture, failover procedures may include:</p>
+<ul>
+<li>Redirecting traffic to standby infrastructure</li>
+<li>Activating alternate compute resources</li>
+<li>Promoting secondary databases</li>
+<li>Restoring application services</li>
+<li>Verifying customer authentication</li>
+<li>Monitoring service stability</li>
+</ul>
+<p>Failover should follow documented procedures and be approved by authorized technical leadership.</p>
+<hr />
+<h2>30. Failback Procedures</h2>
+<p>After the primary environment is restored, LBS may transition services back to the primary production environment.</p>
+<p>Failback activities include:</p>
+<ul>
+<li>Synchronizing data</li>
+<li>Validating data consistency</li>
+<li>Restoring primary routing</li>
+<li>Verifying application health</li>
+<li>Monitoring stability</li>
+<li>Confirming customer functionality</li>
+</ul>
+<p>Failback should be planned to minimize customer disruption.</p>
+<hr />
+<h2>31. Recovery Performance Metrics</h2>
+<p>Following each disaster recovery exercise or actual event, LBS should evaluate performance against established objectives.</p>
+<p>Metrics may include:</p>
+<ul>
+<li>Actual Recovery Time (RTO achieved)</li>
+<li>Actual Recovery Point (RPO achieved)</li>
+<li>Duration of service interruption</li>
+<li>Number of systems restored</li>
+<li>Number of validation failures</li>
+<li>Customer impact</li>
+<li>Support ticket volume</li>
+<li>Time to customer notification</li>
+<li>Time to executive notification</li>
+</ul>
+<p>These metrics support continual improvement of the disaster recovery program.</p>
+<hr />
+<h2>32. Third-Party Recovery Coordination</h2>
+<p>Recovery efforts may require coordination with external service providers.</p>
+<p>Examples include:</p>
+<ul>
+<li>Cloud infrastructure providers</li>
+<li>Identity and authentication providers</li>
+<li>Payment processors</li>
+<li>DNS providers</li>
+<li>Email delivery providers</li>
+<li>Monitoring vendors</li>
+<li>Security service providers</li>
+</ul>
+<p>Vendor contact procedures and escalation paths should be maintained separately and reviewed periodically.</p>
+<hr />
+<h2>33. Customer Communications During Recovery</h2>
+<p>When customer-facing services are affected, LBS will provide timely updates through appropriate communication channels.</p>
+<p>Communications may include:</p>
+<ul>
+<li>Initial incident notification</li>
+<li>Service impact summary</li>
+<li>Recovery progress updates</li>
+<li>Estimated restoration timelines (when reasonably available)</li>
+<li>Service restoration confirmation</li>
+<li>Post-incident summary, when appropriate</li>
+</ul>
+<p>Updates should be factual, timely, and avoid speculation.</p>
+<hr />
+<h2>34. Post-Recovery Review</h2>
+<p>Following every major recovery event, LBS should conduct a structured review to evaluate:</p>
+<ul>
+<li>Recovery effectiveness</li>
+<li>Achievement of RTO and RPO targets</li>
+<li>Root cause</li>
+<li>Recovery challenges</li>
+<li>Customer communications</li>
+<li>Vendor performance</li>
+<li>Documentation quality</li>
+<li>Opportunities for improvement</li>
+</ul>
+<p>Findings should be documented and retained according to organizational record retention requirements.</p>
+<hr />
+<h2>35. Corrective Action Program</h2>
+<p>Issues identified during testing or actual recovery events should be entered into a corrective action process.</p>
+<p>Corrective actions may include:</p>
+<ul>
+<li>Infrastructure improvements</li>
+<li>Process enhancements</li>
+<li>Additional automation</li>
+<li>Documentation revisions</li>
+<li>Training initiatives</li>
+<li>Monitoring improvements</li>
+<li>Vendor changes</li>
+<li>Security enhancements</li>
+</ul>
+<p>Each action should include:</p>
+<ul>
+<li>Description</li>
+<li>Owner</li>
+<li>Priority</li>
+<li>Target completion date</li>
+<li>Completion status</li>
+</ul>
+<p>Management should periodically review outstanding corrective actions.</p>
+<hr />
+<h2>36. Continuous Improvement</h2>
+<p>Disaster recovery planning is an ongoing process.</p>
+<p>LBS will periodically evaluate:</p>
+<ul>
+<li>Technology changes</li>
+<li>Cloud architecture updates</li>
+<li>Security threats</li>
+<li>Customer requirements</li>
+<li>Vendor capabilities</li>
+<li>Regulatory developments</li>
+<li>Industry best practices</li>
+</ul>
+<p>The Disaster Recovery Plan will be updated to reflect significant organizational or technical changes.</p>
+<hr />
+<h2>37. Plan Review and Maintenance</h2>
+<p>This Disaster Recovery Plan should be reviewed:</p>
+<ul>
+<li>At least annually</li>
+<li>Following major infrastructure changes</li>
+<li>After significant production incidents</li>
+<li>Following disaster recovery exercises</li>
+<li>After changes to critical vendors</li>
+<li>When new regulatory or contractual requirements arise</li>
+</ul>
+<p>Plan revisions should be version-controlled and approved by appropriate management.</p>
+<hr />
+<h2>38. Distribution and Access</h2>
+<p>Controlled copies of this Disaster Recovery Plan should be made available to personnel with disaster recovery responsibilities, including:</p>
+<ul>
+<li>Executive leadership</li>
+<li>Engineering leadership</li>
+<li>Security leadership</li>
+<li>Operations</li>
+<li>Customer Success leadership</li>
+<li>Authorized auditors, when appropriate</li>
+</ul>
+<p>Access to detailed technical recovery procedures should be limited to authorized personnel.</p>
+<hr />
+<h2>Appendix A – Disaster Recovery Activation Checklist</h2>
+<ol>
+<li>Verify the disaster event.</li>
+<li>Notify executive leadership.</li>
+<li>Declare a disaster, if warranted.</li>
+<li>Activate the Disaster Recovery Team.</li>
+<li>Assess infrastructure availability.</li>
+<li>Preserve evidence, if applicable.</li>
+<li>Restore critical infrastructure.</li>
+<li>Recover databases.</li>
+<li>Deploy application services.</li>
+<li>Validate authentication.</li>
+<li>Perform recovery validation.</li>
+<li>Communicate status to customers.</li>
+<li>Resume production operations.</li>
+<li>Conduct a post-recovery review.</li>
+</ol>
+<hr />
+<h2>Appendix B – Disaster Recovery Roles</h2>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Primary Responsibilities</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Executive Sponsor</td>
+<td>Authorize disaster declaration, allocate resources, executive communications</td>
+</tr>
+<tr>
+<td>Disaster Recovery Coordinator</td>
+<td>Coordinate technical recovery, track milestones, report status</td>
+</tr>
+<tr>
+<td>Engineering Lead</td>
+<td>Restore infrastructure, databases, and applications</td>
+</tr>
+<tr>
+<td>Security Lead</td>
+<td>Validate security posture, oversee credential management, assess threats</td>
+</tr>
+<tr>
+<td>Operations Lead</td>
+<td>Coordinate vendors, logistics, and operational support</td>
+</tr>
+<tr>
+<td>Customer Success Lead</td>
+<td>Manage customer communications and support activities</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Appendix C – Critical Asset Inventory</h2>
+<p>The following asset categories should be maintained in an internal inventory with ownership, dependencies, recovery objectives, and support contacts:</p>
+<ul>
+<li>Production application environment</li>
+<li>Customer databases</li>
+<li>Authentication services</li>
+<li>API gateways</li>
+<li>Administrative portal</li>
+<li>Employee portal</li>
+<li>Reporting platform</li>
+<li>CI/CD pipelines</li>
+<li>Infrastructure-as-Code repositories</li>
+<li>Backup repositories</li>
+<li>Secrets management systems</li>
+<li>Monitoring and alerting platforms</li>
+<li>Billing and subscription systems</li>
+</ul>
+<p>The inventory should be reviewed after major architectural changes.</p>
+<hr />
+<h2>Appendix D – Vendor Contact Matrix</h2>
+<p>Maintain an internal vendor matrix containing:</p>
+<ul>
+<li>Vendor name</li>
+<li>Service provided</li>
+<li>Primary contact</li>
+<li>Escalation contact</li>
+<li>Support hours</li>
+<li>Contract reference</li>
+<li>Account owner</li>
+<li>Recovery dependencies</li>
+</ul>
+<p>This information should be stored separately from this document to simplify updates and protect sensitive contact information.</p>
+<hr />
+<h2>Appendix E – Disaster Recovery Test Schedule</h2>
+<table>
+<thead>
+<tr>
+<th>Activity</th>
+<th>Recommended Frequency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Documentation Review</td>
+<td>Quarterly</td>
+</tr>
+<tr>
+<td>Contact List Verification</td>
+<td>Quarterly</td>
+</tr>
+<tr>
+<td>Backup Restoration Test</td>
+<td>Quarterly</td>
+</tr>
+<tr>
+<td>Component Recovery Test</td>
+<td>Semi-Annually</td>
+</tr>
+<tr>
+<td>Tabletop Exercise</td>
+<td>Semi-Annually</td>
+</tr>
+<tr>
+<td>Full Disaster Recovery Exercise</td>
+<td>Annually</td>
+</tr>
+<tr>
+<td>Corrective Action Review</td>
+<td>Quarterly</td>
+</tr>
+<tr>
+<td>Plan Review</td>
+<td>Annually or after significant changes</td>
+</tr>
+</tbody>
+</table>
+<p>Testing frequency may be increased based on customer commitments, regulatory requirements, or platform complexity.</p>
+<hr />
+<h2>Document Control</h2>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Disaster Recovery Plan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Product</td>
+<td>Work-A-Bee</td>
+</tr>
+<tr>
+<td>Owner</td>
+<td>Linton Business Solutions, LLC</td>
+</tr>
+<tr>
+<td>Version</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>Effective Date</td>
+<td>July 23, 2026</td>
+</tr>
+<tr>
+<td>Review Cycle</td>
+<td>Annual or after major changes</td>
+</tr>
+<tr>
+<td>Classification</td>
+<td>Internal Confidential</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Approval</h2>
+<p>This Disaster Recovery Plan is approved by executive management and establishes the technical framework for restoring the Work-A-Bee platform following a disaster.</p>
+<p>The plan should be reviewed, tested, and updated regularly to ensure it remains effective and aligned with the organization's architecture, business objectives, and customer commitments.</p>
+{% endblock %}
