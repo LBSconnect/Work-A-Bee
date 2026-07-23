@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Work-A-Bee{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo-workabee.svg') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+  <link rel="alternate icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <div class="admin-topbar">
+      <div class="admin-topbar-left">
+        <img src="{{ url_for('static', filename='logo-workabee.svg') }}" alt="Work-A-Bee">
+        <span>Work-A-Beez</span>
+      </div>
+      <div class="admin-topbar-right">
+        <span>{{ employee.name }} &middot; {{ (employee.worker_type or "employee")|capitalize }}</span>
+        <div class="admin-avatar" style="background: {{ employee.name|avatar_color }}; color: #fff;">{{ employee.name|initials }}</div>
+      </div>
+    </div>
+
+    <div class="admin-body-row">
+      <div class="admin-sidebar">
+        <a class="admin-sidebar-item active" href="{{ url_for('clock_action') }}"><span class="admin-si">📊</span> Dashboard</a>
+        <a class="admin-sidebar-item" href="{{ url_for('clock_action') }}#schedule"><span class="admin-si">🗓️</span> Schedule</a>
+        <a class="admin-sidebar-item" href="{{ url_for('clock_action') }}#time-history"><span class="admin-si">🕐</span> Time</a>
+        <a class="admin-sidebar-item" href="{{ url_for('clock_action') }}#profile"><span class="admin-si">👤</span> Profile</a>
+        <a class="admin-sidebar-item" href="{{ url_for('clock_action') }}#announcements"><span class="admin-si">📣</span> Announcements</a>
+        <a class="admin-sidebar-item admin-sidebar-logout" href="{{ url_for('clock_exit') }}"><span class="admin-si">🚪</span> Exit</a>
+      </div>
+
+      <div class="admin-main">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
+          {% endif %}
+        {% endwith %}
+        {% block employee_content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+</body>
+</html>

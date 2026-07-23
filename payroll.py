@@ -4,19 +4,19 @@ from tz import now_in
 
 
 def get_period_bounds(reference_date: date):
-    """Monday-Friday bounds of the week containing reference_date."""
+    """Monday-Sunday bounds of the week containing reference_date."""
     days_since_monday = reference_date.weekday()
     week_start = reference_date - timedelta(days=days_since_monday)
-    week_end = week_start + timedelta(days=4)
+    week_end = week_start + timedelta(days=6)
     return week_start, week_end
 
 
 def get_prior_periods(period_start: date, count: int = 4):
-    """The `count` Monday-Friday periods immediately before period_start, most recent first."""
+    """The `count` Monday-Sunday periods immediately before period_start, most recent first."""
     periods = []
     for i in range(1, count + 1):
         start = period_start - timedelta(days=7 * i)
-        end = start + timedelta(days=4)
+        end = start + timedelta(days=6)
         periods.append((start, end))
     return periods
 
