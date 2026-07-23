@@ -1,0 +1,21 @@
+{% extends "employee_base.html" %}
+{% block title %}Pay Stubs{% endblock %}
+{% block employee_content %}
+  <h1>Pay stubs</h1>
+  <p class="muted">Last 12 pay periods for {{ employee.name }} ({{ employee.employee_code }}).</p>
+
+  <table>
+    <tr><th>Period</th><th>Regular Hours</th><th>Overtime Hours</th><th>Pay</th><th></th></tr>
+    {% for s in stubs %}
+    <tr>
+      <td>{{ s.period_start.strftime('%b %d') }} &ndash; {{ s.period_end.strftime('%b %d, %Y') }}</td>
+      <td>{{ "%.2f"|format(s.regular_hours) }}</td>
+      <td>{{ "%.2f"|format(s.overtime_hours) }}</td>
+      <td>${{ "%.2f"|format(s.pay) }}</td>
+      <td><a href="{{ url_for('pay_stub_detail', period_start=s.period_start.isoformat()) }}">View</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <p class="muted" style="margin-top:24px;"><a href="{{ url_for('clock_action') }}">&larr; Back to Dashboard</a></p>
+{% endblock %}

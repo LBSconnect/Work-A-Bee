@@ -1,0 +1,44 @@
+{% extends "employee_base.html" %}
+{% block title %}Pay Stub{% endblock %}
+{% block employee_content %}
+  <p class="muted" style="margin-top:0;"><a href="{{ url_for('pay_stubs') }}">&larr; All pay stubs</a></p>
+
+  <div style="border:1px solid #e5e7eb; border-radius:10px; padding:24px; max-width:640px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+      <div>
+        <h1 style="margin-bottom:2px;">{{ org.name }}</h1>
+        <p class="muted">Pay stub summary</p>
+      </div>
+      <p class="muted">{{ period_start.strftime('%b %d') }} &ndash; {{ period_end.strftime('%b %d, %Y') }}</p>
+    </div>
+
+    <table style="margin-top:0;">
+      <tr><th>Employee</th><td>{{ employee.name }} ({{ employee.employee_code }})</td></tr>
+      <tr><th>Hourly Rate</th><td>${{ "%.2f"|format(stub.hourly_rate) }}/hr</td></tr>
+      <tr><th>Regular Hours</th><td>{{ "%.2f"|format(stub.regular_hours) }}</td></tr>
+      <tr><th>Overtime Hours</th><td>{{ "%.2f"|format(stub.overtime_hours) }}</td></tr>
+      <tr><th>Total Hours</th><td>{{ "%.2f"|format(stub.total_hours) }}</td></tr>
+      <tr><th><strong>Gross Pay</strong></th><td><strong>${{ "%.2f"|format(stub.total_due) }}</strong></td></tr>
+    </table>
+
+    <h2 style="margin-top:24px; font-size:14px;">Clock in/out detail</h2>
+    {% if stub.entries %}
+    <table>
+      <tr><th>Clock in</th><th>Clock out</th><th>Hours</th></tr>
+      {% for e in stub.entries %}
+      <tr>
+        <td>{{ e.clock_in.strftime('%a %b %d, %I:%M %p') }}</td>
+        <td>{% if e.clock_out %}{{ e.clock_out.strftime('%a %b %d, %I:%M %p') }}{% else %}<span class="muted">In progress</span>{% endif %}</td>
+        <td>{{ "%.2f"|format(e.hours) }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+    <p class="muted">No clock entries for this period.</p>
+    {% endif %}
+
+    <p class="muted" style="margin-top:20px; font-size:12px;">
+      This is a gross-pay summary generated from your clock records and hourly rate. It does not include tax withholding or deductions and is not an official payroll document.
+    </p>
+  </div>
+{% endblock %}
