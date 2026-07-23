@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Trust Center{% endblock %}
+{% block wrapclass %}wide{% endblock %}
+{% block content %}
+  <h1>Work-A-Beez Trust Center</h1>
+  <p class="muted">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+
+  <p>This page indexes the legal, security, and compliance documentation Linton Business Solutions, LLC ("LBS") maintains for the Work-A-Beez platform, organized by who each document is for.</p>
+
+  <h2>Public Documents</h2>
+  <p>Available to anyone, no request needed.</p>
+  <ul>
+    <li><a href="{{ url_for('terms_of_service') }}">Terms of Service</a></li>
+    <li><a href="{{ url_for('privacy_policy') }}">Privacy Policy</a></li>
+    <li><a href="{{ url_for('aup_policy') }}">Acceptable Use Policy</a></li>
+  </ul>
+
+  <h2>Customer &amp; Prospective Customer Documents</h2>
+  <p>Provided to customers and prospective customers evaluating Work-A-Beez, including for security and procurement review. Reach out using the contact information below if you need a copy for your records.</p>
+  <ul>
+    <li><a href="{{ url_for('dpa_policy') }}">Data Processing Addendum (DPA)</a></li>
+    <li><a href="{{ url_for('security_policy') }}">Security Policy</a></li>
+    <li><a href="{{ url_for('sla_policy') }}">Service Level Agreement (SLA)</a></li>
+  </ul>
+
+  <h2>Questions</h2>
+  <p>For security questionnaires, procurement reviews, or questions about any document on this page, contact <a href="mailto:security@workabeez.net">security@workabeez.net</a> or <a href="mailto:info@lbsconnect.net">info@lbsconnect.net</a>.</p>
+{% endblock %}

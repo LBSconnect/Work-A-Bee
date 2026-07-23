@@ -173,6 +173,11 @@ def sla_policy():
     return render_template("sla.html", updated=datetime.now().date())
 
 
+@app.route("/trust")
+def trust_center():
+    return render_template("trust_center.html", updated=datetime.now().date())
+
+
 @app.route("/pricing")
 def pricing_page():
     return render_template("pricing.html", plans=plans)
