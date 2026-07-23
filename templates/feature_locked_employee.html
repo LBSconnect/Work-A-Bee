@@ -1,0 +1,6 @@
+{% extends "employee_base.html" %}
+{% block title %}{{ feature_label }} &mdash; Upgrade Required{% endblock %}
+{% block employee_content %}
+  <h1>🔒 {{ feature_label }}</h1>
+  <p>{{ feature_label }} is available on the <strong>{{ required_plan.label }}</strong> plan and above. Your company is currently on the <strong>{{ current_plan.label }}</strong> plan. Ask your administrator to upgrade to unlock this feature.</p>
+{% endblock %}

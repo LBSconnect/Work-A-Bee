@@ -131,6 +131,11 @@ th { background: #f9fafb; }
 .badge.in { background: #dcfce7; color: #166534; }
 .badge.out { background: #f3f4f6; color: #374151; }
 .badge.unread { background: #dc2626; color: #fff; font-weight: 700; padding: 1px 7px; }
+.lock-icon { font-size: 11px; opacity: .6; }
+.internal-doc-banner {
+  background: #7f1d1d; color: #fff; font-weight: 700; font-size: 13px;
+  padding: 10px 16px; border-radius: 6px; margin-bottom: 20px; text-align: center;
+}
 
 /* Onboarding wizard */
 .wizard-progress {
@@ -165,6 +170,15 @@ th { background: #f9fafb; }
 .wizard-pill.active .wizard-pill-label { color: #1f2937; font-weight: 600; }
 .wizard-connector { flex: 1 0 20px; height: 2px; background: #e5e7eb; margin: 0 4px 18px; min-width: 20px; }
 .wizard-connector.done { background: var(--bee-black); }
+
+.plan-choice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 16px 0 28px; }
+.plan-choice-card {
+  border: 2px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; cursor: pointer;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.plan-choice-card.selected { border-color: var(--bee-yellow); background: #fffbea; }
+.plan-choice-card input[type="radio"] { margin-bottom: 4px; }
+.plan-choice-price { font-size: 18px; font-weight: 800; }
 
 .wizard-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .wizard-row-3 { grid-template-columns: 1fr 1fr 1fr; }

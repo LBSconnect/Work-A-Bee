@@ -11,6 +11,7 @@ import stripe
 import billing
 import choices
 import devices as devices_mod
+import plans
 from drafts import get_or_create_draft, save_step, attach_cookie, COOKIE_NAME
 from models import get_db
 
@@ -435,6 +436,11 @@ def step_review():
     plan = data.get("plan") if data.get("plan") in ("starter", "growth", "business") else "starter"
 
     if request.method == "POST":
+        selected_plan = request.form.get("plan")
+        if selected_plan in plans.PLANS:
+            plan = selected_plan
+            save_step(token, {"plan": plan})
+
         missing = []
         if not company.get("name"):
             missing.append("Company name is missing. Go back to Step 1.")
@@ -446,6 +452,7 @@ def step_review():
             return _wrap(token, render_template(
                 "wizard/step7_review.html", company=company, admin=admin, settings=settings_,
                 payroll=payroll, employees=employees, device=device, step_num=7,
+                plan=plan, plans=plans.PLANS,
             ))
 
         print(f"[wizard] checkout attempt starting - token={token} plan={plan} employees={len(employees)}")
@@ -462,6 +469,7 @@ def step_review():
             return _wrap(token, render_template(
                 "wizard/step7_review.html", company=company, admin=admin, settings=settings_,
                 payroll=payroll, employees=employees, device=device, step_num=7,
+                plan=plan, plans=plans.PLANS,
             ))
 
         # Nothing is created yet - the organization, admin, and everything else only
@@ -473,6 +481,7 @@ def step_review():
     return _wrap(token, render_template(
         "wizard/step7_review.html", company=company, admin=admin, settings=settings_,
         payroll=payroll, employees=employees, device=device, step_num=7,
+        plan=plan, plans=plans.PLANS,
     ))
 
 

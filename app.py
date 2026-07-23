@@ -17,6 +17,7 @@ import billing
 import choices
 import config
 import devices as devices_mod
+import doc_pages
 import notifications
 import performance
 import plans
@@ -75,6 +76,7 @@ def inject_unread_message_counts():
     ctx = {
         "unread_messages_count": 0, "unread_admin_messages_count": 0,
         "unread_notifications_count": 0, "unread_admin_notifications_count": 0,
+        "locked_features": set(),
     }
     org_id = session.get("org_id")
     if not org_id:
@@ -85,6 +87,11 @@ def inject_unread_message_counts():
         return ctx
     try:
         with get_db() as conn:
+            org = conn.execute("SELECT * FROM organizations WHERE id=%s", (org_id,)).fetchone()
+            if org is not None:
+                ctx["locked_features"] = {
+                    key for key in plans.FEATURE_TIERS if not plans.feature_available(org, key)
+                }
             if emp_id:
                 row = conn.execute(
                     "SELECT COUNT(*) AS c FROM messages m JOIN employees e ON m.employee_id = e.id "
@@ -176,6 +183,21 @@ def sla_policy():
 @app.route("/trust")
 def trust_center():
     return render_template("trust_center.html", updated=datetime.now().date())
+
+
+def _make_static_doc_view(template_name):
+    def view():
+        return render_template(template_name, updated=datetime.now().date())
+    return view
+
+
+@app.route("/docs")
+def docs_index():
+    return render_template("docs_index.html", updated=datetime.now().date(), docs=doc_pages.LIBRARY1)
+
+
+for _endpoint, _url, _template, _title in doc_pages.LIBRARY1:
+    app.add_url_rule(_url, _endpoint, _make_static_doc_view(_template))
 
 
 @app.route("/pricing")
@@ -599,9 +621,15 @@ def messages_page():
         emp = conn.execute(
             "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
         ).fetchone()
-        if emp is None:
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if emp is None or org is None:
             session.pop("employee_id", None)
             return redirect(url_for("staff_login"))
+        locked = _locked_feature_response(org, "messaging", "Messaging", for_admin=False, employee=emp)
+        if locked:
+            return locked
 
         if request.method == "POST":
             body = request.form.get("body", "").strip()
@@ -650,6 +678,9 @@ def performance_page():
         if emp is None or org is None:
             session.pop("employee_id", None)
             return redirect(url_for("staff_login"))
+        locked = _locked_feature_response(org, "performance", "Performance", for_admin=False, employee=emp)
+        if locked:
+            return locked
 
         rows = performance.shift_attendance(conn, org_id, now_in(org["timezone"]), weeks=8, employee_id=emp_id)
         summary = performance.summarize_attendance(rows)
@@ -674,6 +705,9 @@ def recognition_page():
         if emp is None or org is None:
             session.pop("employee_id", None)
             return redirect(url_for("staff_login"))
+        locked = _locked_feature_response(org, "recognition", "Recognition", for_admin=False, employee=emp)
+        if locked:
+            return locked
 
         rows = performance.shift_attendance(conn, org_id, now_in(org["timezone"]), weeks=8, employee_id=emp_id)
         summary = performance.summarize_attendance(rows)
@@ -703,9 +737,15 @@ def notifications_page():
         emp = conn.execute(
             "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
         ).fetchone()
-        if emp is None:
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if emp is None or org is None:
             session.pop("employee_id", None)
             return redirect(url_for("staff_login"))
+        locked = _locked_feature_response(org, "notifications", "Notifications", for_admin=False, employee=emp)
+        if locked:
+            return locked
 
         items = conn.execute(
             "SELECT * FROM notifications WHERE employee_id=%s ORDER BY created_at DESC LIMIT 50",
@@ -727,6 +767,13 @@ def shift_offer_swap(shift_id):
         return redirect(url_for("staff_login"))
 
     with get_db() as conn:
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if org is None or not plans.feature_available(org, "shift_marketplace"):
+            flash("Shift Marketplace requires the Growth plan or higher.")
+            return redirect(url_for("clock_action"))
+
         shift = conn.execute(
             "SELECT * FROM shifts WHERE id=%s AND employee_id=%s AND org_id=%s", (shift_id, emp_id, org_id)
         ).fetchone()
@@ -762,9 +809,15 @@ def shift_marketplace():
         emp = conn.execute(
             "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
         ).fetchone()
-        if emp is None:
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if emp is None or org is None:
             session.pop("employee_id", None)
             return redirect(url_for("staff_login"))
+        locked = _locked_feature_response(org, "shift_marketplace", "Shift Marketplace", for_admin=False, employee=emp)
+        if locked:
+            return locked
 
         open_swaps = conn.execute(
             "SELECT sw.*, s.shift_start, s.shift_end, s.notes, e.name AS offered_by_name "
@@ -786,6 +839,13 @@ def shift_swap_claim(swap_id):
         return redirect(url_for("staff_login"))
 
     with get_db() as conn:
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if org is None or not plans.feature_available(org, "shift_marketplace"):
+            flash("Shift Marketplace requires the Growth plan or higher.")
+            return redirect(url_for("clock_action"))
+
         swap = conn.execute(
             "SELECT * FROM shift_swap_requests WHERE id=%s AND org_id=%s AND status='open'",
             (swap_id, org_id),
@@ -865,6 +925,42 @@ def admin_required(f):
         g.org = org
         return f(*args, **kwargs)
     return wrapper
+
+
+@app.route("/trust-center")
+@admin_required
+def trust_center_index():
+    return render_template("trust_center_index.html", updated=datetime.now().date(), docs=doc_pages.LIBRARY2)
+
+
+for _endpoint, _slug, _template, _title in doc_pages.LIBRARY2:
+    app.add_url_rule(f"/trust-center/{_slug}", _endpoint, admin_required(_make_static_doc_view(_template)))
+
+
+@app.route("/internal")
+def internal_docs_index():
+    return render_template(
+        "internal_docs_index.html", updated=datetime.now().date(),
+        docs=doc_pages.LIBRARY3, real_docs=doc_pages.LIBRARY3_REAL,
+    )
+
+
+for _endpoint, _slug, _template, _title, _section in doc_pages.LIBRARY3:
+    app.add_url_rule(f"/internal/{_slug}", _endpoint, _make_static_doc_view(_template))
+
+for _endpoint, _slug, _template, _title in doc_pages.LIBRARY3_REAL:
+    app.add_url_rule(f"/internal/{_slug}", _endpoint, _make_static_doc_view(_template))
+
+
+def _locked_feature_response(org, feature_key, feature_label, for_admin, employee=None):
+    if plans.feature_available(org, feature_key):
+        return None
+    template = "feature_locked_admin.html" if for_admin else "feature_locked_employee.html"
+    return render_template(
+        template, feature_label=feature_label, employee=employee,
+        required_plan=plans.PLANS[plans.FEATURE_TIERS[feature_key]],
+        current_plan=plans.get_plan(org),
+    )
 
 
 @app.route("/admin/setup", methods=["GET", "POST"])
@@ -1690,6 +1786,9 @@ def admin_pto_deny(request_id):
 @app.route("/admin/messages")
 @admin_required
 def admin_messages():
+    locked = _locked_feature_response(g.org, "messaging", "Messaging", for_admin=True)
+    if locked:
+        return locked
     with get_db() as conn:
         threads = conn.execute(
             "SELECT e.id AS employee_id, e.name AS employee_name, e.employee_code, "
@@ -1709,6 +1808,9 @@ def admin_messages():
 @app.route("/admin/messages/<int:employee_id>", methods=["GET", "POST"])
 @admin_required
 def admin_message_thread(employee_id):
+    locked = _locked_feature_response(g.org, "messaging", "Messaging", for_admin=True)
+    if locked:
+        return locked
     with get_db() as conn:
         emp = conn.execute(
             "SELECT * FROM employees WHERE id=%s AND org_id=%s", (employee_id, g.org["id"])
@@ -1751,6 +1853,9 @@ def admin_message_thread(employee_id):
 @app.route("/admin/performance")
 @admin_required
 def admin_performance():
+    locked = _locked_feature_response(g.org, "performance", "Performance", for_admin=True)
+    if locked:
+        return locked
     with get_db() as conn:
         leaderboard = performance.org_leaderboard(conn, g.org["id"], now_in(g.org["timezone"]), weeks=8)
     return render_template("admin_performance.html", leaderboard=leaderboard)
@@ -1759,6 +1864,9 @@ def admin_performance():
 @app.route("/admin/performance/<int:employee_id>")
 @admin_required
 def admin_performance_employee(employee_id):
+    locked = _locked_feature_response(g.org, "performance", "Performance", for_admin=True)
+    if locked:
+        return locked
     with get_db() as conn:
         emp = conn.execute(
             "SELECT * FROM employees WHERE id=%s AND org_id=%s", (employee_id, g.org["id"])
@@ -1776,6 +1884,9 @@ def admin_performance_employee(employee_id):
 @app.route("/admin/recognition", methods=["GET", "POST"])
 @admin_required
 def admin_recognition():
+    locked = _locked_feature_response(g.org, "recognition", "Recognition", for_admin=True)
+    if locked:
+        return locked
     if request.method == "POST":
         try:
             employee_id = int(request.form.get("employee_id", ""))
@@ -1832,6 +1943,9 @@ def admin_recognition():
 @app.route("/admin/notifications")
 @admin_required
 def admin_notifications():
+    locked = _locked_feature_response(g.org, "notifications", "Notifications", for_admin=True)
+    if locked:
+        return locked
     with get_db() as conn:
         items = conn.execute(
             "SELECT * FROM notifications WHERE admin_id=%s ORDER BY created_at DESC LIMIT 50",

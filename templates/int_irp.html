@@ -1,0 +1,765 @@
+{% extends "internal_base.html" %}
+{% block title %}Work-A-Beez Incident Response Plan (IRP){% endblock %}
+{% block internal_content %}
+  <h1>Work-A-Beez Incident Response Plan (IRP)</h1>
+  <p class="muted">Status: Complete &middot; Classification: Internal Confidential &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+
+<p><strong>Version:</strong> 1.0<br />
+<strong>Effective Date:</strong> July 23, 2026<br />
+<strong>Classification:</strong> Internal Confidential<br />
+<strong>Owner:</strong> Linton Business Solutions, LLC (LBS)  </p>
+<h2>1. Purpose</h2>
+<p>The purpose of this Incident Response Plan ("IRP") is to establish a structured and repeatable process for identifying, reporting, investigating, containing, eradicating, recovering from, and documenting information security incidents affecting the Work-A-Bee platform.
+The objectives of this plan are to:</p>
+<ul>
+<li>Protect Customer Data.</li>
+<li>Minimize business disruption.</li>
+<li>Preserve system integrity.</li>
+<li>Reduce recovery time.</li>
+<li>Meet contractual and legal obligations.</li>
+<li>Coordinate internal and external communications.</li>
+<li>Improve future security posture through lessons learned.</li>
+</ul>
+<p>This Incident Response Plan supports the Work-A-Bee:</p>
+<ul>
+<li>Security Policy</li>
+<li>Business Continuity Plan (BCP)</li>
+<li>Disaster Recovery Plan (DRP)</li>
+<li>Data Processing Addendum (DPA)</li>
+<li>Service Level Agreement (SLA)</li>
+</ul>
+<h2>2. Scope</h2>
+<p>This plan applies to all security incidents affecting:</p>
+<ul>
+<li>Production systems</li>
+<li>Cloud infrastructure</li>
+<li>Customer Data</li>
+<li>Employee accounts</li>
+<li>Administrative accounts</li>
+<li>APIs</li>
+<li>Authentication systems</li>
+<li>Source code repositories</li>
+<li>CI/CD pipelines</li>
+<li>Third-party services supporting Work-A-Bee</li>
+</ul>
+<p>This plan applies to all employees, contractors, and approved third-party service providers supporting Work-A-Bee.</p>
+<h2>3. Incident Response Objectives</h2>
+<p>The Incident Response Program seeks to:</p>
+<ul>
+<li>Detect incidents quickly.</li>
+<li>Limit operational impact.</li>
+<li>Contain threats.</li>
+<li>Preserve evidence.</li>
+<li>Restore normal operations.</li>
+<li>Protect customer trust.</li>
+<li>Meet applicable reporting obligations.</li>
+<li>Continuously improve organizational security.</li>
+</ul>
+<h2>4. Guiding Principles</h2>
+<p>All incident response activities should follow these principles:</p>
+<ul>
+<li>Safety of personnel</li>
+<li>Protection of Customer Data</li>
+<li>Preservation of evidence</li>
+<li>Timely communication</li>
+<li>Least privilege</li>
+<li>Need-to-know information sharing</li>
+<li>Accurate documentation</li>
+<li>Continuous improvement</li>
+</ul>
+<p>When priorities conflict, protecting Customer Data and preserving evidence should take precedence over restoring affected systems.</p>
+<h2>5. Incident Response Team (IRT)</h2>
+<p>LBS maintains an Incident Response Team responsible for coordinating cybersecurity incidents.
+Depending on company size, one individual may fulfill multiple roles.
+Executive Sponsor
+Responsibilities:</p>
+<ul>
+<li>Executive oversight</li>
+<li>Major business decisions</li>
+<li>Customer communication approval</li>
+<li>Regulatory decision support</li>
+</ul>
+<p>Incident Commander
+Responsible for:</p>
+<ul>
+<li>Overall incident coordination</li>
+<li>Incident prioritization</li>
+<li>Resource allocation</li>
+<li>Incident timeline management</li>
+<li>Executive reporting</li>
+</ul>
+<p>Security Lead
+Responsible for:</p>
+<ul>
+<li>Threat analysis</li>
+<li>Evidence preservation</li>
+<li>Security investigation</li>
+<li>Containment strategy</li>
+<li>Security validation</li>
+</ul>
+<p>Engineering Lead
+Responsible for:</p>
+<ul>
+<li>Technical remediation</li>
+<li>Infrastructure recovery</li>
+<li>Application restoration</li>
+<li>Root cause remediation</li>
+</ul>
+<p>Customer Success Lead
+Responsible for:</p>
+<ul>
+<li>Customer communications</li>
+<li>Support coordination</li>
+<li>Customer impact tracking</li>
+</ul>
+<p>Legal and Compliance Advisor
+Where appropriate, legal counsel may assist with:</p>
+<ul>
+<li>Regulatory obligations</li>
+<li>Contractual requirements</li>
+<li>Privacy considerations</li>
+<li>Law enforcement coordination</li>
+<li>Litigation preservation</li>
+</ul>
+<h2>6. Incident Severity Levels</h2>
+<p>Incidents are classified according to business impact.
+Severity 1 – Critical
+Examples:</p>
+<ul>
+<li>Confirmed Customer Data breach</li>
+<li>Active ransomware</li>
+<li>Complete production compromise</li>
+<li>Large-scale credential compromise</li>
+<li>Widespread service outage caused by malicious activity</li>
+</ul>
+<p>Business Impact:
+Critical business interruption requiring immediate executive involvement.
+Severity 2 – High
+Examples:</p>
+<ul>
+<li>Privileged account compromise</li>
+<li>Significant malware infection</li>
+<li>Limited Customer Data exposure</li>
+<li>API compromise</li>
+<li>Authentication failure</li>
+</ul>
+<p>Business Impact:
+Major operational disruption requiring immediate technical response.
+Severity 3 – Medium
+Examples:</p>
+<ul>
+<li>Phishing affecting a limited number of users</li>
+<li>Malware on a non-critical workstation</li>
+<li>Failed security controls</li>
+<li>Isolated unauthorized access attempts</li>
+</ul>
+<p>Business Impact:
+Limited operational impact with manageable risk.
+Severity 4 – Low
+Examples:</p>
+<ul>
+<li>Suspicious email reports</li>
+<li>Security policy violations</li>
+<li>Failed login investigations</li>
+<li>Minor configuration weaknesses</li>
+</ul>
+<p>Business Impact:
+Minimal operational disruption.</p>
+<h2>7. Incident Categories</h2>
+<p>Security incidents may include:</p>
+<ul>
+<li>Malware</li>
+<li>Ransomware</li>
+<li>Phishing</li>
+<li>Business Email Compromise (BEC)</li>
+<li>Credential theft</li>
+<li>Insider threat</li>
+<li>Unauthorized access</li>
+<li>Distributed Denial-of-Service (DDoS)</li>
+<li>Application vulnerability exploitation</li>
+<li>Cloud infrastructure compromise</li>
+<li>Data leakage</li>
+<li>Lost or stolen administrative devices</li>
+<li>Third-party vendor compromise</li>
+</ul>
+<p>Additional categories may be defined as the threat landscape evolves.</p>
+<h2>8. Incident Reporting</h2>
+<p>Personnel should report suspected security incidents immediately through approved internal reporting channels.
+Reports should include, when available:</p>
+<ul>
+<li>Date and time observed</li>
+<li>System affected</li>
+<li>Description of activity</li>
+<li>Screenshots or logs</li>
+<li>User accounts involved</li>
+<li>Business impact</li>
+<li>Reporter contact information</li>
+</ul>
+<p>Prompt reporting improves containment and recovery efforts.</p>
+<h2>9. Detection Sources</h2>
+<p>Security incidents may be identified through:</p>
+<ul>
+<li>Security monitoring tools</li>
+<li>Application logs</li>
+<li>Infrastructure monitoring</li>
+<li>Customer reports</li>
+<li>Employee observations</li>
+<li>Third-party vendors</li>
+<li>Threat intelligence notifications</li>
+<li>Automated alerts</li>
+<li>Vulnerability scanners</li>
+<li>Cloud provider notifications</li>
+</ul>
+<p>All credible reports should be evaluated promptly.</p>
+<h2>10. Initial Incident Assessment</h2>
+<p>Upon receiving a report, the Incident Response Team should:</p>
+<ol>
+<li>Confirm the event.</li>
+<li>Determine whether it is a security incident.</li>
+<li>Assign an initial severity level.</li>
+<li>Identify affected systems.</li>
+<li>Estimate customer impact.</li>
+<li>Determine whether escalation is required.</li>
+<li>Initiate documentation.</li>
+<li>Begin containment planning.</li>
+</ol>
+<p>Severity may be adjusted as additional information becomes available.</p>
+<h2>11. Incident Documentation</h2>
+<p>Every significant incident should have an incident record documenting:</p>
+<ul>
+<li>Incident identifier</li>
+<li>Date and time detected</li>
+<li>Reporter</li>
+<li>Incident category</li>
+<li>Severity level</li>
+<li>Systems affected</li>
+<li>Timeline of actions</li>
+<li>Individuals involved</li>
+<li>Customer impact</li>
+<li>Root cause</li>
+<li>Resolution</li>
+<li>Lessons learned</li>
+</ul>
+<p>Accurate documentation supports audits, regulatory compliance, and continuous improvement.</p>
+<h3>Part 2 – Incident Handling Procedures and Response Runbooks</h3>
+<p><strong>Version:</strong> 1.0  </p>
+<h2>12. Evidence Preservation</h2>
+<p>When a security incident is suspected, preserving evidence is essential to support investigation, recovery, legal obligations, and potential regulatory inquiries.
+Personnel should:</p>
+<ul>
+<li>Avoid unnecessary changes to affected systems.</li>
+<li>Preserve relevant system logs.</li>
+<li>Capture timestamps.</li>
+<li>Record observed activity.</li>
+<li>Document actions performed during the response.</li>
+<li>Preserve volatile data when appropriate.</li>
+<li>Secure copies of relevant configuration information.</li>
+</ul>
+<p>Evidence should be collected only by authorized personnel whenever practical.</p>
+<h2>13. Chain of Custody</h2>
+<p>When evidence is collected, LBS should maintain documentation describing:</p>
+<ul>
+<li>Evidence identifier</li>
+<li>Description of evidence</li>
+<li>Date and time collected</li>
+<li>Collector's name</li>
+<li>Storage location</li>
+<li>Individuals who accessed the evidence</li>
+<li>Reason for each transfer</li>
+<li>Final disposition</li>
+</ul>
+<p>Maintaining a documented chain of custody supports the integrity and admissibility of evidence where required.</p>
+<h2>14. Containment Strategy</h2>
+<p>Containment activities aim to prevent further damage while preserving critical evidence.
+Containment actions may include:</p>
+<ul>
+<li>Isolating affected systems</li>
+<li>Disabling compromised accounts</li>
+<li>Blocking malicious IP addresses</li>
+<li>Revoking API credentials</li>
+<li>Restricting administrative access</li>
+<li>Disabling affected integrations</li>
+<li>Segregating compromised workloads</li>
+<li>Temporarily suspending impacted services</li>
+</ul>
+<p>Containment actions should balance operational continuity with security requirements.</p>
+<h2>15. Malware Response Runbook</h2>
+<p>When malware is suspected:</p>
+<ol>
+<li>Isolate the affected system.</li>
+<li>Preserve evidence.</li>
+<li>Determine malware scope.</li>
+<li>Identify affected users.</li>
+<li>Review system logs.</li>
+<li>Scan adjacent systems.</li>
+<li>Remove malicious software using approved procedures.</li>
+<li>Apply security updates.</li>
+<li>Restore from trusted backups if necessary.</li>
+<li>Validate system integrity before returning the system to service.</li>
+</ol>
+<p>Recovered systems should be monitored closely for recurring indicators of compromise.</p>
+<h2>16. Ransomware Response Runbook</h2>
+<p>If ransomware is suspected or confirmed:</p>
+<ol>
+<li>Immediately isolate affected systems.</li>
+<li>Disable network connectivity where appropriate.</li>
+<li>Preserve forensic evidence.</li>
+<li>Notify executive leadership.</li>
+<li>Activate the Incident Response Team.</li>
+<li>Assess the scope of encryption.</li>
+<li>Determine whether Customer Data has been exfiltrated.</li>
+<li>Restore systems from verified backups when appropriate.</li>
+<li>Rotate potentially compromised credentials.</li>
+<li>Validate restored systems before production use.</li>
+</ol>
+<p>LBS does not maintain a policy of paying ransom demands. Any exception would require executive approval, legal review, and consideration of applicable laws and sanctions.</p>
+<h2>17. Phishing Response Runbook</h2>
+<p>When phishing activity is reported:</p>
+<ul>
+<li>Collect the original email.</li>
+<li>Analyze headers and message content.</li>
+<li>Determine whether credentials were entered.</li>
+<li>Disable compromised accounts if necessary.</li>
+<li>Reset affected credentials.</li>
+<li>Review authentication logs.</li>
+<li>Block malicious domains or senders where feasible.</li>
+<li>Notify potentially affected personnel.</li>
+<li>Conduct user awareness follow-up as appropriate.</li>
+</ul>
+<p>Patterns of phishing activity should be reviewed to improve preventative controls.</p>
+<h2>18. Credential Compromise Response</h2>
+<p>If account credentials are suspected to be compromised:</p>
+<ul>
+<li>Disable or lock the affected account.</li>
+<li>Require a password reset.</li>
+<li>Revoke active sessions.</li>
+<li>Review recent authentication activity.</li>
+<li>Verify MFA enrollment and operation.</li>
+<li>Rotate API keys or service credentials if affected.</li>
+<li>Confirm that administrative privileges remain appropriate.</li>
+</ul>
+<p>Privileged account compromises require immediate investigation and escalation.</p>
+<h2>19. Insider Threat Response</h2>
+<p>Potential insider threats should be handled discreetly and in coordination with appropriate leadership.
+Response activities may include:</p>
+<ul>
+<li>Reviewing access logs.</li>
+<li>Preserving evidence.</li>
+<li>Restricting access where warranted.</li>
+<li>Coordinating with Human Resources and legal counsel, if applicable.</li>
+<li>Monitoring for additional unauthorized activity.</li>
+<li>Assessing potential Customer Data exposure.</li>
+</ul>
+<p>Investigations should respect applicable employment laws and privacy obligations.</p>
+<h2>20. Cloud Infrastructure Compromise</h2>
+<p>If cloud infrastructure is suspected to be compromised:</p>
+<ul>
+<li>Assess the scope of the compromise.</li>
+<li>Restrict administrative access.</li>
+<li>Review cloud audit logs.</li>
+<li>Rotate cloud credentials and access keys as appropriate.</li>
+<li>Validate infrastructure configurations.</li>
+<li>Restore affected workloads from trusted sources.</li>
+<li>Coordinate with the cloud provider if required.</li>
+</ul>
+<p>Infrastructure changes should be documented and verified before restoring production traffic.</p>
+<h2>21. Third-Party Security Incidents</h2>
+<p>If a third-party service provider experiences a security incident that may affect Work-A-Bee:</p>
+<ul>
+<li>Evaluate the provider's notification.</li>
+<li>Assess potential impact on Work-A-Bee.</li>
+<li>Determine whether Customer Data may be affected.</li>
+<li>Coordinate remediation with the provider.</li>
+<li>Implement temporary workarounds if feasible.</li>
+<li>Notify affected Customers when required by law or contract.</li>
+</ul>
+<p>Vendor-related incidents should be tracked until resolution.</p>
+<h2>22. Data Exposure Assessment</h2>
+<p>For incidents involving potential unauthorized access to information, the Incident Response Team should assess:</p>
+<ul>
+<li>Categories of information involved.</li>
+<li>Number of affected customers or users.</li>
+<li>Duration of exposure.</li>
+<li>Likelihood of unauthorized access or exfiltration.</li>
+<li>Whether encryption or other protections were in place.</li>
+<li>Potential legal, contractual, or regulatory obligations.</li>
+</ul>
+<p>This assessment informs notification and remediation decisions.</p>
+<h2>23. Regulatory Notification Considerations</h2>
+<p>Following confirmation of a qualifying incident, LBS will evaluate whether notification obligations exist under:</p>
+<ul>
+<li>Applicable privacy laws.</li>
+<li>Customer contracts.</li>
+<li>Regulatory requirements.</li>
+<li>Industry-specific obligations.</li>
+</ul>
+<p>Notification timing and content will be determined in consultation with legal counsel where appropriate.</p>
+<h2>24. Customer Notification</h2>
+<p>When customer notification is required, communications should include, where appropriate:</p>
+<ul>
+<li>A description of the incident.</li>
+<li>The date or estimated timeframe of occurrence.</li>
+<li>Categories of information potentially affected.</li>
+<li>Actions taken by LBS.</li>
+<li>Recommended customer actions.</li>
+<li>Available support resources.</li>
+<li>Contact information for additional assistance.</li>
+</ul>
+<p>Notifications should be factual, timely, and avoid speculation.</p>
+<h2>25. Law Enforcement Coordination</h2>
+<p>LBS may coordinate with law enforcement or other appropriate authorities when:</p>
+<ul>
+<li>Criminal activity is suspected.</li>
+<li>Required by law.</li>
+<li>Appropriate to support investigation or recovery.</li>
+</ul>
+<p>The decision to involve law enforcement will be made by executive leadership in consultation with legal counsel, considering the nature of the incident and applicable legal obligations.</p>
+<h2>26. Communication Management</h2>
+<p>During an active incident, communications should be coordinated to ensure consistency and accuracy.
+Communication audiences may include:</p>
+<ul>
+<li>Executive leadership</li>
+<li>Employees</li>
+<li>Customers</li>
+<li>Vendors</li>
+<li>Legal counsel</li>
+<li>Insurance providers</li>
+<li>Regulatory authorities</li>
+<li>Law enforcement, where appropriate</li>
+</ul>
+<p>Only authorized spokespersons may make public statements regarding security incidents.
+All communications should be documented as part of the incident record.</p>
+<h3>Part 3 – Recovery, Governance, Testing, and Continuous Improvement</h3>
+<p><strong>Version:</strong> 1.0</p>
+<hr />
+<h2>27. Recovery Procedures</h2>
+<p>Following successful containment and eradication of a security incident, Linton Business Solutions, LLC ("LBS") will begin recovery activities to safely restore affected systems and business operations.</p>
+<p>Recovery objectives include:</p>
+<ul>
+<li>Restoring production services.</li>
+<li>Verifying system integrity.</li>
+<li>Confirming Customer Data availability.</li>
+<li>Preventing reoccurrence of the incident.</li>
+<li>Returning business operations to normal.</li>
+</ul>
+<p>Recovery should proceed in a controlled manner using approved change management procedures.</p>
+<hr />
+<h2>28. Recovery Validation</h2>
+<p>Prior to restoring production access, the Incident Response Team should validate that affected systems are operating securely.</p>
+<p>Validation activities may include:</p>
+<h3>Infrastructure</h3>
+<ul>
+<li>Compute resources operational</li>
+<li>Network connectivity restored</li>
+<li>Security groups validated</li>
+<li>Firewall rules verified</li>
+<li>Monitoring agents active</li>
+</ul>
+<h3>Application</h3>
+<ul>
+<li>Successful user authentication</li>
+<li>Employee clock-in functionality</li>
+<li>Employee clock-out functionality</li>
+<li>Payroll calculations verified</li>
+<li>Administrative portal operational</li>
+<li>API connectivity confirmed</li>
+</ul>
+<h3>Security</h3>
+<ul>
+<li>Logging operational</li>
+<li>Security alerts functioning</li>
+<li>Multi-Factor Authentication (MFA) verified where applicable</li>
+<li>Privileged accounts reviewed</li>
+<li>Temporary containment measures removed or documented</li>
+</ul>
+<p>Only after successful validation should systems return to full production use.</p>
+<hr />
+<h2>29. Root Cause Analysis</h2>
+<p>Following recovery, the Incident Response Team will perform a Root Cause Analysis (RCA) to identify the underlying factors that contributed to the incident.</p>
+<p>The RCA should address:</p>
+<ul>
+<li>How the incident occurred</li>
+<li>Initial attack vector</li>
+<li>Systems affected</li>
+<li>Security controls that functioned as intended</li>
+<li>Security controls that failed or were bypassed</li>
+<li>Timeline of events</li>
+<li>Contributing operational factors</li>
+<li>Opportunities to reduce future risk</li>
+</ul>
+<p>The goal of the RCA is continuous improvement rather than assigning blame.</p>
+<hr />
+<h2>30. Post-Incident Review</h2>
+<p>A formal Post-Incident Review (PIR) should be conducted for all Severity 1 and Severity 2 incidents, and for other incidents as appropriate.</p>
+<p>The review should evaluate:</p>
+<ul>
+<li>Incident timeline</li>
+<li>Response effectiveness</li>
+<li>Communication effectiveness</li>
+<li>Technical recovery</li>
+<li>Customer impact</li>
+<li>Regulatory considerations</li>
+<li>Vendor performance</li>
+<li>Documentation quality</li>
+<li>Lessons learned</li>
+</ul>
+<p>Findings should be documented and shared with appropriate stakeholders.</p>
+<hr />
+<h2>31. Corrective Action Management</h2>
+<p>Recommendations resulting from the Root Cause Analysis or Post-Incident Review should be tracked through a formal corrective action process.</p>
+<p>Each corrective action should include:</p>
+<ul>
+<li>Unique identifier</li>
+<li>Description</li>
+<li>Risk level</li>
+<li>Assigned owner</li>
+<li>Target completion date</li>
+<li>Current status</li>
+<li>Validation of completion</li>
+</ul>
+<p>Corrective actions may include:</p>
+<ul>
+<li>Security control improvements</li>
+<li>Infrastructure enhancements</li>
+<li>Software updates</li>
+<li>Process changes</li>
+<li>Documentation revisions</li>
+<li>Training initiatives</li>
+<li>Vendor management improvements</li>
+</ul>
+<p>Management should review corrective action status on a regular basis.</p>
+<hr />
+<h2>32. Incident Metrics and Key Performance Indicators (KPIs)</h2>
+<p>To evaluate the effectiveness of the Incident Response Program, LBS may monitor metrics including:</p>
+<ul>
+<li>Number of incidents by severity</li>
+<li>Mean Time to Detect (MTTD)</li>
+<li>Mean Time to Acknowledge (MTTA)</li>
+<li>Mean Time to Contain (MTTC)</li>
+<li>Mean Time to Recover (MTTR)</li>
+<li>Percentage of incidents meeting response objectives</li>
+<li>Number of repeat incidents</li>
+<li>Phishing simulation success rates (if conducted)</li>
+<li>Number of security awareness training completions</li>
+<li>Number of unresolved corrective actions</li>
+</ul>
+<p>Metrics should be reviewed periodically to identify trends and opportunities for improvement.</p>
+<hr />
+<h2>33. Security Awareness and Training</h2>
+<p>Personnel with incident response responsibilities should receive periodic training appropriate to their roles.</p>
+<p>Training topics may include:</p>
+<ul>
+<li>Incident identification</li>
+<li>Reporting procedures</li>
+<li>Evidence preservation</li>
+<li>Secure communications</li>
+<li>Phishing recognition</li>
+<li>Ransomware awareness</li>
+<li>Data handling requirements</li>
+<li>Customer communication expectations</li>
+</ul>
+<p>New personnel assigned to the Incident Response Team should receive orientation before participating in active incident response activities.</p>
+<hr />
+<h2>34. Incident Response Exercises</h2>
+<p>LBS should periodically test its incident response capabilities through structured exercises.</p>
+<p>Exercise types may include:</p>
+<ul>
+<li>Tabletop exercises</li>
+<li>Technical simulations</li>
+<li>Phishing simulations</li>
+<li>Ransomware response scenarios</li>
+<li>Cloud compromise scenarios</li>
+<li>Insider threat scenarios</li>
+<li>Business Email Compromise (BEC) simulations</li>
+</ul>
+<p>Exercises should identify strengths, weaknesses, and opportunities to improve procedures.</p>
+<hr />
+<h2>35. Documentation and Record Retention</h2>
+<p>Incident response documentation may include:</p>
+<ul>
+<li>Incident reports</li>
+<li>Investigation notes</li>
+<li>Evidence logs</li>
+<li>Chain of custody records</li>
+<li>Communication records</li>
+<li>Recovery documentation</li>
+<li>Corrective action plans</li>
+<li>Lessons learned</li>
+</ul>
+<p>Retention periods should align with legal, contractual, regulatory, and operational requirements.</p>
+<p>Access to incident documentation should be restricted to authorized personnel.</p>
+<hr />
+<h2>36. Coordination with Other Plans</h2>
+<p>This Incident Response Plan is designed to operate in conjunction with the following Work-A-Bee governance documents:</p>
+<ul>
+<li>Security Policy</li>
+<li>Business Continuity Plan (BCP)</li>
+<li>Disaster Recovery Plan (DRP)</li>
+<li>Service Level Agreement (SLA)</li>
+<li>Data Processing Addendum (DPA)</li>
+<li>Privacy Policy</li>
+<li>Acceptable Use Policy</li>
+</ul>
+<p>Where a cybersecurity incident escalates into a broader operational disruption, the Business Continuity Plan and Disaster Recovery Plan may be activated.</p>
+<hr />
+<h2>37. Plan Review and Maintenance</h2>
+<p>This Incident Response Plan should be reviewed:</p>
+<ul>
+<li>At least annually</li>
+<li>Following major security incidents</li>
+<li>After significant architectural changes</li>
+<li>Following incident response exercises</li>
+<li>After changes in applicable legal or contractual obligations</li>
+<li>When new threat intelligence indicates a material change in risk</li>
+</ul>
+<p>Plan revisions should be version-controlled and approved by executive management.</p>
+<hr />
+<h2>38. Plan Distribution</h2>
+<p>Controlled copies of this Incident Response Plan should be made available to:</p>
+<ul>
+<li>Executive leadership</li>
+<li>Engineering leadership</li>
+<li>Security personnel</li>
+<li>Customer Success leadership</li>
+<li>Operations leadership</li>
+<li>Legal counsel, where appropriate</li>
+<li>Authorized auditors under applicable confidentiality obligations</li>
+</ul>
+<p>Access to operational response procedures should be restricted to authorized personnel.</p>
+<hr />
+<h2>Appendix A – Incident Severity Matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Severity</th>
+<th>Example Impact</th>
+<th>Typical Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Severity 1 – Critical</td>
+<td>Confirmed data breach, ransomware, complete production compromise</td>
+<td>Immediate Incident Response Team activation and executive oversight</td>
+</tr>
+<tr>
+<td>Severity 2 – High</td>
+<td>Privileged account compromise, major malware event</td>
+<td>Rapid containment, investigation, and recovery</td>
+</tr>
+<tr>
+<td>Severity 3 – Medium</td>
+<td>Limited phishing, isolated unauthorized access attempts</td>
+<td>Standard incident handling with appropriate escalation</td>
+</tr>
+<tr>
+<td>Severity 4 – Low</td>
+<td>Policy violations, suspicious emails, informational events</td>
+<td>Routine investigation and documentation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Appendix B – Incident Response Checklist</h2>
+<ol>
+<li>Receive and verify the incident report.</li>
+<li>Classify the incident severity.</li>
+<li>Activate the Incident Response Team if required.</li>
+<li>Preserve evidence.</li>
+<li>Contain the threat.</li>
+<li>Assess business and customer impact.</li>
+<li>Eradicate the root cause.</li>
+<li>Recover affected systems.</li>
+<li>Validate production readiness.</li>
+<li>Notify affected parties when required.</li>
+<li>Conduct a post-incident review.</li>
+<li>Track corrective actions to completion.</li>
+</ol>
+<hr />
+<h2>Appendix C – Incident Response Contact Categories</h2>
+<p>Current contact information should be maintained separately for:</p>
+<ul>
+<li>Executive Management</li>
+<li>Incident Commander</li>
+<li>Engineering Lead</li>
+<li>Security Lead</li>
+<li>Customer Success Lead</li>
+<li>Legal Counsel</li>
+<li>Insurance Carrier</li>
+<li>Cloud Infrastructure Provider</li>
+<li>Identity Provider</li>
+<li>Payment Processor</li>
+<li>Managed Security Service Providers</li>
+<li>Emergency Contacts</li>
+</ul>
+<p>Sensitive contact details should not be included in public versions of this document.</p>
+<hr />
+<h2>Appendix D – Chain of Custody Record</h2>
+<p>For each evidence item, record:</p>
+<ul>
+<li>Evidence ID</li>
+<li>Description</li>
+<li>Source system</li>
+<li>Date and time collected</li>
+<li>Collector</li>
+<li>Storage location</li>
+<li>Access history</li>
+<li>Transfer history</li>
+<li>Final disposition</li>
+</ul>
+<hr />
+<h2>Appendix E – Lessons Learned Template</h2>
+<p>For each significant incident, document:</p>
+<ul>
+<li>Incident summary</li>
+<li>Timeline of events</li>
+<li>Root cause</li>
+<li>Business impact</li>
+<li>Customer impact</li>
+<li>Controls that worked effectively</li>
+<li>Controls requiring improvement</li>
+<li>Recommended corrective actions</li>
+<li>Assigned owners</li>
+<li>Completion dates</li>
+</ul>
+<hr />
+<h2>Document Control</h2>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Incident Response Plan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Product</td>
+<td>Work-A-Bee</td>
+</tr>
+<tr>
+<td>Owner</td>
+<td>Linton Business Solutions, LLC</td>
+</tr>
+<tr>
+<td>Version</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>Effective Date</td>
+<td>July 23, 2026</td>
+</tr>
+<tr>
+<td>Review Cycle</td>
+<td>Annual or after major security incidents</td>
+</tr>
+<tr>
+<td>Classification</td>
+<td>Internal Confidential</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Approval</h2>
+<p>This Incident Response Plan is approved by executive management and establishes the governance framework for responding to information security incidents affecting the Work-A-Bee platform.</p>
+<p>The plan should be tested regularly, reviewed after significant incidents, and updated as the platform, threat landscape, and business requirements evolve.</p>
+{% endblock %}

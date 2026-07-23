@@ -1,0 +1,895 @@
+{% extends "internal_base.html" %}
+{% block title %}Work-A-Beez Business Continuity Plan (BCP){% endblock %}
+{% block internal_content %}
+  <h1>Work-A-Beez Business Continuity Plan (BCP)</h1>
+  <p class="muted">Status: Complete &middot; Classification: Internal Confidential &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+
+<p><strong>Version:</strong> 1.0<br />
+<strong>Effective Date:</strong> July 23, 2026<br />
+<strong>Owner:</strong> Linton Business Solutions, LLC (LBS)</p>
+<hr />
+<h2>1. Purpose</h2>
+<p>The purpose of this Business Continuity Plan ("BCP") is to establish the policies, procedures, and responsibilities necessary to maintain or restore critical business operations following an event that disrupts the normal operation of the Work-A-Bee platform.</p>
+<p>This plan is intended to:</p>
+<ul>
+<li>Protect employees, customers, and business operations.</li>
+<li>Minimize service interruptions.</li>
+<li>Reduce financial and operational impacts.</li>
+<li>Preserve Customer Data.</li>
+<li>Maintain regulatory and contractual obligations.</li>
+<li>Support timely recovery of critical services.</li>
+</ul>
+<p>This BCP complements the Work-A-Bee:</p>
+<ul>
+<li>Security Policy</li>
+<li>Incident Response Plan</li>
+<li>Disaster Recovery Plan</li>
+<li>Service Level Agreement (SLA)</li>
+</ul>
+<hr />
+<h2>2. Scope</h2>
+<p>This Business Continuity Plan applies to:</p>
+<ul>
+<li>Production cloud infrastructure</li>
+<li>Customer support operations</li>
+<li>Engineering operations</li>
+<li>Product management</li>
+<li>Administrative services</li>
+<li>Billing operations</li>
+<li>Identity and authentication services</li>
+<li>Customer communications</li>
+<li>Third-party hosted services supporting Work-A-Bee</li>
+</ul>
+<p>This plan applies to all LBS personnel, contractors, and approved third-party providers supporting the Work-A-Bee platform.</p>
+<hr />
+<h2>3. Objectives</h2>
+<p>The primary objectives of this Business Continuity Plan are to:</p>
+<ul>
+<li>Protect life and safety.</li>
+<li>Maintain essential business operations.</li>
+<li>Restore critical customer-facing services.</li>
+<li>Preserve the confidentiality, integrity, and availability of Customer Data.</li>
+<li>Maintain customer confidence.</li>
+<li>Coordinate internal response activities.</li>
+<li>Support compliance with contractual and legal obligations.</li>
+<li>Continuously improve organizational resilience.</li>
+</ul>
+<hr />
+<h2>4. Business Continuity Governance</h2>
+<p>Overall responsibility for the Business Continuity Program rests with executive management.</p>
+<p>Key responsibilities include:</p>
+<h3>Executive Management</h3>
+<ul>
+<li>Approves continuity strategies</li>
+<li>Allocates recovery resources</li>
+<li>Authorizes disaster declarations</li>
+<li>Oversees major business decisions</li>
+</ul>
+<h3>Product &amp; Engineering</h3>
+<ul>
+<li>Restore application services</li>
+<li>Coordinate technical recovery</li>
+<li>Validate application functionality</li>
+<li>Prioritize critical system restoration</li>
+</ul>
+<h3>Customer Success &amp; Support</h3>
+<ul>
+<li>Communicate with customers</li>
+<li>Track customer impact</li>
+<li>Manage inbound support requests</li>
+<li>Coordinate customer updates</li>
+</ul>
+<h3>Security Team</h3>
+<ul>
+<li>Assess cybersecurity implications</li>
+<li>Preserve evidence where applicable</li>
+<li>Coordinate with Incident Response</li>
+<li>Validate secure restoration</li>
+</ul>
+<h3>Finance &amp; Administration</h3>
+<ul>
+<li>Support billing continuity</li>
+<li>Manage vendor communications</li>
+<li>Track financial impacts</li>
+<li>Coordinate insurance claims when applicable</li>
+</ul>
+<hr />
+<h2>5. Critical Business Functions</h2>
+<p>The following functions are considered critical to Work-A-Bee operations:</p>
+<h3>Tier 1 – Mission Critical</h3>
+<ul>
+<li>User authentication</li>
+<li>Employee clock-in/clock-out</li>
+<li>Timekeeping database</li>
+<li>Payroll calculations</li>
+<li>Administrative portal</li>
+<li>Production infrastructure</li>
+<li>Customer data storage</li>
+</ul>
+<p>Target restoration priority: Immediate</p>
+<hr />
+<h3>Tier 2 – High Priority</h3>
+<ul>
+<li>Reporting</li>
+<li>Notifications</li>
+<li>Customer administration</li>
+<li>API services</li>
+<li>Billing platform</li>
+<li>Subscription management</li>
+</ul>
+<p>Target restoration priority: High</p>
+<hr />
+<h3>Tier 3 – Standard Priority</h3>
+<ul>
+<li>Documentation portal</li>
+<li>Analytics dashboards</li>
+<li>Marketing website</li>
+<li>Training resources</li>
+<li>Internal reporting</li>
+</ul>
+<p>Target restoration priority: As operational capacity allows</p>
+<hr />
+<h2>6. Business Impact Analysis (BIA)</h2>
+<p>Business continuity planning is based on evaluating the operational impact of service disruptions.</p>
+<p>The following factors are considered:</p>
+<ul>
+<li>Financial impact</li>
+<li>Customer impact</li>
+<li>Regulatory obligations</li>
+<li>Reputational risk</li>
+<li>Data integrity</li>
+<li>Security implications</li>
+<li>Operational dependencies</li>
+<li>Recovery complexity</li>
+</ul>
+<p>The BIA is reviewed periodically and updated as the platform evolves.</p>
+<hr />
+<h2>7. Risk Assessment</h2>
+<p>Potential continuity risks include, but are not limited to:</p>
+<h3>Technology Risks</h3>
+<ul>
+<li>Cloud infrastructure failures</li>
+<li>Database corruption</li>
+<li>Network outages</li>
+<li>Authentication failures</li>
+<li>Software defects</li>
+<li>Cybersecurity incidents</li>
+</ul>
+<h3>Operational Risks</h3>
+<ul>
+<li>Personnel shortages</li>
+<li>Vendor failures</li>
+<li>Communication disruptions</li>
+<li>Utility outages</li>
+<li>Supply chain interruptions</li>
+</ul>
+<h3>Environmental Risks</h3>
+<ul>
+<li>Hurricanes</li>
+<li>Flooding</li>
+<li>Tornadoes</li>
+<li>Fire</li>
+<li>Severe weather</li>
+<li>Public health emergencies</li>
+</ul>
+<h3>External Risks</h3>
+<ul>
+<li>Internet backbone failures</li>
+<li>Third-party SaaS outages</li>
+<li>Government actions</li>
+<li>Widespread cyberattacks</li>
+<li>Telecommunications disruptions</li>
+</ul>
+<hr />
+<h2>8. Recovery Priorities</h2>
+<p>Business continuity activities prioritize:</p>
+<h2>1. Personnel safety</h2>
+<h2>2. Protection of Customer Data</h2>
+<h2>3. Security incident containment</h2>
+<h2>4. Restoration of authentication services</h2>
+<h2>5. Restoration of timekeeping services</h2>
+<h2>6. Payroll calculation services</h2>
+<h2>7. Administrative functions</h2>
+<h2>8. Reporting capabilities</h2>
+<h2>9. Customer communications</h2>
+<h2>10. Remaining business services</h2>
+<hr />
+<h2>9. Recovery Time Objectives (RTO)</h2>
+<p>The following operational targets guide recovery planning:</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th style="text-align: right;">Target RTO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Authentication</td>
+<td style="text-align: right;">4 hours</td>
+</tr>
+<tr>
+<td>Timekeeping Services</td>
+<td style="text-align: right;">4 hours</td>
+</tr>
+<tr>
+<td>Payroll Engine</td>
+<td style="text-align: right;">8 hours</td>
+</tr>
+<tr>
+<td>Customer Portal</td>
+<td style="text-align: right;">8 hours</td>
+</tr>
+<tr>
+<td>Reporting</td>
+<td style="text-align: right;">24 hours</td>
+</tr>
+<tr>
+<td>Documentation Portal</td>
+<td style="text-align: right;">48 hours</td>
+</tr>
+</tbody>
+</table>
+<p>These targets are planning objectives and may be adjusted based on operational circumstances.</p>
+<hr />
+<h2>10. Recovery Point Objectives (RPO)</h2>
+<p>The organization seeks to minimize potential data loss.</p>
+<p>Planning targets include:</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th style="text-align: right;">Target RPO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Timekeeping Database</td>
+<td style="text-align: right;">1 hour</td>
+</tr>
+<tr>
+<td>Payroll Data</td>
+<td style="text-align: right;">1 hour</td>
+</tr>
+<tr>
+<td>Customer Configuration</td>
+<td style="text-align: right;">4 hours</td>
+</tr>
+<tr>
+<td>Reporting Data</td>
+<td style="text-align: right;">24 hours</td>
+</tr>
+</tbody>
+</table>
+<p>Actual recovery capabilities may vary depending on the nature and scope of the disruption.</p>
+<hr />
+<h2>11. Continuity Strategies</h2>
+<p>LBS employs multiple strategies to improve operational resilience, including:</p>
+<ul>
+<li>Cloud-based infrastructure</li>
+<li>Automated backups</li>
+<li>Infrastructure as Code (IaC) where appropriate</li>
+<li>Geographic redundancy where supported</li>
+<li>Secure remote administration</li>
+<li>Vendor diversification where feasible</li>
+<li>Cross-training of personnel</li>
+<li>Documented operational procedures</li>
+</ul>
+<p>These strategies are reviewed and enhanced over time as the platform and customer base grow.</p>
+<h3>Part 2 – Crisis Management, Recovery Operations, and Communications</h3>
+<p><strong>Version:</strong> 1.0</p>
+<hr />
+<h2>12. Crisis Management Team (CMT)</h2>
+<p>Linton Business Solutions, LLC ("LBS") maintains a Crisis Management Team responsible for coordinating business continuity activities during significant operational disruptions.</p>
+<p>The Crisis Management Team is activated when an event materially impacts Work-A-Bee operations or requires executive coordination.</p>
+<h3>Primary Responsibilities</h3>
+<ul>
+<li>Assess the severity of the event</li>
+<li>Declare a business continuity event when appropriate</li>
+<li>Coordinate recovery activities</li>
+<li>Prioritize restoration of critical services</li>
+<li>Allocate personnel and resources</li>
+<li>Approve customer communications</li>
+<li>Monitor recovery progress</li>
+<li>Authorize return to normal operations</li>
+</ul>
+<hr />
+<h2>13. Crisis Management Roles</h2>
+<p>The following functional roles participate in continuity management. One individual may fulfill multiple roles depending on company size.</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Primary Responsibilities</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Executive Sponsor</td>
+<td>Strategic decisions, external communications, disaster declaration</td>
+</tr>
+<tr>
+<td>Business Continuity Coordinator</td>
+<td>Overall coordination of recovery activities</td>
+</tr>
+<tr>
+<td>Engineering Lead</td>
+<td>Application restoration, infrastructure recovery</td>
+</tr>
+<tr>
+<td>Security Lead</td>
+<td>Incident assessment, forensic coordination, security validation</td>
+</tr>
+<tr>
+<td>Customer Success Lead</td>
+<td>Customer communications, support coordination</td>
+</tr>
+<tr>
+<td>Operations Lead</td>
+<td>Vendor coordination, internal logistics</td>
+</tr>
+<tr>
+<td>Finance &amp; Administration</td>
+<td>Financial operations, insurance, vendor payments</td>
+</tr>
+</tbody>
+</table>
+<p>Each role should have a designated backup whenever practical.</p>
+<hr />
+<h2>14. Business Continuity Event Classification</h2>
+<p>Business disruptions are categorized to ensure an appropriate response.</p>
+<h3>Level 1 – Minor</h3>
+<p>Examples:</p>
+<ul>
+<li>Localized service degradation</li>
+<li>Isolated application defects</li>
+<li>Limited customer impact</li>
+</ul>
+<p>Typical Response:</p>
+<ul>
+<li>Operational team manages the issue</li>
+<li>Executive escalation generally not required</li>
+</ul>
+<hr />
+<h3>Level 2 – Significant</h3>
+<p>Examples:</p>
+<ul>
+<li>Regional cloud disruption</li>
+<li>Major application failure</li>
+<li>Authentication outage</li>
+<li>Large-scale customer impact</li>
+</ul>
+<p>Typical Response:</p>
+<ul>
+<li>Crisis Management Team activated</li>
+<li>Executive notification</li>
+<li>Customer communications initiated</li>
+</ul>
+<hr />
+<h3>Level 3 – Critical</h3>
+<p>Examples:</p>
+<ul>
+<li>Complete production outage</li>
+<li>Widespread cybersecurity incident</li>
+<li>Data center failure</li>
+<li>Ransomware event</li>
+<li>Catastrophic infrastructure failure</li>
+</ul>
+<p>Typical Response:</p>
+<ul>
+<li>Full Business Continuity Plan activation</li>
+<li>Executive oversight</li>
+<li>Continuous recovery operations</li>
+<li>Frequent customer updates</li>
+</ul>
+<hr />
+<h2>15. Disaster Declaration</h2>
+<p>A formal Business Continuity Event may be declared when an incident is expected to materially impair critical business operations.</p>
+<p>Factors considered include:</p>
+<ul>
+<li>Estimated duration</li>
+<li>Number of affected customers</li>
+<li>Operational impact</li>
+<li>Security implications</li>
+<li>Financial impact</li>
+<li>Regulatory obligations</li>
+<li>Public reputation</li>
+</ul>
+<p>Only authorized executive leadership may formally declare or conclude a disaster event.</p>
+<hr />
+<h2>16. Incident Coordination</h2>
+<p>Once activated, the Crisis Management Team will coordinate:</p>
+<ul>
+<li>Situation assessment</li>
+<li>Resource assignment</li>
+<li>Technical recovery</li>
+<li>Vendor engagement</li>
+<li>Customer communications</li>
+<li>Executive reporting</li>
+<li>Recovery tracking</li>
+</ul>
+<p>Operational priorities are reassessed throughout the incident.</p>
+<hr />
+<h2>17. Internal Communications</h2>
+<p>Clear communication is essential during business disruptions.</p>
+<p>Internal communications may include:</p>
+<ul>
+<li>Executive briefings</li>
+<li>Engineering status updates</li>
+<li>Security advisories</li>
+<li>Recovery milestones</li>
+<li>Operational decisions</li>
+<li>Action assignments</li>
+</ul>
+<p>Personnel are expected to report confirmed operational issues promptly through established internal channels.</p>
+<hr />
+<h2>18. Customer Communications</h2>
+<p>LBS is committed to providing timely and accurate information during significant service disruptions.</p>
+<p>Communications may include:</p>
+<ul>
+<li>Service interruption notices</li>
+<li>Maintenance advisories</li>
+<li>Status updates</li>
+<li>Estimated restoration timelines (when reasonably available)</li>
+<li>Recovery progress</li>
+<li>Incident resolution notices</li>
+</ul>
+<p>Communication channels may include:</p>
+<ul>
+<li>Email</li>
+<li>Administrative dashboard notifications</li>
+<li>Customer portal announcements</li>
+<li>Status page updates</li>
+<li>Customer Success outreach for enterprise customers</li>
+</ul>
+<hr />
+<h2>19. Media and Public Communications</h2>
+<p>Only authorized representatives may issue public statements regarding business continuity events.</p>
+<p>Public communications should:</p>
+<ul>
+<li>Be accurate</li>
+<li>Avoid speculation</li>
+<li>Protect confidential information</li>
+<li>Support customer confidence</li>
+<li>Comply with legal obligations</li>
+</ul>
+<p>Personnel should not communicate publicly regarding incidents unless authorized.</p>
+<hr />
+<h2>20. Alternate Work Locations</h2>
+<p>To support continuity of operations, LBS may utilize:</p>
+<ul>
+<li>Remote work arrangements</li>
+<li>Alternate office facilities</li>
+<li>Temporary workspaces</li>
+<li>Cloud-based collaboration tools</li>
+</ul>
+<p>Employees supporting critical operations should have secure remote access whenever practical.</p>
+<hr />
+<h2>21. Workforce Continuity</h2>
+<p>LBS seeks to minimize operational disruption caused by personnel shortages.</p>
+<p>Continuity measures may include:</p>
+<ul>
+<li>Cross-training</li>
+<li>Documented procedures</li>
+<li>Shared operational knowledge</li>
+<li>Backup personnel assignments</li>
+<li>Remote work capabilities</li>
+<li>Contractor support where appropriate</li>
+</ul>
+<p>Critical operational knowledge should not depend on a single individual.</p>
+<hr />
+<h2>22. Third-Party and Vendor Continuity</h2>
+<p>Work-A-Bee depends on selected third-party providers.</p>
+<p>Business continuity planning includes consideration of:</p>
+<ul>
+<li>Cloud infrastructure providers</li>
+<li>Payment processors</li>
+<li>Authentication providers</li>
+<li>Email delivery services</li>
+<li>Domain registration services</li>
+<li>Monitoring providers</li>
+<li>Customer communication platforms</li>
+</ul>
+<p>LBS monitors key vendor relationships and maintains contingency planning where practical.</p>
+<hr />
+<h2>23. Remote Operations</h2>
+<p>Critical business functions should be capable of operating remotely whenever feasible.</p>
+<p>Remote operational capabilities may include:</p>
+<ul>
+<li>Secure administrative access</li>
+<li>Cloud-based collaboration</li>
+<li>Ticket management</li>
+<li>Customer support</li>
+<li>Engineering activities</li>
+<li>Monitoring and alerting</li>
+<li>Incident coordination</li>
+</ul>
+<p>Remote access is subject to security controls described in the Security Policy.</p>
+<hr />
+<h2>24. Manual Workarounds</h2>
+<p>When automated systems are unavailable, temporary manual procedures may be implemented where feasible.</p>
+<p>Examples include:</p>
+<ul>
+<li>Manual customer communications</li>
+<li>Manual support ticket tracking</li>
+<li>Deferred payroll processing</li>
+<li>Temporary administrative approvals</li>
+<li>Offline operational documentation</li>
+</ul>
+<p>Manual procedures are intended only as temporary continuity measures until normal operations are restored.</p>
+<hr />
+<h2>25. Resource Management</h2>
+<p>During continuity events, resources are allocated according to business priorities.</p>
+<p>Priority is generally given to:</p>
+<h2>1. Customer safety and security</h2>
+<h2>2. Protection of Customer Data</h2>
+<h2>3. Restoration of production services</h2>
+<h2>4. Customer communications</h2>
+<h2>5. Regulatory obligations</h2>
+<h2>6. Financial operations</h2>
+<h2>7. Internal administrative functions</h2>
+<p>Resource allocation may be adjusted as conditions evolve.</p>
+<hr />
+<h2>26. Operational Recovery Milestones</h2>
+<p>Recovery activities generally proceed through the following stages:</p>
+<h2>1. Event identification</h2>
+<h2>2. Initial assessment</h2>
+<h2>3. Business continuity activation</h2>
+<h2>4. Resource mobilization</h2>
+<h2>5. Technical recovery</h2>
+<h2>6. Validation testing</h2>
+<h2>7. Customer communication</h2>
+<h2>8. Service restoration</h2>
+<h2>9. Operational stabilization</h2>
+<h2>10. Post-event review</h2>
+<p>Completion of one stage may overlap with subsequent stages based on operational needs.</p>
+<h3>Part 3 – Testing, Recovery Validation, Continuous Improvement, and Governance</h3>
+<p><strong>Version:</strong> 1.0</p>
+<hr />
+<h2>27. Recovery Validation</h2>
+<p>Before declaring a recovery complete, Linton Business Solutions, LLC ("LBS") will perform reasonable validation procedures to confirm that critical business functions have been restored.</p>
+<p>Validation activities may include:</p>
+<ul>
+<li>User authentication testing</li>
+<li>Employee clock-in and clock-out verification</li>
+<li>Time entry validation</li>
+<li>Payroll calculation verification</li>
+<li>Database integrity checks</li>
+<li>API connectivity testing</li>
+<li>Administrative portal functionality</li>
+<li>Reporting verification</li>
+<li>Security control validation</li>
+<li>Monitoring and alert confirmation</li>
+</ul>
+<p>Recovery is considered complete only after critical services have been verified as operating within acceptable parameters.</p>
+<hr />
+<h2>28. Return to Normal Operations</h2>
+<p>Following successful recovery, the Crisis Management Team will coordinate the transition from continuity operations back to standard business operations.</p>
+<p>This process includes:</p>
+<ul>
+<li>Confirming service stability</li>
+<li>Closing temporary workarounds</li>
+<li>Reinstating standard operating procedures</li>
+<li>Returning personnel to normal responsibilities</li>
+<li>Reviewing temporary security controls</li>
+<li>Updating operational documentation</li>
+<li>Communicating recovery completion to stakeholders</li>
+</ul>
+<p>Any temporary changes implemented during the event should be documented and either formally adopted or removed.</p>
+<hr />
+<h2>29. Post-Incident Review</h2>
+<p>Following significant business continuity events, LBS will conduct a structured post-incident review.</p>
+<p>The review should address:</p>
+<ul>
+<li>Timeline of events</li>
+<li>Root cause</li>
+<li>Business impact</li>
+<li>Customer impact</li>
+<li>Effectiveness of recovery actions</li>
+<li>Communication effectiveness</li>
+<li>Technology performance</li>
+<li>Vendor performance</li>
+<li>Opportunities for improvement</li>
+</ul>
+<p>Corrective actions will be documented, assigned, and tracked to completion.</p>
+<hr />
+<h2>30. Corrective Action Management</h2>
+<p>Recommendations identified during post-incident reviews should be evaluated and prioritized based on risk and business value.</p>
+<p>Corrective actions may include:</p>
+<ul>
+<li>Infrastructure improvements</li>
+<li>Process updates</li>
+<li>Security enhancements</li>
+<li>Documentation revisions</li>
+<li>Additional training</li>
+<li>Vendor changes</li>
+<li>Software improvements</li>
+<li>Monitoring enhancements</li>
+</ul>
+<p>Management will periodically review the status of corrective actions.</p>
+<hr />
+<h2>31. Business Continuity Testing</h2>
+<p>The effectiveness of this Business Continuity Plan depends on regular testing.</p>
+<p>Testing objectives include:</p>
+<ul>
+<li>Validating recovery procedures</li>
+<li>Confirming personnel readiness</li>
+<li>Identifying documentation gaps</li>
+<li>Measuring recovery performance</li>
+<li>Verifying communication processes</li>
+<li>Improving organizational resilience</li>
+</ul>
+<p>Testing results should be documented and reviewed by management.</p>
+<hr />
+<h2>32. Tabletop Exercises</h2>
+<p>LBS should conduct periodic tabletop exercises to evaluate decision-making and coordination during simulated disruption scenarios.</p>
+<p>Example scenarios include:</p>
+<ul>
+<li>Cloud provider outage</li>
+<li>Ransomware attack</li>
+<li>Database corruption</li>
+<li>Internet service interruption</li>
+<li>Identity provider failure</li>
+<li>Severe weather event</li>
+<li>Loss of key personnel</li>
+<li>Third-party vendor failure</li>
+</ul>
+<p>Tabletop exercises should identify lessons learned and opportunities to strengthen continuity procedures.</p>
+<hr />
+<h2>33. Technical Recovery Exercises</h2>
+<p>Where practical, technical recovery procedures should be periodically validated through controlled testing.</p>
+<p>Examples include:</p>
+<ul>
+<li>Backup restoration</li>
+<li>Database recovery</li>
+<li>Infrastructure deployment</li>
+<li>Disaster recovery failover</li>
+<li>Identity restoration</li>
+<li>Configuration recovery</li>
+<li>Application deployment validation</li>
+</ul>
+<p>Testing should avoid unnecessary disruption to production services.</p>
+<hr />
+<h2>34. Training and Awareness</h2>
+<p>Personnel with continuity responsibilities should receive training appropriate to their assigned roles.</p>
+<p>Training topics may include:</p>
+<ul>
+<li>Business continuity procedures</li>
+<li>Incident reporting</li>
+<li>Communication protocols</li>
+<li>Recovery responsibilities</li>
+<li>Remote work procedures</li>
+<li>Security obligations</li>
+<li>Disaster declaration process</li>
+</ul>
+<p>Training may be supplemented by exercises and periodic awareness reminders.</p>
+<hr />
+<h2>35. Documentation Management</h2>
+<p>Business continuity documentation should be:</p>
+<ul>
+<li>Accurate</li>
+<li>Current</li>
+<li>Version controlled</li>
+<li>Securely stored</li>
+<li>Accessible to authorized personnel during emergencies</li>
+</ul>
+<p>Supporting documentation may include:</p>
+<ul>
+<li>Recovery procedures</li>
+<li>Contact lists</li>
+<li>Vendor information</li>
+<li>Infrastructure diagrams</li>
+<li>Critical application inventory</li>
+<li>Communication templates</li>
+<li>Checklists</li>
+</ul>
+<hr />
+<h2>36. Records Retention</h2>
+<p>Records related to business continuity activities may include:</p>
+<ul>
+<li>Test results</li>
+<li>Exercise reports</li>
+<li>Incident reports</li>
+<li>Recovery logs</li>
+<li>Corrective action plans</li>
+<li>Communication records</li>
+<li>Disaster declarations</li>
+<li>Plan revisions</li>
+</ul>
+<p>Retention periods should align with legal, regulatory, contractual, and operational requirements.</p>
+<hr />
+<h2>37. Regulatory and Contractual Considerations</h2>
+<p>Business continuity activities should support applicable:</p>
+<ul>
+<li>Contractual commitments</li>
+<li>Privacy obligations</li>
+<li>Data protection requirements</li>
+<li>Industry standards</li>
+<li>Customer agreements</li>
+<li>Security policies</li>
+</ul>
+<p>Where customer contracts contain additional continuity requirements, those contractual obligations will govern for the applicable customer.</p>
+<hr />
+<h2>38. Continuous Improvement</h2>
+<p>Business continuity is an ongoing process.</p>
+<p>LBS will periodically evaluate:</p>
+<ul>
+<li>Emerging risks</li>
+<li>Operational changes</li>
+<li>Technology improvements</li>
+<li>Vendor changes</li>
+<li>Customer requirements</li>
+<li>Lessons learned</li>
+<li>Industry best practices</li>
+</ul>
+<p>Updates to this plan should reflect significant organizational or technical changes.</p>
+<hr />
+<h2>39. Plan Review</h2>
+<p>This Business Continuity Plan should be reviewed:</p>
+<ul>
+<li>At least annually</li>
+<li>Following significant incidents</li>
+<li>After major infrastructure changes</li>
+<li>Following organizational restructuring</li>
+<li>After major product releases</li>
+<li>When significant risks are identified</li>
+</ul>
+<p>Reviews should verify that the plan remains accurate and operationally effective.</p>
+<hr />
+<h2>40. Plan Distribution</h2>
+<p>This Business Continuity Plan will be made available to personnel with continuity responsibilities.</p>
+<p>Controlled copies may be distributed to:</p>
+<ul>
+<li>Executive Management</li>
+<li>Engineering Leadership</li>
+<li>Security Leadership</li>
+<li>Customer Success Leadership</li>
+<li>Operations Leadership</li>
+<li>Approved auditors or customers under appropriate confidentiality arrangements</li>
+</ul>
+<p>Recipients are responsible for protecting non-public operational information contained in this plan.</p>
+<hr />
+<h2>Appendix A – Emergency Contact Categories</h2>
+<p>During a continuity event, current contact information should be maintained for:</p>
+<ul>
+<li>Executive leadership</li>
+<li>Engineering leadership</li>
+<li>Security personnel</li>
+<li>Customer Success</li>
+<li>Operations</li>
+<li>Finance</li>
+<li>Legal counsel</li>
+<li>Insurance provider</li>
+<li>Cloud infrastructure provider</li>
+<li>Payment processor</li>
+<li>Identity provider</li>
+<li>Critical third-party vendors</li>
+<li>Emergency services (where applicable)</li>
+</ul>
+<p>Contact details should be stored separately from this public-facing version of the plan and reviewed regularly.</p>
+<hr />
+<h2>Appendix B – Business Continuity Recovery Checklist</h2>
+<p>The following checklist provides a high-level sequence for continuity operations:</p>
+<ol>
+<li>Identify and verify the disruption.</li>
+<li>Assess business impact.</li>
+<li>Determine event severity.</li>
+<li>Activate the Crisis Management Team if required.</li>
+<li>Protect personnel and critical assets.</li>
+<li>Preserve Customer Data and evidence, where applicable.</li>
+<li>Notify key internal stakeholders.</li>
+<li>Communicate with affected customers as appropriate.</li>
+<li>Restore Tier 1 services.</li>
+<li>Restore Tier 2 services.</li>
+<li>Validate system functionality.</li>
+<li>Resume normal operations.</li>
+<li>Conduct a post-incident review.</li>
+<li>Document lessons learned and corrective actions.</li>
+</ol>
+<hr />
+<h2>Appendix C – Critical Systems Inventory</h2>
+<p>The following systems should be maintained in an internal inventory with ownership and recovery information:</p>
+<ul>
+<li>Production application environment</li>
+<li>Authentication services</li>
+<li>Timekeeping database</li>
+<li>Payroll calculation engine</li>
+<li>Administrative portal</li>
+<li>Reporting services</li>
+<li>API services</li>
+<li>Customer support platform</li>
+<li>Billing and subscription systems</li>
+<li>Monitoring and alerting systems</li>
+<li>Backup repositories</li>
+<li>Source code repositories</li>
+<li>CI/CD pipeline</li>
+<li>Infrastructure-as-Code repositories</li>
+</ul>
+<p>The inventory should identify system owners, dependencies, recovery priorities, and recovery objectives.</p>
+<hr />
+<h2>Appendix D – Testing Schedule</h2>
+<p>Recommended minimum testing cadence:</p>
+<table>
+<thead>
+<tr>
+<th>Activity</th>
+<th>Frequency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Business Continuity Plan Review</td>
+<td>Annually</td>
+</tr>
+<tr>
+<td>Tabletop Exercise</td>
+<td>Semi-annually</td>
+</tr>
+<tr>
+<td>Backup Restoration Test</td>
+<td>Quarterly</td>
+</tr>
+<tr>
+<td>Disaster Recovery Exercise</td>
+<td>Annually</td>
+</tr>
+<tr>
+<td>Contact List Verification</td>
+<td>Quarterly</td>
+</tr>
+<tr>
+<td>Vendor Continuity Review</td>
+<td>Annually</td>
+</tr>
+<tr>
+<td>Infrastructure Recovery Validation</td>
+<td>Annually</td>
+</tr>
+<tr>
+<td>Corrective Action Review</td>
+<td>Quarterly</td>
+</tr>
+</tbody>
+</table>
+<p>Testing frequency may be adjusted based on business growth, contractual obligations, regulatory requirements, or significant platform changes.</p>
+<hr />
+<h2>Document Control</h2>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Business Continuity Plan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Product</td>
+<td>Work-A-Bee</td>
+</tr>
+<tr>
+<td>Owner</td>
+<td>Linton Business Solutions, LLC</td>
+</tr>
+<tr>
+<td>Version</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>Effective Date</td>
+<td>July 23, 2026</td>
+</tr>
+<tr>
+<td>Review Cycle</td>
+<td>Annual or after major operational changes</td>
+</tr>
+<tr>
+<td>Classification</td>
+<td>Internal Confidential</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Approval</h2>
+<p>This Business Continuity Plan is approved by executive management and serves as the governing framework for maintaining business operations during significant disruptions affecting the Work-A-Bee platform.</p>
+<p>It should be reviewed periodically to ensure continued effectiveness and alignment with organizational objectives.</p>
+{% endblock %}

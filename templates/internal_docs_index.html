@@ -1,0 +1,30 @@
+{% extends "internal_base.html" %}
+{% block title %}Internal Documentation{% endblock %}
+{% block internal_content %}
+  <h1>Internal Documentation</h1>
+  <p class="muted">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <p>This index is intentionally not linked from any public or customer-facing page. It is reachable only by direct URL - that is not real access control, so do not treat it as confidential storage.</p>
+
+  <h2>Governance Plans</h2>
+  <ul>
+    {% for endpoint, slug, template, title in real_docs %}
+      <li><a href="{{ url_for(endpoint) }}">{{ title }}</a></li>
+    {% endfor %}
+  </ul>
+
+  {% set sections = [] %}
+  {% for endpoint, slug, template, title, section in docs %}
+    {% if section not in sections %}{% set _ = sections.append(section) %}{% endif %}
+  {% endfor %}
+
+  {% for section in sections %}
+    <h2>{{ section }}</h2>
+    <ul>
+      {% for endpoint, slug, template, title, doc_section in docs %}
+        {% if doc_section == section %}
+          <li><a href="{{ url_for(endpoint) }}">{{ title }}</a></li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  {% endfor %}
+{% endblock %}

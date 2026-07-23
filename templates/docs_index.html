@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Documentation{% endblock %}
+{% block wrapclass %}wide{% endblock %}
+{% block content %}
+  <h1>Work-A-Beez Documentation</h1>
+  <p class="muted">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <p>Legal documents and customer-facing guides. See also the <a href="{{ url_for('trust_center') }}">Trust Center</a> for security and compliance documentation.</p>
+
+  <h2>Legal</h2>
+  <ul>
+    <li><a href="{{ url_for('terms_of_service') }}">Terms of Service</a></li>
+    <li><a href="{{ url_for('privacy_policy') }}">Privacy Policy</a></li>
+    <li><a href="{{ url_for('aup_policy') }}">Acceptable Use Policy</a></li>
+    {% for endpoint, url, template, title in docs[:5] %}
+      <li><a href="{{ url_for(endpoint) }}">{{ title }}</a></li>
+    {% endfor %}
+  </ul>
+
+  <h2>Customer Information</h2>
+  <ul>
+    {% for endpoint, url, template, title in docs[5:] %}
+      <li><a href="{{ url_for(endpoint) }}">{{ title }}</a></li>
+    {% endfor %}
+  </ul>
+{% endblock %}
