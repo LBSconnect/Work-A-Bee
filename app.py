@@ -4,7 +4,7 @@ import zlib
 from datetime import datetime, timedelta
 from functools import wraps
 
-from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g, Response, make_response
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g, Response, make_response, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -65,6 +65,16 @@ def _active_companies():
 @app.route("/")
 def clock_home():
     return render_template("index.html")
+
+
+@app.route("/robots.txt")
+def robots_txt():
+    return send_from_directory(app.static_folder, "robots.txt", mimetype="text/plain")
+
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    return send_from_directory(app.static_folder, "sitemap.xml", mimetype="application/xml")
 
 
 @app.route("/staff/login", methods=["GET", "POST"])

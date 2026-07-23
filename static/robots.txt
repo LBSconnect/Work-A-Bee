@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /signup
+Disallow: /admin
+Disallow: /staff
+Disallow: /clock
+Disallow: /org/
+
+Sitemap: https://www.workabeez.net/sitemap.xml
