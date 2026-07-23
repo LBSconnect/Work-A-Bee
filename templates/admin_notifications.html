@@ -1,0 +1,18 @@
+{% extends "admin_base.html" %}
+{% block title %}Notifications{% endblock %}
+{% block admin_content %}
+  <h1>Notifications</h1>
+
+  {% if items %}
+    {% for n in items %}
+      <div style="border:1px solid #e5e7eb; border-radius:8px; padding:14px 16px; margin-top:12px;{{ '' if n.read_at else ' background:#FFFDF5; border-color:#FDE68A;' }}">
+        <strong>{{ n.title }}</strong>
+        <p class="muted" style="margin-top:2px;">{{ n.created_at.strftime('%B %d, %Y %I:%M %p') }}</p>
+        {% if n.body %}<p style="margin-top:8px; white-space:pre-wrap;">{{ n.body }}</p>{% endif %}
+        {% if n.link %}<p style="margin-top:8px;"><a href="{{ n.link }}">View &rarr;</a></p>{% endif %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="muted">No notifications yet.</p>
+  {% endif %}
+{% endblock %}

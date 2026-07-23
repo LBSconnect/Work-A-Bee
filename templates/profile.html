@@ -1,0 +1,13 @@
+{% extends "employee_base.html" %}
+{% block title %}Profile{% endblock %}
+{% block employee_content %}
+  <h1>Profile</h1>
+  <table>
+    <tr><th>Employee ID</th><td>{{ employee.employee_code }}</td></tr>
+    <tr><th>Type</th><td>{{ (employee.worker_type or "employee")|capitalize }}</td></tr>
+    {% if employee.job_title %}<tr><th>Job Title</th><td>{{ employee.job_title }}</td></tr>{% endif %}
+    {% if department %}<tr><th>Department</th><td>{{ department }}</td></tr>{% endif %}
+    {% if employee.email %}<tr><th>Email</th><td>{{ employee.email }}</td></tr>{% endif %}
+    {% if employee.phone %}<tr><th>Phone</th><td>{{ employee.phone }}</td></tr>{% endif %}
+  </table>
+{% endblock %}

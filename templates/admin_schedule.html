@@ -21,16 +21,27 @@
       <tr><th>Employee</th><th>Time</th><th>Notes</th><th></th></tr>
       {% for s in shifts %}
       <tr>
-        <td>{{ s.employee_name }}</td>
+        <td>{{ s.employee_name }}{% if s.series_id %} <span title="Part of a weekly repeating series">🔁</span>{% endif %}</td>
         <td>{{ s.shift_start.strftime('%I:%M %p') }} &ndash; {{ s.shift_end.strftime('%I:%M %p') }}</td>
         <td class="muted">{{ s.notes or '' }}</td>
         <td>
           <a href="{{ url_for('admin_shift_edit', shift_id=s.id) }}">Edit</a>
           &middot;
+          <form method="post" action="{{ url_for('admin_shift_copy_4_weeks', shift_id=s.id) }}" style="display:inline;">
+            <button type="submit" class="secondary" style="margin:0; padding:2px 8px; font-size:12px;">Copy 4 weeks</button>
+          </form>
+          &middot;
           <form method="post" action="{{ url_for('admin_shift_delete', shift_id=s.id) }}"
                 onsubmit="return confirm('Delete this shift?');" style="display:inline;">
             <button type="submit" class="secondary" style="margin:0; padding:2px 8px; font-size:12px;">Delete</button>
           </form>
+          {% if s.series_id %}
+            &middot;
+            <form method="post" action="{{ url_for('admin_shift_series_end', series_id=s.series_id) }}"
+                  onsubmit="return confirm('End this repeating series? Already-scheduled shifts stay put.');" style="display:inline;">
+              <button type="submit" class="secondary" style="margin:0; padding:2px 8px; font-size:12px;">End series</button>
+            </form>
+          {% endif %}
         </td>
       </tr>
       {% endfor %}

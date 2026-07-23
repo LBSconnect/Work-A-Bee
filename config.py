@@ -14,6 +14,11 @@ MS_CLIENT_ID = os.environ.get("MS_CLIENT_ID", "")
 MS_CLIENT_SECRET = os.environ.get("MS_CLIENT_SECRET", "")
 MS_SENDER_EMAIL = os.environ.get("MS_SENDER_EMAIL", "")
 
+# Platform-wide transactional email (Postmark) for per-org notification emails -
+# one shared sending account, not per-customer credentials like the MS Graph report above.
+POSTMARK_SERVER_TOKEN = os.environ.get("POSTMARK_SERVER_TOKEN", "")
+NOTIFICATION_FROM_EMAIL = os.environ.get("NOTIFICATION_FROM_EMAIL", "")
+
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
 STRIPE_PRICE_STARTER = os.environ.get("STRIPE_PRICE_STARTER", "")

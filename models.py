@@ -303,6 +303,49 @@ def init_db():
                     created_at TIMESTAMP NOT NULL DEFAULT NOW()
                 )
             """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS recognitions (
+                    id SERIAL PRIMARY KEY,
+                    org_id INTEGER NOT NULL REFERENCES organizations(id),
+                    employee_id INTEGER NOT NULL REFERENCES employees(id),
+                    given_by_admin_id INTEGER REFERENCES admin_users(id),
+                    badge_type TEXT NOT NULL,
+                    note TEXT,
+                    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+                )
+            """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS shift_series (
+                    id SERIAL PRIMARY KEY,
+                    org_id INTEGER NOT NULL REFERENCES organizations(id),
+                    employee_id INTEGER NOT NULL REFERENCES employees(id),
+                    anchor_date DATE NOT NULL,
+                    start_time TIME NOT NULL,
+                    end_time TIME NOT NULL,
+                    notes TEXT,
+                    active BOOLEAN NOT NULL DEFAULT TRUE,
+                    created_by_admin_id INTEGER REFERENCES admin_users(id),
+                    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+                )
+            """)
+            conn.execute("""
+                ALTER TABLE shifts
+                    ADD COLUMN IF NOT EXISTS series_id INTEGER REFERENCES shift_series(id)
+            """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS notifications (
+                    id SERIAL PRIMARY KEY,
+                    org_id INTEGER NOT NULL REFERENCES organizations(id),
+                    employee_id INTEGER REFERENCES employees(id),
+                    admin_id INTEGER REFERENCES admin_users(id),
+                    kind TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    body TEXT,
+                    link TEXT,
+                    read_at TIMESTAMP,
+                    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+                )
+            """)
             conn.commit()
     except Exception:
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")

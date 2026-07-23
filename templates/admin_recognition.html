@@ -1,0 +1,42 @@
+{% extends "admin_base.html" %}
+{% block title %}Recognition{% endblock %}
+{% block admin_content %}
+  <h1>Recognition</h1>
+  <p class="muted">Give a teammate a shoutout. Employees also earn Perfect Attendance / Punctuality Pro badges automatically from real attendance data.</p>
+
+  <form method="post" style="border:1px solid #e5e7eb; border-radius:10px; padding:16px; margin:16px 0 24px; max-width:480px;">
+    <label>Employee</label>
+    <select name="employee_id" required>
+      <option value="" disabled selected>Choose an employee&hellip;</option>
+      {% for e in employees %}
+        <option value="{{ e.id }}">{{ e.name }}</option>
+      {% endfor %}
+    </select>
+    <label>Badge</label>
+    <select name="badge_type" required>
+      <option value="" disabled selected>Choose a badge&hellip;</option>
+      {% for key, b in badge_types.items() %}
+        <option value="{{ key }}">{{ b.icon }} {{ b.label }}</option>
+      {% endfor %}
+    </select>
+    <label>Note (optional)</label>
+    <textarea name="note" rows="2" placeholder="What did they do well?"></textarea>
+    <button type="submit" style="margin-top:12px;">Give recognition</button>
+  </form>
+
+  <h2 style="font-size:16px;">Recent recognition</h2>
+  {% if feed %}
+    {% for k in feed %}
+      <div style="border:1px solid #e5e7eb; border-radius:8px; padding:14px 16px; margin-top:12px; display:flex; gap:12px; align-items:flex-start;">
+        <span style="font-size:24px;">{{ badge_types[k.badge_type].icon if k.badge_type in badge_types else '🏅' }}</span>
+        <div>
+          <strong>{{ k.employee_name }}</strong> &middot; {{ badge_types[k.badge_type].label if k.badge_type in badge_types else k.badge_type }}
+          <p class="muted" style="margin-top:2px;">From {{ k.admin_username or 'admin' }} &middot; {{ k.created_at.strftime('%B %d, %Y') }}</p>
+          {% if k.note %}<p style="margin-top:8px; white-space:pre-wrap;">{{ k.note }}</p>{% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="muted">No recognition given yet.</p>
+  {% endif %}
+{% endblock %}

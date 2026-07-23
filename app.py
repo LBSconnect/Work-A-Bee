@@ -16,8 +16,10 @@ import billing
 import choices
 import config
 import devices as devices_mod
+import notifications
 import performance
 import plans
+import recognition
 import schedule
 from models import init_db, get_db
 from orgs import get_active_org, normalize_company_code
@@ -63,7 +65,10 @@ app.jinja_env.filters["avatar_color"] = avatar_color
 
 @app.context_processor
 def inject_unread_message_counts():
-    ctx = {"unread_messages_count": 0, "unread_admin_messages_count": 0}
+    ctx = {
+        "unread_messages_count": 0, "unread_admin_messages_count": 0,
+        "unread_notifications_count": 0, "unread_admin_notifications_count": 0,
+    }
     org_id = session.get("org_id")
     if not org_id:
         return ctx
@@ -81,6 +86,11 @@ def inject_unread_message_counts():
                     (emp_id,),
                 ).fetchone()
                 ctx["unread_messages_count"] = row["c"] if row else 0
+                row = conn.execute(
+                    "SELECT COUNT(*) AS c FROM notifications WHERE employee_id=%s AND read_at IS NULL",
+                    (emp_id,),
+                ).fetchone()
+                ctx["unread_notifications_count"] = row["c"] if row else 0
             if admin_id:
                 row = conn.execute(
                     "SELECT COUNT(*) AS c FROM messages m JOIN employees e ON m.employee_id = e.id "
@@ -89,6 +99,11 @@ def inject_unread_message_counts():
                     (org_id,),
                 ).fetchone()
                 ctx["unread_admin_messages_count"] = row["c"] if row else 0
+                row = conn.execute(
+                    "SELECT COUNT(*) AS c FROM notifications WHERE admin_id=%s AND read_at IS NULL",
+                    (admin_id,),
+                ).fetchone()
+                ctx["unread_admin_notifications_count"] = row["c"] if row else 0
     except Exception:
         pass
     return ctx
@@ -244,11 +259,6 @@ def clock_action():
             session.pop("employee_id", None)
             return redirect(url_for("staff_login"))
 
-        recent_entries = conn.execute(
-            "SELECT * FROM time_entries WHERE employee_id=%s ORDER BY clock_in DESC LIMIT 10",
-            (emp_id,),
-        ).fetchall()
-
         today = today_in(org["timezone"])
         period_start, period_end = get_period_bounds(today)
 
@@ -275,66 +285,20 @@ def clock_action():
             for day, hours in sorted(day_totals.items())
         ]
 
-        weekly_history = []
-        for start, end in get_prior_periods(period_start, count=4):
-            rows = calculate_payroll(conn, org, start, end)
-            mine = next((r for r in rows if r["employee_code"] == emp["employee_code"]), None)
-            weekly_history.append({
-                "period_start": start,
-                "period_end": end,
-                "hours": mine["total_hours"] if mine else 0.0,
-                "pay": mine["pay"] if mine else 0.0,
-            })
-
-        upcoming_shifts = conn.execute(
-            "SELECT * FROM shifts WHERE employee_id=%s AND shift_end >= %s ORDER BY shift_start LIMIT 5",
-            (emp_id, now_in(org["timezone"])),
-        ).fetchall()
-
-        offered_shift_ids = {
-            row["shift_id"] for row in conn.execute(
-                "SELECT shift_id FROM shift_swap_requests WHERE requested_by_employee_id=%s AND status='open'",
-                (emp_id,),
-            ).fetchall()
-        }
-
         today_shift = conn.execute(
             "SELECT * FROM shifts WHERE employee_id=%s AND shift_start::date=%s ORDER BY shift_start LIMIT 1",
             (emp_id, today),
         ).fetchone()
 
-        department = None
-        if emp.get("department_id"):
-            department = conn.execute(
-                "SELECT name FROM departments WHERE id=%s", (emp["department_id"],)
-            ).fetchone()
-
-        announcements = conn.execute(
-            "SELECT * FROM announcements WHERE org_id=%s ORDER BY created_at DESC LIMIT 5", (org["id"],)
-        ).fetchall()
-
-    history = []
-    for e in recent_entries:
-        hours = None
-        if e["clock_out"]:
-            hours = round((e["clock_out"] - e["clock_in"]).total_seconds() / 3600, 2)
-        history.append({"clock_in": e["clock_in"], "clock_out": e["clock_out"], "hours": hours})
-
     return render_template(
         "clock.html",
         employee=emp,
         is_clocked_in=bool(open_entry),
-        history=history,
-        weekly_history=weekly_history,
-        upcoming_shifts=upcoming_shifts,
         today_shift=today_shift,
-        department=department["name"] if department else None,
         current_week_hours=current_week_hours,
         current_week_pay=current_week_pay,
         chart_days=chart_days,
         now=now_in(org["timezone"]),
-        announcements=announcements,
-        offered_shift_ids=offered_shift_ids,
     )
 
 
@@ -466,6 +430,132 @@ def pto_requests_page():
     return render_template("pto_requests.html", employee=emp, requests=my_requests)
 
 
+@app.route("/schedule")
+def my_schedule_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if emp is None or org is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        upcoming_shifts = conn.execute(
+            "SELECT * FROM shifts WHERE employee_id=%s AND shift_end >= %s ORDER BY shift_start LIMIT 25",
+            (emp_id, now_in(org["timezone"])),
+        ).fetchall()
+
+        offered_shift_ids = {
+            row["shift_id"] for row in conn.execute(
+                "SELECT shift_id FROM shift_swap_requests WHERE requested_by_employee_id=%s AND status='open'",
+                (emp_id,),
+            ).fetchall()
+        }
+
+    return render_template(
+        "my_schedule.html", employee=emp, upcoming_shifts=upcoming_shifts, offered_shift_ids=offered_shift_ids,
+    )
+
+
+@app.route("/time-history")
+def time_history_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if emp is None or org is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        recent_entries = conn.execute(
+            "SELECT * FROM time_entries WHERE employee_id=%s ORDER BY clock_in DESC LIMIT 25",
+            (emp_id,),
+        ).fetchall()
+
+        period_start, _ = get_period_bounds(today_in(org["timezone"]))
+        weekly_history = []
+        for start, end in [(period_start, period_start + timedelta(days=6))] + get_prior_periods(period_start, count=8):
+            rows = calculate_payroll(conn, org, start, end)
+            mine = next((r for r in rows if r["employee_code"] == emp["employee_code"]), None)
+            weekly_history.append({
+                "period_start": start,
+                "period_end": end,
+                "hours": mine["total_hours"] if mine else 0.0,
+                "pay": mine["pay"] if mine else 0.0,
+            })
+
+    history = []
+    for e in recent_entries:
+        hours = None
+        if e["clock_out"]:
+            hours = round((e["clock_out"] - e["clock_in"]).total_seconds() / 3600, 2)
+        history.append({"clock_in": e["clock_in"], "clock_out": e["clock_out"], "hours": hours})
+
+    return render_template("time_history.html", employee=emp, history=history, weekly_history=weekly_history)
+
+
+@app.route("/profile")
+def profile_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        if emp is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        department = None
+        if emp.get("department_id"):
+            department = conn.execute(
+                "SELECT name FROM departments WHERE id=%s", (emp["department_id"],)
+            ).fetchone()
+
+    return render_template("profile.html", employee=emp, department=department["name"] if department else None)
+
+
+@app.route("/announcements")
+def employee_announcements_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        if emp is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        announcements = conn.execute(
+            "SELECT * FROM announcements WHERE org_id=%s ORDER BY created_at DESC LIMIT 25", (org_id,)
+        ).fetchall()
+
+    return render_template("employee_announcements.html", employee=emp, announcements=announcements)
+
+
 @app.route("/messages", methods=["GET", "POST"])
 def messages_page():
     emp_id = session.get("employee_id")
@@ -489,6 +579,10 @@ def messages_page():
             conn.execute(
                 "INSERT INTO messages (org_id, employee_id, sender_type, body) VALUES (%s,%s,'employee',%s)",
                 (org_id, emp_id, body),
+            )
+            notifications.notify_admins(
+                conn, org_id, "message_from_employee", f"New message from {emp['name']}",
+                body=body[:200], link=url_for("admin_message_thread", employee_id=emp_id),
             )
             conn.commit()
             return redirect(url_for("messages_page"))
@@ -529,6 +623,68 @@ def performance_page():
         summary = performance.summarize_attendance(rows)
 
     return render_template("performance.html", employee=emp, summary=summary, rows=rows)
+
+
+@app.route("/recognition")
+def recognition_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if emp is None or org is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        rows = performance.shift_attendance(conn, org_id, now_in(org["timezone"]), weeks=8, employee_id=emp_id)
+        summary = performance.summarize_attendance(rows)
+        earned = recognition.automated_badges(summary)
+
+        kudos = conn.execute(
+            "SELECT r.*, a.username AS admin_username FROM recognitions r "
+            "LEFT JOIN admin_users a ON r.given_by_admin_id = a.id "
+            "WHERE r.employee_id=%s ORDER BY r.created_at DESC",
+            (emp_id,),
+        ).fetchall()
+
+    return render_template(
+        "recognition.html", employee=emp, earned_badges=earned, kudos=kudos,
+        badge_types=recognition.BADGE_TYPES,
+    )
+
+
+@app.route("/notifications")
+def notifications_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        if emp is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        items = conn.execute(
+            "SELECT * FROM notifications WHERE employee_id=%s ORDER BY created_at DESC LIMIT 50",
+            (emp_id,),
+        ).fetchall()
+        conn.execute(
+            "UPDATE notifications SET read_at=NOW() WHERE employee_id=%s AND read_at IS NULL", (emp_id,)
+        )
+        conn.commit()
+
+    return render_template("notifications.html", employee=emp, items=items)
 
 
 @app.route("/shifts/<int:shift_id>/offer-swap", methods=["POST"])
@@ -609,6 +765,9 @@ def shift_swap_claim(swap_id):
             flash("You can't claim your own shift offer.")
             return redirect(url_for("shift_marketplace"))
 
+        claimer = conn.execute("SELECT name FROM employees WHERE id=%s", (emp_id,)).fetchone()
+        shift = conn.execute("SELECT * FROM shifts WHERE id=%s", (swap["shift_id"],)).fetchone()
+
         conn.execute("UPDATE shifts SET employee_id=%s WHERE id=%s", (emp_id, swap["shift_id"]))
         conn.execute(
             "UPDATE shift_swap_requests SET status='claimed', claimed_by_employee_id=%s, claimed_at=NOW() "
@@ -616,6 +775,13 @@ def shift_swap_claim(swap_id):
             (emp_id, swap_id),
         )
         audit.log(conn, org_id, "employee", emp_id, "shift.swap_claimed", f"shift {swap['shift_id']}")
+        notifications.notify_employee(
+            conn, org_id, swap["requested_by_employee_id"], "shift_claimed",
+            f"{claimer['name']} claimed your {shift['shift_start'].strftime('%a %b %d')} shift",
+            body=f"{claimer['name']} picked up the shift you offered for swap "
+                 f"({shift['shift_start'].strftime('%I:%M %p')} - {shift['shift_end'].strftime('%I:%M %p')}).",
+            link=url_for("clock_action"),
+        )
         conn.commit()
     flash("Shift claimed! It's now on your schedule.")
     return redirect(url_for("shift_marketplace"))
@@ -1045,6 +1211,14 @@ def admin_schedule():
     days = schedule.week_days(week_start)
 
     with get_db() as conn:
+        active_series = conn.execute(
+            "SELECT * FROM shift_series WHERE org_id=%s AND active=TRUE", (g.org["id"],)
+        ).fetchall()
+        horizon = max(today_in(g.org["timezone"]) + timedelta(weeks=schedule.SERIES_GENERATE_WEEKS_AHEAD), week_end)
+        for series in active_series:
+            schedule.generate_series_occurrences(conn, series, horizon)
+        conn.commit()
+
         shifts = conn.execute(
             "SELECT s.*, e.name AS employee_name FROM shifts s "
             "JOIN employees e ON s.employee_id = e.id "
@@ -1084,6 +1258,7 @@ def admin_shift_new():
         start_raw = request.form.get("shift_start", "").strip()
         end_raw = request.form.get("shift_end", "").strip()
         notes = request.form.get("notes", "").strip()
+        repeat_weekly = request.form.get("repeat_weekly") == "on"
 
         with get_db() as conn:
             emp = conn.execute(
@@ -1106,17 +1281,37 @@ def admin_shift_new():
             return render_template("admin_shift_form.html", employees=employees, shift=None, default_date=default_date)
 
         with get_db() as conn:
-            conn.execute(
-                "INSERT INTO shifts (org_id, employee_id, shift_start, shift_end, notes, created_by_admin_id) "
-                "VALUES (%s, %s, %s, %s, %s, %s)",
-                (g.org["id"], emp_id, shift_start, shift_end, notes or None, g.admin["id"]),
-            )
-            audit.log(
-                conn, g.org["id"], "admin", g.admin["id"], "shift.created",
-                f"{emp['name']}: {shift_start} - {shift_end}",
-            )
+            if repeat_weekly:
+                conn.execute(
+                    "INSERT INTO shift_series (org_id, employee_id, anchor_date, start_time, end_time, notes, "
+                    "created_by_admin_id) VALUES (%s,%s,%s,%s,%s,%s,%s)",
+                    (g.org["id"], emp_id, shift_start.date(), shift_start.time(), shift_end.time(),
+                     notes or None, g.admin["id"]),
+                )
+                series = conn.execute(
+                    "SELECT * FROM shift_series WHERE org_id=%s AND employee_id=%s AND anchor_date=%s "
+                    "ORDER BY id DESC LIMIT 1",
+                    (g.org["id"], emp_id, shift_start.date()),
+                ).fetchone()
+                horizon = shift_start.date() + timedelta(weeks=schedule.SERIES_GENERATE_WEEKS_AHEAD)
+                schedule.generate_series_occurrences(conn, series, horizon)
+                audit.log(
+                    conn, g.org["id"], "admin", g.admin["id"], "shift.series_created",
+                    f"{emp['name']}: weekly from {shift_start.date()} {shift_start.time()}-{shift_end.time()}",
+                )
+                flash(f"Repeating weekly shift created for {emp['name']} - it'll keep going until you end the series.")
+            else:
+                conn.execute(
+                    "INSERT INTO shifts (org_id, employee_id, shift_start, shift_end, notes, created_by_admin_id) "
+                    "VALUES (%s, %s, %s, %s, %s, %s)",
+                    (g.org["id"], emp_id, shift_start, shift_end, notes or None, g.admin["id"]),
+                )
+                audit.log(
+                    conn, g.org["id"], "admin", g.admin["id"], "shift.created",
+                    f"{emp['name']}: {shift_start} - {shift_end}",
+                )
+                flash(f"Shift added for {emp['name']}.")
             conn.commit()
-        flash(f"Shift added for {emp['name']}.")
         return redirect(url_for("admin_schedule", week=schedule.week_bounds(shift_start.date())[0].isoformat()))
 
     return render_template("admin_shift_form.html", employees=employees, shift=None, default_date=default_date)
@@ -1201,6 +1396,64 @@ def admin_shift_delete(shift_id):
         conn.commit()
     flash("Shift deleted.")
     return redirect(url_for("admin_schedule", week=schedule.week_bounds(shift["shift_start"].date())[0].isoformat()))
+
+
+@app.route("/admin/schedule/<int:shift_id>/copy-4-weeks", methods=["POST"])
+@admin_required
+def admin_shift_copy_4_weeks(shift_id):
+    with get_db() as conn:
+        shift = conn.execute(
+            "SELECT s.*, e.name AS employee_name FROM shifts s JOIN employees e ON s.employee_id = e.id "
+            "WHERE s.id=%s AND s.org_id=%s",
+            (shift_id, g.org["id"]),
+        ).fetchone()
+        if shift is None:
+            flash("Shift not found.")
+            return redirect(url_for("admin_schedule"))
+
+        created = 0
+        for weeks_out in (1, 2, 3, 4):
+            new_start = shift["shift_start"] + timedelta(weeks=weeks_out)
+            new_end = shift["shift_end"] + timedelta(weeks=weeks_out)
+            exists = conn.execute(
+                "SELECT 1 FROM shifts WHERE employee_id=%s AND shift_start=%s",
+                (shift["employee_id"], new_start),
+            ).fetchone()
+            if exists:
+                continue
+            conn.execute(
+                "INSERT INTO shifts (org_id, employee_id, shift_start, shift_end, notes, created_by_admin_id) "
+                "VALUES (%s,%s,%s,%s,%s,%s)",
+                (g.org["id"], shift["employee_id"], new_start, new_end, shift["notes"], g.admin["id"]),
+            )
+            created += 1
+        audit.log(
+            conn, g.org["id"], "admin", g.admin["id"], "shift.copied_4_weeks",
+            f"{shift['employee_name']}: {shift['shift_start']} x{created}",
+        )
+        conn.commit()
+    flash(f"Copied this shift to the next 4 weeks ({created} new shift{'s' if created != 1 else ''} added).")
+    return redirect(url_for("admin_schedule", week=schedule.week_bounds(shift["shift_start"].date())[0].isoformat()))
+
+
+@app.route("/admin/schedule/series/<int:series_id>/end", methods=["POST"])
+@admin_required
+def admin_shift_series_end(series_id):
+    with get_db() as conn:
+        series = conn.execute(
+            "SELECT s.*, e.name AS employee_name FROM shift_series s JOIN employees e ON s.employee_id = e.id "
+            "WHERE s.id=%s AND s.org_id=%s",
+            (series_id, g.org["id"]),
+        ).fetchone()
+        if series is None:
+            flash("Series not found.")
+            return redirect(url_for("admin_schedule"))
+
+        conn.execute("UPDATE shift_series SET active=FALSE WHERE id=%s", (series_id,))
+        audit.log(conn, g.org["id"], "admin", g.admin["id"], "shift.series_ended", series["employee_name"])
+        conn.commit()
+    flash(f"Ended the repeating series for {series['employee_name']}. Already-scheduled shifts are untouched.")
+    return redirect(url_for("admin_schedule"))
 
 
 def _send_current_period_report(org):
@@ -1362,6 +1615,12 @@ def admin_pto_approve(request_id):
             (req["hours"], req["employee_id"]),
         )
         audit.log(conn, g.org["id"], "admin", g.admin["id"], "pto.approved", f"{req['employee_name']}: {req['hours']}h")
+        notifications.notify_employee(
+            conn, g.org["id"], req["employee_id"], "pto_approved",
+            "Your time off request was approved",
+            body=f"{req['start_date'].strftime('%b %d')} - {req['end_date'].strftime('%b %d')} ({req['hours']}h) approved.",
+            link=url_for("pto_requests_page"),
+        )
         conn.commit()
     flash(f"Approved {req['employee_name']}'s time off request.")
     return redirect(url_for("admin_pto"))
@@ -1385,6 +1644,12 @@ def admin_pto_deny(request_id):
             (g.admin["id"], request_id),
         )
         audit.log(conn, g.org["id"], "admin", g.admin["id"], "pto.denied", f"{req['employee_name']}: {req['hours']}h")
+        notifications.notify_employee(
+            conn, g.org["id"], req["employee_id"], "pto_denied",
+            "Your time off request was denied",
+            body=f"{req['start_date'].strftime('%b %d')} - {req['end_date'].strftime('%b %d')} ({req['hours']}h) denied.",
+            link=url_for("pto_requests_page"),
+        )
         conn.commit()
     flash(f"Denied {req['employee_name']}'s time off request.")
     return redirect(url_for("admin_pto"))
@@ -1430,6 +1695,10 @@ def admin_message_thread(employee_id):
                 "VALUES (%s,%s,'admin',%s,%s)",
                 (g.org["id"], employee_id, g.admin["id"], body),
             )
+            notifications.notify_employee(
+                conn, g.org["id"], employee_id, "message_from_admin", "New message from your manager",
+                body=body[:200], link=url_for("messages_page"),
+            )
             conn.commit()
             return redirect(url_for("admin_message_thread", employee_id=employee_id))
 
@@ -1470,6 +1739,77 @@ def admin_performance_employee(employee_id):
         )
         summary = performance.summarize_attendance(rows)
     return render_template("admin_performance_employee.html", employee=emp, summary=summary, rows=rows)
+
+
+@app.route("/admin/recognition", methods=["GET", "POST"])
+@admin_required
+def admin_recognition():
+    if request.method == "POST":
+        try:
+            employee_id = int(request.form.get("employee_id", ""))
+        except ValueError:
+            flash("Choose an employee.")
+            return redirect(url_for("admin_recognition"))
+        badge_type = request.form.get("badge_type", "")
+        note = request.form.get("note", "").strip()
+        if badge_type not in recognition.BADGE_TYPES:
+            flash("Choose a valid badge.")
+            return redirect(url_for("admin_recognition"))
+
+        with get_db() as conn:
+            emp = conn.execute(
+                "SELECT * FROM employees WHERE id=%s AND org_id=%s", (employee_id, g.org["id"])
+            ).fetchone()
+            if emp is None:
+                flash("Employee not found.")
+                return redirect(url_for("admin_recognition"))
+            conn.execute(
+                "INSERT INTO recognitions (org_id, employee_id, given_by_admin_id, badge_type, note) "
+                "VALUES (%s,%s,%s,%s,%s)",
+                (g.org["id"], employee_id, g.admin["id"], badge_type, note or None),
+            )
+            audit.log(conn, g.org["id"], "admin", g.admin["id"], "recognition.given",
+                       f"{emp['name']}: {recognition.BADGE_TYPES[badge_type]['label']}")
+            badge_label = recognition.BADGE_TYPES[badge_type]["label"]
+            notifications.notify_employee(
+                conn, g.org["id"], employee_id, "recognition_given",
+                f"You earned the {badge_label} badge!",
+                body=note or None, link=url_for("recognition_page"),
+            )
+            conn.commit()
+        flash(f"Gave {emp['name']} the {recognition.BADGE_TYPES[badge_type]['label']} badge.")
+        return redirect(url_for("admin_recognition"))
+
+    with get_db() as conn:
+        employees = conn.execute(
+            "SELECT id, name FROM employees WHERE org_id=%s AND active=1 ORDER BY name", (g.org["id"],)
+        ).fetchall()
+        feed = conn.execute(
+            "SELECT r.*, e.name AS employee_name, a.username AS admin_username FROM recognitions r "
+            "JOIN employees e ON r.employee_id = e.id "
+            "LEFT JOIN admin_users a ON r.given_by_admin_id = a.id "
+            "WHERE r.org_id=%s ORDER BY r.created_at DESC LIMIT 50",
+            (g.org["id"],),
+        ).fetchall()
+
+    return render_template(
+        "admin_recognition.html", employees=employees, feed=feed, badge_types=recognition.BADGE_TYPES,
+    )
+
+
+@app.route("/admin/notifications")
+@admin_required
+def admin_notifications():
+    with get_db() as conn:
+        items = conn.execute(
+            "SELECT * FROM notifications WHERE admin_id=%s ORDER BY created_at DESC LIMIT 50",
+            (g.admin["id"],),
+        ).fetchall()
+        conn.execute(
+            "UPDATE notifications SET read_at=NOW() WHERE admin_id=%s AND read_at IS NULL", (g.admin["id"],)
+        )
+        conn.commit()
+    return render_template("admin_notifications.html", items=items)
 
 
 @app.route("/admin/settings", methods=["GET", "POST"])

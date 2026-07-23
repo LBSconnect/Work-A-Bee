@@ -246,6 +246,26 @@ th { background: #f9fafb; }
 .admin-stat-cards { margin-bottom: 8px; }
 .stat-card-sub { font-size: 11px; color: #9ca3af; margin-top: 4px; }
 
+.quick-actions-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px; margin: 16px 0 24px;
+}
+.quick-action-card {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 16px 10px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
+  text-decoration: none; color: #1f2937; text-align: center;
+  transition: box-shadow 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+}
+.quick-action-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-2px); border-color: var(--bee-yellow);
+}
+.quick-action-icon {
+  width: 44px; height: 44px; border-radius: 50%; background: #FFF8E1;
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.quick-action-card .badge.unread { position: static; margin-left: 2px; }
+.quick-action-label { font-size: 12px; font-weight: 600; }
+
 .admin-panels-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 8px 0 8px; }
 .dash-panel {
   background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px;
