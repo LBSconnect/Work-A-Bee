@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Terms of Service{% endblock %}
+{% block wrapclass %}wide{% endblock %}
+{% block content %}
+  <div class="flash">
+    <strong>Draft terms.</strong> Structured the way established workforce-management providers (Workday, ADP, Paycom) structure theirs, but this is a starting point, not a lawyer-reviewed contract. Have it reviewed before relying on it, and fill in the bracketed details ([Your Company Legal Name], [Your State/Country]) for your business.
+  </div>
+
+  <h1>Terms of Service</h1>
+  <p class="muted">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+
+  <h2>1. Acceptance of terms</h2>
+  <p>Work-A-Bee is provided by [Your Company Legal Name] ("we", "us"). By creating a company account or using Work-A-Bee, you agree to these terms on behalf of your business ("Company", "you"). If you don't agree, don't use the service.</p>
+
+  <h2>2. The service</h2>
+  <p>Work-A-Bee lets a Company track employee clock-ins/outs from authorized devices, manage timesheets, and generate payroll reports. Work-A-Bee is a tool to help with these tasks &mdash; it is not a substitute for legal, tax, or payroll advice, and your Company remains responsible for complying with applicable wage, hour, and labor laws.</p>
+
+  <h2>3. Accounts &amp; responsibilities</h2>
+  <p>Your Company is responsible for: the accuracy of the company, employee, and payroll information entered; keeping admin credentials and employee PINs confidential; choosing which computers to authorize as trusted clock-in devices; and giving its employees any notice required by law before collecting their time and attendance data.</p>
+
+  <h2>4. Acceptable use</h2>
+  <p>You agree not to: use Work-A-Bee to store data you don't have the right to collect; misrepresent hours worked; attempt to access another company's data; bypass or defeat device authorization; or interfere with the security or normal operation of the service.</p>
+
+  <h2>5. Intellectual property</h2>
+  <p>We own Work-A-Bee's software, design, and branding. Your Company owns the data it enters (employee records, time entries, payroll data) and grants us only the rights needed to store and process it in order to provide the service.</p>
+
+  <h2>6. Plans &amp; fees</h2>
+  <p>Work-A-Bee offers Starter, Growth, and Business plans as described on our <a href="{{ url_for('pricing_page') }}">Pricing page</a>. All plans are currently free for a company's first 90 days, regardless of which plan is selected. We do not collect payment today; if that changes, we'll provide advance notice and clear pricing before any charges apply to your account.</p>
+
+  <h2>7. Service availability &amp; disclaimer of warranties</h2>
+  <p>We aim to keep the service available and your data intact, but Work-A-Bee is provided "as is" and "as available," without warranties of any kind, express or implied, including merchantability or fitness for a particular purpose.</p>
+
+  <h2>8. Limitation of liability</h2>
+  <p>To the fullest extent permitted by law, [Your Company Legal Name] is not liable for indirect, incidental, or consequential damages (including lost profits or lost data) arising from use of, or inability to use, the service.</p>
+
+  <h2>9. Termination</h2>
+  <p>You may stop using Work-A-Bee at any time. We may suspend or terminate an account that violates these terms or poses a security risk to the service or other Companies' data.</p>
+
+  <h2>10. Changes to these terms</h2>
+  <p>We may update these terms as the product evolves. Continued use after an update means you accept the revised terms.</p>
+
+  <h2>11. Governing law</h2>
+  <p>These terms are governed by the laws of [Your State/Country], without regard to conflict-of-law principles, and any disputes will be resolved in the courts located in [Your State/Country].</p>
+
+  <h2>12. Contact</h2>
+  <p>Questions about these terms? Email <a href="mailto:info@lbsconnect.net">info@lbsconnect.net</a>.</p>
+{% endblock %}

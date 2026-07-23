@@ -13,6 +13,7 @@ import audit
 import choices
 import config
 import devices as devices_mod
+import plans
 from models import init_db, get_db
 from orgs import get_active_org, normalize_company_code
 from payroll import get_period_bounds, calculate_payroll, get_period_entries, get_prior_periods
@@ -75,6 +76,21 @@ def robots_txt():
 @app.route("/sitemap.xml")
 def sitemap_xml():
     return send_from_directory(app.static_folder, "sitemap.xml", mimetype="application/xml")
+
+
+@app.route("/privacy")
+def privacy_policy():
+    return render_template("privacy.html", updated=datetime.now().date())
+
+
+@app.route("/terms")
+def terms_of_service():
+    return render_template("terms.html", updated=datetime.now().date())
+
+
+@app.route("/pricing")
+def pricing_page():
+    return render_template("pricing.html", plans=plans)
 
 
 @app.route("/staff/login", methods=["GET", "POST"])
@@ -417,6 +433,19 @@ def admin_employees():
 @admin_required
 def admin_employee_new():
     if request.method == "POST":
+        limit = plans.employee_limit(g.org)
+        if limit is not None:
+            with get_db() as conn:
+                active_count = conn.execute(
+                    "SELECT COUNT(*) AS c FROM employees WHERE org_id=%s AND active=1", (g.org["id"],)
+                ).fetchone()["c"]
+            if active_count >= limit:
+                flash(
+                    f"Your {plans.get_plan(g.org)['label']} plan is limited to {limit} active employees. "
+                    f"Upgrade your plan on the Company Settings page to add more."
+                )
+                return redirect(url_for("admin_employees"))
+
         code = request.form["employee_code"].strip()
         name = request.form["name"].strip()
         worker_type = request.form["worker_type"]
@@ -600,6 +629,18 @@ def admin_devices():
         action = request.form.get("action")
         with get_db() as conn:
             if action == "register":
+                limit = plans.device_limit(g.org)
+                if limit is not None:
+                    active_count = conn.execute(
+                        "SELECT COUNT(*) AS c FROM devices WHERE org_id=%s AND status='active'", (g.org["id"],)
+                    ).fetchone()["c"]
+                    if active_count >= limit:
+                        flash(
+                            f"Your {plans.get_plan(g.org)['label']} plan is limited to {limit} authorized "
+                            f"device{'s' if limit != 1 else ''}. Upgrade your plan on the Company Settings page to add more."
+                        )
+                        return redirect(url_for("admin_devices"))
+
                 name = request.form.get("device_name", "").strip() or "Office Computer"
                 dev_id, raw_token = devices_mod.register_device(conn, g.org["id"], name, g.admin["id"])
                 audit.log(conn, g.org["id"], "admin", g.admin["id"], "device.registered", name)
@@ -678,7 +719,7 @@ def admin_settings():
 
         if errors:
             return render_template(
-                "admin_settings.html", org={**org, **fields}, errors=errors, choices=choices
+                "admin_settings.html", org={**org, **fields}, errors=errors, choices=choices, plans=plans
             )
 
         with get_db() as conn:
@@ -707,7 +748,23 @@ def admin_settings():
         flash("Company profile updated.")
         return redirect(url_for("admin_settings"))
 
-    return render_template("admin_settings.html", org=org, errors=errors, choices=choices)
+    return render_template("admin_settings.html", org=org, errors=errors, choices=choices, plans=plans)
+
+
+@app.route("/admin/plan", methods=["POST"])
+@admin_required
+def admin_plan_update():
+    plan_key = request.form.get("plan", "")
+    if plan_key not in plans.PLANS:
+        flash("Unknown plan selected.")
+        return redirect(url_for("admin_settings"))
+
+    with get_db() as conn:
+        conn.execute("UPDATE organizations SET plan=%s WHERE id=%s", (plan_key, g.org["id"]))
+        audit.log(conn, g.org["id"], "admin", g.admin["id"], "org.plan_changed", plan_key)
+        conn.commit()
+    flash(f"Plan changed to {plans.PLANS[plan_key]['label']}.")
+    return redirect(url_for("admin_settings"))
 
 
 @app.route("/org/<int:org_id>/logo")

@@ -56,7 +56,11 @@ def _wrap(token, body):
 
 @wizard.route("/signup", methods=["GET"])
 def signup_entry():
-    return redirect(url_for("wizard.step_company"))
+    token, draft = _ensure_draft()
+    plan = request.args.get("plan")
+    if plan in ("starter", "growth", "business"):
+        save_step(token, {"plan": plan})
+    return _wrap(token, redirect(url_for("wizard.step_company")))
 
 
 @wizard.route("/signup/restart")
@@ -428,6 +432,7 @@ def step_review():
     payroll = data.get("payroll", {})
     employees = data.get("employees", [])
     device = data.get("device") or {}
+    plan = data.get("plan") if data.get("plan") in ("starter", "growth", "business") else "starter"
 
     if request.method == "POST":
         missing = []
@@ -455,8 +460,8 @@ def step_review():
                     "timezone, currency, week_starts_on, payroll_frequency, default_shift_minutes, "
                     "overtime_rule, overtime_threshold_hours, default_hourly_rate, "
                     "allow_employee_specific_rates, round_clock_minutes, auto_lunch_deduction, "
-                    "lunch_duration_minutes, allow_paid_breaks, report_recipients, onboarding_completed_at) "
-                    "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW())",
+                    "lunch_duration_minutes, allow_paid_breaks, report_recipients, plan, onboarding_completed_at) "
+                    "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW())",
                     (next_id, code, company["name"], company.get("dba_name") or None,
                      company.get("business_type") or None, company.get("industry") or None,
                      company.get("address_line1"), company.get("city") or None, company.get("state") or None,
@@ -469,7 +474,7 @@ def step_review():
                      settings_.get("overtime_threshold_hours"), payroll.get("default_hourly_rate", 16.00),
                      payroll.get("allow_employee_specific_rates", True), payroll.get("round_clock_minutes", 0),
                      payroll.get("auto_lunch_deduction", False), payroll.get("lunch_duration_minutes", 30),
-                     payroll.get("allow_paid_breaks", False), admin.get("email")),
+                     payroll.get("allow_paid_breaks", False), admin.get("email"), plan),
                 )
                 org_id = next_id
                 print(f"[wizard] checkpoint: organizations insert OK, org_id={org_id}")
