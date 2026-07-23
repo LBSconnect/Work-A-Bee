@@ -437,9 +437,9 @@ def step_review():
     if request.method == "POST":
         missing = []
         if not company.get("name"):
-            missing.append("Company name is missing — go back to Step 1.")
+            missing.append("Company name is missing. Go back to Step 1.")
         if not admin.get("email") or not admin.get("password_hash"):
-            missing.append("Administrator account is incomplete — go back to Step 2.")
+            missing.append("Administrator account is incomplete. Go back to Step 2.")
         if missing:
             for m in missing:
                 flash(m)

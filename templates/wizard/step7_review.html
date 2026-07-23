@@ -1,5 +1,5 @@
 {% extends "wizard/base.html" %}
-{% block title %}Sign Up — Review & Launch{% endblock %}
+{% block title %}Sign Up: Review & Launch{% endblock %}
 {% block step_content %}
   <h1>Review &amp; Launch</h1>
 
@@ -43,11 +43,11 @@
     {% endfor %}
   </table>
   {% else %}
-  <p class="muted">None added — you can add employees after launch.</p>
+  <p class="muted">None added. You can add employees after launch.</p>
   {% endif %}
 
   <h2 style="margin-top:24px;">Authorized Devices</h2>
-  <p class="muted">{% if device.register %}{{ device.name }} (this computer){% else %}None registered yet — clock-in stays open until you register a device.{% endif %}</p>
+  <p class="muted">{% if device.register %}{{ device.name }} (this computer){% else %}None registered yet. Clock-in stays open until you register a device.{% endif %}</p>
 
   <form method="post" style="margin-top:32px;">
     <button type="submit">Create Company</button>

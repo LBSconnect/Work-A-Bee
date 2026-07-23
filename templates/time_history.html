@@ -18,7 +18,7 @@
             <span class="muted">In progress</span>
           {% endif %}
         </td>
-        <td>{% if h.hours is not none %}{{ "%.2f"|format(h.hours) }}{% else %}&mdash;{% endif %}</td>
+        <td>{% if h.hours is not none %}{{ "%.2f"|format(h.hours) }}{% else %}-{% endif %}</td>
       </tr>
       {% endfor %}
     </table>

@@ -3,11 +3,11 @@
 {% block admin_content %}
   {% if welcome_company_code %}
   <div class="flash">
-    <strong>{{ g.org.name }} is set up! Your Company Code is {{ welcome_company_code }}</strong> — write it down, employees and admins will need it to log in.
+    <strong>{{ g.org.name }} is set up! Your Company Code is {{ welcome_company_code }}.</strong> Write it down; employees and admins will need it to log in.
     {% if welcome_admin_creds %}
       <br><br>Additional administrator logins created:
       {% for c in welcome_admin_creds %}
-        <br>{{ c.email }} — temporary password: <code>{{ c.temp_password }}</code> (have them log in and note it down)
+        <br>{{ c.email }}, temporary password: <code>{{ c.temp_password }}</code> (have them log in and note it down)
       {% endfor %}
     {% endif %}
   </div>
