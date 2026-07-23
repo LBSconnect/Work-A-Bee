@@ -10,6 +10,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_wtf.csrf import CSRFProtect
 
 import stripe
 
@@ -47,11 +48,23 @@ app.config.update(
 )
 
 limiter = Limiter(get_remote_address, app=app, default_limits=[])
+csrf = CSRFProtect(app)
 
 init_db()
 ensure_system_admin_bootstrap()
 
 app.register_blueprint(wizard_blueprint)
+
+
+@app.after_request
+def set_security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    if config.ON_RENDER:
+        response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
+    return response
+
 
 AVATAR_COLORS = ["#4f46e5", "#059669", "#dc2626", "#d97706", "#7c3aed", "#0ea5e9", "#db2777", "#65a30d"]
 
@@ -208,6 +221,7 @@ def pricing_page():
 
 
 @app.route("/stripe/webhook", methods=["POST"])
+@csrf.exempt
 def stripe_webhook():
     payload = request.get_data()
     sig_header = request.headers.get("Stripe-Signature", "")
@@ -1345,6 +1359,11 @@ def admin_employee_new():
             return render_template(
                 "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"]
             )
+        if len(pin) < 4:
+            flash("PIN must be at least 4 digits.")
+            return render_template(
+                "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"]
+            )
 
         try:
             with get_db() as conn:
@@ -1392,6 +1411,10 @@ def admin_employee_edit(emp_id):
                 pto_balance = float(request.form.get("pto_balance_hours", emp["pto_balance_hours"]))
             except ValueError:
                 flash("PTO balance must be a number.")
+                return render_template("admin_employee_form.html", employee=emp)
+
+            if pin and len(pin) < 4:
+                flash("PIN must be at least 4 digits.")
                 return render_template("admin_employee_form.html", employee=emp)
 
             if pin:

@@ -3,6 +3,7 @@
 {% block step_content %}
   <h1>Payroll Settings</h1>
   <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Default Hourly Rate ($)</label>
     <input type="number" step="0.01" min="0" name="default_hourly_rate" value="{{ data.default_hourly_rate or '16.00' }}">
     {% if errors.default_hourly_rate %}<p class="field-error">{{ errors.default_hourly_rate }}</p>{% endif %}

@@ -17,12 +17,14 @@
       <td>
         {% if d.status == 'active' %}
         <form method="post" style="display:inline;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="action" value="disable">
           <input type="hidden" name="device_id" value="{{ d.id }}">
           <button type="submit" class="secondary" style="margin:0; padding:6px 10px; font-size:13px;">Disable</button>
         </form>
         {% endif %}
         <form method="post" style="display:inline;" onsubmit="return confirm('Remove this device?');">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="action" value="remove">
           <input type="hidden" name="device_id" value="{{ d.id }}">
           <button type="submit" class="secondary" style="margin:0; padding:6px 10px; font-size:13px;">Remove</button>
@@ -39,6 +41,7 @@
   <p class="muted">Sit at the office PC you want to authorize, then click below on that PC's browser.</p>
   <p class="muted">Reported by browser: {{ user_agent }}</p>
   <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="action" value="register">
     <label>Device Name</label>
     <input type="text" name="device_name" list="device-suggestions" placeholder="e.g. Reception PC">

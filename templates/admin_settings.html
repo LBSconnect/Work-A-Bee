@@ -21,6 +21,7 @@
     {% if org.current_period_end and not org.cancel_at_period_end %} &middot; Next bill: {{ org.current_period_end.strftime('%B %d, %Y') }}{% endif %}
   </p>
   <form method="post" action="{{ url_for('admin_plan_update') }}" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <select name="plan">
       {% for key, p in plans.PLANS.items() %}
         <option value="{{ key }}" {% if key == plans.get_plan_key(org) %}selected{% endif %}>
@@ -35,11 +36,13 @@
   {% if org.stripe_subscription_id %}
     {% if org.cancel_at_period_end %}
     <form method="post" action="{{ url_for('admin_plan_resume') }}" style="margin-top:8px;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <button type="submit" class="secondary" style="margin:0;">Resume Subscription</button>
     </form>
     {% else %}
     <form method="post" action="{{ url_for('admin_plan_cancel') }}" style="margin-top:8px;"
           onsubmit="return confirm('Cancel your subscription? You\'ll keep access until the end of your current billing period.');">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <button type="submit" class="secondary" style="margin:0;">Cancel Subscription</button>
     </form>
     {% endif %}
@@ -48,6 +51,7 @@
   <h1 style="margin-top:40px;">Company profile</h1>
 
   <form method="post" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Company Name *</label>
     <input type="text" name="company_name" value="{{ org.name or '' }}" required>
     {% if errors.company_name %}<p class="field-error">{{ errors.company_name }}</p>{% endif %}

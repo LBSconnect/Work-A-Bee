@@ -71,6 +71,7 @@
   <p class="muted">{% if device.register %}{{ device.name }} (this computer){% else %}None registered yet. Clock-in stays open until you register a device.{% endif %}</p>
 
   <form method="post" id="review-form" style="margin-top:32px;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <button type="submit">Create Company</button>
   </form>
   <p class="muted" style="margin-top:16px;"><a href="{{ url_for('wizard.step_devices') }}">Back</a></p>

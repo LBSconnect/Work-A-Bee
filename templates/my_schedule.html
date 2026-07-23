@@ -17,6 +17,7 @@
             <span class="muted">Offered for swap</span>
           {% else %}
             <form method="post" action="{{ url_for('shift_offer_swap', shift_id=s.id) }}" style="display:inline;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button type="submit" class="secondary" style="margin:0; padding:4px 10px; font-size:12px;">Offer for Swap</button>
             </form>
           {% endif %}

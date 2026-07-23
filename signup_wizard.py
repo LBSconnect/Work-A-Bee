@@ -278,6 +278,8 @@ def _validate_employee_fields(first_name, last_name, pin, employee_code, employe
         errors.append("Last name is required.")
     if not pin:
         errors.append("PIN is required.")
+    elif len(pin) < 4:
+        errors.append("PIN must be at least 4 digits.")
     if employee_code and employee_code.upper() in {e.get("employee_code", "").upper() for e in employees}:
         errors.append(f"Employee ID '{employee_code}' is already used in this list.")
     hourly_rate = None

@@ -5,6 +5,7 @@
   <p class="muted">Give a teammate a shoutout. Employees also earn Perfect Attendance / Punctuality Pro badges automatically from real attendance data.</p>
 
   <form method="post" style="border:1px solid #e5e7eb; border-radius:10px; padding:16px; margin:16px 0 24px; max-width:480px;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Employee</label>
     <select name="employee_id" required>
       <option value="" disabled selected>Choose an employee&hellip;</option>

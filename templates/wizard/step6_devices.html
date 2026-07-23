@@ -12,6 +12,7 @@
   </table>
 
   <form method="post" style="margin-top:16px;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="action" value="register">
     <label>Device Name</label>
     <input type="text" name="device_name" list="device-suggestions" placeholder="e.g. Reception PC" value="{{ device.name or '' }}">
@@ -24,6 +25,7 @@
   </form>
 
   <form method="post" style="margin-top:12px;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="action" value="skip">
     <button type="submit" class="secondary">Skip for now</button>
   </form>

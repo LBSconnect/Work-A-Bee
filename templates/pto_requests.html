@@ -5,6 +5,7 @@
   <p class="muted">PTO balance: <strong>{{ "%.1f"|format(employee.pto_balance_hours) }} hours</strong></p>
 
   <form method="post" style="max-width:420px;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Start date</label>
     <input type="date" name="start_date" required>
     <label>End date</label>

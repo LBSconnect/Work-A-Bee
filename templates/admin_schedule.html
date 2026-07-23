@@ -28,17 +28,20 @@
           <a href="{{ url_for('admin_shift_edit', shift_id=s.id) }}">Edit</a>
           &middot;
           <form method="post" action="{{ url_for('admin_shift_copy_4_weeks', shift_id=s.id) }}" style="display:inline;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="secondary" style="margin:0; padding:2px 8px; font-size:12px;">Copy 4 weeks</button>
           </form>
           &middot;
           <form method="post" action="{{ url_for('admin_shift_delete', shift_id=s.id) }}"
                 onsubmit="return confirm('Delete this shift?');" style="display:inline;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="secondary" style="margin:0; padding:2px 8px; font-size:12px;">Delete</button>
           </form>
           {% if s.series_id %}
             &middot;
             <form method="post" action="{{ url_for('admin_shift_series_end', series_id=s.series_id) }}"
                   onsubmit="return confirm('End this repeating series? Already-scheduled shifts stay put.');" style="display:inline;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button type="submit" class="secondary" style="margin:0; padding:2px 8px; font-size:12px;">End series</button>
             </form>
           {% endif %}

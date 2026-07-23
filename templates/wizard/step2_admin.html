@@ -3,6 +3,7 @@
 {% block step_content %}
   <h1>Create Your Administrator Account</h1>
   <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="wizard-row">
       <div>
         <label>First Name *</label>

@@ -17,11 +17,13 @@
           {% if sw.requested_by_employee_id == employee.id %}
             <form method="post" action="{{ url_for('shift_swap_cancel', swap_id=sw.id) }}"
                   onsubmit="return confirm('Cancel this swap offer?');" style="display:inline;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button type="submit" class="secondary" style="margin:0; padding:4px 10px; font-size:12px;">Cancel Offer</button>
             </form>
           {% else %}
             <form method="post" action="{{ url_for('shift_swap_claim', swap_id=sw.id) }}"
                   onsubmit="return confirm('Claim this shift? It will be added to your schedule.');" style="display:inline;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button type="submit" style="margin:0; padding:4px 10px; font-size:12px;">Claim</button>
             </form>
           {% endif %}
