@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { useAuth } from "../auth/AuthContext";
 import LoginScreen from "../screens/LoginScreen";
-import ClockScreen from "../screens/employee/ClockScreen";
+import EmployeeTabs from "./EmployeeTabs";
 import AdminHomeScreen from "../screens/admin/AdminHomeScreen";
 
 const Stack = createNativeStackNavigator();
@@ -27,7 +27,7 @@ export default function RootNavigator() {
         {status === "signedOut" || !me ? (
           <Stack.Screen name="Login" component={LoginScreen} />
         ) : me.role === "employee" ? (
-          <Stack.Screen name="EmployeeClock" component={ClockScreen} />
+          <Stack.Screen name="EmployeeTabs" component={EmployeeTabs} />
         ) : (
           <Stack.Screen name="AdminHome" component={AdminHomeScreen} />
         )}
