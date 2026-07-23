@@ -38,6 +38,7 @@
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_announcements' else '' }}" href="{{ url_for('admin_announcements') }}"><span class="admin-si">📣</span> Announcements</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_pto' else '' }}" href="{{ url_for('admin_pto') }}"><span class="admin-si">🌴</span> Time Off</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint in ('admin_messages', 'admin_message_thread') else '' }}" href="{{ url_for('admin_messages') }}"><span class="admin-si">💬</span> Messages{% if unread_admin_messages_count %} <span class="badge unread">{{ unread_admin_messages_count }}</span>{% endif %}</a>
+        <a class="admin-sidebar-item{{ ' active' if request.endpoint in ('admin_performance', 'admin_performance_employee') else '' }}" href="{{ url_for('admin_performance') }}"><span class="admin-si">🎯</span> Performance</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_devices' else '' }}" href="{{ url_for('admin_devices') }}"><span class="admin-si">💻</span> Devices</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_settings' else '' }}" href="{{ url_for('admin_settings') }}"><span class="admin-si">⚙️</span> Settings</a>
         <a class="admin-sidebar-item admin-sidebar-logout" href="{{ url_for('admin_logout') }}"><span class="admin-si">🚪</span> Log out</a>
