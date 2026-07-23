@@ -268,6 +268,10 @@ def clock_action():
                 "SELECT name FROM departments WHERE id=%s", (emp["department_id"],)
             ).fetchone()
 
+        announcements = conn.execute(
+            "SELECT * FROM announcements WHERE org_id=%s ORDER BY created_at DESC LIMIT 5", (org["id"],)
+        ).fetchall()
+
     history = []
     for e in recent_entries:
         hours = None
@@ -288,6 +292,7 @@ def clock_action():
         current_week_pay=current_week_pay,
         chart_days=chart_days,
         now=now_in(org["timezone"]),
+        announcements=announcements,
     )
 
 
@@ -919,6 +924,49 @@ def admin_devices():
         "admin_devices.html", devices=device_list,
         user_agent=request.headers.get("User-Agent", "Unknown device"),
     )
+
+
+@app.route("/admin/announcements", methods=["GET", "POST"])
+@admin_required
+def admin_announcements():
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        body = request.form.get("body", "").strip()
+        if not title or not body:
+            flash("Title and message are both required.")
+        else:
+            with get_db() as conn:
+                conn.execute(
+                    "INSERT INTO announcements (org_id, title, body, created_by_admin_id) VALUES (%s,%s,%s,%s)",
+                    (g.org["id"], title, body, g.admin["id"]),
+                )
+                audit.log(conn, g.org["id"], "admin", g.admin["id"], "announcement.posted", title)
+                conn.commit()
+            flash("Announcement posted.")
+        return redirect(url_for("admin_announcements"))
+
+    with get_db() as conn:
+        announcements = conn.execute(
+            "SELECT * FROM announcements WHERE org_id=%s ORDER BY created_at DESC", (g.org["id"],)
+        ).fetchall()
+    return render_template("admin_announcements.html", announcements=announcements)
+
+
+@app.route("/admin/announcements/<int:announcement_id>/delete", methods=["POST"])
+@admin_required
+def admin_announcement_delete(announcement_id):
+    with get_db() as conn:
+        announcement = conn.execute(
+            "SELECT * FROM announcements WHERE id=%s AND org_id=%s", (announcement_id, g.org["id"])
+        ).fetchone()
+        if announcement is None:
+            flash("Announcement not found.")
+            return redirect(url_for("admin_announcements"))
+        conn.execute("DELETE FROM announcements WHERE id=%s AND org_id=%s", (announcement_id, g.org["id"]))
+        audit.log(conn, g.org["id"], "admin", g.admin["id"], "announcement.deleted", announcement["title"])
+        conn.commit()
+    flash("Announcement deleted.")
+    return redirect(url_for("admin_announcements"))
 
 
 @app.route("/admin/settings", methods=["GET", "POST"])

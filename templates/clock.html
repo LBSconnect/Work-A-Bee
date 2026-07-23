@@ -127,4 +127,17 @@
     {% if employee.email %}<tr><th>Email</th><td>{{ employee.email }}</td></tr>{% endif %}
     {% if employee.phone %}<tr><th>Phone</th><td>{{ employee.phone }}</td></tr>{% endif %}
   </table>
+
+  <h2 id="announcements" style="margin-top:32px; font-size:16px;">Company announcements</h2>
+  {% if announcements %}
+    {% for a in announcements %}
+      <div style="border:1px solid #e5e7eb; border-radius:8px; padding:14px 16px; margin-top:12px;">
+        <strong>{{ a.title }}</strong>
+        <p class="muted" style="margin-top:2px;">{{ a.created_at.strftime('%B %d, %Y') }}</p>
+        <p style="margin-top:8px; white-space:pre-wrap;">{{ a.body }}</p>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="muted">No announcements yet.</p>
+  {% endif %}
 {% endblock %}

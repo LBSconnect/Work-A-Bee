@@ -1,0 +1,35 @@
+{% extends "admin_base.html" %}
+{% block title %}Announcements{% endblock %}
+{% block admin_content %}
+  <h1>Announcements</h1>
+  <p class="muted">Post updates for your whole team &mdash; they'll show up on every employee's dashboard.</p>
+
+  <form method="post" style="max-width:520px;">
+    <label>Title</label>
+    <input type="text" name="title" required>
+    <label>Message</label>
+    <textarea name="body" rows="4" required style="width:100%; padding:12px; font-size:16px; border:1px solid #d1d5db; border-radius:8px; font-family:inherit;"></textarea>
+    <button type="submit">Post Announcement</button>
+  </form>
+
+  <h2 style="margin-top:32px; font-size:16px;">Posted announcements</h2>
+  {% if announcements %}
+    {% for a in announcements %}
+      <div style="border:1px solid #e5e7eb; border-radius:8px; padding:14px 16px; margin-top:12px;">
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+          <div>
+            <strong>{{ a.title }}</strong>
+            <p class="muted" style="margin-top:2px;">{{ a.created_at.strftime('%B %d, %Y %I:%M %p') }}</p>
+          </div>
+          <form method="post" action="{{ url_for('admin_announcement_delete', announcement_id=a.id) }}"
+                onsubmit="return confirm('Delete this announcement?');">
+            <button type="submit" class="secondary" style="margin:0; padding:4px 10px; font-size:12px;">Delete</button>
+          </form>
+        </div>
+        <p style="margin-top:8px; white-space:pre-wrap;">{{ a.body }}</p>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="muted">No announcements posted yet.</p>
+  {% endif %}
+{% endblock %}
