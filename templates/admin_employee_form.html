@@ -28,6 +28,9 @@
 
     {% if employee %}
       <label><input type="checkbox" name="active" style="width:auto;" {% if employee.active %}checked{% endif %}> Active</label>
+
+      <label>PTO balance (hours)</label>
+      <input type="number" step="0.5" name="pto_balance_hours" value="{{ employee.pto_balance_hours }}">
     {% endif %}
 
     <button type="submit">Save</button>

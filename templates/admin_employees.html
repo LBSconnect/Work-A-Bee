@@ -17,6 +17,8 @@
         <a href="{{ url_for('admin_employee_edit', emp_id=e.id) }}">Edit</a>
         &middot;
         <a href="{{ url_for('admin_time_entry_new', emp_id=e.id) }}">Add entry</a>
+        &middot;
+        <a href="{{ url_for('admin_message_thread', employee_id=e.id) }}">Message</a>
       </td>
     </tr>
     {% else %}

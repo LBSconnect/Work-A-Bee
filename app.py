@@ -60,6 +60,39 @@ app.jinja_env.filters["initials"] = avatar_initials
 app.jinja_env.filters["avatar_color"] = avatar_color
 
 
+@app.context_processor
+def inject_unread_message_counts():
+    ctx = {"unread_messages_count": 0, "unread_admin_messages_count": 0}
+    org_id = session.get("org_id")
+    if not org_id:
+        return ctx
+    emp_id = session.get("employee_id")
+    admin_id = session.get("admin_id")
+    if not emp_id and not admin_id:
+        return ctx
+    try:
+        with get_db() as conn:
+            if emp_id:
+                row = conn.execute(
+                    "SELECT COUNT(*) AS c FROM messages m JOIN employees e ON m.employee_id = e.id "
+                    "WHERE m.employee_id=%s AND m.sender_type='admin' "
+                    "AND (e.messages_read_by_employee_at IS NULL OR m.created_at > e.messages_read_by_employee_at)",
+                    (emp_id,),
+                ).fetchone()
+                ctx["unread_messages_count"] = row["c"] if row else 0
+            if admin_id:
+                row = conn.execute(
+                    "SELECT COUNT(*) AS c FROM messages m JOIN employees e ON m.employee_id = e.id "
+                    "WHERE e.org_id=%s AND m.sender_type='employee' "
+                    "AND (e.messages_read_by_admin_at IS NULL OR m.created_at > e.messages_read_by_admin_at)",
+                    (org_id,),
+                ).fetchone()
+                ctx["unread_admin_messages_count"] = row["c"] if row else 0
+    except Exception:
+        pass
+    return ctx
+
+
 def _active_companies():
     with get_db() as conn:
         return conn.execute(
@@ -257,6 +290,13 @@ def clock_action():
             (emp_id, now_in(org["timezone"])),
         ).fetchall()
 
+        offered_shift_ids = {
+            row["shift_id"] for row in conn.execute(
+                "SELECT shift_id FROM shift_swap_requests WHERE requested_by_employee_id=%s AND status='open'",
+                (emp_id,),
+            ).fetchall()
+        }
+
         today_shift = conn.execute(
             "SELECT * FROM shifts WHERE employee_id=%s AND shift_start::date=%s ORDER BY shift_start LIMIT 1",
             (emp_id, today),
@@ -293,6 +333,7 @@ def clock_action():
         chart_days=chart_days,
         now=now_in(org["timezone"]),
         announcements=announcements,
+        offered_shift_ids=offered_shift_ids,
     )
 
 
@@ -369,6 +410,214 @@ def pay_stub_detail(period_start):
         "pay_stub_detail.html", employee=emp, org=org,
         period_start=start_date, period_end=end_date, stub=mine,
     )
+
+
+@app.route("/pto", methods=["GET", "POST"])
+def pto_requests_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        if emp is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        if request.method == "POST":
+            start_raw = request.form.get("start_date", "").strip()
+            end_raw = request.form.get("end_date", "").strip()
+            hours_raw = request.form.get("hours", "").strip()
+            reason = request.form.get("reason", "").strip()
+
+            try:
+                start_date = datetime.strptime(start_raw, "%Y-%m-%d").date()
+                end_date = datetime.strptime(end_raw, "%Y-%m-%d").date()
+                hours = float(hours_raw)
+            except ValueError:
+                flash("Enter a valid date range and number of hours.")
+                return redirect(url_for("pto_requests_page"))
+
+            if end_date < start_date:
+                flash("End date must be on or after the start date.")
+                return redirect(url_for("pto_requests_page"))
+            if hours <= 0:
+                flash("Hours requested must be greater than zero.")
+                return redirect(url_for("pto_requests_page"))
+
+            conn.execute(
+                "INSERT INTO pto_requests (org_id, employee_id, start_date, end_date, hours, reason) "
+                "VALUES (%s,%s,%s,%s,%s,%s)",
+                (org_id, emp_id, start_date, end_date, hours, reason or None),
+            )
+            audit.log(conn, org_id, "employee", emp_id, "pto.requested", f"{start_date} - {end_date} ({hours}h)")
+            conn.commit()
+            flash("Time off request submitted.")
+            return redirect(url_for("pto_requests_page"))
+
+        my_requests = conn.execute(
+            "SELECT * FROM pto_requests WHERE employee_id=%s ORDER BY requested_at DESC", (emp_id,)
+        ).fetchall()
+
+    return render_template("pto_requests.html", employee=emp, requests=my_requests)
+
+
+@app.route("/messages", methods=["GET", "POST"])
+def messages_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        if emp is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        if request.method == "POST":
+            body = request.form.get("body", "").strip()
+            if not body:
+                flash("Enter a message before sending.")
+                return redirect(url_for("messages_page"))
+            conn.execute(
+                "INSERT INTO messages (org_id, employee_id, sender_type, body) VALUES (%s,%s,'employee',%s)",
+                (org_id, emp_id, body),
+            )
+            conn.commit()
+            return redirect(url_for("messages_page"))
+
+        thread = conn.execute(
+            "SELECT m.*, a.username AS admin_username FROM messages m "
+            "LEFT JOIN admin_users a ON m.sender_admin_id = a.id "
+            "WHERE m.employee_id=%s ORDER BY m.created_at",
+            (emp_id,),
+        ).fetchall()
+        conn.execute(
+            "UPDATE employees SET messages_read_by_employee_at=NOW() WHERE id=%s", (emp_id,)
+        )
+        conn.commit()
+
+    return render_template("messages.html", employee=emp, thread=thread)
+
+
+@app.route("/shifts/<int:shift_id>/offer-swap", methods=["POST"])
+def shift_offer_swap(shift_id):
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        shift = conn.execute(
+            "SELECT * FROM shifts WHERE id=%s AND employee_id=%s AND org_id=%s", (shift_id, emp_id, org_id)
+        ).fetchone()
+        if shift is None:
+            flash("Shift not found.")
+            return redirect(url_for("clock_action"))
+
+        existing = conn.execute(
+            "SELECT 1 FROM shift_swap_requests WHERE shift_id=%s AND status='open'", (shift_id,)
+        ).fetchone()
+        if existing:
+            flash("This shift is already offered for swap.")
+            return redirect(url_for("clock_action"))
+
+        conn.execute(
+            "INSERT INTO shift_swap_requests (org_id, shift_id, requested_by_employee_id) VALUES (%s,%s,%s)",
+            (org_id, shift_id, emp_id),
+        )
+        audit.log(conn, org_id, "employee", emp_id, "shift.swap_offered", f"shift {shift_id}")
+        conn.commit()
+    flash("Shift offered for swap. Anyone on your team can now claim it.")
+    return redirect(url_for("clock_action"))
+
+
+@app.route("/shifts/marketplace")
+def shift_marketplace():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        if emp is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        open_swaps = conn.execute(
+            "SELECT sw.*, s.shift_start, s.shift_end, s.notes, e.name AS offered_by_name "
+            "FROM shift_swap_requests sw "
+            "JOIN shifts s ON sw.shift_id = s.id "
+            "JOIN employees e ON sw.requested_by_employee_id = e.id "
+            "WHERE sw.org_id=%s AND sw.status='open' ORDER BY s.shift_start",
+            (org_id,),
+        ).fetchall()
+
+    return render_template("shift_marketplace.html", employee=emp, open_swaps=open_swaps)
+
+
+@app.route("/shifts/marketplace/<int:swap_id>/claim", methods=["POST"])
+def shift_swap_claim(swap_id):
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        swap = conn.execute(
+            "SELECT * FROM shift_swap_requests WHERE id=%s AND org_id=%s AND status='open'",
+            (swap_id, org_id),
+        ).fetchone()
+        if swap is None:
+            flash("That shift is no longer available to claim.")
+            return redirect(url_for("shift_marketplace"))
+        if swap["requested_by_employee_id"] == emp_id:
+            flash("You can't claim your own shift offer.")
+            return redirect(url_for("shift_marketplace"))
+
+        conn.execute("UPDATE shifts SET employee_id=%s WHERE id=%s", (emp_id, swap["shift_id"]))
+        conn.execute(
+            "UPDATE shift_swap_requests SET status='claimed', claimed_by_employee_id=%s, claimed_at=NOW() "
+            "WHERE id=%s",
+            (emp_id, swap_id),
+        )
+        audit.log(conn, org_id, "employee", emp_id, "shift.swap_claimed", f"shift {swap['shift_id']}")
+        conn.commit()
+    flash("Shift claimed! It's now on your schedule.")
+    return redirect(url_for("shift_marketplace"))
+
+
+@app.route("/shifts/marketplace/<int:swap_id>/cancel", methods=["POST"])
+def shift_swap_cancel(swap_id):
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        swap = conn.execute(
+            "SELECT * FROM shift_swap_requests WHERE id=%s AND org_id=%s AND requested_by_employee_id=%s "
+            "AND status='open'",
+            (swap_id, org_id, emp_id),
+        ).fetchone()
+        if swap is None:
+            flash("That offer can't be canceled.")
+            return redirect(url_for("shift_marketplace"))
+
+        conn.execute("UPDATE shift_swap_requests SET status='canceled' WHERE id=%s", (swap_id,))
+        audit.log(conn, org_id, "employee", emp_id, "shift.swap_canceled", f"shift {swap['shift_id']}")
+        conn.commit()
+    flash("Swap offer canceled.")
+    return redirect(url_for("shift_marketplace"))
 
 
 def admin_required(f):
@@ -660,18 +909,23 @@ def admin_employee_edit(emp_id):
             except ValueError:
                 flash("Hourly rate must be a number.")
                 return render_template("admin_employee_form.html", employee=emp)
+            try:
+                pto_balance = float(request.form.get("pto_balance_hours", emp["pto_balance_hours"]))
+            except ValueError:
+                flash("PTO balance must be a number.")
+                return render_template("admin_employee_form.html", employee=emp)
 
             if pin:
                 conn.execute(
-                    "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s, pin_hash=%s "
-                    "WHERE id=%s AND org_id=%s",
-                    (name, rate, worker_type, active, generate_password_hash(pin), emp_id, g.org["id"]),
+                    "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s, pin_hash=%s, "
+                    "pto_balance_hours=%s WHERE id=%s AND org_id=%s",
+                    (name, rate, worker_type, active, generate_password_hash(pin), pto_balance, emp_id, g.org["id"]),
                 )
             else:
                 conn.execute(
-                    "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s "
+                    "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s, pto_balance_hours=%s "
                     "WHERE id=%s AND org_id=%s",
-                    (name, rate, worker_type, active, emp_id, g.org["id"]),
+                    (name, rate, worker_type, active, pto_balance, emp_id, g.org["id"]),
                 )
             conn.commit()
             flash("Updated.")
@@ -1042,6 +1296,130 @@ def admin_announcement_delete(announcement_id):
         conn.commit()
     flash("Announcement deleted.")
     return redirect(url_for("admin_announcements"))
+
+
+@app.route("/admin/pto")
+@admin_required
+def admin_pto():
+    with get_db() as conn:
+        requests_ = conn.execute(
+            "SELECT r.*, e.name AS employee_name, e.employee_code, e.pto_balance_hours FROM pto_requests r "
+            "JOIN employees e ON r.employee_id = e.id "
+            "WHERE r.org_id=%s ORDER BY (r.status = 'pending') DESC, r.requested_at DESC",
+            (g.org["id"],),
+        ).fetchall()
+    return render_template("admin_pto.html", requests=requests_)
+
+
+@app.route("/admin/pto/<int:request_id>/approve", methods=["POST"])
+@admin_required
+def admin_pto_approve(request_id):
+    with get_db() as conn:
+        req = conn.execute(
+            "SELECT r.*, e.name AS employee_name, e.pto_balance_hours FROM pto_requests r "
+            "JOIN employees e ON r.employee_id = e.id "
+            "WHERE r.id=%s AND r.org_id=%s AND r.status='pending'",
+            (request_id, g.org["id"]),
+        ).fetchone()
+        if req is None:
+            flash("Request not found or already reviewed.")
+            return redirect(url_for("admin_pto"))
+
+        if req["hours"] > req["pto_balance_hours"]:
+            flash(f"{req['employee_name']} only has {req['pto_balance_hours']:.1f} PTO hours available; approve anyway from Employees if you want to allow a negative balance.")
+
+        conn.execute(
+            "UPDATE pto_requests SET status='approved', reviewed_by_admin_id=%s, reviewed_at=NOW() WHERE id=%s",
+            (g.admin["id"], request_id),
+        )
+        conn.execute(
+            "UPDATE employees SET pto_balance_hours = pto_balance_hours - %s WHERE id=%s",
+            (req["hours"], req["employee_id"]),
+        )
+        audit.log(conn, g.org["id"], "admin", g.admin["id"], "pto.approved", f"{req['employee_name']}: {req['hours']}h")
+        conn.commit()
+    flash(f"Approved {req['employee_name']}'s time off request.")
+    return redirect(url_for("admin_pto"))
+
+
+@app.route("/admin/pto/<int:request_id>/deny", methods=["POST"])
+@admin_required
+def admin_pto_deny(request_id):
+    with get_db() as conn:
+        req = conn.execute(
+            "SELECT r.*, e.name AS employee_name FROM pto_requests r JOIN employees e ON r.employee_id = e.id "
+            "WHERE r.id=%s AND r.org_id=%s AND r.status='pending'",
+            (request_id, g.org["id"]),
+        ).fetchone()
+        if req is None:
+            flash("Request not found or already reviewed.")
+            return redirect(url_for("admin_pto"))
+
+        conn.execute(
+            "UPDATE pto_requests SET status='denied', reviewed_by_admin_id=%s, reviewed_at=NOW() WHERE id=%s",
+            (g.admin["id"], request_id),
+        )
+        audit.log(conn, g.org["id"], "admin", g.admin["id"], "pto.denied", f"{req['employee_name']}: {req['hours']}h")
+        conn.commit()
+    flash(f"Denied {req['employee_name']}'s time off request.")
+    return redirect(url_for("admin_pto"))
+
+
+@app.route("/admin/messages")
+@admin_required
+def admin_messages():
+    with get_db() as conn:
+        threads = conn.execute(
+            "SELECT e.id AS employee_id, e.name AS employee_name, e.employee_code, "
+            "e.messages_read_by_admin_at, "
+            "(SELECT body FROM messages m WHERE m.employee_id = e.id ORDER BY m.created_at DESC LIMIT 1) AS last_body, "
+            "(SELECT created_at FROM messages m WHERE m.employee_id = e.id ORDER BY m.created_at DESC LIMIT 1) AS last_at, "
+            "(SELECT COUNT(*) FROM messages m WHERE m.employee_id = e.id AND m.sender_type='employee' "
+            " AND (e.messages_read_by_admin_at IS NULL OR m.created_at > e.messages_read_by_admin_at)) AS unread_count "
+            "FROM employees e "
+            "WHERE e.org_id=%s AND EXISTS (SELECT 1 FROM messages m WHERE m.employee_id = e.id) "
+            "ORDER BY last_at DESC",
+            (g.org["id"],),
+        ).fetchall()
+    return render_template("admin_messages.html", threads=threads)
+
+
+@app.route("/admin/messages/<int:employee_id>", methods=["GET", "POST"])
+@admin_required
+def admin_message_thread(employee_id):
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (employee_id, g.org["id"])
+        ).fetchone()
+        if emp is None:
+            flash("Employee not found.")
+            return redirect(url_for("admin_messages"))
+
+        if request.method == "POST":
+            body = request.form.get("body", "").strip()
+            if not body:
+                flash("Enter a message before sending.")
+                return redirect(url_for("admin_message_thread", employee_id=employee_id))
+            conn.execute(
+                "INSERT INTO messages (org_id, employee_id, sender_type, sender_admin_id, body) "
+                "VALUES (%s,%s,'admin',%s,%s)",
+                (g.org["id"], employee_id, g.admin["id"], body),
+            )
+            conn.commit()
+            return redirect(url_for("admin_message_thread", employee_id=employee_id))
+
+        thread = conn.execute(
+            "SELECT m.*, a.username AS admin_username FROM messages m "
+            "LEFT JOIN admin_users a ON m.sender_admin_id = a.id "
+            "WHERE m.employee_id=%s ORDER BY m.created_at",
+            (employee_id,),
+        ).fetchall()
+        conn.execute(
+            "UPDATE employees SET messages_read_by_admin_at=NOW() WHERE id=%s", (employee_id,)
+        )
+        conn.commit()
+
+    return render_template("admin_message_thread.html", employee=emp, thread=thread)
 
 
 @app.route("/admin/settings", methods=["GET", "POST"])

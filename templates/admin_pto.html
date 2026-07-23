@@ -1,0 +1,36 @@
+{% extends "admin_base.html" %}
+{% block title %}Time Off Requests{% endblock %}
+{% block admin_content %}
+  <h1>Time off requests</h1>
+
+  {% if requests %}
+    <table>
+      <tr><th>Employee</th><th>Dates</th><th>Hours</th><th>Reason</th><th>Status</th><th></th></tr>
+      {% for r in requests %}
+      <tr>
+        <td>{{ r.employee_name }} ({{ r.employee_code }})</td>
+        <td>{{ r.start_date.strftime('%b %d') }} &ndash; {{ r.end_date.strftime('%b %d, %Y') }}</td>
+        <td>{{ "%.1f"|format(r.hours) }}</td>
+        <td class="muted">{{ r.reason or '' }}</td>
+        <td>
+          {% if r.status == 'approved' %}<span class="badge in">Approved</span>
+          {% elif r.status == 'denied' %}<span class="badge out">Denied</span>
+          {% else %}<span class="badge out" style="background:#fef3c7; color:#92400e;">Pending</span>{% endif %}
+        </td>
+        <td>
+          {% if r.status == 'pending' %}
+          <form method="post" action="{{ url_for('admin_pto_approve', request_id=r.id) }}" style="display:inline;">
+            <button type="submit" style="margin:0; padding:4px 10px; font-size:12px;">Approve</button>
+          </form>
+          <form method="post" action="{{ url_for('admin_pto_deny', request_id=r.id) }}" style="display:inline;">
+            <button type="submit" class="secondary" style="margin:0; padding:4px 10px; font-size:12px;">Deny</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p class="muted">No time off requests yet.</p>
+  {% endif %}
+{% endblock %}

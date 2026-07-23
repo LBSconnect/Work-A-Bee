@@ -1,0 +1,28 @@
+{% extends "admin_base.html" %}
+{% block title %}Message {{ employee.name }}{% endblock %}
+{% block admin_content %}
+  <p class="muted"><a href="{{ url_for('admin_messages') }}">&larr; All conversations</a></p>
+  <h1>{{ employee.name }}</h1>
+
+  <div style="border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin-top:16px; max-height:480px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+    {% if thread %}
+      {% for m in thread %}
+        <div style="max-width:70%; align-self: {{ 'flex-end' if m.sender_type == 'admin' else 'flex-start' }};">
+          <div style="background: {{ '#FFF8E1' if m.sender_type == 'admin' else '#f3f4f6' }}; border-radius:10px; padding:8px 12px;">
+            <p style="margin:0; white-space:pre-wrap;">{{ m.body }}</p>
+          </div>
+          <p class="muted" style="margin:2px 4px 0; font-size:11px;">
+            {{ (m.admin_username or 'You') if m.sender_type == 'admin' else employee.name }} &middot; {{ m.created_at.strftime('%b %d, %I:%M %p') }}
+          </p>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="muted">No messages yet. Say hello!</p>
+    {% endif %}
+  </div>
+
+  <form method="post" style="margin-top:16px; display:flex; gap:8px;">
+    <textarea name="body" rows="2" required style="flex:1; padding:8px; border:1px solid #d1d5db; border-radius:8px; font-family:inherit;" placeholder="Type a message..."></textarea>
+    <button type="submit" style="align-self:flex-end;">Send</button>
+  </form>
+{% endblock %}
