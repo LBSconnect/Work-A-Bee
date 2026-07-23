@@ -77,6 +77,16 @@ def sitemap_xml():
     return send_from_directory(app.static_folder, "sitemap.xml", mimetype="application/xml")
 
 
+@app.route("/privacy")
+def privacy_policy():
+    return render_template("privacy.html", updated=datetime.now().date())
+
+
+@app.route("/terms")
+def terms_of_service():
+    return render_template("terms.html", updated=datetime.now().date())
+
+
 @app.route("/staff/login", methods=["GET", "POST"])
 @limiter.limit("10 per minute")
 def staff_login():
