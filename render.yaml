@@ -47,3 +47,5 @@ services:
         sync: false
       - key: STRIPE_PRICE_BUSINESS
         sync: false
+      - key: SYSTEM_SETUP_TOKEN
+        sync: false

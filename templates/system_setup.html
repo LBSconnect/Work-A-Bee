@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}System Admin Setup{% endblock %}
+{% block head_extra %}<meta name="robots" content="noindex, nofollow, noarchive">{% endblock %}
+{% block content %}
+  <h1>System Admin Setup</h1>
+  <p class="muted">Create a new system admin account, or reset the password of an existing one. This page is only reachable while SYSTEM_SETUP_TOKEN is set in the environment - remove it once you're done.</p>
+  <form method="post">
+    <label>Setup token</label>
+    <input type="password" name="token" autofocus required>
+    <label>Username</label>
+    <input type="text" name="username" required>
+    <label>New password (12+ characters)</label>
+    <input type="password" name="password" required minlength="12">
+    <label>Confirm new password</label>
+    <input type="password" name="confirm_password" required minlength="12">
+    <button type="submit">Save</button>
+  </form>
+{% endblock %}
