@@ -3,7 +3,81 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Work-A-Bee | Employee Timekeeping</title>
+  <title>Work-A-Bee | Employee Time Tracking &amp; Payroll Software</title>
+  <meta name="description" content="Employee time tracking and payroll software with a free 14-day trial, no credit card required. Track clock-ins, manage timesheets, and run accurate payroll from secure, office-authorized devices.">
+  <link rel="canonical" href="https://www.workabeez.net/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Work-A-Bee">
+  <meta property="og:title" content="Work-A-Bee | Employee Time Tracking &amp; Payroll Software">
+  <meta property="og:description" content="Employee time tracking and payroll software with a free 14-day trial, no credit card required. Track clock-ins, manage timesheets, and run accurate payroll.">
+  <meta property="og:url" content="https://www.workabeez.net/">
+  <meta property="og:image" content="https://www.workabeez.net/static/logo.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Work-A-Bee | Employee Time Tracking &amp; Payroll Software">
+  <meta name="twitter:description" content="Employee time tracking and payroll software with a free 14-day trial, no credit card required. Track clock-ins, manage timesheets, and run accurate payroll.">
+  <meta name="twitter:image" content="https://www.workabeez.net/static/logo.png">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Work-A-Bee",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "url": "https://www.workabeez.net/",
+    "description": "Work-A-Bee is employee time tracking and payroll software for businesses of any size, with a free 14-day trial. Track clock-ins, manage timesheets, and run accurate payroll from secure, office-authorized devices."
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is Work-A-Bee free to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Work-A-Bee offers a free 14-day trial with no credit card required, so you can try full time tracking and payroll features risk-free."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does employee clock-in work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Employees clock in and out from a simple PIN-based screen on office computers your admin authorizes as trusted devices, which helps prevent buddy punching and time theft."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can Work-A-Bee handle payroll for hourly and contract workers?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Work-A-Bee tracks hours for both employees and contractors, calculates pay based on your rates and overtime rules, and generates weekly payroll reports you can email directly to your team."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to install anything?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Work-A-Bee runs entirely in your browser, with no downloads, no hardware, and no setup beyond registering the computers you want employees to clock in from."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is my company's data secure?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Only devices your admin explicitly registers can be used to clock in or out, and each company's data is kept isolated from other businesses using Work-A-Bee."
+        }
+      }
+    ]
+  }
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -390,6 +464,69 @@
     .hex-bg {
       position: absolute; opacity: .05; pointer-events: none;
     }
+
+    /* ── FAQ ── */
+    .faq {
+      padding: 80px 48px; background: var(--light-gray);
+      border-top: 1px solid #f0f0f0;
+    }
+    .faq-inner { max-width: 760px; margin: 0 auto; }
+    .faq h2 {
+      font-size: 34px; font-weight: 900; letter-spacing: -1px;
+      margin-bottom: 32px; text-align: center;
+    }
+    .faq h2 span { color: var(--yellow); }
+    .faq-item {
+      background: var(--white); border-radius: 10px; padding: 20px 24px;
+      margin-bottom: 12px; border: 1px solid #eee;
+    }
+    .faq-item summary {
+      font-size: 16px; font-weight: 700; cursor: pointer; list-style: none;
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::before { content: "+ "; color: var(--yellow); font-weight: 900; }
+    .faq-item[open] summary::before { content: "– "; }
+    .faq-item p { font-size: 14px; color: #555; line-height: 1.6; margin-top: 12px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      nav { padding: 0 24px; }
+      .nav-links { display: none; }
+      .hero { flex-direction: column; padding: 48px 24px 40px; text-align: center; }
+      .hero-left { max-width: 100%; }
+      .hero-left p { margin-left: auto; margin-right: auto; }
+      .hero-ctas { justify-content: center; flex-wrap: wrap; }
+      .hero-badges { justify-content: center; }
+      .hero-right { width: 100%; display: flex; justify-content: center; margin-top: 32px; }
+      .dashboard-card { width: 100%; max-width: 520px; }
+      .mobile-card { display: none; }
+      .features-grid { grid-template-columns: repeat(3, 1fr); }
+      .why-section { flex-direction: column; padding: 48px 24px; text-align: center; }
+      .why-left { max-width: 100%; }
+      .why-bullets { align-items: center; }
+      .why-bullets li { text-align: left; }
+      .footer-top { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+      .hero-left h1 { font-size: 36px; }
+      .hero-ctas { flex-direction: column; align-items: stretch; }
+      nav { flex-wrap: wrap; height: auto; padding: 12px 20px; row-gap: 10px; }
+      .nav-logo-text span { display: none; }
+      .nav-logo-text strong { font-size: 15px; white-space: nowrap; }
+      .nav-actions { width: 100%; justify-content: center; gap: 10px; flex-wrap: wrap; }
+      .nav-actions .btn-ghost { font-size: 12px; padding: 6px 8px; white-space: nowrap; }
+      .nav-actions .btn-yellow { font-size: 12px; padding: 8px 14px; white-space: nowrap; }
+      .features { padding: 48px 20px; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      .social-proof { padding: 24px 20px; }
+      .logos-row { gap: 24px; }
+      .cta-banner { padding: 32px 20px; flex-direction: column; text-align: center; }
+      .cta-banner-left { flex-direction: column; }
+      .footer-top { grid-template-columns: 1fr; gap: 28px; }
+      .faq { padding: 48px 20px; }
+      .faq h2 { font-size: 26px; }
+    }
   </style>
 </head>
 <body>
@@ -587,13 +724,13 @@
 
 <!-- ═══════════ SOCIAL PROOF ═══════════ -->
 <div class="social-proof" id="trusted-by">
-  <div class="social-proof-label">— Trusted by Businesses of All Sizes —</div>
+  <div class="social-proof-label">— Built For Teams Like Yours —</div>
   <div class="logos-row">
-    <div class="logo-item"><span class="logo-icon">🏗</span> Buildrite<br><small>Construction</small></div>
-    <div class="logo-item"><span class="logo-icon">⛰</span> Summit<br><small>Services</small></div>
-    <div class="logo-item"><span class="logo-icon">⭐</span> NorthStar<br><small>Electric</small></div>
-    <div class="logo-item"><span class="logo-icon">📦</span> Pioneer<br><small>Logistics</small></div>
-    <div class="logo-item"><span class="logo-icon">🏢</span> BrightView<br><small>Properties</small></div>
+    <div class="logo-item"><span class="logo-icon">🏗</span> Construction<br><small>Crews</small></div>
+    <div class="logo-item"><span class="logo-icon">⛰</span> Field Service<br><small>Teams</small></div>
+    <div class="logo-item"><span class="logo-icon">🏢</span> Property<br><small>Management</small></div>
+    <div class="logo-item"><span class="logo-icon">📦</span> Warehouses &amp;<br><small>Logistics</small></div>
+    <div class="logo-item"><span class="logo-icon">🛎</span> Retail &amp;<br><small>Hospitality</small></div>
   </div>
 </div>
 
@@ -727,9 +864,42 @@
 
       <div class="trust-pill">
         <span class="trust-bee">🐝</span>
-        <span class="trust-text">Thousands of businesses trust Work-A-Bee to keep their teams on track.</span>
+        <span class="trust-text">Built to help growing teams keep accurate time and payroll, free.</span>
       </div>
     </div>
+  </div>
+</section>
+
+
+<!-- ═══════════ FAQ ═══════════ -->
+<section class="faq" id="faq">
+  <div class="faq-inner">
+    <h2>Frequently Asked <span>Questions</span></h2>
+
+    <details class="faq-item">
+      <summary>Is Work-A-Bee free to use?</summary>
+      <p>Work-A-Bee offers a free 14-day trial with no credit card required, so you can try full time tracking and payroll features risk-free.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>How does employee clock-in work?</summary>
+      <p>Employees clock in and out from a simple PIN-based screen on office computers your admin authorizes as trusted devices, which helps prevent buddy punching and time theft.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>Can Work-A-Bee handle payroll for hourly and contract workers?</summary>
+      <p>Yes. Work-A-Bee tracks hours for both employees and contractors, calculates pay based on your rates and overtime rules, and generates weekly payroll reports you can email directly to your team.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>Do I need to install anything?</summary>
+      <p>No. Work-A-Bee runs entirely in your browser — no downloads, no hardware, no setup beyond registering the computers you want employees to clock in from.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>Is my company's data secure?</summary>
+      <p>Yes. Only devices your admin explicitly registers can be used to clock in or out, and each company's data is kept isolated from other businesses using Work-A-Bee.</p>
+    </details>
   </div>
 </section>
 
