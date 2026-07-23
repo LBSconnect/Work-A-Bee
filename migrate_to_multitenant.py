@@ -28,6 +28,8 @@ Usage (run from the project root, e.g. in Render's Shell):
 """
 import argparse
 
+from psycopg2 import sql
+
 from models import get_db
 from orgs import normalize_company_code, is_valid_company_code
 
@@ -89,18 +91,25 @@ def _backfill(args):
                 print(f"Created organization '{code}' (id={org_id}).")
 
         for table in ("admin_users", "employees", "report_log"):
-            count = conn.execute(f"SELECT COUNT(*) AS c FROM {table} WHERE org_id IS NULL").fetchone()["c"]
+            count = conn.execute(
+                sql.SQL("SELECT COUNT(*) AS c FROM {} WHERE org_id IS NULL").format(sql.Identifier(table))
+            ).fetchone()["c"]
             if args.dry_run:
                 print(f"[dry-run] Would backfill org_id on {count} row(s) in {table}.")
             elif org_id is not None:
-                conn.execute(f"UPDATE {table} SET org_id=%s WHERE org_id IS NULL", (org_id,))
+                conn.execute(
+                    sql.SQL("UPDATE {} SET org_id=%s WHERE org_id IS NULL").format(sql.Identifier(table)),
+                    (org_id,),
+                )
                 conn.commit()
                 print(f"Backfilled org_id on {count} row(s) in {table}.")
 
         if not args.dry_run:
             print("\nVerification:")
             for table in ("admin_users", "employees", "report_log"):
-                remaining = conn.execute(f"SELECT COUNT(*) AS c FROM {table} WHERE org_id IS NULL").fetchone()["c"]
+                remaining = conn.execute(
+                    sql.SQL("SELECT COUNT(*) AS c FROM {} WHERE org_id IS NULL").format(sql.Identifier(table))
+                ).fetchone()["c"]
                 print(f"  {table}: {remaining} row(s) still missing org_id (expect 0)")
             emp_count = conn.execute("SELECT COUNT(*) AS c FROM employees").fetchone()["c"]
             entry_count = conn.execute("SELECT COUNT(*) AS c FROM time_entries").fetchone()["c"]
@@ -114,35 +123,55 @@ def _backfill(args):
 def _lock_constraints():
     with get_db() as conn:
         for table, unique_cols, old_col in (
-            ("admin_users", "org_id, username", "username"),
-            ("employees", "org_id, employee_code", "employee_code"),
-            ("report_log", "org_id, report_date", "report_date"),
+            ("admin_users", ("org_id", "username"), "username"),
+            ("employees", ("org_id", "employee_code"), "employee_code"),
+            ("report_log", ("org_id", "report_date"), "report_date"),
         ):
-            conn.execute(f"ALTER TABLE {table} ALTER COLUMN org_id SET NOT NULL")
-            conn.execute(f"""
-                DO $$
-                BEGIN
-                    IF EXISTS (
-                        SELECT 1 FROM information_schema.table_constraints
-                        WHERE table_name = '{table}' AND constraint_name = '{table}_{old_col}_key'
-                    ) THEN
-                        ALTER TABLE {table} DROP CONSTRAINT {table}_{old_col}_key;
-                    END IF;
-                END $$;
-            """)
-            conn.execute(f"""
-                DO $$
-                BEGIN
-                    IF NOT EXISTS (
-                        SELECT 1 FROM information_schema.table_constraints
-                        WHERE table_name = '{table}' AND constraint_name = '{table}_org_{old_col}_key'
-                    ) THEN
-                        ALTER TABLE {table} ADD CONSTRAINT {table}_org_{old_col}_key UNIQUE ({unique_cols});
-                    END IF;
-                END $$;
-            """)
+            old_constraint = f"{table}_{old_col}_key"
+            new_constraint = f"{table}_org_{old_col}_key"
+
+            conn.execute(
+                sql.SQL("ALTER TABLE {} ALTER COLUMN org_id SET NOT NULL").format(sql.Identifier(table))
+            )
+            conn.execute(
+                sql.SQL("""
+                    DO $$
+                    BEGIN
+                        IF EXISTS (
+                            SELECT 1 FROM information_schema.table_constraints
+                            WHERE table_name = {table_lit} AND constraint_name = {old_lit}
+                        ) THEN
+                            ALTER TABLE {table_id} DROP CONSTRAINT {old_id};
+                        END IF;
+                    END $$;
+                """).format(
+                    table_lit=sql.Literal(table),
+                    old_lit=sql.Literal(old_constraint),
+                    table_id=sql.Identifier(table),
+                    old_id=sql.Identifier(old_constraint),
+                )
+            )
+            conn.execute(
+                sql.SQL("""
+                    DO $$
+                    BEGIN
+                        IF NOT EXISTS (
+                            SELECT 1 FROM information_schema.table_constraints
+                            WHERE table_name = {table_lit} AND constraint_name = {new_lit}
+                        ) THEN
+                            ALTER TABLE {table_id} ADD CONSTRAINT {new_id} UNIQUE ({cols});
+                        END IF;
+                    END $$;
+                """).format(
+                    table_lit=sql.Literal(table),
+                    new_lit=sql.Literal(new_constraint),
+                    table_id=sql.Identifier(table),
+                    new_id=sql.Identifier(new_constraint),
+                    cols=sql.SQL(", ").join(sql.Identifier(c) for c in unique_cols),
+                )
+            )
             conn.commit()
-            print(f"{table}: org_id is NOT NULL, composite unique ({unique_cols}) in place, old global unique dropped.")
+            print(f"{table}: org_id is NOT NULL, composite unique ({', '.join(unique_cols)}) in place, old global unique dropped.")
     print("\nDone. Schema is now fully multi-tenant.")
 
 
