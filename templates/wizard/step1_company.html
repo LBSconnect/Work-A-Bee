@@ -1,5 +1,5 @@
 {% extends "wizard/base.html" %}
-{% block title %}Sign Up — Company Information{% endblock %}
+{% block title %}Sign Up: Company Information{% endblock %}
 {% block step_content %}
   <h1>Welcome to LBS TimeKeeper</h1>
   <p class="muted">Let's set up your company in just a few minutes.</p>
@@ -63,7 +63,7 @@
 
     <label>Company Logo</label>
     <input type="file" name="logo" accept="image/png,image/jpeg,image/svg+xml">
-    {% if data.logo_b64 %}<p class="muted">Logo already uploaded — choose a new file to replace it.</p>{% endif %}
+    {% if data.logo_b64 %}<p class="muted">Logo already uploaded. Choose a new file to replace it.</p>{% endif %}
     {% if errors.logo %}<p class="field-error">{{ errors.logo }}</p>{% endif %}
 
     <button type="submit">Continue</button>

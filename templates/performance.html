@@ -35,7 +35,7 @@
       <tr>
         <td>{{ r.shift_start.strftime('%a %b %d') }}</td>
         <td>{{ r.shift_start.strftime('%I:%M %p') }}</td>
-        <td>{% if r.punch_in %}{{ r.punch_in.strftime('%I:%M %p') }}{% else %}&mdash;{% endif %}</td>
+        <td>{% if r.punch_in %}{{ r.punch_in.strftime('%I:%M %p') }}{% else %}-{% endif %}</td>
         <td>
           {% if r.status == 'on_time' %}<span class="badge in">On time</span>
           {% elif r.status == 'late' %}<span class="badge" style="background:#FEF3C7; color:#92400E;">Late</span>

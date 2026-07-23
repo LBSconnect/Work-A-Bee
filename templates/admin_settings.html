@@ -5,7 +5,7 @@
   {% set current_plan = plans.get_plan(org) %}
   {% if plans.promo_active(org) %}
     <div class="flash">
-      <strong>Launch promo active:</strong> all plan limits are waived for {{ plans.promo_days_left(org) }} more day{{ 's' if plans.promo_days_left(org) != 1 else '' }} &mdash; add as many employees and devices as you need, free. Your card on file won't be charged until your promo period ends.
+      <strong>Launch promo active:</strong> all plan limits are waived for {{ plans.promo_days_left(org) }} more day{{ 's' if plans.promo_days_left(org) != 1 else '' }}. Add as many employees and devices as you need, free. Your card on file won't be charged until your promo period ends.
     </div>
   {% endif %}
   {% if org.cancel_at_period_end %}
@@ -24,13 +24,13 @@
     <select name="plan">
       {% for key, p in plans.PLANS.items() %}
         <option value="{{ key }}" {% if key == plans.get_plan_key(org) %}selected{% endif %}>
-          {{ p.label }} &mdash; {{ "$%d/mo"|format(p.price) if p.price else "Free" }}
+          {{ p.label }} &middot; {{ "$%d/mo"|format(p.price) if p.price else "Free" }}
         </option>
       {% endfor %}
     </select>
     <button type="submit" style="margin:0;">Change Plan</button>
   </form>
-  <p class="muted" style="margin-top:8px;">See <a href="{{ url_for('pricing_page') }}">full plan details</a>. Your card is charged automatically once your 90-day free period ends &mdash; cancel anytime, no questions asked.</p>
+  <p class="muted" style="margin-top:8px;">See <a href="{{ url_for('pricing_page') }}">full plan details</a>. Your card is charged automatically once your 90-day free period ends. Cancel anytime, no questions asked.</p>
 
   {% if org.stripe_subscription_id %}
     {% if org.cancel_at_period_end %}
