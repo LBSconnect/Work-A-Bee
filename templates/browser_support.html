@@ -3,20 +3,291 @@
 {% block wrapclass %}wide{% endblock %}
 {% block content %}
   <h1>Work-A-Beez Browser Support</h1>
-  <p class="muted">Status: Draft template &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <p class="muted">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
 
-  <p><em>This page is a starting template generated for LBS to complete. Replace the placeholder text in each section below with final content before treating this page as published.</em></p>
-
-  <h2>1. Supported Browsers</h2>
-  <p>[Add content here.]</p>
-
-  <h2>2. Minimum Versions</h2>
-  <p>[Add content here.]</p>
-
-  <h2>3. Known Limitations</h2>
-  <p>[Add content here.]</p>
-
-  <h2>4. Recommendations</h2>
-  <p>[Add content here.]</p>
-
+<h2>Browser Support Guide</h2>
+<p>Welcome to the Work-A-Beez Browser Support Guide.</p>
+<p>Work-A-Beez is a modern, cloud-native web application designed to operate using current versions of major web browsers. This guide explains supported browsers, browser configuration requirements, compatibility policies, and troubleshooting recommendations.</p>
+<p>Following these guidelines helps ensure optimal performance, security, and user experience.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Overview</li>
+<li>Browser Support Policy</li>
+<li>Supported Desktop Browsers</li>
+<li>Supported Mobile Browsers</li>
+<li>Browser Configuration Requirements</li>
+<li>Cookies &amp; Local Storage</li>
+<li>JavaScript Requirements</li>
+<li>Browser Security Requirements</li>
+<li>Browser Extensions</li>
+<li>Browser Compatibility Testing</li>
+<li>Unsupported Browsers</li>
+<li>Known Limitations</li>
+<li>Browser Troubleshooting</li>
+<li>Frequently Asked Questions</li>
+<li>Related Documentation</li>
+</ol>
+<hr />
+<h2>Overview</h2>
+<p>Work-A-Beez is accessed using a modern web browser over a secure HTTPS connection.</p>
+<p>No browser plug-ins or desktop software are required.</p>
+<p>For the best experience:</p>
+<ul>
+<li>Keep browsers updated.</li>
+<li>Enable JavaScript.</li>
+<li>Enable cookies.</li>
+<li>Use supported browser versions.</li>
+<li>Avoid unsupported browser extensions.</li>
+</ul>
+<hr />
+<h2>Browser Support Policy</h2>
+<p>Work-A-Beez supports current vendor-supported releases of major browsers.</p>
+<p>As browser vendors release new versions, Work-A-Beez regularly validates compatibility.</p>
+<p>Support generally includes:</p>
+<ul>
+<li>Current Stable Release</li>
+<li>Previous Stable Release (when still vendor-supported)</li>
+</ul>
+<p>Browsers that have reached end-of-life or no longer receive security updates are not supported.</p>
+<hr />
+<h2>Supported Desktop Browsers</h2>
+<h3>Google Chrome</h3>
+<p>Supported:</p>
+<ul>
+<li>Current stable release</li>
+<li>Previous stable release (while vendor-supported)</li>
+</ul>
+<hr />
+<h3>Microsoft Edge</h3>
+<p>Supported:</p>
+<ul>
+<li>Current stable release</li>
+<li>Previous stable release</li>
+</ul>
+<hr />
+<h3>Mozilla Firefox</h3>
+<p>Supported:</p>
+<ul>
+<li>Current Extended Support Release (ESR)</li>
+<li>Current stable release</li>
+</ul>
+<hr />
+<h3>Apple Safari</h3>
+<p>Supported on current vendor-supported versions of macOS.</p>
+<p>Safari users should ensure:</p>
+<ul>
+<li>Cookies are enabled</li>
+<li>JavaScript is enabled</li>
+<li>Pop-up blocking allows approved Work-A-Beez pages when required</li>
+</ul>
+<hr />
+<h2>Supported Mobile Browsers</h2>
+<p>Work-A-Beez does not currently offer a dedicated mobile application; the web application is responsive and supports use from mobile browsers, including:</p>
+<h3>iOS</h3>
+<ul>
+<li>Safari</li>
+<li>Chrome (current supported version)</li>
+</ul>
+<hr />
+<h3>Android</h3>
+<ul>
+<li>Google Chrome</li>
+<li>Firefox</li>
+</ul>
+<hr />
+<h2>Browser Configuration Requirements</h2>
+<p>The following browser features must be enabled.</p>
+<h3>HTTPS</h3>
+<p>All connections use encrypted HTTPS.</p>
+<p>HTTP connections are not supported.</p>
+<hr />
+<h3>TLS</h3>
+<p>Browsers must support:</p>
+<ul>
+<li>TLS 1.2 or higher</li>
+</ul>
+<p>Older SSL and TLS protocols are not supported.</p>
+<hr />
+<h3>Pop-ups</h3>
+<p>Some administrative features may open secondary browser windows.</p>
+<p>Organizations should allow pop-ups for approved Work-A-Beez domains where necessary.</p>
+<hr />
+<h3>Downloads</h3>
+<p>Browsers should allow downloads where reports or documents are provided.</p>
+<hr />
+<h2>Cookies &amp; Local Storage</h2>
+<p>Work-A-Beez requires cookies for:</p>
+<ul>
+<li>Authentication</li>
+<li>Session management</li>
+<li>Security</li>
+</ul>
+<p>Blocking required cookies may prevent successful sign-in or normal application behavior.</p>
+<hr />
+<h2>JavaScript Requirements</h2>
+<p>JavaScript is required for nearly all platform functionality.</p>
+<p>Disabling JavaScript may prevent:</p>
+<ul>
+<li>Authentication</li>
+<li>Navigation</li>
+<li>Dashboards</li>
+<li>Scheduling</li>
+<li>Reporting</li>
+<li>Forms</li>
+</ul>
+<p>Browsers should permit JavaScript for all Work-A-Beez domains.</p>
+<hr />
+<h2>Browser Security Requirements</h2>
+<p>For security reasons, browsers should:</p>
+<ul>
+<li>Receive automatic updates</li>
+<li>Support modern encryption</li>
+<li>Validate digital certificates</li>
+<li>Warn users of insecure websites</li>
+<li>Support secure cookies</li>
+</ul>
+<p>Users should avoid disabling browser security features.</p>
+<hr />
+<h2>Browser Extensions</h2>
+<p>Most browser extensions are compatible with Work-A-Beez.</p>
+<p>However, some extensions may interfere with normal operation.</p>
+<p>Examples include:</p>
+<ul>
+<li>Aggressive content blockers</li>
+<li>Script-blocking extensions</li>
+<li>Cookie removal tools</li>
+<li>Privacy extensions that disable required storage</li>
+<li>Browser automation tools</li>
+</ul>
+<p>If unexpected behavior occurs, temporarily disable browser extensions to determine whether they are causing the issue.</p>
+<hr />
+<h2>Browser Compatibility Testing</h2>
+<p>Work-A-Beez regularly tests major application functionality, including:</p>
+<ul>
+<li>Authentication</li>
+<li>Dashboard navigation</li>
+<li>Employee management</li>
+<li>Scheduling</li>
+<li>Timekeeping</li>
+<li>Leave management</li>
+<li>Payroll preparation</li>
+<li>Reporting</li>
+<li>Administrative configuration</li>
+<li>Mobile responsiveness</li>
+</ul>
+<p>Testing occurs throughout the software development lifecycle.</p>
+<hr />
+<h2>Unsupported Browsers</h2>
+<p>The following browser configurations are not supported:</p>
+<ul>
+<li>Internet Explorer</li>
+<li>Browsers no longer maintained by their vendor</li>
+<li>Browsers with JavaScript disabled</li>
+<li>Browsers with required cookies disabled</li>
+<li>Browsers using obsolete TLS versions</li>
+<li>Experimental browser builds not intended for production use</li>
+</ul>
+<p>Unsupported browsers may experience reduced functionality or security vulnerabilities.</p>
+<hr />
+<h2>Known Limitations</h2>
+<p>Certain browser-specific behaviors may differ slightly.</p>
+<p>Examples include:</p>
+<ul>
+<li>Native file selection dialogs</li>
+<li>PDF viewing behavior</li>
+<li>Notification permissions</li>
+<li>Password manager integration</li>
+<li>Printing interfaces</li>
+</ul>
+<p>These differences are determined by the browser vendor rather than the Work-A-Beez application.</p>
+<hr />
+<h2>Browser Troubleshooting</h2>
+<h3>Application Will Not Load</h3>
+<p>Verify:</p>
+<ul>
+<li>Internet connectivity</li>
+<li>Browser version</li>
+<li>JavaScript enabled</li>
+<li>HTTPS access</li>
+<li>Firewall settings</li>
+</ul>
+<hr />
+<h3>Unable to Sign In</h3>
+<p>Check:</p>
+<ul>
+<li>Cookies enabled</li>
+<li>Correct credentials</li>
+<li>Supported browser version</li>
+</ul>
+<hr />
+<h3>Slow Performance</h3>
+<p>Recommendations:</p>
+<ul>
+<li>Close unused browser tabs</li>
+<li>Disable unnecessary browser extensions</li>
+<li>Restart the browser</li>
+<li>Clear browser cache</li>
+<li>Update to the latest browser version</li>
+</ul>
+<hr />
+<h3>Display Issues</h3>
+<p>Try:</p>
+<ul>
+<li>Refresh the page</li>
+<li>Clear cached files</li>
+<li>Zoom level set to 100%</li>
+<li>Disable browser compatibility mode</li>
+<li>Update graphics drivers if necessary</li>
+</ul>
+<hr />
+<h2>Frequently Asked Questions</h2>
+<h3>Which browser is recommended?</h3>
+<p>Google Chrome and Microsoft Edge generally provide the best overall experience.</p>
+<hr />
+<h3>Can I use Safari?</h3>
+<p>Yes.</p>
+<p>Current supported versions of Safari are fully supported on macOS and iOS.</p>
+<hr />
+<h3>Does Work-A-Beez support Internet Explorer?</h3>
+<p>No.</p>
+<p>Internet Explorer is not supported.</p>
+<hr />
+<h3>Do I need browser plug-ins?</h3>
+<p>No.</p>
+<p>Work-A-Beez does not require browser plug-ins or add-ons.</p>
+<hr />
+<h3>Should browsers be updated automatically?</h3>
+<p>Yes.</p>
+<p>Automatic browser updates improve both security and compatibility.</p>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>System Requirements</li>
+<li>Security Overview</li>
+<li>Password Policy</li>
+<li>Customer Onboarding Guide</li>
+<li>Administrator Guide</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product of LBS.</p>
 {% endblock %}

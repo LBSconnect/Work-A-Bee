@@ -1,0 +1,292 @@
+{% extends "internal_base.html" %}
+{% block title %}Frequently Asked Questions (Future-State Draft){% endblock %}
+{% block internal_content %}
+  <h1>Frequently Asked Questions (Future-State Draft)</h1>
+  <p class="muted">Status: Future-State / Not Yet Implemented &middot; Classification: Internal &middot; Section: Future-State Product Documentation &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This document describes planned or target-state functionality for Work-A-Beez. It does not reflect functionality available in the current production system and is provided for internal product-planning and engineering-reference purposes only. It is not customer-facing and must not be shared externally in its current form.</div>
+
+<h2>Frequently Asked Questions (FAQ)</h2>
+<p>Welcome to the Work-A-Beez Frequently Asked Questions (FAQ).</p>
+<p>This document answers the most common questions about Work-A-Beez, including product capabilities, security, billing, implementation, support, integrations, and account management.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>General Questions</li>
+<li>Getting Started</li>
+<li>Features</li>
+<li>Security</li>
+<li>Billing &amp; Subscription</li>
+<li>Technical Questions</li>
+<li>Integrations</li>
+<li>Support</li>
+<li>Mobile Application</li>
+<li>Frequently Asked Troubleshooting Questions</li>
+</ol>
+<hr />
+<h2>General Questions</h2>
+<h3>What is Work-A-Beez?</h3>
+<p>Work-A-Beez is a cloud-based Workforce Management (WFM) platform that helps organizations manage employees, schedules, attendance, leave, payroll preparation, compliance, reporting, and workforce operations from a single application.</p>
+<hr />
+<h3>Who is Work-A-Beez designed for?</h3>
+<p>Work-A-Beez supports organizations of all sizes including:</p>
+<ul>
+<li>Small businesses</li>
+<li>Mid-sized companies</li>
+<li>Enterprise organizations</li>
+<li>Healthcare</li>
+<li>Retail</li>
+<li>Hospitality</li>
+<li>Manufacturing</li>
+<li>Logistics</li>
+<li>Government</li>
+<li>Education</li>
+<li>Professional services</li>
+</ul>
+<hr />
+<h3>Is Work-A-Beez cloud-based?</h3>
+<p>Yes.</p>
+<p>Work-A-Beez is delivered as a Software-as-a-Service (SaaS) platform that is securely hosted in the cloud.</p>
+<p>No local software installation is required for normal use.</p>
+<hr />
+<h3>Do employees need to install software?</h3>
+<p>No.</p>
+<p>Employees may use:</p>
+<ul>
+<li>Supported web browsers</li>
+<li>The Work-A-Beez mobile application (where available)</li>
+</ul>
+<hr />
+<h2>Getting Started</h2>
+<h3>How long does implementation take?</h3>
+<p>Implementation varies depending on organization size and complexity.</p>
+<p>Typical timelines range from a few days for smaller organizations to several weeks for larger enterprise deployments.</p>
+<hr />
+<h3>Can I import existing employee data?</h3>
+<p>Yes.</p>
+<p>Administrators can import employee information, organizational structures, schedules, and other supported data using import tools or integrations.</p>
+<hr />
+<h3>Is training available?</h3>
+<p>Yes.</p>
+<p>Training resources include:</p>
+<ul>
+<li>User guides</li>
+<li>Administrator guides</li>
+<li>Knowledge Base articles</li>
+<li>Video tutorials</li>
+<li>Customer onboarding materials</li>
+</ul>
+<p>Additional training services may be available depending on your subscription.</p>
+<hr />
+<h2>Features</h2>
+<h3>What can employees do?</h3>
+<p>Employees can:</p>
+<ul>
+<li>Clock in and out</li>
+<li>View schedules</li>
+<li>Request leave</li>
+<li>View PTO balances</li>
+<li>Receive notifications</li>
+<li>Update personal information (if permitted)</li>
+<li>Access company announcements</li>
+</ul>
+<hr />
+<h3>What can managers do?</h3>
+<p>Managers can:</p>
+<ul>
+<li>Create schedules</li>
+<li>Approve leave</li>
+<li>Approve timecards</li>
+<li>Monitor attendance</li>
+<li>Fill open shifts</li>
+<li>Review reports</li>
+<li>Manage teams</li>
+</ul>
+<hr />
+<h3>Does Work-A-Beez support mobile devices?</h3>
+<p>Yes.</p>
+<p>Supported mobile applications allow users to:</p>
+<ul>
+<li>Clock in/out</li>
+<li>View schedules</li>
+<li>Receive notifications</li>
+<li>Request leave</li>
+<li>Approve requests (where authorized)</li>
+</ul>
+<hr />
+<h3>Can Work-A-Beez support multiple locations?</h3>
+<p>Yes.</p>
+<p>Organizations can manage:</p>
+<ul>
+<li>Multiple offices</li>
+<li>Stores</li>
+<li>Departments</li>
+<li>Regions</li>
+<li>Business units</li>
+</ul>
+<p>from a single platform.</p>
+<hr />
+<h2>Security</h2>
+<h3>Is my data encrypted?</h3>
+<p>Yes.</p>
+<p>Data is encrypted both in transit and at rest using industry-standard encryption technologies.</p>
+<hr />
+<h3>Does Work-A-Beez support Multi-Factor Authentication (MFA)?</h3>
+<p>Yes.</p>
+<p>Organizations may require MFA to provide an additional layer of account security.</p>
+<hr />
+<h3>Can I use Single Sign-On (SSO)?</h3>
+<p>Yes.</p>
+<p>Supported authentication methods may include:</p>
+<ul>
+<li>Microsoft Entra ID</li>
+<li>Google Workspace</li>
+<li>SAML-compatible identity providers</li>
+<li>OAuth providers</li>
+</ul>
+<p>Availability depends on your subscription and configuration.</p>
+<hr />
+<h3>Who can access my organization's data?</h3>
+<p>Access is controlled through Role-Based Access Control (RBAC).</p>
+<p>Users can access only the information permitted by their assigned roles and permissions.</p>
+<hr />
+<h2>Billing &amp; Subscription</h2>
+<h3>How am I billed?</h3>
+<p>Billing depends on your selected subscription plan and billing cycle.</p>
+<p>Refer to your subscription agreement for pricing details.</p>
+<hr />
+<h3>Can I upgrade my subscription?</h3>
+<p>Yes.</p>
+<p>Organizations can upgrade their subscription as business needs evolve.</p>
+<hr />
+<h3>Can I downgrade my subscription?</h3>
+<p>Subscription changes are subject to your agreement and renewal terms.</p>
+<p>Contact Customer Support for assistance.</p>
+<hr />
+<h3>Can I cancel my subscription?</h3>
+<p>Yes.</p>
+<p>Cancellation procedures are described in the Cancellation Policy and Subscription Terms.</p>
+<hr />
+<h2>Technical Questions</h2>
+<h3>Which browsers are supported?</h3>
+<p>Work-A-Beez supports current versions of major web browsers.</p>
+<p>See the Browser Support Guide for detailed compatibility information.</p>
+<hr />
+<h3>Does Work-A-Beez require installation?</h3>
+<p>No.</p>
+<p>Users typically access the platform through a supported web browser or the mobile application.</p>
+<hr />
+<h3>Is an internet connection required?</h3>
+<p>Yes.</p>
+<p>An active internet connection is required for most functionality.</p>
+<p>Some mobile features may support limited offline capabilities.</p>
+<hr />
+<h2>Integrations</h2>
+<h3>Does Work-A-Beez integrate with payroll systems?</h3>
+<p>Yes.</p>
+<p>Supported integrations may include payroll providers, HR systems, identity providers, and other third-party applications.</p>
+<p>Refer to the Integration Guide for supported integrations.</p>
+<hr />
+<h3>Is an API available?</h3>
+<p>Yes.</p>
+<p>Developers can use the Work-A-Beez REST API to integrate with external systems.</p>
+<p>API documentation is available separately.</p>
+<hr />
+<h2>Support</h2>
+<h3>How do I contact support?</h3>
+<p>Customers may contact support through the available support portal, email, or other support channels included with their subscription.</p>
+<hr />
+<h3>What are support hours?</h3>
+<p>Support availability depends on the support plan associated with your subscription.</p>
+<hr />
+<h3>How do I report a bug?</h3>
+<p>Administrators should submit support requests with:</p>
+<ul>
+<li>Description of the issue</li>
+<li>Steps to reproduce</li>
+<li>Screenshots (if applicable)</li>
+<li>Browser and device information</li>
+<li>Error messages</li>
+</ul>
+<hr />
+<h2>Mobile Application</h2>
+<h3>Can I clock in using my phone?</h3>
+<p>Yes.</p>
+<p>Organizations may enable mobile clock-in using GPS verification or geofencing.</p>
+<hr />
+<h3>Can I receive push notifications?</h3>
+<p>Yes.</p>
+<p>Push notifications are available through supported mobile applications.</p>
+<hr />
+<h3>Can I request leave from the app?</h3>
+<p>Yes.</p>
+<p>Employees can submit leave requests directly from the mobile application if enabled by their organization.</p>
+<hr />
+<h2>Frequently Asked Troubleshooting Questions</h2>
+<h3>I forgot my password.</h3>
+<p>Use the <strong>Forgot Password</strong> link on the sign-in page or contact your organization's administrator if additional assistance is required.</p>
+<hr />
+<h3>I am locked out of my account.</h3>
+<p>Wait for the lockout period to expire or contact your administrator to unlock your account.</p>
+<hr />
+<h3>I didn't receive my verification code.</h3>
+<p>Verify:</p>
+<ul>
+<li>Your contact information is correct.</li>
+<li>Spam or junk folders.</li>
+<li>Mobile signal or email availability.</li>
+</ul>
+<p>If the issue persists, contact your administrator.</p>
+<hr />
+<h3>Why can't I clock in?</h3>
+<p>Possible reasons include:</p>
+<ul>
+<li>You are outside the approved location.</li>
+<li>Your scheduled shift has not started.</li>
+<li>GPS is disabled.</li>
+<li>Mobile permissions are restricted.</li>
+<li>Your organization has disabled mobile clock-in.</li>
+</ul>
+<hr />
+<h3>My schedule is missing.</h3>
+<p>Verify that:</p>
+<ul>
+<li>The schedule has been published.</li>
+<li>You are viewing the correct date.</li>
+<li>Your manager has assigned shifts.</li>
+</ul>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>Product Overview</li>
+<li>User Guide</li>
+<li>Administrator Guide</li>
+<li>Customer Onboarding Guide</li>
+<li>Security Overview</li>
+<li>Password Reset Guide</li>
+<li>Multi-Factor Authentication Guide</li>
+<li>Billing FAQ</li>
+<li>Support Center</li>
+<li>Knowledge Base</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product of LBS.</p>
+{% endblock %}

@@ -1,3 +1,4 @@
+import hmac
 import os
 import traceback
 import zlib
@@ -962,6 +963,54 @@ def system_admin_required(f):
         g.system_admin = sys_admin
         return f(*args, **kwargs)
     return wrapper
+
+
+@app.route("/system/setup", methods=["GET", "POST"])
+@limiter.limit("10 per minute")
+def system_setup():
+    """Browser-based alternative to running create_system_admin.py from a shell.
+    A 404 unless SYSTEM_SETUP_TOKEN is set in the environment - this is meant to be
+    turned on temporarily, used once, then the env var removed again."""
+    if not config.SYSTEM_SETUP_TOKEN:
+        abort(404)
+
+    if request.method == "POST":
+        token = request.form.get("token", "")
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        confirm = request.form.get("confirm_password", "")
+
+        if not hmac.compare_digest(token, config.SYSTEM_SETUP_TOKEN):
+            flash("Setup token not recognized.")
+        elif not username:
+            flash("Username is required.")
+        elif password != confirm:
+            flash("Passwords don't match.")
+        elif len(password) < 12:
+            flash("Password must be at least 12 characters.")
+        else:
+            with get_db() as conn:
+                existing = conn.execute(
+                    "SELECT id FROM system_admins WHERE username=%s", (username,)
+                ).fetchone()
+                if existing:
+                    conn.execute(
+                        "UPDATE system_admins SET password_hash=%s, must_change_password=TRUE WHERE id=%s",
+                        (generate_password_hash(password), existing["id"]),
+                    )
+                    conn.commit()
+                    flash(f"Password reset for existing system admin '{username}'. You can log in now.")
+                else:
+                    conn.execute(
+                        "INSERT INTO system_admins (username, password_hash, must_change_password) "
+                        "VALUES (%s, %s, TRUE)",
+                        (username, generate_password_hash(password)),
+                    )
+                    conn.commit()
+                    flash(f"System admin '{username}' created. You can log in now.")
+            return redirect(url_for("system_login"))
+
+    return render_template("system_setup.html")
 
 
 @app.route("/system/login", methods=["GET", "POST"])

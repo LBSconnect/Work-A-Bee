@@ -1,0 +1,391 @@
+{% extends "internal_base.html" %}
+{% block title %}Notification & Communication Guide{% endblock %}
+{% block internal_content %}
+  <h1>Notification & Communication Guide</h1>
+  <p class="muted">Status: Future-State / Not Yet Implemented &middot; Classification: Internal &middot; Section: Future-State Product Documentation &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This document describes planned or target-state functionality for Work-A-Beez. It does not reflect functionality available in the current production system and is provided for internal product-planning and engineering-reference purposes only. It is not customer-facing and must not be shared externally in its current form.</div>
+
+<p>Welcome to the Work-A-Beez Notification &amp; Communication Guide.</p>
+<p>Effective communication is essential to workforce management. Work-A-Beez provides configurable notifications, announcements, reminders, and alerts to ensure employees and managers receive timely, relevant information.</p>
+<p>This guide explains how notifications are generated, delivered, customized, monitored, and managed across the platform.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Introduction</li>
+<li>Notification Architecture</li>
+<li>Supported Notification Channels</li>
+<li>Notification Types</li>
+<li>User Notification Preferences</li>
+<li>Administrator Configuration</li>
+<li>Email Notifications</li>
+<li>SMS Notifications</li>
+<li>Push Notifications</li>
+<li>In-App Notifications</li>
+<li>Announcements</li>
+<li>Automated Reminders</li>
+<li>Escalation Notifications</li>
+<li>Notification Templates</li>
+<li>Delivery Tracking</li>
+<li>Localization &amp; Time Zones</li>
+<li>Security Considerations</li>
+<li>Best Practices</li>
+<li>Troubleshooting</li>
+<li>Related Documentation</li>
+</ol>
+<hr />
+<h2>Introduction</h2>
+<p>Work-A-Beez automatically communicates important events to employees, supervisors, managers, and administrators.</p>
+<p>Notifications help organizations:</p>
+<ul>
+<li>Improve employee engagement</li>
+<li>Reduce missed shifts</li>
+<li>Increase schedule awareness</li>
+<li>Accelerate approvals</li>
+<li>Improve payroll accuracy</li>
+<li>Support compliance</li>
+<li>Reduce manual communication</li>
+</ul>
+<p>Notifications are configurable based on organizational policies.</p>
+<hr />
+<h2>Notification Architecture</h2>
+<p>The notification service consists of:</p>
+<ul>
+<li>Event Generator</li>
+<li>Notification Rules Engine</li>
+<li>Template Engine</li>
+<li>Delivery Queue</li>
+<li>Channel Providers</li>
+<li>Delivery Tracking</li>
+<li>Notification History</li>
+</ul>
+<p>Events generated within Work-A-Beez are evaluated against notification rules before delivery.</p>
+<hr />
+<h2>Supported Notification Channels</h2>
+<p>Work-A-Beez supports multiple delivery methods.</p>
+<h3>Email</h3>
+<p>Used for:</p>
+<ul>
+<li>Invitations</li>
+<li>Leave approvals</li>
+<li>Schedule publication</li>
+<li>Payroll reminders</li>
+<li>Password resets</li>
+</ul>
+<hr />
+<h3>SMS</h3>
+<p>Used for:</p>
+<ul>
+<li>Shift reminders</li>
+<li>Schedule changes</li>
+<li>Emergency alerts</li>
+<li>Time-sensitive notifications</li>
+</ul>
+<p>SMS availability depends on the organization's configured provider.</p>
+<hr />
+<h3>Push Notifications</h3>
+<p>Available through supported mobile applications.</p>
+<p>Examples include:</p>
+<ul>
+<li>Shift reminders</li>
+<li>Approval requests</li>
+<li>Leave decisions</li>
+<li>Clock-in reminders</li>
+<li>Schedule updates</li>
+</ul>
+<hr />
+<h3>In-App Notifications</h3>
+<p>Displayed within the Work-A-Beez web application.</p>
+<p>Users can review both active and historical notifications from the Notification Center.</p>
+<hr />
+<h2>Notification Types</h2>
+<p>Examples include:</p>
+<h4>Employee Notifications</h4>
+<ul>
+<li>Welcome messages</li>
+<li>Schedule published</li>
+<li>Shift assigned</li>
+<li>Shift changed</li>
+<li>Shift cancelled</li>
+<li>Clock-in reminder</li>
+<li>Break reminder</li>
+<li>Leave approved</li>
+<li>Leave denied</li>
+<li>Payroll reminder</li>
+</ul>
+<hr />
+<h4>Manager Notifications</h4>
+<ul>
+<li>Leave requests awaiting approval</li>
+<li>Missed punches</li>
+<li>Overtime alerts</li>
+<li>Shift coverage gaps</li>
+<li>Employee availability updates</li>
+<li>Timecard approvals</li>
+</ul>
+<hr />
+<h4>Administrator Notifications</h4>
+<ul>
+<li>Failed integrations</li>
+<li>Payroll completion</li>
+<li>User provisioning</li>
+<li>Security alerts</li>
+<li>Configuration changes</li>
+<li>License usage</li>
+</ul>
+<hr />
+<h2>User Notification Preferences</h2>
+<p>Users may configure personal preferences including:</p>
+<ul>
+<li>Preferred notification channels</li>
+<li>Quiet hours</li>
+<li>Language</li>
+<li>Time zone</li>
+<li>Email frequency</li>
+</ul>
+<p>Some mandatory security notifications cannot be disabled.</p>
+<hr />
+<h2>Administrator Configuration</h2>
+<p>Administrators can configure:</p>
+<ul>
+<li>Organization-wide notification policies</li>
+<li>Default notification settings</li>
+<li>Delivery channels</li>
+<li>Reminder schedules</li>
+<li>Broadcast permissions</li>
+<li>Escalation rules</li>
+</ul>
+<p>Organization defaults may be overridden by user preferences where permitted.</p>
+<hr />
+<h2>Email Notifications</h2>
+<p>Email notifications support:</p>
+<ul>
+<li>HTML formatting</li>
+<li>Plain text fallback</li>
+<li>Organization branding</li>
+<li>Dynamic content</li>
+<li>Delivery confirmation</li>
+</ul>
+<p>Typical email notifications include:</p>
+<ul>
+<li>Account activation</li>
+<li>Password reset</li>
+<li>Schedule publication</li>
+<li>Leave approvals</li>
+<li>Payroll reminders</li>
+<li>Organization announcements</li>
+</ul>
+<hr />
+<h2>SMS Notifications</h2>
+<p>SMS is intended for urgent or time-sensitive communications.</p>
+<p>Typical SMS messages include:</p>
+<ul>
+<li>Upcoming shift reminders</li>
+<li>Last-minute schedule changes</li>
+<li>Emergency notifications</li>
+<li>Manager approval reminders</li>
+</ul>
+<p>Administrators should avoid excessive SMS messaging to reduce notification fatigue.</p>
+<hr />
+<h2>Push Notifications</h2>
+<p>Push notifications are delivered through supported mobile applications.</p>
+<p>Examples include:</p>
+<ul>
+<li>Shift begins in one hour</li>
+<li>New schedule available</li>
+<li>Leave approved</li>
+<li>Overtime request</li>
+<li>Open shift available</li>
+<li>Timecard correction required</li>
+</ul>
+<p>Users may manage push notification permissions within the mobile application settings.</p>
+<hr />
+<h2>In-App Notifications</h2>
+<p>The Notification Center displays:</p>
+<ul>
+<li>Active notifications</li>
+<li>Read notifications</li>
+<li>Action-required notifications</li>
+<li>Historical notifications</li>
+</ul>
+<p>Users may:</p>
+<ul>
+<li>Mark notifications as read</li>
+<li>Filter notifications</li>
+<li>Search notification history</li>
+<li>View related records</li>
+</ul>
+<hr />
+<h2>Announcements</h2>
+<p>Administrators may publish organization-wide or targeted announcements.</p>
+<p>Examples include:</p>
+<ul>
+<li>Company news</li>
+<li>Policy updates</li>
+<li>Holiday schedules</li>
+<li>Office closures</li>
+<li>Maintenance windows</li>
+<li>Training opportunities</li>
+</ul>
+<p>Announcements may target:</p>
+<ul>
+<li>Entire organization</li>
+<li>Departments</li>
+<li>Locations</li>
+<li>Job roles</li>
+<li>Individual groups</li>
+</ul>
+<hr />
+<h2>Automated Reminders</h2>
+<p>Automated reminders help reduce missed tasks.</p>
+<p>Common reminders include:</p>
+<ul>
+<li>Upcoming shifts</li>
+<li>Clock-in reminders</li>
+<li>Break reminders</li>
+<li>Leave approval reminders</li>
+<li>Timecard submission reminders</li>
+<li>Payroll approval deadlines</li>
+</ul>
+<p>Reminder timing is configurable by administrators.</p>
+<hr />
+<h2>Escalation Notifications</h2>
+<p>If required actions are not completed within defined timeframes, notifications may be escalated.</p>
+<p>Examples include:</p>
+<ul>
+<li>Unapproved leave requests</li>
+<li>Pending timecards</li>
+<li>Missed punches</li>
+<li>Payroll approval delays</li>
+<li>Shift coverage shortages</li>
+</ul>
+<p>Escalations may notify higher-level supervisors or administrators.</p>
+<hr />
+<h2>Notification Templates</h2>
+<p>Administrators can customize templates using supported placeholders.</p>
+<p>Example placeholders include:</p>
+<ul>
+<li>Employee Name</li>
+<li>Department</li>
+<li>Shift Start Time</li>
+<li>Shift Location</li>
+<li>Manager Name</li>
+<li>Leave Dates</li>
+<li>Organization Name</li>
+</ul>
+<p>Templates should be reviewed before deployment to ensure clarity and accuracy.</p>
+<hr />
+<h2>Delivery Tracking</h2>
+<p>Administrators can monitor notification delivery status.</p>
+<p>Typical statuses include:</p>
+<ul>
+<li>Queued</li>
+<li>Sent</li>
+<li>Delivered</li>
+<li>Failed</li>
+<li>Read (where supported)</li>
+</ul>
+<p>Delivery tracking assists with troubleshooting communication issues.</p>
+<hr />
+<h2>Localization &amp; Time Zones</h2>
+<p>Notifications support:</p>
+<ul>
+<li>Multiple languages</li>
+<li>Localized date formats</li>
+<li>Localized time formats</li>
+<li>User-specific time zones</li>
+<li>Organization branding</li>
+</ul>
+<p>Messages are generated using the recipient's configured language and time zone whenever available.</p>
+<hr />
+<h2>Security Considerations</h2>
+<p>To protect sensitive information:</p>
+<ul>
+<li>Avoid including confidential personal data in notifications.</li>
+<li>Require secure links for sensitive actions.</li>
+<li>Expire action links after a configurable period.</li>
+<li>Encrypt communications where applicable.</li>
+<li>Authenticate users before displaying sensitive information.</li>
+</ul>
+<p>Security-related notifications such as password resets should always use secure delivery mechanisms.</p>
+<hr />
+<h2>Best Practices</h2>
+<p>To maximize communication effectiveness:</p>
+<ul>
+<li>Send only relevant notifications.</li>
+<li>Use concise subject lines and message content.</li>
+<li>Configure quiet hours to respect employees' personal time.</li>
+<li>Regularly review notification templates.</li>
+<li>Test notifications before enabling organization-wide delivery.</li>
+<li>Monitor delivery failures and correct configuration issues promptly.</li>
+<li>Balance frequency to avoid notification fatigue.</li>
+</ul>
+<hr />
+<h2>Troubleshooting</h2>
+<h3>Notifications Not Received</h3>
+<p>Verify:</p>
+<ul>
+<li>User contact information</li>
+<li>Notification preferences</li>
+<li>Delivery channel configuration</li>
+<li>Spam or junk mail filters</li>
+</ul>
+<hr />
+<h3>SMS Delivery Failures</h3>
+<p>Check:</p>
+<ul>
+<li>SMS provider configuration</li>
+<li>Valid mobile numbers</li>
+<li>Country code formatting</li>
+<li>Provider service status</li>
+</ul>
+<hr />
+<h3>Push Notifications Not Appearing</h3>
+<p>Confirm:</p>
+<ul>
+<li>Mobile app is installed</li>
+<li>Push permissions are enabled</li>
+<li>Device has network connectivity</li>
+<li>User is signed in</li>
+</ul>
+<hr />
+<h3>Announcement Not Visible</h3>
+<p>Verify:</p>
+<ul>
+<li>Target audience</li>
+<li>Publication date</li>
+<li>Expiration date</li>
+<li>User permissions</li>
+</ul>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>Administrator Guide</li>
+<li>Employee User Guide</li>
+<li>Integration Guide</li>
+<li>Support &amp; Escalation Guide</li>
+<li>Security Overview</li>
+<li>Reporting &amp; Analytics Guide</li>
+<li>API Developer Guide</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product of LBS.</p>
+{% endblock %}

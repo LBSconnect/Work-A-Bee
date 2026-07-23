@@ -1,0 +1,284 @@
+{% extends "internal_base.html" %}
+{% block title %}Multi-Factor Authentication (MFA) Guide{% endblock %}
+{% block internal_content %}
+  <h1>Multi-Factor Authentication (MFA) Guide</h1>
+  <p class="muted">Status: Future-State / Not Yet Implemented &middot; Classification: Internal &middot; Section: Future-State Product Documentation &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This document describes planned or target-state functionality for Work-A-Beez. It does not reflect functionality available in the current production system and is provided for internal product-planning and engineering-reference purposes only. It is not customer-facing and must not be shared externally in its current form.</div>
+
+<p>Welcome to the Work-A-Beez Multi-Factor Authentication (MFA) Guide.</p>
+<p>Multi-Factor Authentication (MFA) provides an additional layer of security beyond a username and password by requiring users to verify their identity using a second authentication factor.</p>
+<p>This guide explains how MFA works, how to enroll, supported authentication methods, and how to manage and troubleshoot MFA for your Work-A-Beez account.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Overview</li>
+<li>Why MFA Matters</li>
+<li>How MFA Works</li>
+<li>Supported Authentication Methods</li>
+<li>Enrolling in MFA</li>
+<li>Signing In with MFA</li>
+<li>Managing Authentication Methods</li>
+<li>Backup Authentication Methods</li>
+<li>Lost or Replaced Devices</li>
+<li>Recovery Process</li>
+<li>Administrator Controls</li>
+<li>Security Best Practices</li>
+<li>Troubleshooting</li>
+<li>Frequently Asked Questions</li>
+<li>Related Documentation</li>
+</ol>
+<hr />
+<h2>Overview</h2>
+<p>Multi-Factor Authentication requires users to verify their identity using two or more authentication factors.</p>
+<p>Authentication factors typically include:</p>
+<ul>
+<li>Something you know (password)</li>
+<li>Something you have (mobile device or security key)</li>
+<li>Something you are (biometric authentication where supported)</li>
+</ul>
+<p>Even if a password is compromised, MFA significantly reduces the likelihood of unauthorized account access.</p>
+<hr />
+<h2>Why MFA Matters</h2>
+<p>MFA helps protect against:</p>
+<ul>
+<li>Stolen passwords</li>
+<li>Phishing attacks</li>
+<li>Credential stuffing</li>
+<li>Password reuse</li>
+<li>Brute-force attacks</li>
+<li>Unauthorized remote access</li>
+</ul>
+<p>Organizations are strongly encouraged to enable MFA for all users, particularly those with administrative privileges.</p>
+<hr />
+<h2>How MFA Works</h2>
+<p>After entering a valid username and password, users complete a second verification step before access is granted.</p>
+<p>Typical sign-in process:</p>
+<ol>
+<li>Enter username.</li>
+<li>Enter password.</li>
+<li>Complete second-factor verification.</li>
+<li>Access Work-A-Beez.</li>
+</ol>
+<p>If verification fails, access is denied.</p>
+<hr />
+<h2>Supported Authentication Methods</h2>
+<p>Depending on your organization's configuration, Work-A-Beez may support one or more of the following authentication methods.</p>
+<h3>Authenticator Applications</h3>
+<p>Authenticator apps generate time-based one-time passwords (TOTP).</p>
+<p>Examples include:</p>
+<ul>
+<li>Microsoft Authenticator</li>
+<li>Google Authenticator</li>
+<li>Authy</li>
+<li>Other compatible TOTP applications</li>
+</ul>
+<hr />
+<h3>Push Notifications</h3>
+<p>Users receive a notification on a registered mobile device and approve or deny the sign-in request.</p>
+<hr />
+<h3>SMS Verification Codes</h3>
+<p>A one-time verification code is sent to a registered mobile phone.</p>
+<p>SMS should be used only when stronger authentication methods are unavailable.</p>
+<hr />
+<h3>Email Verification Codes</h3>
+<p>A one-time code is sent to the user's registered email address.</p>
+<hr />
+<h3>Hardware Security Keys</h3>
+<p>Organizations may use FIDO2 or WebAuthn-compatible security keys for enhanced security.</p>
+<p>Examples include USB, NFC, or Bluetooth security keys.</p>
+<hr />
+<h3>Biometric Authentication</h3>
+<p>Where supported by the user's device and authentication provider, biometric authentication may be used.</p>
+<p>Examples include:</p>
+<ul>
+<li>Fingerprint recognition</li>
+<li>Facial recognition</li>
+</ul>
+<p>Biometric information remains managed by the device or identity provider and is not stored by Work-A-Beez.</p>
+<hr />
+<h2>Enrolling in MFA</h2>
+<p>Users may be prompted to enroll in MFA during their first sign-in or when required by their organization.</p>
+<p>Typical enrollment process:</p>
+<ol>
+<li>Sign in to Work-A-Beez.</li>
+<li>Navigate to <strong>Account Settings</strong>.</li>
+<li>Select <strong>Security</strong>.</li>
+<li>Choose <strong>Multi-Factor Authentication</strong>.</li>
+<li>Select an authentication method.</li>
+<li>Follow the enrollment instructions.</li>
+<li>Verify the authentication method.</li>
+<li>Save your changes.</li>
+</ol>
+<p>Enrollment is complete after successful verification.</p>
+<hr />
+<h2>Signing In with MFA</h2>
+<p>During sign-in:</p>
+<ol>
+<li>Enter your username.</li>
+<li>Enter your password.</li>
+<li>Complete the requested verification step.</li>
+<li>Access your account.</li>
+</ol>
+<p>Depending on organizational policy, trusted devices may reduce the frequency of MFA prompts.</p>
+<hr />
+<h2>Managing Authentication Methods</h2>
+<p>Users may manage their authentication methods from the Security settings.</p>
+<p>Available actions may include:</p>
+<ul>
+<li>Add a new authenticator</li>
+<li>Remove an old device</li>
+<li>Change the default authentication method</li>
+<li>Register additional devices</li>
+<li>Update recovery information</li>
+</ul>
+<p>Organizations may restrict some changes based on security policy.</p>
+<hr />
+<h2>Backup Authentication Methods</h2>
+<p>Users are encouraged to register more than one authentication method.</p>
+<p>Examples include:</p>
+<ul>
+<li>Authenticator app</li>
+<li>Hardware security key</li>
+<li>Secondary mobile device</li>
+<li>Backup email (if permitted)</li>
+</ul>
+<p>Having multiple authentication methods helps prevent account lockouts.</p>
+<hr />
+<h2>Lost or Replaced Devices</h2>
+<p>If your authentication device is lost, stolen, or replaced:</p>
+<ol>
+<li>Contact your administrator if you cannot sign in.</li>
+<li>Verify your identity.</li>
+<li>Remove the lost device from your account.</li>
+<li>Register your replacement device.</li>
+<li>Review recent account activity.</li>
+</ol>
+<p>If you believe your device has been compromised, report it immediately.</p>
+<hr />
+<h2>Recovery Process</h2>
+<p>If you cannot complete MFA verification:</p>
+<ul>
+<li>Use another registered authentication method.</li>
+<li>Use recovery codes if your organization provides them.</li>
+<li>Contact your administrator.</li>
+<li>Contact the Work-A-Beez Support Center if additional assistance is required.</li>
+</ul>
+<p>Recovery procedures vary depending on your organization's authentication configuration.</p>
+<hr />
+<h2>Administrator Controls</h2>
+<p>Administrators may configure:</p>
+<ul>
+<li>MFA enforcement</li>
+<li>Allowed authentication methods</li>
+<li>Trusted device policies</li>
+<li>Session duration</li>
+<li>Recovery procedures</li>
+<li>Administrative reset of MFA enrollment</li>
+<li>Conditional access requirements</li>
+</ul>
+<p>Administrative changes should align with the organization's security policies and regulatory requirements.</p>
+<hr />
+<h2>Security Best Practices</h2>
+<p>To maximize account security:</p>
+<ul>
+<li>Enable MFA for all users.</li>
+<li>Prefer authenticator apps or hardware security keys over SMS when possible.</li>
+<li>Register multiple authentication methods.</li>
+<li>Keep recovery information up to date.</li>
+<li>Never approve unexpected MFA prompts.</li>
+<li>Report suspicious authentication requests immediately.</li>
+<li>Remove old or unused devices from your account.</li>
+<li>Secure your mobile devices with screen locks or biometrics.</li>
+</ul>
+<hr />
+<h2>Troubleshooting</h2>
+<h3>I Didn't Receive My Verification Code</h3>
+<p>Verify:</p>
+<ul>
+<li>Cellular service (for SMS)</li>
+<li>Internet connectivity (for authenticator apps)</li>
+<li>Email spam folder (for email verification)</li>
+<li>Correct registered phone number or email address</li>
+</ul>
+<hr />
+<h3>My Authenticator Code Is Incorrect</h3>
+<p>Possible causes include:</p>
+<ul>
+<li>Incorrect device time</li>
+<li>Expired one-time password</li>
+<li>Incorrect account selected in the authenticator app</li>
+</ul>
+<p>Ensure your device's date and time are synchronized automatically.</p>
+<hr />
+<h3>I Replaced My Phone</h3>
+<p>If you cannot access your previous authenticator:</p>
+<ul>
+<li>Use another registered authentication method.</li>
+<li>Contact your administrator.</li>
+<li>Complete identity verification.</li>
+<li>Register your new device.</li>
+</ul>
+<hr />
+<h3>I Accidentally Denied an MFA Prompt</h3>
+<p>Simply attempt to sign in again.</p>
+<p>If repeated unexpected prompts occur, change your password immediately and notify your administrator, as this may indicate attempted unauthorized access.</p>
+<hr />
+<h3>My Security Key Is Not Working</h3>
+<p>Check:</p>
+<ul>
+<li>Browser compatibility</li>
+<li>USB or NFC connection</li>
+<li>Supported browser version</li>
+<li>Security key registration</li>
+</ul>
+<p>Try another supported browser if necessary.</p>
+<hr />
+<h2>Frequently Asked Questions</h2>
+<h3>Is MFA required?</h3>
+<p>Organizations determine whether MFA is mandatory. Work-A-Beez strongly recommends enabling MFA for all users.</p>
+<hr />
+<h3>Which authentication method is the most secure?</h3>
+<p>Hardware security keys and authenticator applications generally provide stronger protection than SMS verification.</p>
+<hr />
+<h3>Can I register multiple devices?</h3>
+<p>Yes.</p>
+<p>Organizations may allow users to register multiple authentication methods or devices for redundancy.</p>
+<hr />
+<h3>What happens if I lose my phone?</h3>
+<p>Use another registered authentication method or contact your administrator to complete the recovery process.</p>
+<hr />
+<h3>Can administrators disable MFA?</h3>
+<p>Administrators may reset or modify MFA enrollment according to organizational policies. They cannot bypass identity verification requirements established by the authentication system.</p>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>Password Policy</li>
+<li>Password Reset Guide</li>
+<li>Security Overview</li>
+<li>Administrator Guide</li>
+<li>User Guide</li>
+<li>Support Center</li>
+<li>Compliance Overview</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product of LBS.</p>
+{% endblock %}

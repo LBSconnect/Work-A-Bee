@@ -1,0 +1,359 @@
+{% extends "internal_base.html" %}
+{% block title %}Webhook Developer Guide{% endblock %}
+{% block internal_content %}
+  <h1>Webhook Developer Guide</h1>
+  <p class="muted">Status: Future-State / Not Yet Implemented &middot; Classification: Internal &middot; Section: Future-State Product Documentation &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This document describes planned or target-state functionality for Work-A-Beez. It does not reflect functionality available in the current production system and is provided for internal product-planning and engineering-reference purposes only. It is not customer-facing and must not be shared externally in its current form.</div>
+
+<p>title: Webhook Developer Guide
+description: Comprehensive guide for implementing, securing, and troubleshooting Work-A-Beez webhook integrations.
+version: 1.0
+last_updated: July 23, 2026
+owner: Engineering
+classification: Technical Documentation
+audience: Developers, Integration Partners, Solution Architects</p>
+<hr />
+<p>Welcome to the Work-A-Beez Webhook Developer Guide.</p>
+<p>Work-A-Beez webhooks enable applications to receive near real-time notifications when events occur within the platform. Rather than polling the API for changes, subscribed applications receive HTTPS POST requests whenever selected events occur.</p>
+<p>This guide explains how to subscribe to webhook events, validate requests, process deliveries, handle retries, and build reliable event-driven integrations.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Introduction</li>
+<li>How Webhooks Work</li>
+<li>Architecture</li>
+<li>Creating Webhook Subscriptions</li>
+<li>Webhook Events</li>
+<li>Event Payload Structure</li>
+<li>Authentication &amp; Signature Verification</li>
+<li>Retry Policy</li>
+<li>Idempotency</li>
+<li>Event Ordering</li>
+<li>Security Best Practices</li>
+<li>Testing Webhooks</li>
+<li>Troubleshooting</li>
+<li>Event Reference</li>
+<li>Related Documentation</li>
+</ol>
+<hr />
+<h2>Introduction</h2>
+<p>A webhook is an HTTP callback triggered automatically when a specified event occurs.</p>
+<p>Instead of requesting updates repeatedly, your application receives notifications as events happen.</p>
+<p>Typical webhook use cases include:</p>
+<ul>
+<li>Employee onboarding</li>
+<li>Schedule publication</li>
+<li>Shift assignment</li>
+<li>Clock in/out activity</li>
+<li>Leave approvals</li>
+<li>User invitations</li>
+<li>Payroll exports</li>
+</ul>
+<hr />
+<h2>How Webhooks Work</h2>
+<p>The webhook lifecycle follows these steps:</p>
+<ol>
+<li>Register a webhook endpoint.</li>
+<li>Subscribe to one or more event types.</li>
+<li>Work-A-Beez detects an event.</li>
+<li>A signed HTTPS POST request is sent.</li>
+<li>Your application validates the request.</li>
+<li>Your application processes the payload.</li>
+<li>Your application returns a successful HTTP response.</li>
+</ol>
+<p>If delivery fails, Work-A-Beez retries according to the configured retry policy.</p>
+<hr />
+<h2>Architecture</h2>
+<p>Webhook communication is asynchronous.</p>
+<p><code>Work-A-Beez
+      │
+      │ Event Occurs
+      ▼
+Webhook Dispatcher
+      │
+HTTPS POST
+      ▼
+Customer Endpoint
+      │
+Validate Signature
+      │
+Queue Processing
+      │
+Business Logic</code></p>
+<p>Endpoints should acknowledge receipt quickly and defer lengthy processing to background workers.</p>
+<hr />
+<h2>Creating Webhook Subscriptions</h2>
+<p>Administrators can create webhook subscriptions from:</p>
+<p><strong>Administration → Developer Settings → Webhooks</strong></p>
+<p>Each subscription requires:</p>
+<ul>
+<li>Endpoint URL</li>
+<li>Event selection</li>
+<li>Authentication configuration</li>
+<li>Secret key</li>
+<li>Description (optional)</li>
+<li>Status (Enabled/Disabled)</li>
+</ul>
+<p>Only HTTPS endpoints are supported.</p>
+<hr />
+<h2>Webhook Events</h2>
+<p>Available event categories include:</p>
+<h4>Organization</h4>
+<ul>
+<li>organization.created</li>
+<li>organization.updated</li>
+</ul>
+<h4>Employees</h4>
+<ul>
+<li>employee.created</li>
+<li>employee.updated</li>
+<li>employee.deactivated</li>
+<li>employee.reactivated</li>
+</ul>
+<h4>Scheduling</h4>
+<ul>
+<li>schedule.created</li>
+<li>schedule.published</li>
+<li>schedule.updated</li>
+<li>shift.created</li>
+<li>shift.updated</li>
+<li>shift.deleted</li>
+<li>shift.assigned</li>
+<li>shift.unassigned</li>
+</ul>
+<h4>Timekeeping</h4>
+<ul>
+<li>timeentry.clockin</li>
+<li>timeentry.clockout</li>
+<li>timeentry.updated</li>
+<li>break.started</li>
+<li>break.ended</li>
+</ul>
+<h4>Leave</h4>
+<ul>
+<li>leave.requested</li>
+<li>leave.approved</li>
+<li>leave.denied</li>
+<li>leave.cancelled</li>
+</ul>
+<h4>User Management</h4>
+<ul>
+<li>user.invited</li>
+<li>user.activated</li>
+<li>user.deactivated</li>
+<li>password.reset</li>
+</ul>
+<h4>Payroll</h4>
+<ul>
+<li>payroll.export.completed</li>
+<li>payroll.approved</li>
+</ul>
+<p>Additional events may be introduced in future platform versions.</p>
+<hr />
+<h2>Event Payload Structure</h2>
+<p>All webhook payloads follow a consistent format.</p>
+<p>Example:</p>
+<p><code>json
+{
+  "eventId": "evt_8f2d91c4",
+  "eventType": "employee.created",
+  "occurredAt": "2026-07-23T14:30:18Z",
+  "organizationId": "org_10293",
+  "resourceId": "emp_45082",
+  "data": {
+    "employeeId": "emp_45082",
+    "firstName": "John",
+    "lastName": "Smith",
+    "department": "Operations"
+  }
+}</code></p>
+<p>Applications should ignore unknown properties to maintain forward compatibility.</p>
+<hr />
+<h2>Authentication &amp; Signature Verification</h2>
+<p>Each webhook request includes a digital signature to verify authenticity.</p>
+<p>Recommended validation process:</p>
+<ol>
+<li>Read the raw request body.</li>
+<li>Retrieve the webhook secret.</li>
+<li>Generate the expected signature.</li>
+<li>Compare it with the signature provided in the request header.</li>
+<li>Reject requests with invalid signatures.</li>
+</ol>
+<p>Never process unsigned or unverifiable requests.</p>
+<hr />
+<h2>Required Headers</h2>
+<p>Typical webhook headers include:</p>
+<p><code>http
+Content-Type: application/json
+X-WorkABeez-Event
+X-WorkABeez-Signature
+X-WorkABeez-Timestamp
+X-WorkABeez-DeliveryId</code></p>
+<p>Applications should validate required headers before processing.</p>
+<hr />
+<h2>Successful Responses</h2>
+<p>After successfully receiving and validating a webhook, return:</p>
+<p><code>http
+HTTP/1.1 200 OK</code></p>
+<p>or</p>
+<p><code>http
+HTTP/1.1 204 No Content</code></p>
+<p>Responses should be returned promptly to avoid unnecessary retries.</p>
+<hr />
+<h2>Retry Policy</h2>
+<p>If a delivery attempt fails, Work-A-Beez retries automatically.</p>
+<p>Typical retry schedule:</p>
+<table>
+<thead>
+<tr>
+<th>Attempt</th>
+<th style="text-align: right;">Delay</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td style="text-align: right;">Immediate</td>
+</tr>
+<tr>
+<td>2</td>
+<td style="text-align: right;">1 minute</td>
+</tr>
+<tr>
+<td>3</td>
+<td style="text-align: right;">5 minutes</td>
+</tr>
+<tr>
+<td>4</td>
+<td style="text-align: right;">15 minutes</td>
+</tr>
+<tr>
+<td>5</td>
+<td style="text-align: right;">1 hour</td>
+</tr>
+<tr>
+<td>6</td>
+<td style="text-align: right;">6 hours</td>
+</tr>
+</tbody>
+</table>
+<p>Retries may stop after the maximum configured attempts.</p>
+<hr />
+<h2>Idempotency</h2>
+<p>Webhook consumers should process events idempotently.</p>
+<p>Use the <code>eventId</code> to detect duplicate deliveries.</p>
+<p>Example logic:</p>
+<p><code>If eventId already processed
+    Ignore request
+Else
+    Process event</code></p>
+<p>Duplicate deliveries are expected behavior during retry scenarios.</p>
+<hr />
+<h2>Event Ordering</h2>
+<p>Webhook delivery order is not guaranteed.</p>
+<p>Applications should:</p>
+<ul>
+<li>Handle out-of-order events gracefully.</li>
+<li>Retrieve current resource state from the API if sequencing is critical.</li>
+<li>Avoid assuming that related events arrive consecutively.</li>
+</ul>
+<hr />
+<h2>Security Best Practices</h2>
+<p>To secure webhook endpoints:</p>
+<ul>
+<li>Require HTTPS.</li>
+<li>Verify request signatures.</li>
+<li>Restrict accepted HTTP methods to POST.</li>
+<li>Validate timestamps to reduce replay attacks.</li>
+<li>Rotate webhook secrets periodically.</li>
+<li>Log delivery identifiers for troubleshooting.</li>
+<li>Rate-limit incoming requests where appropriate.</li>
+</ul>
+<p>Do not expose webhook endpoints unnecessarily.</p>
+<hr />
+<h2>Testing Webhooks</h2>
+<p>Before enabling production subscriptions:</p>
+<ul>
+<li>Verify endpoint availability.</li>
+<li>Validate signatures.</li>
+<li>Test retry behavior.</li>
+<li>Simulate malformed payloads.</li>
+<li>Confirm duplicate event handling.</li>
+<li>Verify timeout handling.</li>
+</ul>
+<p>Testing should include both successful and failure scenarios.</p>
+<hr />
+<h2>Troubleshooting</h2>
+<h3>Signature Validation Failed</h3>
+<p>Verify:</p>
+<ul>
+<li>Shared secret</li>
+<li>Raw request body</li>
+<li>Hash algorithm</li>
+<li>Header values</li>
+</ul>
+<hr />
+<h3>Duplicate Events</h3>
+<p>Expected during retries.</p>
+<p>Use the event identifier to prevent duplicate processing.</p>
+<hr />
+<h3>Missing Events</h3>
+<p>Check:</p>
+<ul>
+<li>Subscription status</li>
+<li>Event selection</li>
+<li>Endpoint availability</li>
+<li>Delivery logs</li>
+<li>Firewall rules</li>
+</ul>
+<hr />
+<h3>Timeout Errors</h3>
+<p>Ensure:</p>
+<ul>
+<li>Endpoint responds within expected time.</li>
+<li>Long-running work is processed asynchronously.</li>
+<li>Background workers handle intensive tasks.</li>
+</ul>
+<hr />
+<h2>Event Reference</h2>
+<p>Each event includes:</p>
+<ul>
+<li>Event name</li>
+<li>Description</li>
+<li>Trigger conditions</li>
+<li>Payload schema</li>
+<li>Example payload</li>
+<li>Related resources</li>
+</ul>
+<p>Refer to the API Reference Manual for resource definitions associated with each event.</p>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>API Developer Guide</li>
+<li>API Reference Manual</li>
+<li>Integration Guide</li>
+<li>Security Overview</li>
+<li>Administrator Guide</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product of LBS.</p>
+{% endblock %}

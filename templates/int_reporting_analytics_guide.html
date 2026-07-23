@@ -1,0 +1,420 @@
+{% extends "internal_base.html" %}
+{% block title %}Reporting & Analytics Guide{% endblock %}
+{% block internal_content %}
+  <h1>Reporting & Analytics Guide</h1>
+  <p class="muted">Status: Future-State / Not Yet Implemented &middot; Classification: Internal &middot; Section: Future-State Product Documentation &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This document describes planned or target-state functionality for Work-A-Beez. It does not reflect functionality available in the current production system and is provided for internal product-planning and engineering-reference purposes only. It is not customer-facing and must not be shared externally in its current form.</div>
+
+<p>title: Reporting &amp; Analytics Guide
+description: Comprehensive guide for creating, managing, scheduling, and interpreting reports and analytics in the Work-A-Beez Workforce Management Platform.
+version: 1.0
+last_updated: July 23, 2026
+owner: Product Management
+classification: Customer Documentation
+audience: Administrators, Managers, HR, Payroll, Executives</p>
+<hr />
+<p>Welcome to the Work-A-Beez Reporting &amp; Analytics Guide.</p>
+<p>Reporting and analytics transform workforce data into actionable insights that help organizations improve productivity, control labor costs, maintain compliance, and make informed business decisions.</p>
+<p>This guide explains how to access dashboards, run reports, build custom reports, schedule report delivery, and interpret key workforce metrics.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Overview</li>
+<li>Reporting Architecture</li>
+<li>Dashboard Overview</li>
+<li>Standard Reports</li>
+<li>Custom Reports</li>
+<li>Report Filters</li>
+<li>Saved Reports</li>
+<li>Scheduled Reports</li>
+<li>Export Options</li>
+<li>Workforce KPIs</li>
+<li>Labor Cost Analytics</li>
+<li>Attendance Analytics</li>
+<li>Scheduling Analytics</li>
+<li>PTO &amp; Leave Analytics</li>
+<li>Compliance Reporting</li>
+<li>Executive Dashboards</li>
+<li>Best Practices</li>
+<li>Troubleshooting</li>
+<li>Related Documentation</li>
+</ol>
+<hr />
+<h2>Overview</h2>
+<p>Work-A-Beez provides powerful reporting capabilities designed for organizations of all sizes.</p>
+<p>Reports enable organizations to:</p>
+<ul>
+<li>Monitor workforce activity</li>
+<li>Analyze labor costs</li>
+<li>Review attendance trends</li>
+<li>Track overtime</li>
+<li>Improve scheduling efficiency</li>
+<li>Support payroll</li>
+<li>Demonstrate compliance</li>
+<li>Measure organizational performance</li>
+</ul>
+<p>Most reports can be viewed on-screen or exported for external analysis.</p>
+<hr />
+<h2>Reporting Architecture</h2>
+<p>Work-A-Beez reporting is built upon operational data collected from:</p>
+<ul>
+<li>Employee profiles</li>
+<li>Time entries</li>
+<li>Schedules</li>
+<li>Leave requests</li>
+<li>Departments</li>
+<li>Locations</li>
+<li>Payroll exports</li>
+<li>User activity</li>
+<li>Audit logs</li>
+</ul>
+<p>Reports use the latest available approved data unless otherwise specified.</p>
+<hr />
+<h2>Dashboard Overview</h2>
+<p>The Analytics Dashboard provides a real-time overview of workforce activity.</p>
+<p>Typical dashboard widgets include:</p>
+<ul>
+<li>Employees Clocked In</li>
+<li>Scheduled Employees</li>
+<li>Attendance Rate</li>
+<li>Overtime Hours</li>
+<li>Open Shifts</li>
+<li>Pending Leave Requests</li>
+<li>Labor Cost Today</li>
+<li>Missed Punches</li>
+<li>Payroll Status</li>
+<li>Compliance Alerts</li>
+</ul>
+<p>Administrators may configure dashboard layouts based on their role.</p>
+<hr />
+<h2>Standard Reports</h2>
+<p>Work-A-Beez includes a library of predefined reports.</p>
+<h3>Employee Directory</h3>
+<p>Displays:</p>
+<ul>
+<li>Employee information</li>
+<li>Departments</li>
+<li>Locations</li>
+<li>Job titles</li>
+<li>Employment status</li>
+</ul>
+<hr />
+<h3>Attendance Report</h3>
+<p>Displays:</p>
+<ul>
+<li>Clock-in times</li>
+<li>Clock-out times</li>
+<li>Missed punches</li>
+<li>Absences</li>
+<li>Tardiness</li>
+</ul>
+<hr />
+<h3>Timecard Report</h3>
+<p>Displays:</p>
+<ul>
+<li>Regular hours</li>
+<li>Overtime</li>
+<li>Breaks</li>
+<li>Total payable hours</li>
+</ul>
+<hr />
+<h3>Schedule Report</h3>
+<p>Displays:</p>
+<ul>
+<li>Published schedules</li>
+<li>Assigned shifts</li>
+<li>Open shifts</li>
+<li>Coverage gaps</li>
+</ul>
+<hr />
+<h3>Leave Report</h3>
+<p>Displays:</p>
+<ul>
+<li>PTO balances</li>
+<li>Approved leave</li>
+<li>Pending requests</li>
+<li>Leave history</li>
+</ul>
+<hr />
+<h3>Payroll Export Report</h3>
+<p>Displays:</p>
+<ul>
+<li>Pay periods</li>
+<li>Hours worked</li>
+<li>Earnings</li>
+<li>Overtime</li>
+<li>Leave balances</li>
+</ul>
+<hr />
+<h3>Audit Log Report</h3>
+<p>Displays:</p>
+<ul>
+<li>User activity</li>
+<li>Administrative changes</li>
+<li>Security events</li>
+<li>Login history</li>
+</ul>
+<hr />
+<h2>Custom Reports</h2>
+<p>Administrators can build custom reports using the Report Builder.</p>
+<p>Available data fields include:</p>
+<ul>
+<li>Employee</li>
+<li>Department</li>
+<li>Manager</li>
+<li>Job Title</li>
+<li>Location</li>
+<li>Shift</li>
+<li>Time Entry</li>
+<li>Payroll</li>
+<li>Leave</li>
+<li>Schedule</li>
+<li>Custom Fields</li>
+</ul>
+<p>Custom reports can be saved and reused.</p>
+<hr />
+<h2>Report Filters</h2>
+<p>Reports may be filtered using one or more criteria.</p>
+<p>Common filters include:</p>
+<ul>
+<li>Date Range</li>
+<li>Department</li>
+<li>Location</li>
+<li>Employee</li>
+<li>Manager</li>
+<li>Job Title</li>
+<li>Employment Status</li>
+<li>Shift Type</li>
+<li>Schedule</li>
+<li>Payroll Period</li>
+</ul>
+<p>Multiple filters may be combined to refine report results.</p>
+<hr />
+<h2>Saved Reports</h2>
+<p>Frequently used reports may be saved for future use.</p>
+<p>Saved reports preserve:</p>
+<ul>
+<li>Selected columns</li>
+<li>Filters</li>
+<li>Sorting</li>
+<li>Grouping</li>
+<li>Calculated fields</li>
+</ul>
+<p>Only authorized users may modify shared reports.</p>
+<hr />
+<h2>Scheduled Reports</h2>
+<p>Reports can be generated automatically.</p>
+<p>Scheduling options include:</p>
+<ul>
+<li>Daily</li>
+<li>Weekly</li>
+<li>Monthly</li>
+<li>Quarterly</li>
+</ul>
+<p>Reports may be delivered by:</p>
+<ul>
+<li>Email</li>
+<li>Secure download</li>
+<li>Shared reporting portal</li>
+</ul>
+<p>Administrators should avoid scheduling large reports during peak operational periods.</p>
+<hr />
+<h2>Export Options</h2>
+<p>Supported export formats include:</p>
+<ul>
+<li>CSV</li>
+<li>Excel (.xlsx)</li>
+<li>PDF</li>
+</ul>
+<p>Exports maintain report formatting where applicable.</p>
+<p>Large reports may require additional processing time.</p>
+<hr />
+<h2>Workforce KPIs</h2>
+<p>Common workforce metrics include:</p>
+<h3>Attendance Rate</h3>
+<p>Percentage of scheduled employees who reported to work.</p>
+<hr />
+<h3>Overtime Hours</h3>
+<p>Total overtime worked during the selected reporting period.</p>
+<hr />
+<h3>Labor Cost</h3>
+<p>Combined wage cost associated with worked hours.</p>
+<hr />
+<h3>Schedule Coverage</h3>
+<p>Percentage of required shifts successfully filled.</p>
+<hr />
+<h3>Leave Utilization</h3>
+<p>Percentage of accrued leave that has been used.</p>
+<hr />
+<h3>Employee Turnover</h3>
+<p>Percentage of employees leaving the organization during a reporting period.</p>
+<hr />
+<h3>Average Hours Worked</h3>
+<p>Average hours worked per employee.</p>
+<hr />
+<h3>Missed Punch Rate</h3>
+<p>Percentage of time entries requiring correction.</p>
+<hr />
+<h2>Labor Cost Analytics</h2>
+<p>Labor cost reporting enables organizations to monitor workforce expenses.</p>
+<p>Available metrics include:</p>
+<ul>
+<li>Labor cost by department</li>
+<li>Labor cost by location</li>
+<li>Labor cost by manager</li>
+<li>Labor cost by employee</li>
+<li>Overtime expense</li>
+<li>Budget variance</li>
+<li>Cost per labor hour</li>
+</ul>
+<p>These reports support workforce planning and budgeting.</p>
+<hr />
+<h2>Attendance Analytics</h2>
+<p>Attendance reports help identify workforce trends.</p>
+<p>Common metrics include:</p>
+<ul>
+<li>Tardiness</li>
+<li>Early departures</li>
+<li>No-call/no-show events</li>
+<li>Missed punches</li>
+<li>Absence frequency</li>
+<li>Attendance percentages</li>
+</ul>
+<p>Managers can use attendance trends to improve workforce reliability.</p>
+<hr />
+<h2>Scheduling Analytics</h2>
+<p>Scheduling reports help optimize staffing levels.</p>
+<p>Examples include:</p>
+<ul>
+<li>Shift coverage</li>
+<li>Open shifts</li>
+<li>Shift swaps</li>
+<li>Schedule adherence</li>
+<li>Understaffing</li>
+<li>Overstaffing</li>
+</ul>
+<p>Analytics assist managers in balancing labor costs with operational demand.</p>
+<hr />
+<h2>PTO &amp; Leave Analytics</h2>
+<p>Leave reports include:</p>
+<ul>
+<li>PTO balances</li>
+<li>Vacation usage</li>
+<li>Sick leave</li>
+<li>Holiday utilization</li>
+<li>Leave trends</li>
+<li>Department leave summaries</li>
+</ul>
+<p>Managers can identify periods of increased leave activity for workforce planning.</p>
+<hr />
+<h2>Compliance Reporting</h2>
+<p>Compliance reports support organizational and regulatory requirements.</p>
+<p>Examples include:</p>
+<ul>
+<li>Overtime compliance</li>
+<li>Break compliance</li>
+<li>Rest period compliance</li>
+<li>Maximum hours worked</li>
+<li>Timekeeping exceptions</li>
+<li>Audit history</li>
+</ul>
+<p>Compliance reports should be reviewed regularly to identify potential issues before they become violations.</p>
+<hr />
+<h2>Executive Dashboards</h2>
+<p>Executive dashboards summarize organizational performance through high-level metrics.</p>
+<p>Typical executive indicators include:</p>
+<ul>
+<li>Total Workforce</li>
+<li>Active Employees</li>
+<li>Labor Cost</li>
+<li>Overtime Percentage</li>
+<li>Attendance Rate</li>
+<li>Leave Utilization</li>
+<li>Payroll Status</li>
+<li>Department Performance</li>
+<li>Workforce Trends</li>
+</ul>
+<p>Executives may customize dashboards to align with organizational goals.</p>
+<hr />
+<h2>Best Practices</h2>
+<p>To maximize reporting effectiveness:</p>
+<ul>
+<li>Use consistent date ranges.</li>
+<li>Verify report filters before exporting.</li>
+<li>Schedule recurring reports.</li>
+<li>Archive historical reports.</li>
+<li>Limit access to sensitive reports.</li>
+<li>Review labor trends regularly.</li>
+<li>Monitor compliance reports routinely.</li>
+</ul>
+<p>Organizations should establish reporting standards to ensure consistent interpretation across departments.</p>
+<hr />
+<h2>Troubleshooting</h2>
+<h3>Missing Data</h3>
+<p>Verify:</p>
+<ul>
+<li>Date filters</li>
+<li>Employee permissions</li>
+<li>Approved time entries</li>
+<li>Data synchronization status</li>
+</ul>
+<hr />
+<h3>Incorrect Totals</h3>
+<p>Review:</p>
+<ul>
+<li>Report filters</li>
+<li>Payroll approval status</li>
+<li>Timecard approvals</li>
+<li>Overtime rules</li>
+</ul>
+<hr />
+<h3>Export Failures</h3>
+<p>Confirm:</p>
+<ul>
+<li>User permissions</li>
+<li>Browser compatibility</li>
+<li>File size limitations</li>
+<li>Available storage space</li>
+</ul>
+<hr />
+<h3>Scheduled Reports Not Delivered</h3>
+<p>Check:</p>
+<ul>
+<li>Recipient email addresses</li>
+<li>Delivery schedule</li>
+<li>Spam filtering</li>
+<li>Report ownership</li>
+</ul>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>Administrator Guide</li>
+<li>Employee User Guide</li>
+<li>Integration Guide</li>
+<li>API Developer Guide</li>
+<li>Payroll Guide</li>
+<li>Compliance Overview</li>
+<li>Support &amp; Escalation Guide</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product of LBS.</p>
+{% endblock %}

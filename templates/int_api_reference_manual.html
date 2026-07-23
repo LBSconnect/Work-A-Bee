@@ -1,10 +1,9 @@
-{% extends "base.html" %}
+{% extends "internal_base.html" %}
 {% block title %}API Reference Manual{% endblock %}
-{% block wrapclass %}wide{% endblock %}
-{% block content %}
-  <h1>Work-A-Beez API Reference Manual</h1>
-  <p class="muted">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
-  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This reference describes a planned future API. None of the endpoints listed below exist yet - this page is a roadmap of planned functionality, not a live API you can call today. See the API Developer Guide for more context.</div>
+{% block internal_content %}
+  <h1>API Reference Manual</h1>
+  <p class="muted">Status: Future-State / Not Yet Implemented &middot; Classification: Internal &middot; Section: Future-State Product Documentation &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This document describes planned or target-state functionality for Work-A-Beez. It does not reflect functionality available in the current production system and is provided for internal product-planning and engineering-reference purposes only. It is not customer-facing and must not be shared externally in its current form.</div>
 
 <p>Welcome to the Work-A-Beez API Reference Manual.</p>
 <p>This manual provides complete technical documentation for every publicly available REST API endpoint supported by Work-A-Beez.</p>

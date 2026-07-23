@@ -3,20 +3,265 @@
 {% block wrapclass %}wide{% endblock %}
 {% block content %}
   <h1>Work-A-Beez Availability Commitment</h1>
-  <p class="muted">Status: Draft template &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <p class="muted">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
 
-  <p><em>This page is a starting template generated for LBS to complete. Replace the placeholder text in each section below with final content before treating this page as published.</em></p>
-
-  <h2>1. Our Commitment</h2>
-  <p>[Add content here.]</p>
-
-  <h2>2. Planned Maintenance</h2>
-  <p>[Add content here.]</p>
-
-  <h2>3. Reporting an Outage</h2>
-  <p>[Add content here.]</p>
-
-  <h2>4. Related Documents</h2>
-  <p>[Add content here.]</p>
-
+<p>title: Availability Commitment
+description: Work-A-Beez's commitment to platform availability, service reliability, uptime objectives, monitoring, maintenance, and operational transparency.
+version: 1.0
+last_updated: July 23, 2026
+owner: Site Reliability Engineering (SRE)
+classification: Customer Documentation
+audience: Customers, IT Administrators, Organization Administrators, Security Teams</p>
+<hr />
+<p>Welcome to the Work-A-Beez Availability Commitment.</p>
+<p>Work-A-Beez is designed to provide a highly available, secure, and reliable workforce management platform. This document explains our availability objectives, how service availability is measured, planned maintenance practices, and the shared responsibilities that help ensure dependable service.</p>
+<p>This Availability Commitment complements the Work-A-Beez <strong>Service Level Agreement (SLA)</strong> and should be read together with the <strong>Status Page Information</strong>, <strong>Business Continuity Plan</strong>, and <strong>Disaster Recovery Plan</strong>.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Purpose</li>
+<li>Our Commitment</li>
+<li>Availability Objectives</li>
+<li>Measuring Availability</li>
+<li>Planned Maintenance</li>
+<li>Unplanned Service Interruptions</li>
+<li>Service Monitoring</li>
+<li>Incident Response</li>
+<li>Customer Responsibilities</li>
+<li>Service Exclusions</li>
+<li>Disaster Recovery</li>
+<li>Transparency &amp; Communication</li>
+<li>Frequently Asked Questions</li>
+<li>Related Documentation</li>
+</ol>
+<hr />
+<h2>Purpose</h2>
+<p>This document describes Work-A-Beez's operational commitment to maintaining a reliable and resilient cloud platform while providing transparency into how availability is monitored and communicated.</p>
+<p>Its objectives are to:</p>
+<ul>
+<li>Define availability expectations.</li>
+<li>Explain service monitoring practices.</li>
+<li>Describe planned maintenance activities.</li>
+<li>Clarify service exclusions.</li>
+<li>Promote operational transparency.</li>
+</ul>
+<hr />
+<h2>Our Commitment</h2>
+<p>Work-A-Beez is engineered using modern cloud infrastructure and operational best practices to provide reliable access to the platform.</p>
+<p>Our operational objectives include:</p>
+<ul>
+<li>High platform availability</li>
+<li>Secure infrastructure</li>
+<li>Continuous monitoring</li>
+<li>Rapid incident response</li>
+<li>Scalable cloud architecture</li>
+<li>Proactive maintenance</li>
+<li>Continuous service improvement</li>
+</ul>
+<p>Availability is continuously evaluated through automated monitoring and operational reviews.</p>
+<hr />
+<h2>Availability Objectives</h2>
+<p>Work-A-Beez is designed to achieve high service availability throughout each calendar month.</p>
+<p>Availability objectives are established through our Service Level Agreement (SLA).</p>
+<p>Availability measurements generally apply to core services including:</p>
+<ul>
+<li>Authentication</li>
+<li>Web Application</li>
+<li>Scheduling</li>
+<li>Time &amp; Attendance</li>
+<li>Leave Management</li>
+<li>Reporting</li>
+<li>Notification Services</li>
+</ul>
+<p>Actual commitments are governed by the applicable SLA or customer agreement.</p>
+<hr />
+<h2>Measuring Availability</h2>
+<p>Service availability is measured using automated monitoring systems.</p>
+<p>Availability calculations generally consider:</p>
+<ul>
+<li>Successful user access</li>
+<li>Service responsiveness</li>
+<li>Platform accessibility</li>
+<li>Core application functionality</li>
+<li>Infrastructure health</li>
+</ul>
+<p>Availability measurements are typically based on monthly operational performance.</p>
+<p>Scheduled maintenance periods identified in advance may be excluded from availability calculations in accordance with the SLA.</p>
+<hr />
+<h2>Planned Maintenance</h2>
+<p>Routine maintenance is necessary to:</p>
+<ul>
+<li>Improve performance</li>
+<li>Apply security updates</li>
+<li>Upgrade infrastructure</li>
+<li>Increase platform capacity</li>
+<li>Deploy product enhancements</li>
+<li>Maintain platform reliability</li>
+</ul>
+<p>Whenever practical:</p>
+<ul>
+<li>Maintenance is scheduled during periods of lower customer activity.</li>
+<li>Advance notice is provided.</li>
+<li>Maintenance windows are minimized.</li>
+<li>Customer impact is reduced whenever possible.</li>
+</ul>
+<p>Maintenance announcements are published through the Status Page and other customer communication channels.</p>
+<hr />
+<h2>Unplanned Service Interruptions</h2>
+<p>Despite extensive monitoring and redundancy, unexpected service interruptions may occasionally occur.</p>
+<p>Examples include:</p>
+<ul>
+<li>Infrastructure failures</li>
+<li>Cloud provider disruptions</li>
+<li>Network outages</li>
+<li>Software defects</li>
+<li>Security events</li>
+<li>Third-party service interruptions</li>
+</ul>
+<p>When an interruption occurs, Work-A-Beez follows established incident response procedures to restore service as quickly as possible.</p>
+<hr />
+<h2>Service Monitoring</h2>
+<p>The platform is continuously monitored for operational health.</p>
+<p>Monitoring includes:</p>
+<ul>
+<li>Application availability</li>
+<li>API responsiveness</li>
+<li>Database performance</li>
+<li>Infrastructure health</li>
+<li>Network connectivity</li>
+<li>Authentication services</li>
+<li>Storage systems</li>
+<li>Error rates</li>
+<li>Resource utilization</li>
+<li>Security events</li>
+</ul>
+<p>Automated alerts notify engineering personnel of conditions requiring investigation.</p>
+<hr />
+<h2>Incident Response</h2>
+<p>When an incident is detected, Work-A-Beez follows a structured incident management process.</p>
+<p>Typical stages include:</p>
+<ol>
+<li>Detection</li>
+<li>Assessment</li>
+<li>Classification</li>
+<li>Investigation</li>
+<li>Mitigation</li>
+<li>Resolution</li>
+<li>Validation</li>
+<li>Post-Incident Review</li>
+</ol>
+<p>Communication updates are provided during significant service events through the Status Page.</p>
+<hr />
+<h2>Customer Responsibilities</h2>
+<p>Customers contribute to service availability by:</p>
+<ul>
+<li>Using supported browsers.</li>
+<li>Maintaining reliable internet connectivity.</li>
+<li>Keeping operating systems updated.</li>
+<li>Maintaining compatible devices.</li>
+<li>Protecting account credentials.</li>
+<li>Following security best practices.</li>
+<li>Monitoring scheduled maintenance notifications.</li>
+<li>Promptly reporting suspected service issues.</li>
+</ul>
+<p>Customer-side network or device issues are outside the operational control of Work-A-Beez.</p>
+<hr />
+<h2>Service Exclusions</h2>
+<p>Availability calculations generally do not include interruptions resulting from circumstances outside Work-A-Beez's reasonable control.</p>
+<p>Examples may include:</p>
+<ul>
+<li>Customer internet outages</li>
+<li>Local network failures</li>
+<li>Unsupported browsers</li>
+<li>Customer hardware failures</li>
+<li>Third-party software not managed by Work-A-Beez</li>
+<li>Force majeure events</li>
+<li>Actions performed by customer administrators</li>
+<li>Planned maintenance announced in advance</li>
+</ul>
+<p>Specific exclusions are defined in the Service Level Agreement.</p>
+<hr />
+<h2>Disaster Recovery</h2>
+<p>Work-A-Beez maintains disaster recovery capabilities designed to support business continuity.</p>
+<p>Recovery planning includes:</p>
+<ul>
+<li>Secure backups</li>
+<li>Data replication</li>
+<li>Infrastructure redundancy</li>
+<li>Recovery testing</li>
+<li>Operational procedures</li>
+<li>Recovery validation</li>
+</ul>
+<p>Detailed recovery procedures are documented separately within the Disaster Recovery Plan.</p>
+<hr />
+<h2>Transparency &amp; Communication</h2>
+<p>Customers are informed about service health through multiple communication channels.</p>
+<p>These may include:</p>
+<ul>
+<li>Status Page</li>
+<li>Email notifications</li>
+<li>Maintenance announcements</li>
+<li>Incident updates</li>
+<li>Support communications</li>
+<li>Customer Success notifications</li>
+</ul>
+<p>Following significant incidents, Work-A-Beez may publish a post-incident summary describing:</p>
+<ul>
+<li>What occurred</li>
+<li>Customer impact</li>
+<li>Resolution activities</li>
+<li>Preventive improvements</li>
+</ul>
+<hr />
+<h2>Frequently Asked Questions</h2>
+<h3>What does "availability" mean?</h3>
+<p>Availability refers to the ability of authorized users to access and use the Work-A-Beez platform under normal operating conditions.</p>
+<hr />
+<h3>Is availability guaranteed?</h3>
+<p>Availability objectives are defined in the applicable Service Level Agreement (SLA). Actual service levels may vary based on scheduled maintenance, service exclusions, and other contractual terms.</p>
+<hr />
+<h3>Does planned maintenance count as downtime?</h3>
+<p>Scheduled maintenance announced in advance may be excluded from availability calculations according to the Service Level Agreement.</p>
+<hr />
+<h3>How can I determine if Work-A-Beez is experiencing an outage?</h3>
+<p>Visit the Work-A-Beez Status Page for the latest information regarding platform health, incidents, and maintenance activities.</p>
+<hr />
+<h3>How quickly are incidents addressed?</h3>
+<p>Incident response priority depends on the severity and business impact of the issue. Critical incidents receive immediate attention from the appropriate engineering teams.</p>
+<hr />
+<h3>Will I be notified about maintenance?</h3>
+<p>Yes.</p>
+<p>Whenever practical, advance notification is provided before maintenance that may affect service availability.</p>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>Service Level Agreement (SLA)</li>
+<li>Status Page Information</li>
+<li>Business Continuity Plan</li>
+<li>Disaster Recovery Plan</li>
+<li>Incident Response Plan</li>
+<li>Support Center</li>
+<li>Security Overview</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product of LBS.</p>
 {% endblock %}
