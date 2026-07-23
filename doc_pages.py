@@ -22,8 +22,6 @@ LIBRARY1 = [
     ("system_requirements", "/system-requirements", "system_requirements.html", "System Requirements"),
     ("browser_support", "/browser-support", "browser_support.html", "Browser Support"),
     ("release_notes", "/release-notes", "release_notes.html", "Release Notes"),
-    ("api_overview", "/api-overview", "api_overview.html", "API Overview"),
-    ("api_reference", "/api-reference", "api_reference.html", "API Reference Manual"),
     ("status_page_info", "/status", "status_page_info.html", "Status Page Information"),
     ("support_center", "/support", "support_center.html", "Support Center"),
     ("onboarding_guide", "/onboarding-guide", "onboarding_guide.html", "Customer Onboarding Guide"),
@@ -189,6 +187,27 @@ LIBRARY3 = [
     ("int_product_governance", "product-governance", "int_product_governance.html", "Product Governance", "Product Management"),
     ("int_customer_feedback_process", "customer-feedback-process", "int_customer_feedback_process.html", "Customer Feedback Process", "Product Management"),
     ("int_feature_request_process", "feature-request-process", "int_feature_request_process.html", "Feature Request Process", "Product Management"),
+
+    # Future-State Product Documentation - customer-style guides for features that
+    # are not yet implemented. Kept internal-only (not customer-facing) until the
+    # underlying functionality actually ships. See app.py's system_admin_required.
+    ("int_api_developer_guide", "api-developer-guide", "int_api_developer_guide.html", "API Developer Guide", "Future-State Product Documentation"),
+    ("int_api_reference_manual", "api-reference-manual", "int_api_reference_manual.html", "API Reference Manual", "Future-State Product Documentation"),
+    ("int_mfa_guide", "mfa-guide", "int_mfa_guide.html", "Multi-Factor Authentication (MFA) Guide", "Future-State Product Documentation"),
+    ("int_password_reset_guide", "password-reset-guide", "int_password_reset_guide.html", "Password Reset Guide", "Future-State Product Documentation"),
+    ("int_password_policy_future", "password-policy-target-state", "int_password_policy_future.html", "Password Policy (Target State)", "Future-State Product Documentation"),
+    ("int_training_resources", "training-resources", "int_training_resources.html", "Training Resources", "Future-State Product Documentation"),
+    ("int_video_documentation", "video-documentation", "int_video_documentation.html", "Video Documentation", "Future-State Product Documentation"),
+    ("int_mobile_app_guide", "mobile-application-guide", "int_mobile_app_guide.html", "Mobile Application Guide", "Future-State Product Documentation"),
+    ("int_webhook_developer_guide", "webhook-developer-guide", "int_webhook_developer_guide.html", "Webhook Developer Guide", "Future-State Product Documentation"),
+    ("int_integration_guide", "integration-guide", "int_integration_guide.html", "Integration Guide", "Future-State Product Documentation"),
+    ("int_reporting_analytics_guide", "reporting-analytics-guide", "int_reporting_analytics_guide.html", "Reporting & Analytics Guide", "Future-State Product Documentation"),
+    ("int_payroll_admin_guide", "payroll-administration-guide", "int_payroll_admin_guide.html", "Payroll Administration Guide", "Future-State Product Documentation"),
+    ("int_implementation_deployment_guide", "implementation-deployment-guide", "int_implementation_deployment_guide.html", "Implementation & Deployment Guide", "Future-State Product Documentation"),
+    ("int_audit_logging_compliance_guide", "audit-logging-compliance-guide", "int_audit_logging_compliance_guide.html", "Audit Logging & Compliance Guide", "Future-State Product Documentation"),
+    ("int_performance_scalability_guide", "performance-scalability-guide", "int_performance_scalability_guide.html", "Performance & Scalability Guide", "Future-State Product Documentation"),
+    ("int_notification_guide", "notification-communication-guide", "int_notification_guide.html", "Notification & Communication Guide", "Future-State Product Documentation"),
+    ("int_faq_future", "faq-future-state", "int_faq_future.html", "Frequently Asked Questions (Future-State Draft)", "Future-State Product Documentation"),
 ]
 
 # The 4 real internal documents, built from verbatim customer-supplied text.

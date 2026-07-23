@@ -3,20 +3,253 @@
 {% block wrapclass %}wide{% endblock %}
 {% block content %}
   <h1>Work-A-Beez System Requirements</h1>
-  <p class="muted">Status: Draft template &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <p class="muted">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
 
-  <p><em>This page is a starting template generated for LBS to complete. Replace the placeholder text in each section below with final content before treating this page as published.</em></p>
-
-  <h2>1. Supported Devices</h2>
-  <p>[Add content here.]</p>
-
-  <h2>2. Operating Systems</h2>
-  <p>[Add content here.]</p>
-
-  <h2>3. Network Requirements</h2>
-  <p>[Add content here.]</p>
-
-  <h2>4. Recommended Hardware</h2>
-  <p>[Add content here.]</p>
-
+<p>Welcome to the Work-A-Beez System Requirements Guide.</p>
+<p>This document outlines the minimum and recommended system requirements for accessing the Work-A-Beez Workforce Management Platform. Following these recommendations helps ensure optimal performance, security, and compatibility.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Introduction</li>
+<li>Supported Deployment Model</li>
+<li>Hardware Requirements</li>
+<li>Operating System Requirements</li>
+<li>Browser Requirements</li>
+<li>Mobile Device Requirements</li>
+<li>Display Requirements</li>
+<li>Network Requirements</li>
+<li>Internet Connectivity</li>
+<li>Email Requirements</li>
+<li>Authentication Requirements</li>
+<li>Printing Requirements</li>
+<li>API Requirements</li>
+<li>Performance Recommendations</li>
+<li>Unsupported Configurations</li>
+<li>Frequently Asked Questions</li>
+<li>Related Documentation</li>
+</ol>
+<hr />
+<h2>Introduction</h2>
+<p>Work-A-Beez is a cloud-native Software-as-a-Service (SaaS) platform.</p>
+<p>Because the application is browser-based, customers do not install application servers or desktop software. Users access Work-A-Beez through a supported web browser.</p>
+<hr />
+<h2>Supported Deployment Model</h2>
+<p>Work-A-Beez supports:</p>
+<ul>
+<li>Cloud-hosted SaaS deployment</li>
+<li>Multi-tenant architecture</li>
+<li>Secure HTTPS access</li>
+</ul>
+<p>No on-premises application installation is required.</p>
+<hr />
+<h2>Hardware Requirements</h2>
+<h3>Minimum Workstation</h3>
+<ul>
+<li>Dual-core processor</li>
+<li>4 GB RAM</li>
+<li>2 GB available disk space</li>
+<li>Internet connection</li>
+<li>1366 x 768 display resolution</li>
+</ul>
+<hr />
+<h3>Recommended Workstation</h3>
+<ul>
+<li>Quad-core processor or better</li>
+<li>8 GB RAM or more</li>
+<li>SSD storage</li>
+<li>Stable broadband Internet</li>
+<li>Full HD (1920 x 1080) display or higher</li>
+</ul>
+<hr />
+<h3>Administrator Workstations</h3>
+<p>For administrators who frequently manage reports, imports, and payroll processing:</p>
+<p>Recommended:</p>
+<ul>
+<li>Quad-core processor</li>
+<li>16 GB RAM</li>
+<li>Dual monitors (recommended)</li>
+<li>High-speed Internet connection</li>
+</ul>
+<hr />
+<h2>Operating System Requirements</h2>
+<p>Supported operating systems include current vendor-supported versions of:</p>
+<h3>Microsoft Windows</h3>
+<ul>
+<li>Windows 10</li>
+<li>Windows 11</li>
+</ul>
+<hr />
+<h3>Apple macOS</h3>
+<p>Current supported versions of macOS.</p>
+<hr />
+<h3>ChromeOS</h3>
+<p>Supported through compatible web browsers.</p>
+<hr />
+<h3>Linux</h3>
+<p>Current enterprise Linux distributions running supported browsers.</p>
+<hr />
+<p>Operating systems that are no longer supported by their vendors are not recommended.</p>
+<hr />
+<h2>Browser Requirements</h2>
+<p>Work-A-Beez supports current stable versions of major browsers including:</p>
+<ul>
+<li>Google Chrome</li>
+<li>Microsoft Edge</li>
+<li>Mozilla Firefox</li>
+<li>Apple Safari</li>
+</ul>
+<p>Browsers should:</p>
+<ul>
+<li>Support JavaScript</li>
+<li>Support cookies</li>
+<li>Support TLS 1.2 or higher</li>
+</ul>
+<p>See the <strong>Browser Support Guide</strong> for detailed compatibility information.</p>
+<hr />
+<h2>Mobile Device Requirements</h2>
+<p>Work-A-Beez does not currently offer a dedicated mobile application. The web application is responsive and supports use from mobile browsers, including:</p>
+<h3>Apple iOS</h3>
+<p>Current supported versions of iOS, using Safari.</p>
+<hr />
+<h3>Android</h3>
+<p>Current supported versions of Android, using Chrome.</p>
+<hr />
+<p>Some features are optimized for larger screens and may be more limited on small mobile displays.</p>
+<hr />
+<h2>Display Requirements</h2>
+<p>Minimum supported resolution:</p>
+<ul>
+<li>1366 x 768</li>
+</ul>
+<p>Recommended resolution:</p>
+<ul>
+<li>1920 x 1080 or higher</li>
+</ul>
+<p>The user interface is responsive and adapts to tablets, laptops, and desktops.</p>
+<hr />
+<h2>Network Requirements</h2>
+<p>Organizations should ensure access to:</p>
+<ul>
+<li>HTTPS (TCP Port 443)</li>
+<li>DNS resolution</li>
+<li>Secure outbound Internet access</li>
+</ul>
+<p>Recommended network characteristics:</p>
+<ul>
+<li>Low latency</li>
+<li>Stable connectivity</li>
+<li>Reliable DNS services</li>
+</ul>
+<p>If outbound traffic is filtered, Work-A-Beez domains should be added to the organization's allowlist.</p>
+<hr />
+<h2>Internet Connectivity</h2>
+<p>Recommended connection:</p>
+<ul>
+<li>Broadband Internet</li>
+</ul>
+<p>Suggested minimum bandwidth:</p>
+<ul>
+<li>5 Mbps per active workstation</li>
+</ul>
+<p>Higher bandwidth may be beneficial for simultaneous users and larger organizations.</p>
+<hr />
+<h2>Email Requirements</h2>
+<p>Organizations should permit email delivery from approved Work-A-Beez sending domains.</p>
+<p>Examples include:</p>
+<ul>
+<li>Account activation</li>
+<li>Password resets</li>
+<li>Schedule notifications</li>
+<li>Weekly payroll reports</li>
+<li>System alerts</li>
+</ul>
+<p>Administrators should review spam filtering policies to ensure delivery of transactional emails.</p>
+<hr />
+<h2>Authentication Requirements</h2>
+<p>Supported authentication method:</p>
+<ul>
+<li>Username/email and password</li>
+</ul>
+<p>Additional authentication methods (Multi-Factor Authentication, Single Sign-On) are planned but not yet available.</p>
+<hr />
+<h2>Printing Requirements</h2>
+<p>For organizations printing schedules or reports:</p>
+<p>Recommended:</p>
+<ul>
+<li>Standard office printer</li>
+<li>A4 or Letter paper support</li>
+</ul>
+<p>Reports are currently viewed on-screen through the browser; browser print/PDF functions can be used to print or save a copy.</p>
+<hr />
+<h2>Performance Recommendations</h2>
+<p>For the best experience:</p>
+<ul>
+<li>Use the latest browser version.</li>
+<li>Enable automatic browser updates.</li>
+<li>Close unused browser tabs.</li>
+<li>Use wired or high-quality Wi-Fi connections.</li>
+</ul>
+<p>Organizations should periodically review browser and operating system versions to maintain compatibility.</p>
+<hr />
+<h2>Unsupported Configurations</h2>
+<p>The following configurations are not supported:</p>
+<ul>
+<li>Unsupported or end-of-life operating systems</li>
+<li>Browsers that no longer receive vendor security updates</li>
+<li>Browsers with JavaScript disabled</li>
+<li>Browsers with required cookies disabled</li>
+<li>Insecure HTTP connections</li>
+</ul>
+<p>Unsupported environments may experience reduced functionality or security risks.</p>
+<hr />
+<h2>Frequently Asked Questions</h2>
+<h3>Do I need to install software?</h3>
+<p>No.</p>
+<p>Work-A-Beez is accessed through a supported web browser.</p>
+<hr />
+<h3>Can I use Work-A-Beez on a tablet?</h3>
+<p>Yes.</p>
+<p>The responsive interface supports most modern tablets using supported browsers.</p>
+<hr />
+<h3>Is VPN access required?</h3>
+<p>Typically, no.</p>
+<p>Organizations with specific security policies may require VPN access for certain users.</p>
+<hr />
+<h3>Does Work-A-Beez support dual monitors?</h3>
+<p>Yes.</p>
+<p>Dual monitors are particularly useful for payroll administrators, schedulers, and HR personnel managing large datasets.</p>
+<hr />
+<h3>Will Work-A-Beez work on older computers?</h3>
+<p>In many cases, yes.</p>
+<p>However, modern hardware and current operating systems provide the best user experience and security.</p>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>Browser Support Guide</li>
+<li>Security Overview</li>
+<li>Password Policy</li>
+<li>Customer Onboarding Guide</li>
+<li>Administrator Guide</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product of LBS.</p>
 {% endblock %}

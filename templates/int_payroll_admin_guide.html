@@ -1,0 +1,410 @@
+{% extends "internal_base.html" %}
+{% block title %}Payroll Administration Guide{% endblock %}
+{% block internal_content %}
+  <h1>Payroll Administration Guide</h1>
+  <p class="muted">Status: Future-State / Not Yet Implemented &middot; Classification: Internal &middot; Section: Future-State Product Documentation &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This document describes planned or target-state functionality for Work-A-Beez. It does not reflect functionality available in the current production system and is provided for internal product-planning and engineering-reference purposes only. It is not customer-facing and must not be shared externally in its current form.</div>
+
+<p>title: Payroll Administration Guide
+description: Comprehensive guide for configuring, managing, approving, and exporting payroll data in the Work-A-Beez Workforce Management Platform.
+version: 1.0
+last_updated: July 23, 2026
+owner: Product Management
+classification: Customer Documentation
+audience: Payroll Administrators, HR Professionals, Finance Teams, System Administrators</p>
+<hr />
+<p>Welcome to the Work-A-Beez Payroll Administration Guide.</p>
+<p>Payroll is one of the most critical functions within the Work-A-Beez platform. This guide explains how to configure payroll settings, manage pay groups and pay periods, approve employee timecards, calculate payable hours, export payroll data, and maintain payroll accuracy.</p>
+<p>While Work-A-Beez is not a payroll processing system, it serves as the authoritative source for employee work hours and attendance, ensuring payroll systems receive accurate, validated data.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Overview</li>
+<li>Payroll Architecture</li>
+<li>Payroll Roles &amp; Permissions</li>
+<li>Payroll Configuration</li>
+<li>Pay Groups</li>
+<li>Pay Periods</li>
+<li>Earnings Codes</li>
+<li>Overtime Rules</li>
+<li>Holiday Pay</li>
+<li>PTO &amp; Leave Calculations</li>
+<li>Timecard Review</li>
+<li>Payroll Approval Workflow</li>
+<li>Payroll Locking</li>
+<li>Payroll Exports</li>
+<li>Payroll Adjustments</li>
+<li>Payroll Auditing</li>
+<li>Best Practices</li>
+<li>Troubleshooting</li>
+<li>Related Documentation</li>
+</ol>
+<hr />
+<h2>Overview</h2>
+<p>The Payroll module enables organizations to:</p>
+<ul>
+<li>Collect approved work hours</li>
+<li>Calculate payable time</li>
+<li>Apply overtime rules</li>
+<li>Include approved leave</li>
+<li>Validate employee timecards</li>
+<li>Export payroll-ready data</li>
+<li>Maintain audit history</li>
+</ul>
+<p>Payroll administrators should complete all validations before exporting payroll data.</p>
+<hr />
+<h2>Payroll Architecture</h2>
+<p>Payroll information is generated from several platform components:</p>
+<ul>
+<li>Employee Profiles</li>
+<li>Time Entries</li>
+<li>Break Records</li>
+<li>Schedules</li>
+<li>Approved Leave</li>
+<li>Overtime Rules</li>
+<li>Holiday Calendars</li>
+<li>Pay Groups</li>
+<li>Payroll Periods</li>
+</ul>
+<p>These components work together to produce accurate payroll data.</p>
+<hr />
+<h2>Payroll Roles &amp; Permissions</h2>
+<p>Payroll access is controlled through role-based permissions.</p>
+<h3>Payroll Administrator</h3>
+<p>Can:</p>
+<ul>
+<li>Configure payroll settings</li>
+<li>Open payroll periods</li>
+<li>Approve payroll</li>
+<li>Lock payroll</li>
+<li>Export payroll</li>
+<li>View payroll reports</li>
+</ul>
+<hr />
+<h3>HR Administrator</h3>
+<p>Can:</p>
+<ul>
+<li>Review employee records</li>
+<li>Approve leave</li>
+<li>Correct employee information</li>
+</ul>
+<hr />
+<h3>Supervisor</h3>
+<p>Can:</p>
+<ul>
+<li>Review employee timecards</li>
+<li>Approve employee hours</li>
+<li>Submit corrections</li>
+</ul>
+<hr />
+<h3>Employee</h3>
+<p>Can:</p>
+<ul>
+<li>View personal timecards</li>
+<li>Submit corrections</li>
+<li>Review approved hours</li>
+</ul>
+<p>Employees cannot modify approved payroll records.</p>
+<hr />
+<h2>Payroll Configuration</h2>
+<p>Payroll settings include:</p>
+<ul>
+<li>Default workweek</li>
+<li>Payroll frequency</li>
+<li>Time rounding</li>
+<li>Overtime calculations</li>
+<li>Holiday rules</li>
+<li>PTO calculations</li>
+<li>Export preferences</li>
+<li>Default earnings codes</li>
+</ul>
+<p>Configuration changes should be reviewed before a payroll period begins.</p>
+<hr />
+<h2>Pay Groups</h2>
+<p>Pay Groups organize employees who share common payroll characteristics.</p>
+<p>Typical grouping methods include:</p>
+<ul>
+<li>Weekly payroll</li>
+<li>Bi-weekly payroll</li>
+<li>Semi-monthly payroll</li>
+<li>Monthly payroll</li>
+</ul>
+<p>Pay Groups determine:</p>
+<ul>
+<li>Payroll calendar</li>
+<li>Approval deadlines</li>
+<li>Export schedules</li>
+<li>Payroll administrators</li>
+</ul>
+<hr />
+<h2>Pay Periods</h2>
+<p>Each payroll cycle consists of:</p>
+<ul>
+<li>Period Start Date</li>
+<li>Period End Date</li>
+<li>Approval Deadline</li>
+<li>Export Date</li>
+<li>Payroll Status</li>
+</ul>
+<p>Typical statuses include:</p>
+<ul>
+<li>Open</li>
+<li>Under Review</li>
+<li>Pending Approval</li>
+<li>Approved</li>
+<li>Locked</li>
+<li>Exported</li>
+</ul>
+<hr />
+<h2>Earnings Codes</h2>
+<p>Earnings codes categorize payable hours.</p>
+<p>Examples include:</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>REG</td>
+<td>Regular Hours</td>
+</tr>
+<tr>
+<td>OT</td>
+<td>Overtime</td>
+</tr>
+<tr>
+<td>DT</td>
+<td>Double Time</td>
+</tr>
+<tr>
+<td>HOL</td>
+<td>Holiday Pay</td>
+</tr>
+<tr>
+<td>PTO</td>
+<td>Paid Time Off</td>
+</tr>
+<tr>
+<td>SICK</td>
+<td>Sick Leave</td>
+</tr>
+<tr>
+<td>VAC</td>
+<td>Vacation</td>
+</tr>
+<tr>
+<td>TRN</td>
+<td>Training</td>
+</tr>
+</tbody>
+</table>
+<p>Organizations may create additional earnings codes based on business requirements.</p>
+<hr />
+<h2>Overtime Rules</h2>
+<p>Overtime calculations may be configured according to organizational policies and applicable labor laws.</p>
+<p>Examples include:</p>
+<ul>
+<li>Daily overtime</li>
+<li>Weekly overtime</li>
+<li>Double time</li>
+<li>Consecutive day overtime</li>
+<li>Shift differential</li>
+<li>Premium pay</li>
+</ul>
+<p>Administrators should validate overtime configurations before processing payroll.</p>
+<hr />
+<h2>Holiday Pay</h2>
+<p>Holiday settings define:</p>
+<ul>
+<li>Recognized holidays</li>
+<li>Holiday schedules</li>
+<li>Eligibility requirements</li>
+<li>Premium pay rates</li>
+<li>Substitute holidays</li>
+</ul>
+<p>Holiday rules are automatically applied to eligible employees based on organizational policy.</p>
+<hr />
+<h2>PTO &amp; Leave Calculations</h2>
+<p>Approved leave may contribute to payroll calculations.</p>
+<p>Supported leave types include:</p>
+<ul>
+<li>Vacation</li>
+<li>Sick Leave</li>
+<li>Personal Leave</li>
+<li>Floating Holidays</li>
+<li>Jury Duty</li>
+<li>Bereavement</li>
+<li>Military Leave</li>
+</ul>
+<p>Accrual balances are updated according to configured organizational policies.</p>
+<hr />
+<h2>Timecard Review</h2>
+<p>Before payroll approval, administrators should review:</p>
+<ul>
+<li>Missing punches</li>
+<li>Overtime</li>
+<li>Break violations</li>
+<li>Attendance exceptions</li>
+<li>Approved corrections</li>
+<li>Leave approvals</li>
+<li>Shift premiums</li>
+</ul>
+<p>Timecards requiring attention should be corrected before approval.</p>
+<hr />
+<h2>Payroll Approval Workflow</h2>
+<p>Typical payroll workflow:</p>
+<ol>
+<li>Employees submit time.</li>
+<li>Supervisors review timecards.</li>
+<li>Supervisors approve hours.</li>
+<li>Payroll reviews exceptions.</li>
+<li>Payroll administrator approves payroll.</li>
+<li>Payroll is locked.</li>
+<li>Payroll is exported.</li>
+</ol>
+<p>Each approval action is recorded in the audit log.</p>
+<hr />
+<h2>Payroll Locking</h2>
+<p>Once payroll is approved, administrators may lock the payroll period.</p>
+<p>Locking prevents:</p>
+<ul>
+<li>Timecard edits</li>
+<li>Schedule changes</li>
+<li>Payroll recalculation</li>
+<li>Additional approvals</li>
+</ul>
+<p>Unlocking payroll requires administrator authorization.</p>
+<hr />
+<h2>Payroll Exports</h2>
+<p>Payroll-ready data can be exported for external payroll processing.</p>
+<p>Supported export formats include:</p>
+<ul>
+<li>CSV</li>
+<li>Excel (.xlsx)</li>
+<li>JSON (where supported)</li>
+</ul>
+<p>Typical exported fields include:</p>
+<ul>
+<li>Employee ID</li>
+<li>Employee Name</li>
+<li>Earnings Code</li>
+<li>Hours Worked</li>
+<li>Overtime</li>
+<li>Leave Hours</li>
+<li>Department</li>
+<li>Location</li>
+<li>Pay Period</li>
+</ul>
+<p>Organizations should validate exported data before importing it into payroll systems.</p>
+<hr />
+<h2>Payroll Adjustments</h2>
+<p>Occasionally payroll corrections are required.</p>
+<p>Examples include:</p>
+<ul>
+<li>Missed punches</li>
+<li>Incorrect job codes</li>
+<li>Shift premium corrections</li>
+<li>Overtime adjustments</li>
+<li>Retroactive pay corrections</li>
+</ul>
+<p>Adjustments should be documented with the reason for the change.</p>
+<hr />
+<h2>Payroll Auditing</h2>
+<p>Payroll audit reports provide visibility into:</p>
+<ul>
+<li>Timecard edits</li>
+<li>Approval history</li>
+<li>Payroll exports</li>
+<li>Payroll corrections</li>
+<li>Administrator actions</li>
+<li>User activity</li>
+</ul>
+<p>Audit history supports compliance and internal controls.</p>
+<hr />
+<h2>Best Practices</h2>
+<p>To improve payroll accuracy:</p>
+<ul>
+<li>Review exceptions daily.</li>
+<li>Approve timecards before payroll deadlines.</li>
+<li>Verify overtime calculations.</li>
+<li>Confirm leave approvals.</li>
+<li>Lock payroll after approval.</li>
+<li>Archive payroll reports.</li>
+<li>Regularly review audit logs.</li>
+</ul>
+<p>Consistent payroll procedures reduce errors and improve operational efficiency.</p>
+<hr />
+<h2>Troubleshooting</h2>
+<h3>Missing Employee Hours</h3>
+<p>Verify:</p>
+<ul>
+<li>Employee assigned to correct pay group</li>
+<li>Approved timecards</li>
+<li>Payroll period dates</li>
+<li>Schedule assignments</li>
+</ul>
+<hr />
+<h3>Incorrect Overtime</h3>
+<p>Check:</p>
+<ul>
+<li>Overtime rules</li>
+<li>Shift assignments</li>
+<li>Workweek definitions</li>
+<li>Holiday settings</li>
+</ul>
+<hr />
+<h3>Export Validation Errors</h3>
+<p>Review:</p>
+<ul>
+<li>Missing employee IDs</li>
+<li>Invalid earnings codes</li>
+<li>Required fields</li>
+<li>Payroll mappings</li>
+</ul>
+<hr />
+<h3>Locked Payroll Requires Correction</h3>
+<p>An administrator must:</p>
+<ol>
+<li>Unlock the payroll period.</li>
+<li>Apply authorized corrections.</li>
+<li>Reapprove payroll.</li>
+<li>Lock the payroll period again.</li>
+<li>Generate a new export.</li>
+</ol>
+<p>All actions are recorded in the audit log.</p>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>Administrator Guide</li>
+<li>Reporting &amp; Analytics Guide</li>
+<li>Integration Guide</li>
+<li>API Developer Guide</li>
+<li>Employee User Guide</li>
+<li>Audit Logging Guide</li>
+<li>Support &amp; Escalation Guide</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product of LBS.</p>
+{% endblock %}

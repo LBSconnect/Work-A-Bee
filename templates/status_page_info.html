@@ -3,20 +3,261 @@
 {% block wrapclass %}wide{% endblock %}
 {% block content %}
   <h1>Work-A-Beez Status Page Information</h1>
-  <p class="muted">Status: Draft template &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <p class="muted">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
 
-  <p><em>This page is a starting template generated for LBS to complete. Replace the placeholder text in each section below with final content before treating this page as published.</em></p>
-
-  <h2>1. What We Monitor</h2>
-  <p>[Add content here.]</p>
-
-  <h2>2. How to Check Status</h2>
-  <p>[Add content here.]</p>
-
-  <h2>3. Incident Notifications</h2>
-  <p>[Add content here.]</p>
-
-  <h2>4. Subscribing to Updates</h2>
-  <p>[Add content here.]</p>
-
+<p>Welcome to the Work-A-Beez Status Page Information Guide.</p>
+<p>The Work-A-Beez Status Page provides real-time visibility into the operational status of our cloud services. Customers can monitor platform health, view scheduled maintenance, receive incident updates, and subscribe to service notifications.</p>
+<p>The status page promotes transparency and helps customers stay informed about service availability and operational events.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Overview</li>
+<li>Purpose</li>
+<li>Service Components</li>
+<li>Service Status Indicators</li>
+<li>Planned Maintenance</li>
+<li>Incident Management</li>
+<li>Incident Severity Levels</li>
+<li>Incident Lifecycle</li>
+<li>Historical Service Status</li>
+<li>Notification Subscriptions</li>
+<li>Customer Communication</li>
+<li>Frequently Asked Questions</li>
+<li>Related Documentation</li>
+</ol>
+<hr />
+<h2>Overview</h2>
+<p>The Work-A-Beez Status Page provides near real-time information regarding the health and availability of platform services.</p>
+<p>Customers can use the Status Page to:</p>
+<ul>
+<li>Monitor service availability</li>
+<li>View ongoing incidents</li>
+<li>Review scheduled maintenance</li>
+<li>Subscribe to notifications</li>
+<li>Access historical uptime information</li>
+<li>Track incident progress</li>
+</ul>
+<p>The Status Page is available independently of the main Work-A-Beez application whenever possible.</p>
+<hr />
+<h2>Purpose</h2>
+<p>The Status Page is intended to provide transparent communication regarding platform availability.</p>
+<p>It helps customers:</p>
+<ul>
+<li>Determine whether an issue is isolated or system-wide</li>
+<li>Monitor maintenance activities</li>
+<li>Stay informed during service interruptions</li>
+<li>Reduce unnecessary support requests</li>
+<li>Plan around scheduled maintenance</li>
+</ul>
+<hr />
+<h2>Service Components</h2>
+<p>The Status Page displays the operational status of major platform components.</p>
+<p>Typical components include:</p>
+<ul>
+<li>Authentication Services</li>
+<li>Web Application</li>
+<li>Scheduling</li>
+<li>Time &amp; Attendance</li>
+<li>Leave Management</li>
+<li>Payroll Services</li>
+<li>Reporting &amp; Analytics</li>
+<li>Notifications</li>
+<li>File Import &amp; Export Services</li>
+</ul>
+<p>Each component is monitored independently.</p>
+<hr />
+<h2>Service Status Indicators</h2>
+<p>Each service component displays one of the following statuses.</p>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Operational</strong></td>
+<td>Service is functioning normally.</td>
+</tr>
+<tr>
+<td><strong>Degraded Performance</strong></td>
+<td>Service is available but performance may be slower than expected.</td>
+</tr>
+<tr>
+<td><strong>Partial Outage</strong></td>
+<td>Some functionality or users are affected.</td>
+</tr>
+<tr>
+<td><strong>Major Outage</strong></td>
+<td>Significant disruption impacting one or more core services.</td>
+</tr>
+<tr>
+<td><strong>Maintenance</strong></td>
+<td>Planned maintenance is currently in progress.</td>
+</tr>
+</tbody>
+</table>
+<p>Status indicators are updated as new information becomes available.</p>
+<hr />
+<h2>Planned Maintenance</h2>
+<p>Routine maintenance helps maintain security, reliability, and performance.</p>
+<p>Planned maintenance may include:</p>
+<ul>
+<li>Infrastructure upgrades</li>
+<li>Security updates</li>
+<li>Database maintenance</li>
+<li>Network improvements</li>
+<li>Platform enhancements</li>
+</ul>
+<p>Whenever practical, maintenance is scheduled during periods of lower customer activity.</p>
+<p>Customers are notified in advance of planned maintenance that may impact service availability.</p>
+<hr />
+<h2>Incident Management</h2>
+<p>When an unexpected service disruption occurs, the Status Page provides timely updates throughout the incident.</p>
+<p>Incident communications typically include:</p>
+<ul>
+<li>Summary of the issue</li>
+<li>Affected services</li>
+<li>Impact assessment</li>
+<li>Current investigation status</li>
+<li>Mitigation efforts</li>
+<li>Estimated next update</li>
+<li>Resolution confirmation</li>
+</ul>
+<p>Updates are published as additional information becomes available.</p>
+<hr />
+<h2>Incident Severity Levels</h2>
+<p>Incidents are classified to help communicate customer impact.</p>
+<h3>Severity 1 - Critical</h3>
+<p>Examples:</p>
+<ul>
+<li>Complete platform outage</li>
+<li>Authentication unavailable</li>
+<li>Widespread customer impact</li>
+</ul>
+<p>Immediate response is initiated.</p>
+<hr />
+<h3>Severity 2 - High</h3>
+<p>Examples:</p>
+<ul>
+<li>Major feature unavailable</li>
+<li>Significant degradation</li>
+<li>Large customer impact</li>
+</ul>
+<p>Engineering teams begin investigation immediately.</p>
+<hr />
+<h3>Severity 3 - Medium</h3>
+<p>Examples:</p>
+<ul>
+<li>Limited feature disruption</li>
+<li>Performance issues</li>
+<li>Moderate customer impact</li>
+</ul>
+<p>Resolution is prioritized according to business impact.</p>
+<hr />
+<h3>Severity 4 - Low</h3>
+<p>Examples:</p>
+<ul>
+<li>Cosmetic issues</li>
+<li>Minor usability concerns</li>
+<li>Isolated defects</li>
+</ul>
+<p>Resolution is scheduled through normal maintenance and release processes.</p>
+<hr />
+<h2>Incident Lifecycle</h2>
+<p>Incidents generally progress through the following stages.</p>
+<ol>
+<li>Detection</li>
+<li>Investigation</li>
+<li>Identification</li>
+<li>Mitigation</li>
+<li>Resolution</li>
+<li>Monitoring</li>
+<li>Post-Incident Review</li>
+</ol>
+<p>Customers receive updates during significant milestones whenever practical.</p>
+<hr />
+<h2>Historical Service Status</h2>
+<p>The Status Page maintains a history of previous service events, allowing customers to review:</p>
+<ul>
+<li>Past incidents</li>
+<li>Planned maintenance</li>
+<li>Historical uptime</li>
+<li>Resolution timelines</li>
+<li>Service availability trends</li>
+</ul>
+<p>Historical information supports operational reviews and customer reporting.</p>
+<hr />
+<h2>Notification Subscriptions</h2>
+<p>Customers may subscribe to receive service updates through supported channels.</p>
+<p>Available subscription methods may include:</p>
+<ul>
+<li>Email notifications</li>
+<li>RSS feed</li>
+</ul>
+<p>Subscribers receive updates for:</p>
+<ul>
+<li>New incidents</li>
+<li>Incident status changes</li>
+<li>Incident resolution</li>
+<li>Scheduled maintenance</li>
+<li>Maintenance completion</li>
+</ul>
+<p>Notification options may vary by subscription plan or deployment.</p>
+<hr />
+<h2>Customer Communication</h2>
+<p>During significant service events, Work-A-Beez aims to communicate:</p>
+<ul>
+<li>What happened</li>
+<li>Which services are affected</li>
+<li>Current customer impact</li>
+<li>Actions being taken</li>
+<li>Expected resolution timeline (when available)</li>
+<li>Recommended customer actions</li>
+</ul>
+<p>Updates continue until the incident is resolved and service stability has been confirmed.</p>
+<hr />
+<h2>Frequently Asked Questions</h2>
+<h3>How often is the Status Page updated?</h3>
+<p>Updates are published as meaningful new information becomes available throughout an incident or maintenance event.</p>
+<hr />
+<h3>Does an Operational status guarantee no issues?</h3>
+<p>No.</p>
+<p>An Operational status indicates that platform monitoring has not detected widespread service disruption. Individual user issues may still occur due to local network conditions, browser configuration, or organization-specific environments.</p>
+<hr />
+<h3>Should I contact Support if the Status Page shows an outage?</h3>
+<p>You generally do not need to report an issue already identified on the Status Page unless your organization is experiencing additional problems not reflected in the published incident.</p>
+<hr />
+<h3>What if my issue is not listed?</h3>
+<p>If you believe you are experiencing a platform issue that is not reflected on the Status Page, contact the Work-A-Beez Support Center for assistance.</p>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>Service Level Agreement (SLA)</li>
+<li>Availability Commitment</li>
+<li>Support Center</li>
+<li>Security Overview</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product of LBS.</p>
 {% endblock %}

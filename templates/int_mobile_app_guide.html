@@ -1,0 +1,333 @@
+{% extends "internal_base.html" %}
+{% block title %}Mobile Application Guide{% endblock %}
+{% block internal_content %}
+  <h1>Mobile Application Guide</h1>
+  <p class="muted">Status: Future-State / Not Yet Implemented &middot; Classification: Internal &middot; Section: Future-State Product Documentation &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This document describes planned or target-state functionality for Work-A-Beez. It does not reflect functionality available in the current production system and is provided for internal product-planning and engineering-reference purposes only. It is not customer-facing and must not be shared externally in its current form.</div>
+
+<p>title: Mobile Application Guide
+description: Complete guide to installing, configuring, and using the Work-A-Beez mobile application for workforce management.
+version: 1.0
+last_updated: July 23, 2026
+owner: Product Management
+classification: Customer Documentation
+audience: Employees, Supervisors, Managers, Administrators</p>
+<hr />
+<p>Welcome to the Work-A-Beez Mobile Application Guide.</p>
+<p>The Work-A-Beez mobile application enables employees and managers to stay connected to their workforce from anywhere. Users can clock in and out, manage schedules, request leave, receive notifications, approve requests, and monitor workforce activity using a secure mobile experience.</p>
+<p>This guide explains installation, configuration, security, and everyday mobile workflows.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Introduction</li>
+<li>System Requirements</li>
+<li>Installing the Mobile App</li>
+<li>Signing In</li>
+<li>Multi-Factor Authentication (MFA)</li>
+<li>Mobile Dashboard</li>
+<li>Clocking In &amp; Out</li>
+<li>Breaks &amp; Meal Periods</li>
+<li>Viewing Schedules</li>
+<li>Shift Marketplace</li>
+<li>Leave Requests</li>
+<li>Manager Functions</li>
+<li>Notifications</li>
+<li>Offline Mode</li>
+<li>Security &amp; Privacy</li>
+<li>Device Management</li>
+<li>Troubleshooting</li>
+<li>Frequently Asked Questions</li>
+<li>Related Documentation</li>
+</ol>
+<hr />
+<h2>Introduction</h2>
+<p>The Work-A-Beez mobile application allows authorized users to perform workforce management tasks from their smartphones or tablets.</p>
+<p>Depending on assigned permissions, users may:</p>
+<ul>
+<li>View schedules</li>
+<li>Clock in and out</li>
+<li>Start and end breaks</li>
+<li>Request leave</li>
+<li>View PTO balances</li>
+<li>Receive announcements</li>
+<li>Approve requests</li>
+<li>Manage employees</li>
+<li>Receive push notifications</li>
+</ul>
+<p>Available features depend on the user's security role.</p>
+<hr />
+<h2>System Requirements</h2>
+<p>Supported platforms include:</p>
+<h3>iOS</h3>
+<ul>
+<li>Current supported iOS versions</li>
+<li>Internet connection</li>
+<li>Location Services (for GPS features)</li>
+</ul>
+<hr />
+<h3>Android</h3>
+<ul>
+<li>Current supported Android versions</li>
+<li>Internet connection</li>
+<li>Location Services (for GPS features)</li>
+</ul>
+<hr />
+<h3>Recommended</h3>
+<ul>
+<li>Automatic app updates enabled</li>
+<li>Push notifications enabled</li>
+<li>Biometric authentication (if supported)</li>
+<li>Device screen lock configured</li>
+</ul>
+<hr />
+<h2>Installing the Mobile App</h2>
+<p>Download the application from the appropriate app store.</p>
+<p>After installation:</p>
+<ol>
+<li>Open the application.</li>
+<li>Enter your organization information.</li>
+<li>Sign in using your company credentials.</li>
+<li>Complete Multi-Factor Authentication if required.</li>
+<li>Grant required permissions.</li>
+</ol>
+<hr />
+<h2>Signing In</h2>
+<p>Users authenticate using organization credentials.</p>
+<p>Supported methods include:</p>
+<ul>
+<li>Email and password</li>
+<li>Single Sign-On (SSO)</li>
+<li>Microsoft Entra ID</li>
+<li>Google Workspace</li>
+<li>OAuth providers</li>
+<li>SAML identity providers</li>
+</ul>
+<p>Authentication methods depend on organizational configuration.</p>
+<hr />
+<h2>Multi-Factor Authentication (MFA)</h2>
+<p>If enabled, users may verify their identity using:</p>
+<ul>
+<li>Authenticator application</li>
+<li>SMS verification code</li>
+<li>Email verification</li>
+<li>Security key (where supported)</li>
+</ul>
+<p>MFA significantly improves account security and may be required before accessing sensitive features.</p>
+<hr />
+<h2>Mobile Dashboard</h2>
+<p>After signing in, the dashboard displays personalized information such as:</p>
+<ul>
+<li>Today's schedule</li>
+<li>Upcoming shifts</li>
+<li>Current clock status</li>
+<li>PTO balance</li>
+<li>Pending approvals (managers)</li>
+<li>Recent notifications</li>
+<li>Company announcements</li>
+<li>Quick action buttons</li>
+</ul>
+<p>Dashboard content varies based on the user's role.</p>
+<hr />
+<h2>Clocking In &amp; Out</h2>
+<p>Employees can record work hours directly from the app.</p>
+<p>Typical workflow:</p>
+<ol>
+<li>Open the app.</li>
+<li>Select <strong>Clock In</strong>.</li>
+<li>Confirm work location if prompted.</li>
+<li>Begin the shift.</li>
+</ol>
+<p>To end the workday:</p>
+<ol>
+<li>Select <strong>Clock Out</strong>.</li>
+<li>Review worked hours.</li>
+<li>Confirm submission.</li>
+</ol>
+<p>Organizations may require GPS verification or geofencing before allowing clock-in.</p>
+<hr />
+<h2>Breaks &amp; Meal Periods</h2>
+<p>Employees can manage breaks by selecting:</p>
+<ul>
+<li>Start Break</li>
+<li>End Break</li>
+<li>Start Meal</li>
+<li>End Meal</li>
+</ul>
+<p>Break rules are determined by organizational policy.</p>
+<p>Missed or incomplete breaks may require supervisor review.</p>
+<hr />
+<h2>Viewing Schedules</h2>
+<p>Employees can view:</p>
+<ul>
+<li>Today's schedule</li>
+<li>Weekly schedule</li>
+<li>Monthly schedule</li>
+<li>Assigned shifts</li>
+<li>Open shifts</li>
+<li>Approved leave</li>
+<li>Holiday schedules</li>
+</ul>
+<p>Schedules automatically update after publication.</p>
+<hr />
+<h2>Shift Marketplace</h2>
+<p>If enabled by the organization, employees may:</p>
+<ul>
+<li>View open shifts</li>
+<li>Volunteer for available shifts</li>
+<li>Request shift swaps</li>
+<li>Offer assigned shifts</li>
+<li>Withdraw swap requests</li>
+</ul>
+<p>Managers receive notifications when approval is required.</p>
+<hr />
+<h2>Leave Requests</h2>
+<p>Employees can:</p>
+<ul>
+<li>Submit leave requests</li>
+<li>View PTO balances</li>
+<li>Check approval status</li>
+<li>Cancel pending requests</li>
+<li>Review leave history</li>
+</ul>
+<p>Leave requests follow the organization's configured approval workflow.</p>
+<hr />
+<h2>Manager Functions</h2>
+<p>Managers may access additional capabilities including:</p>
+<ul>
+<li>Approve timecards</li>
+<li>Approve leave requests</li>
+<li>View employee schedules</li>
+<li>Fill open shifts</li>
+<li>Monitor attendance</li>
+<li>Review missed punches</li>
+<li>Send team announcements</li>
+</ul>
+<p>Manager features are available only to authorized users.</p>
+<hr />
+<h2>Notifications</h2>
+<p>The mobile app supports push notifications for events such as:</p>
+<ul>
+<li>Upcoming shifts</li>
+<li>Schedule changes</li>
+<li>Leave approvals</li>
+<li>Missed punch reminders</li>
+<li>Payroll reminders</li>
+<li>Company announcements</li>
+<li>Approval requests</li>
+</ul>
+<p>Users may manage notification preferences within the application settings.</p>
+<hr />
+<h2>Offline Mode</h2>
+<p>Limited functionality may be available when internet connectivity is unavailable.</p>
+<p>Offline capabilities may include:</p>
+<ul>
+<li>Viewing cached schedules</li>
+<li>Reviewing previously downloaded information</li>
+</ul>
+<p>Actions requiring server validation, such as clocking in or submitting leave requests, may be queued and synchronized automatically when connectivity is restored.</p>
+<p>Administrators should define organizational policies regarding offline time capture.</p>
+<hr />
+<h2>Security &amp; Privacy</h2>
+<p>To protect user information, the mobile application supports:</p>
+<ul>
+<li>Encrypted communication</li>
+<li>Secure token storage</li>
+<li>Automatic session expiration</li>
+<li>Biometric authentication</li>
+<li>Remote session invalidation</li>
+<li>Multi-Factor Authentication</li>
+</ul>
+<p>Users should report lost or stolen devices immediately.</p>
+<hr />
+<h2>Device Management</h2>
+<p>Administrators may enforce mobile security policies such as:</p>
+<ul>
+<li>Minimum operating system version</li>
+<li>Screen lock requirements</li>
+<li>Device encryption</li>
+<li>Session timeout</li>
+<li>Application version requirements</li>
+</ul>
+<p>Organizations using Mobile Device Management (MDM) solutions may apply additional security controls.</p>
+<hr />
+<h2>Troubleshooting</h2>
+<h3>Unable to Sign In</h3>
+<p>Verify:</p>
+<ul>
+<li>Username and password</li>
+<li>Internet connection</li>
+<li>Organization URL</li>
+<li>Multi-Factor Authentication status</li>
+</ul>
+<hr />
+<h3>GPS Not Detected</h3>
+<p>Check:</p>
+<ul>
+<li>Location Services enabled</li>
+<li>App permissions granted</li>
+<li>Device GPS enabled</li>
+<li>Organizational geofencing rules</li>
+</ul>
+<hr />
+<h3>Push Notifications Not Received</h3>
+<p>Verify:</p>
+<ul>
+<li>Notifications enabled on the device</li>
+<li>App notification permissions</li>
+<li>Internet connectivity</li>
+<li>User notification preferences</li>
+</ul>
+<hr />
+<h3>Unable to Clock In</h3>
+<p>Confirm:</p>
+<ul>
+<li>Scheduled shift exists</li>
+<li>Location requirements met</li>
+<li>Device date and time are correct</li>
+<li>Organization policy permits mobile clock-in</li>
+</ul>
+<hr />
+<h2>Frequently Asked Questions</h2>
+<h4>Can I use multiple devices?</h4>
+<p>Yes, if permitted by your organization. Active sessions may be limited based on security policies.</p>
+<hr />
+<h4>What happens if I lose internet connectivity?</h4>
+<p>Certain information remains available from the local cache. Actions requiring server confirmation are synchronized once connectivity returns.</p>
+<hr />
+<h4>Can I disable location services?</h4>
+<p>Location services may be optional or required depending on your organization's attendance policies. If required, disabling location services may prevent mobile clock-in.</p>
+<hr />
+<h4>How do I change my notification preferences?</h4>
+<p>Open <strong>Settings → Notifications</strong> within the mobile application to update your preferences, subject to organizational policies.</p>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>Employee User Guide</li>
+<li>Administrator Guide</li>
+<li>Notification &amp; Communication Guide</li>
+<li>Security Overview</li>
+<li>Integration Guide</li>
+<li>Support &amp; Escalation Guide</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product of LBS.</p>
+{% endblock %}
