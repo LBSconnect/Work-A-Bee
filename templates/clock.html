@@ -30,6 +30,33 @@
     </div>
   </div>
 
+  <div class="quick-actions-grid">
+    <a class="quick-action-card" href="{{ url_for('pto_requests_page') }}">
+      <span class="quick-action-icon">🌴</span>
+      <span class="quick-action-label">Request Time Off</span>
+    </a>
+    <a class="quick-action-card" href="{{ url_for('shift_marketplace') }}">
+      <span class="quick-action-icon">🔄</span>
+      <span class="quick-action-label">Shift Marketplace</span>
+    </a>
+    <a class="quick-action-card" href="{{ url_for('messages_page') }}">
+      <span class="quick-action-icon">💬</span>
+      <span class="quick-action-label">Messages{% if unread_messages_count %} <span class="badge unread">{{ unread_messages_count }}</span>{% endif %}</span>
+    </a>
+    <a class="quick-action-card" href="{{ url_for('pay_stubs') }}">
+      <span class="quick-action-icon">💵</span>
+      <span class="quick-action-label">Pay Stubs</span>
+    </a>
+    <a class="quick-action-card" href="{{ url_for('performance_page') }}">
+      <span class="quick-action-icon">🎯</span>
+      <span class="quick-action-label">My Performance</span>
+    </a>
+    <a class="quick-action-card" href="#announcements">
+      <span class="quick-action-icon">📣</span>
+      <span class="quick-action-label">Announcements</span>
+    </a>
+  </div>
+
   <div class="stat-cards admin-stat-cards">
     <div class="stat-card">
       <div class="stat-card-label">Today's Schedule</div>
