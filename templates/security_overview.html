@@ -3,23 +3,399 @@
 {% block wrapclass %}wide{% endblock %}
 {% block content %}
   <h1>Work-A-Beez Security Overview</h1>
-  <p class="muted">Status: Draft template &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <p class="muted">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
 
-  <p><em>This page is a starting template generated for LBS to complete. Replace the placeholder text in each section below with final content before treating this page as published.</em></p>
-
-  <h2>1. Our Approach to Security</h2>
-  <p>[Add content here.]</p>
-
-  <h2>2. Data Encryption</h2>
-  <p>[Add content here.]</p>
-
-  <h2>3. Access Controls</h2>
-  <p>[Add content here.]</p>
-
-  <h2>4. Infrastructure</h2>
-  <p>[Add content here.]</p>
-
-  <h2>5. Reporting a Concern</h2>
-  <p>[Add content here.]</p>
-
+<p>At Work-A-Beez, security is a core part of how we design, build, and operate our platform.</p>
+<p>We understand that our customers entrust us with sensitive workforce information, and we are committed to protecting that information through industry-recognized security practices, secure software development, and continuous monitoring.</p>
+<p>Security is integrated into every stage of the software lifecycle, from design and development to deployment and ongoing operations.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ul>
+<li>Security Philosophy</li>
+<li>Shared Responsibility Model</li>
+<li>Cloud Infrastructure</li>
+<li>Data Encryption</li>
+<li>Authentication</li>
+<li>Authorization</li>
+<li>Multi-Factor Authentication</li>
+<li>Password Security</li>
+<li>Secure Software Development</li>
+<li>Application Security</li>
+<li>Infrastructure Security</li>
+<li>Network Security</li>
+<li>Logging &amp; Monitoring</li>
+<li>Vulnerability Management</li>
+<li>Security Updates</li>
+<li>Backups</li>
+<li>Disaster Recovery</li>
+<li>Incident Response</li>
+<li>Customer Responsibilities</li>
+<li>Responsible Disclosure</li>
+<li>Security Contact</li>
+</ul>
+<hr />
+<h2>Security Philosophy</h2>
+<p>Work-A-Beez follows the principle of <strong>Security by Design</strong>.</p>
+<p>Every new feature is evaluated for:</p>
+<ul>
+<li>Confidentiality</li>
+<li>Integrity</li>
+<li>Availability</li>
+<li>Privacy</li>
+<li>Authentication</li>
+<li>Authorization</li>
+<li>Auditability</li>
+<li>Risk</li>
+</ul>
+<p>Security reviews occur throughout the software development lifecycle.</p>
+<hr />
+<h2>Shared Responsibility Model</h2>
+<p>Security is a shared responsibility between Work-A-Beez and our customers.</p>
+<h3>Work-A-Beez Responsibilities</h3>
+<p>We are responsible for:</p>
+<ul>
+<li>Application security</li>
+<li>Infrastructure security</li>
+<li>Database protection</li>
+<li>Software updates</li>
+<li>Monitoring</li>
+<li>Data backups</li>
+<li>Service availability</li>
+<li>Vulnerability remediation</li>
+</ul>
+<hr />
+<h3>Customer Responsibilities</h3>
+<p>Customers are responsible for:</p>
+<ul>
+<li>Protecting user credentials</li>
+<li>Managing employee access</li>
+<li>Assigning permissions appropriately</li>
+<li>Enabling Multi-Factor Authentication</li>
+<li>Maintaining secure endpoint devices</li>
+<li>Reviewing audit logs</li>
+<li>Promptly removing inactive users</li>
+</ul>
+<hr />
+<h2>Cloud Infrastructure</h2>
+<p>Work-A-Beez is hosted within professionally managed cloud infrastructure designed for high availability and security.</p>
+<p>Infrastructure includes:</p>
+<ul>
+<li>Redundant systems</li>
+<li>Secure networking</li>
+<li>Firewall protection</li>
+<li>Geographic redundancy</li>
+<li>Automated monitoring</li>
+<li>Encrypted storage</li>
+<li>Secure backup systems</li>
+</ul>
+<p>Infrastructure providers maintain their own physical security controls and environmental protections.</p>
+<hr />
+<h2>Data Encryption</h2>
+<h3>Data In Transit</h3>
+<p>All communication between users and Work-A-Beez is encrypted using modern TLS (Transport Layer Security).</p>
+<p>This protects information while traveling across public networks.</p>
+<p>Examples include:</p>
+<ul>
+<li>Login requests</li>
+<li>Employee records</li>
+<li>Payroll information</li>
+<li>API traffic</li>
+<li>Administrative actions</li>
+</ul>
+<hr />
+<h3>Data At Rest</h3>
+<p>Sensitive customer data is encrypted while stored within Work-A-Beez systems.</p>
+<p>Examples include:</p>
+<ul>
+<li>Employee information</li>
+<li>Payroll records</li>
+<li>Timecards</li>
+<li>Company settings</li>
+<li>Uploaded documents</li>
+</ul>
+<hr />
+<h2>Authentication</h2>
+<p>Every user must authenticate before accessing the platform.</p>
+<p>Authentication includes:</p>
+<ul>
+<li>Email address</li>
+<li>Username (optional)</li>
+<li>Password</li>
+<li>Multi-Factor Authentication (when enabled)</li>
+</ul>
+<p>Unauthorized access attempts are monitored and logged.</p>
+<hr />
+<h2>Authorization</h2>
+<p>Access to platform resources is controlled through Role-Based Access Control (RBAC).</p>
+<p>Examples of supported roles include:</p>
+<ul>
+<li>System Administrator</li>
+<li>Company Administrator</li>
+<li>Human Resources</li>
+<li>Payroll Administrator</li>
+<li>Manager</li>
+<li>Supervisor</li>
+<li>Employee</li>
+<li>Auditor</li>
+</ul>
+<p>Permissions are granted based on the principle of least privilege.</p>
+<p>Users receive only the permissions necessary to perform their responsibilities.</p>
+<hr />
+<h2>Multi-Factor Authentication</h2>
+<p>Work-A-Beez supports Multi-Factor Authentication (MFA) for enhanced account security.</p>
+<p>When enabled, users must provide:</p>
+<ul>
+<li>Password</li>
+<li>One-time verification code</li>
+</ul>
+<p>MFA significantly reduces the risk of unauthorized account access resulting from compromised passwords.</p>
+<p>Organizations are encouraged to require MFA for all administrative users.</p>
+<hr />
+<h2>Password Security</h2>
+<p>Passwords are never stored in plain text.</p>
+<p>Security practices include:</p>
+<ul>
+<li>Secure password hashing</li>
+<li>Password complexity requirements</li>
+<li>Minimum password length</li>
+<li>Password change capabilities</li>
+<li>Password reset verification</li>
+<li>Failed login monitoring</li>
+</ul>
+<p>See the Password Policy for complete requirements.</p>
+<hr />
+<h2>Session Security</h2>
+<p>User sessions are protected through multiple security mechanisms.</p>
+<p>These include:</p>
+<ul>
+<li>Secure session tokens</li>
+<li>Automatic session expiration</li>
+<li>Logout capability</li>
+<li>Session invalidation after password changes</li>
+<li>Idle timeout</li>
+</ul>
+<p>Users should always sign out when using shared devices.</p>
+<hr />
+<h2>Secure Software Development</h2>
+<p>Security is integrated throughout the development lifecycle.</p>
+<p>Development practices include:</p>
+<ul>
+<li>Code reviews</li>
+<li>Peer review</li>
+<li>Static code analysis</li>
+<li>Dependency review</li>
+<li>Secure coding guidelines</li>
+<li>Automated testing</li>
+<li>Security testing</li>
+<li>Regression testing</li>
+</ul>
+<p>Security considerations are evaluated before every production release.</p>
+<hr />
+<h2>Application Security</h2>
+<p>Application-level protections include:</p>
+<ul>
+<li>Input validation</li>
+<li>Output encoding</li>
+<li>Access control enforcement</li>
+<li>CSRF protection</li>
+<li>Rate limiting</li>
+<li>Session validation</li>
+<li>Error handling</li>
+<li>Secure file handling</li>
+</ul>
+<p>Security controls are regularly reviewed and updated.</p>
+<hr />
+<h2>Infrastructure Security</h2>
+<p>Infrastructure protections include:</p>
+<ul>
+<li>Network segmentation</li>
+<li>Firewall management</li>
+<li>Secure administrative access</li>
+<li>Monitoring</li>
+<li>Intrusion detection</li>
+<li>Secure backups</li>
+<li>Patch management</li>
+</ul>
+<p>Only authorized personnel have administrative access.</p>
+<hr />
+<h2>Network Security</h2>
+<p>Network protections include:</p>
+<ul>
+<li>Firewalls</li>
+<li>Secure routing</li>
+<li>TLS encryption</li>
+<li>DDoS mitigation (where supported)</li>
+<li>Traffic monitoring</li>
+<li>Access restrictions</li>
+</ul>
+<hr />
+<h2>Logging &amp; Monitoring</h2>
+<p>Work-A-Beez continuously monitors platform activity.</p>
+<p>Examples include:</p>
+<ul>
+<li>Authentication events</li>
+<li>Administrative actions</li>
+<li>System errors</li>
+<li>Permission changes</li>
+<li>API requests</li>
+<li>Infrastructure health</li>
+</ul>
+<p>Logs help identify:</p>
+<ul>
+<li>Unauthorized access attempts</li>
+<li>System anomalies</li>
+<li>Operational issues</li>
+<li>Potential security incidents</li>
+</ul>
+<hr />
+<h2>Audit Logging</h2>
+<p>Administrative activities may be recorded for security and compliance purposes.</p>
+<p>Examples include:</p>
+<ul>
+<li>User creation</li>
+<li>User deletion</li>
+<li>Password resets</li>
+<li>Permission modifications</li>
+<li>Timecard edits</li>
+<li>Schedule changes</li>
+<li>PTO approvals</li>
+<li>Billing updates</li>
+</ul>
+<p>Audit records assist organizations with compliance and internal investigations.</p>
+<hr />
+<h2>Vulnerability Management</h2>
+<p>Work-A-Beez actively monitors for security vulnerabilities.</p>
+<p>Processes include:</p>
+<ul>
+<li>Software dependency reviews</li>
+<li>Security updates</li>
+<li>Risk assessments</li>
+<li>Vulnerability remediation</li>
+<li>Security testing</li>
+</ul>
+<p>Critical vulnerabilities are prioritized for immediate remediation.</p>
+<hr />
+<h2>Security Updates</h2>
+<p>Security improvements are deployed regularly.</p>
+<p>Updates may include:</p>
+<ul>
+<li>Vulnerability patches</li>
+<li>Dependency updates</li>
+<li>Performance improvements</li>
+<li>Infrastructure enhancements</li>
+<li>Security enhancements</li>
+</ul>
+<p>Maintenance windows may be announced when customer action is required.</p>
+<hr />
+<h2>Backup &amp; Recovery</h2>
+<p>Customer data is backed up regularly to support disaster recovery objectives.</p>
+<p>Backup procedures are designed to protect against:</p>
+<ul>
+<li>Hardware failures</li>
+<li>Software failures</li>
+<li>Operational errors</li>
+<li>Infrastructure disruptions</li>
+</ul>
+<p>Backup retention periods may vary.</p>
+<hr />
+<h2>Disaster Recovery</h2>
+<p>Work-A-Beez maintains disaster recovery procedures intended to restore services following major operational disruptions.</p>
+<p>Recovery priorities include:</p>
+<ul>
+<li>Platform availability</li>
+<li>Data integrity</li>
+<li>Secure restoration</li>
+<li>Service continuity</li>
+</ul>
+<p>Specific recovery objectives may vary by subscription level.</p>
+<hr />
+<h2>Incident Response</h2>
+<p>Security incidents are handled using a structured response process.</p>
+<p>Typical phases include:</p>
+<ol>
+<li>Detection</li>
+<li>Investigation</li>
+<li>Containment</li>
+<li>Remediation</li>
+<li>Recovery</li>
+<li>Post-Incident Review</li>
+</ol>
+<p>Customers may be notified when required by applicable law or contractual obligations.</p>
+<hr />
+<h2>Responsible Disclosure</h2>
+<p>We appreciate responsible reporting of security vulnerabilities.</p>
+<p>Researchers who discover potential vulnerabilities should:</p>
+<ul>
+<li>Report findings privately</li>
+<li>Allow reasonable time for investigation</li>
+<li>Avoid disrupting customer services</li>
+<li>Avoid accessing customer information</li>
+</ul>
+<p>See our Responsible Disclosure Policy for complete reporting procedures.</p>
+<hr />
+<h2>Customer Security Best Practices</h2>
+<p>We recommend customers:</p>
+<ul>
+<li>Enable MFA</li>
+<li>Use unique passwords</li>
+<li>Remove inactive accounts</li>
+<li>Review permissions regularly</li>
+<li>Monitor audit logs</li>
+<li>Keep browsers updated</li>
+<li>Use supported operating systems</li>
+<li>Train employees on phishing awareness</li>
+</ul>
+<p>Security is strongest when customers actively participate in protecting their environments.</p>
+<hr />
+<h2>Compliance</h2>
+<p>Work-A-Beez designs its security program to support applicable regulatory and industry best practices.</p>
+<p>Additional compliance information is available in:</p>
+<ul>
+<li>Compliance Overview</li>
+<li>Data Protection Overview</li>
+<li>Privacy Policy</li>
+<li>Subprocessor Overview</li>
+</ul>
+<hr />
+<h2>Security Contact</h2>
+<p>Questions regarding security may be directed to:</p>
+<p><strong>Security Team</strong></p>
+<p>Email: info@lbsconnect.net</p>
+<p>For vulnerability reports, please review the Responsible Disclosure Policy before submitting a report.</p>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>Data Protection Overview</li>
+<li>Compliance Overview</li>
+<li>Responsible Disclosure Policy</li>
+<li>Password Policy</li>
+<li>Multi-Factor Authentication Guide</li>
+<li>Privacy Policy</li>
+<li>Cookie Policy</li>
+<li>API Overview</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Disclaimer</h3>
+<p>This document provides a general overview of Work-A-Beez security practices and is intended for informational purposes only. Security controls, infrastructure, technologies, and operational procedures may evolve over time as the platform and industry standards continue to develop.</p>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez is a product of LBS.</p>
 {% endblock %}
