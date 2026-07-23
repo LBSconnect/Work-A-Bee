@@ -1,31 +1,362 @@
 {% extends "internal_base.html" %}
-{% block title %}Coding Standards{% endblock %}
+{% block title %}Coding Standards & Engineering Handbook{% endblock %}
 {% block internal_content %}
-  <h1>Coding Standards</h1>
-  <p class="muted">Status: Draft template &middot; Section: Product Documentation &middot; Classification: Internal Confidential &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <h1>Coding Standards & Engineering Handbook</h1>
+  <p class="muted">Status: Needs Validation &middot; Classification: Internal &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This document has not been fully validated against the current codebase and mixes accurate description with idealized/aspirational practices (e.g., formal CI/CD pipelines, a REST API, multiple deployment environments, semantic-versioned releases) that are not yet implemented for Work-A-Beez today. Flagged for engineering review before being treated as authoritative.</div>
 
-  <p><em>This page is a starting template generated for LBS to complete. Replace the placeholder text in each section below with final content.</em></p>
-
-  <table style="margin-bottom:20px;">
-    <tr><th>Document Title</th><td>Coding Standards</td></tr>
-    <tr><th>Version</th><td>[Add version]</td></tr>
-    <tr><th>Owner</th><td>Linton Business Solutions, LLC</td></tr>
-    <tr><th>Approver</th><td>[Add approver]</td></tr>
-    <tr><th>Classification</th><td>Internal Confidential</td></tr>
-  </table>
-
-  <h2>1. Purpose</h2>
-  <p>[Add content here.]</p>
-
-  <h2>2. Scope</h2>
-  <p>[Add content here.]</p>
-
-  <h2>3. Content</h2>
-  <p>[Add content here.]</p>
-
-  <h2>4. Related Documents</h2>
-  <p>[List related documents here.]</p>
-
-  <h2>5. Revision History</h2>
-  <p>[Add revision history here.]</p>
+<p>Welcome to the Work-A-Beez Engineering Handbook.</p>
+<p>This handbook establishes the engineering standards for all software developed for the Work-A-Beez platform. It defines coding conventions, architecture expectations, source control workflows, testing standards, documentation requirements, and development best practices.</p>
+<p>Every contributor is expected to understand and follow these standards before contributing code.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Engineering Philosophy</li>
+<li>Guiding Principles</li>
+<li>Repository Organization</li>
+<li>Branching Strategy</li>
+<li>Source Control Standards</li>
+<li>Code Style</li>
+<li>Naming Conventions</li>
+<li>API Standards</li>
+<li>Database Standards</li>
+<li>Security Standards</li>
+<li>Logging Standards</li>
+<li>Error Handling</li>
+<li>Configuration Management</li>
+<li>Testing Requirements</li>
+<li>Performance Guidelines</li>
+<li>Code Reviews</li>
+<li>Pull Request Standards</li>
+<li>Release Management</li>
+<li>Documentation Standards</li>
+<li>Engineering Checklist</li>
+</ol>
+<hr />
+<h2>Engineering Philosophy</h2>
+<p>Work-A-Beez is built with long-term maintainability in mind.</p>
+<p>Code should be:</p>
+<ul>
+<li>Easy to read</li>
+<li>Easy to test</li>
+<li>Easy to modify</li>
+<li>Secure by default</li>
+<li>Predictable</li>
+<li>Well documented</li>
+<li>Consistent</li>
+</ul>
+<p>Engineers should optimize for clarity over cleverness.</p>
+<p>Readable code is preferred over complex implementations that are difficult to maintain.</p>
+<hr />
+<h2>Guiding Principles</h2>
+<p>Every feature should follow these principles:</p>
+<ul>
+<li>Simplicity</li>
+<li>Consistency</li>
+<li>Reusability</li>
+<li>Security</li>
+<li>Scalability</li>
+<li>Reliability</li>
+<li>Testability</li>
+</ul>
+<p>When multiple solutions exist, choose the one that is easiest for another engineer to understand six months later.</p>
+<hr />
+<h2>Repository Organization</h2>
+<p>Each repository should follow a consistent structure.</p>
+<p>Example:</p>
+<p><code>/src
+/api
+/application
+/domain
+/infrastructure
+/shared
+/tests
+/docs
+/scripts
+/config</code></p>
+<p>Generated files should not be committed unless required.</p>
+<hr />
+<h2>Branching Strategy</h2>
+<p>The Work-A-Beez repositories follow a Git-based branching model.</p>
+<p>Primary branches:</p>
+<p><code>main
+develop</code></p>
+<p>Supporting branches:</p>
+<p><code>feature/*
+bugfix/*
+hotfix/*
+release/*
+experiment/*</code></p>
+<p>Examples:</p>
+<p><code>feature/employee-import
+feature/open-shifts
+bugfix/timecard-rounding
+hotfix/login-timeout</code></p>
+<p>Direct commits to the <code>main</code> branch are prohibited.</p>
+<hr />
+<h2>Commit Standards</h2>
+<p>Every commit should be:</p>
+<ul>
+<li>Atomic</li>
+<li>Reversible</li>
+<li>Descriptive</li>
+</ul>
+<p>Preferred format:</p>
+<p><code>feat:
+fix:
+refactor:
+docs:
+test:
+build:
+chore:</code></p>
+<p>Examples:</p>
+<p><code>feat(schedule): add recurring shifts
+fix(payroll): correct overtime calculation
+docs(api): update authentication examples
+refactor(employee): simplify validation logic</code></p>
+<hr />
+<h2>Code Style</h2>
+<p>All code should prioritize readability.</p>
+<p>General rules:</p>
+<ul>
+<li>Keep methods small.</li>
+<li>Keep classes focused.</li>
+<li>Avoid deeply nested logic.</li>
+<li>Remove unused code.</li>
+<li>Eliminate duplication.</li>
+<li>Prefer descriptive names.</li>
+<li>Use early returns where appropriate.</li>
+</ul>
+<hr />
+<h2>Naming Conventions</h2>
+<p>Variables</p>
+<p><code>employee
+employeeId
+scheduleDate</code></p>
+<p>Classes</p>
+<p><code>EmployeeService
+ScheduleController
+PayrollCalculator</code></p>
+<p>Interfaces</p>
+<p><code>IEmployeeRepository
+INotificationProvider</code></p>
+<p>Enums</p>
+<p><code>EmployeeStatus
+ShiftStatus
+LeaveType</code></p>
+<p>Constants</p>
+<p><code>MAX_SHIFT_LENGTH
+DEFAULT_PAGE_SIZE</code></p>
+<p>Magic numbers should never appear directly in business logic.</p>
+<hr />
+<h2>SOLID Principles</h2>
+<p>All production code should follow SOLID principles whenever practical.</p>
+<ul>
+<li>Single Responsibility Principle</li>
+<li>Open/Closed Principle</li>
+<li>Liskov Substitution Principle</li>
+<li>Interface Segregation Principle</li>
+<li>Dependency Inversion Principle</li>
+</ul>
+<p>Favor composition over inheritance unless inheritance provides a clear benefit.</p>
+<hr />
+<h2>Dependency Injection</h2>
+<p>Application services should receive dependencies through dependency injection.</p>
+<p>Avoid:</p>
+<p><code>new DatabaseConnection()</code></p>
+<p>Prefer:</p>
+<p><code>constructor(
+    employeeRepository,
+    notificationService
+)</code></p>
+<p>Dependency injection improves testability and reduces coupling.</p>
+<hr />
+<h2>API Standards</h2>
+<p>All APIs should:</p>
+<ul>
+<li>Use HTTPS</li>
+<li>Return JSON</li>
+<li>Use consistent HTTP status codes</li>
+<li>Support pagination</li>
+<li>Validate inputs</li>
+<li>Return structured error responses</li>
+<li>Require authentication</li>
+<li>Enforce authorization</li>
+</ul>
+<p>Breaking API changes should only occur through versioned releases.</p>
+<hr />
+<h2>Validation Standards</h2>
+<p>All incoming data must be validated.</p>
+<p>Validation should include:</p>
+<ul>
+<li>Required fields</li>
+<li>Length limits</li>
+<li>Allowed values</li>
+<li>Email format</li>
+<li>Date format</li>
+<li>Numeric ranges</li>
+<li>Business rules</li>
+</ul>
+<p>Client-side validation improves usability, but server-side validation is always required.</p>
+<hr />
+<h2>Database Standards</h2>
+<p>Application code should:</p>
+<ul>
+<li>Use parameterized queries</li>
+<li>Avoid dynamic SQL</li>
+<li>Use transactions appropriately</li>
+<li>Prevent duplicate writes</li>
+<li>Respect tenant boundaries</li>
+<li>Never bypass repository abstractions without justification</li>
+</ul>
+<p>Database schema changes must be delivered through version-controlled migrations.</p>
+<hr />
+<h2>Logging Standards</h2>
+<p>Applications should log meaningful events without exposing sensitive information.</p>
+<p>Recommended log levels:</p>
+<ul>
+<li>Trace</li>
+<li>Debug</li>
+<li>Information</li>
+<li>Warning</li>
+<li>Error</li>
+<li>Critical</li>
+</ul>
+<p>Sensitive information such as passwords, access tokens, API keys, Social Security numbers, and payment information must never be written to logs.</p>
+<hr />
+<h2>Error Handling</h2>
+<p>Applications should fail gracefully.</p>
+<p>Error responses should:</p>
+<ul>
+<li>Be predictable</li>
+<li>Be actionable</li>
+<li>Avoid exposing internal implementation details</li>
+<li>Include correlation or trace identifiers</li>
+<li>Be logged appropriately</li>
+</ul>
+<p>Never expose stack traces to end users.</p>
+<hr />
+<h2>Configuration Management</h2>
+<p>Configuration values should be stored outside application code.</p>
+<p>Examples:</p>
+<ul>
+<li>Database connections</li>
+<li>SMTP settings</li>
+<li>API credentials</li>
+<li>Feature flags</li>
+<li>Storage providers</li>
+</ul>
+<p>Secrets should be managed using a secure secrets management solution and must never be committed to source control.</p>
+<hr />
+<h2>Testing Requirements</h2>
+<p>Every new feature should include appropriate automated tests.</p>
+<p>Testing should cover:</p>
+<ul>
+<li>Unit Tests</li>
+<li>Integration Tests</li>
+<li>API Tests</li>
+<li>End-to-End Tests</li>
+<li>Regression Tests</li>
+</ul>
+<p>Critical business logic should achieve high automated test coverage.</p>
+<hr />
+<h2>Performance Guidelines</h2>
+<p>Engineers should consider performance during implementation.</p>
+<p>Recommendations:</p>
+<ul>
+<li>Avoid unnecessary database queries.</li>
+<li>Use pagination for large datasets.</li>
+<li>Cache frequently accessed reference data.</li>
+<li>Optimize expensive operations.</li>
+<li>Profile slow requests.</li>
+<li>Minimize network calls.</li>
+</ul>
+<p>Performance optimizations should be based on measurement rather than assumptions.</p>
+<hr />
+<h2>Code Reviews</h2>
+<p>Every pull request requires at least one peer review before merging.</p>
+<p>Reviewers should evaluate:</p>
+<ul>
+<li>Correctness</li>
+<li>Readability</li>
+<li>Security</li>
+<li>Performance</li>
+<li>Test coverage</li>
+<li>Documentation</li>
+<li>Architectural consistency</li>
+</ul>
+<p>Constructive feedback should focus on improving the codebase rather than the individual.</p>
+<hr />
+<h2>Pull Request Standards</h2>
+<p>Each pull request should include:</p>
+<ul>
+<li>Summary of changes</li>
+<li>Related work item or issue</li>
+<li>Testing performed</li>
+<li>Screenshots (if UI changes)</li>
+<li>Migration notes (if applicable)</li>
+<li>Documentation updates</li>
+</ul>
+<p>Large pull requests should be broken into smaller, reviewable units whenever possible.</p>
+<hr />
+<h2>Documentation Standards</h2>
+<p>Code should be accompanied by documentation where it adds value.</p>
+<p>Documentation should be updated when changes affect:</p>
+<ul>
+<li>APIs</li>
+<li>User workflows</li>
+<li>Configuration</li>
+<li>Architecture</li>
+<li>Deployment</li>
+<li>Security</li>
+<li>Database schema</li>
+</ul>
+<p>Documentation is considered part of the definition of done.</p>
+<hr />
+<h2>Engineering Checklist</h2>
+<p>Before merging code, verify that:</p>
+<ul>
+<li>Feature requirements are complete.</li>
+<li>Automated tests pass.</li>
+<li>Static analysis issues are resolved.</li>
+<li>Security considerations have been reviewed.</li>
+<li>Documentation has been updated.</li>
+<li>Logging is appropriate.</li>
+<li>Error handling is complete.</li>
+<li>Performance has been considered.</li>
+<li>Code review has been approved.</li>
+<li>The solution aligns with established architectural standards.</li>
+</ul>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>System Architecture Guide</li>
+<li>Database Design &amp; Data Dictionary</li>
+<li>API Developer Guide</li>
+<li>API Reference Manual</li>
+<li>Security Overview</li>
+<li>DevOps Deployment Guide (Planned)</li>
+<li>QA Testing Strategy (Planned)</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product of LBS.</p>
 {% endblock %}

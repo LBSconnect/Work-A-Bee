@@ -1,31 +1,376 @@
 {% extends "internal_base.html" %}
-{% block title %}Deployment Guide{% endblock %}
+{% block title %}DevOps & Deployment Guide{% endblock %}
 {% block internal_content %}
-  <h1>Deployment Guide</h1>
-  <p class="muted">Status: Draft template &middot; Section: Engineering &middot; Classification: Internal Confidential &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <h1>DevOps & Deployment Guide</h1>
+  <p class="muted">Status: Needs Validation &middot; Classification: Internal &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This document has not been fully validated against the current codebase and mixes accurate description with idealized/aspirational practices (e.g., formal CI/CD pipelines, a REST API, multiple deployment environments, semantic-versioned releases) that are not yet implemented for Work-A-Beez today. Flagged for engineering review before being treated as authoritative.</div>
 
-  <p><em>This page is a starting template generated for LBS to complete. Replace the placeholder text in each section below with final content.</em></p>
-
-  <table style="margin-bottom:20px;">
-    <tr><th>Document Title</th><td>Deployment Guide</td></tr>
-    <tr><th>Version</th><td>[Add version]</td></tr>
-    <tr><th>Owner</th><td>Linton Business Solutions, LLC</td></tr>
-    <tr><th>Approver</th><td>[Add approver]</td></tr>
-    <tr><th>Classification</th><td>Internal Confidential</td></tr>
-  </table>
-
-  <h2>1. Purpose</h2>
-  <p>[Add content here.]</p>
-
-  <h2>2. Scope</h2>
-  <p>[Add content here.]</p>
-
-  <h2>3. Content</h2>
-  <p>[Add content here.]</p>
-
-  <h2>4. Related Documents</h2>
-  <p>[List related documents here.]</p>
-
-  <h2>5. Revision History</h2>
-  <p>[Add revision history here.]</p>
+<p>Welcome to the Work-A-Beez DevOps &amp; Deployment Guide.</p>
+<p>This document defines the operational standards used to build, deploy, monitor, secure, and maintain the Work-A-Beez platform across all supported environments.</p>
+<p>The objective is to ensure deployments are reliable, repeatable, secure, and recoverable while minimizing service interruptions.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>DevOps Philosophy</li>
+<li>Infrastructure Overview</li>
+<li>Environment Strategy</li>
+<li>Infrastructure as Code</li>
+<li>Source Control Integration</li>
+<li>CI/CD Pipeline</li>
+<li>Build Process</li>
+<li>Deployment Strategy</li>
+<li>Secrets Management</li>
+<li>Configuration Management</li>
+<li>Database Migrations</li>
+<li>Monitoring &amp; Observability</li>
+<li>Logging</li>
+<li>Alerting</li>
+<li>Backup &amp; Recovery</li>
+<li>Rollback Procedures</li>
+<li>High Availability</li>
+<li>Disaster Recovery</li>
+<li>Operational Runbooks</li>
+<li>Maintenance Windows</li>
+</ol>
+<hr />
+<h2>DevOps Philosophy</h2>
+<p>Work-A-Beez embraces DevOps practices that promote collaboration between development, operations, QA, and security teams.</p>
+<p>Core objectives include:</p>
+<ul>
+<li>Automated deployments</li>
+<li>Repeatable infrastructure</li>
+<li>Continuous delivery</li>
+<li>Infrastructure consistency</li>
+<li>Rapid recovery</li>
+<li>Operational visibility</li>
+<li>Secure deployment pipelines</li>
+</ul>
+<p>Automation should replace manual deployment activities whenever practical.</p>
+<hr />
+<h2>Infrastructure Overview</h2>
+<p>The platform consists of several logical components:</p>
+<ul>
+<li>Web Application</li>
+<li>REST API</li>
+<li>Authentication Services</li>
+<li>Background Workers</li>
+<li>Notification Services</li>
+<li>Database Cluster</li>
+<li>Object Storage</li>
+<li>Monitoring Platform</li>
+<li>Logging Platform</li>
+<li>CI/CD Infrastructure</li>
+</ul>
+<p>Each component should be independently deployable where architecture permits.</p>
+<hr />
+<h2>Environment Strategy</h2>
+<p>Work-A-Beez maintains separate environments throughout the software development lifecycle.</p>
+<p>Standard environments include:</p>
+<table>
+<thead>
+<tr>
+<th>Environment</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Local</td>
+<td>Individual developer workstations</td>
+</tr>
+<tr>
+<td>Development</td>
+<td>Active feature development</td>
+</tr>
+<tr>
+<td>Integration</td>
+<td>Service integration testing</td>
+</tr>
+<tr>
+<td>QA</td>
+<td>Functional and regression testing</td>
+</tr>
+<tr>
+<td>UAT</td>
+<td>Customer and stakeholder validation</td>
+</tr>
+<tr>
+<td>Staging</td>
+<td>Production mirror</td>
+</tr>
+<tr>
+<td>Production</td>
+<td>Live customer environment</td>
+</tr>
+</tbody>
+</table>
+<p>No environment should share production credentials or customer data unless explicitly authorized and appropriately protected.</p>
+<hr />
+<h2>Infrastructure as Code</h2>
+<p>Infrastructure should be provisioned using Infrastructure as Code (IaC).</p>
+<p>Benefits include:</p>
+<ul>
+<li>Repeatability</li>
+<li>Version control</li>
+<li>Peer review</li>
+<li>Consistency</li>
+<li>Disaster recovery</li>
+<li>Auditability</li>
+</ul>
+<p>Infrastructure definitions should be stored alongside application source code and follow the same review process.</p>
+<hr />
+<h2>Source Control Integration</h2>
+<p>All deployments originate from version-controlled source code.</p>
+<p>Recommended branch flow:</p>
+<p><code>feature/*
+develop
+release/*
+main</code></p>
+<p>Only approved code may progress to production.</p>
+<hr />
+<h2>Continuous Integration</h2>
+<p>Every code commit should automatically trigger:</p>
+<ul>
+<li>Dependency restoration</li>
+<li>Static code analysis</li>
+<li>Security scanning</li>
+<li>Unit tests</li>
+<li>Integration tests</li>
+<li>Build artifact generation</li>
+</ul>
+<p>Failed builds should block downstream deployment stages.</p>
+<hr />
+<h2>Continuous Deployment</h2>
+<p>Deployment pipelines should support:</p>
+<ul>
+<li>Automated deployments</li>
+<li>Manual approval gates where required</li>
+<li>Environment-specific configuration</li>
+<li>Health verification</li>
+<li>Rollback capability</li>
+</ul>
+<p>Production deployments should occur only after successful validation in preceding environments.</p>
+<hr />
+<h2>Build Process</h2>
+<p>Each build should produce immutable artifacts.</p>
+<p>Artifacts should include:</p>
+<ul>
+<li>Application binaries</li>
+<li>Container images (if applicable)</li>
+<li>Database migration scripts</li>
+<li>Release metadata</li>
+</ul>
+<p>Artifacts must be versioned and traceable to a specific source code revision.</p>
+<hr />
+<h2>Configuration Management</h2>
+<p>Application configuration should be externalized.</p>
+<p>Examples include:</p>
+<ul>
+<li>Database connections</li>
+<li>Email providers</li>
+<li>API endpoints</li>
+<li>Authentication settings</li>
+<li>Feature flags</li>
+<li>Logging levels</li>
+</ul>
+<p>Environment-specific values should not require recompilation of the application.</p>
+<hr />
+<h2>Secrets Management</h2>
+<p>Sensitive information must never be stored in source control.</p>
+<p>Examples include:</p>
+<ul>
+<li>API keys</li>
+<li>Encryption keys</li>
+<li>Certificates</li>
+<li>OAuth secrets</li>
+<li>Database passwords</li>
+<li>SMTP credentials</li>
+</ul>
+<p>Access to secrets should be restricted based on the principle of least privilege.</p>
+<hr />
+<h2>Database Migrations</h2>
+<p>Schema changes should be applied using version-controlled migration scripts.</p>
+<p>Migration guidelines:</p>
+<ul>
+<li>One logical change per migration</li>
+<li>Forward-only where practical</li>
+<li>Tested in lower environments</li>
+<li>Rollback strategy documented</li>
+<li>Reviewed before execution</li>
+</ul>
+<p>Manual database changes in production should be avoided except during approved emergency procedures.</p>
+<hr />
+<h2>Deployment Strategy</h2>
+<p>Supported deployment strategies include:</p>
+<ul>
+<li>Rolling deployments</li>
+<li>Blue/Green deployments</li>
+<li>Canary deployments (where appropriate)</li>
+</ul>
+<p>The chosen strategy should minimize customer impact and enable rapid rollback.</p>
+<hr />
+<h2>Health Checks</h2>
+<p>Applications should expose health endpoints for monitoring.</p>
+<p>Recommended checks include:</p>
+<ul>
+<li>Application availability</li>
+<li>Database connectivity</li>
+<li>Queue connectivity</li>
+<li>External service dependencies</li>
+<li>Storage availability</li>
+</ul>
+<p>Health endpoints should avoid exposing sensitive implementation details.</p>
+<hr />
+<h2>Monitoring &amp; Observability</h2>
+<p>The platform should provide visibility into:</p>
+<ul>
+<li>Application health</li>
+<li>Response times</li>
+<li>Error rates</li>
+<li>Resource utilization</li>
+<li>Background job status</li>
+<li>Queue depth</li>
+<li>Deployment history</li>
+</ul>
+<p>Operational dashboards should provide real-time insight into platform health.</p>
+<hr />
+<h2>Logging</h2>
+<p>Applications should generate structured logs.</p>
+<p>Logs should include:</p>
+<ul>
+<li>Timestamp</li>
+<li>Severity</li>
+<li>Service name</li>
+<li>Environment</li>
+<li>Correlation ID</li>
+<li>User ID (where appropriate)</li>
+<li>Organization ID (where appropriate)</li>
+<li>Request ID</li>
+</ul>
+<p>Sensitive customer information must not be written to logs.</p>
+<hr />
+<h2>Alerting</h2>
+<p>Operational alerts should be configured for significant events.</p>
+<p>Examples include:</p>
+<ul>
+<li>Service outages</li>
+<li>Database failures</li>
+<li>Deployment failures</li>
+<li>High error rates</li>
+<li>Resource exhaustion</li>
+<li>Authentication failures</li>
+<li>Backup failures</li>
+</ul>
+<p>Alerts should route to the appropriate operational team based on severity.</p>
+<hr />
+<h2>Backup Strategy</h2>
+<p>Backups should include:</p>
+<ul>
+<li>Databases</li>
+<li>Configuration</li>
+<li>Object storage metadata</li>
+<li>Critical application state</li>
+</ul>
+<p>Backups should be:</p>
+<ul>
+<li>Automated</li>
+<li>Encrypted</li>
+<li>Regularly tested</li>
+<li>Stored securely</li>
+<li>Retained according to policy</li>
+</ul>
+<hr />
+<h2>Rollback Procedures</h2>
+<p>Every production deployment must have a documented rollback plan.</p>
+<p>Rollback criteria may include:</p>
+<ul>
+<li>Elevated error rates</li>
+<li>Failed health checks</li>
+<li>Critical functionality unavailable</li>
+<li>Security concerns</li>
+<li>Data integrity issues</li>
+</ul>
+<p>Rollback procedures should be tested periodically.</p>
+<hr />
+<h2>High Availability</h2>
+<p>The platform should minimize single points of failure.</p>
+<p>Strategies include:</p>
+<ul>
+<li>Redundant application instances</li>
+<li>Load balancing</li>
+<li>Database replication</li>
+<li>Automatic failover</li>
+<li>Redundant storage</li>
+<li>Multi-zone deployment where available</li>
+</ul>
+<p>Availability objectives should align with published service commitments.</p>
+<hr />
+<h2>Disaster Recovery</h2>
+<p>Disaster recovery planning should define:</p>
+<ul>
+<li>Recovery Time Objective (RTO)</li>
+<li>Recovery Point Objective (RPO)</li>
+<li>Recovery procedures</li>
+<li>Communication plans</li>
+<li>Validation steps</li>
+<li>Post-incident review process</li>
+</ul>
+<p>Recovery procedures should be exercised periodically.</p>
+<hr />
+<h2>Operational Runbooks</h2>
+<p>Runbooks should exist for common operational scenarios, including:</p>
+<ul>
+<li>Deployment failures</li>
+<li>Database connectivity issues</li>
+<li>Authentication outages</li>
+<li>High CPU or memory usage</li>
+<li>Queue backlogs</li>
+<li>Service restarts</li>
+<li>Certificate renewal</li>
+<li>Backup restoration</li>
+</ul>
+<p>Runbooks should be reviewed and updated as the platform evolves.</p>
+<hr />
+<h2>Maintenance Windows</h2>
+<p>Planned maintenance should:</p>
+<ul>
+<li>Be scheduled in advance</li>
+<li>Minimize customer impact</li>
+<li>Include rollback procedures</li>
+<li>Be communicated to affected customers</li>
+<li>Be monitored throughout execution</li>
+</ul>
+<p>Emergency maintenance should follow established incident management procedures.</p>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>System Architecture Guide</li>
+<li>Coding Standards &amp; Engineering Handbook</li>
+<li>Quality Assurance &amp; Testing Strategy</li>
+<li>Database Design &amp; Data Dictionary</li>
+<li>Security Overview</li>
+<li>Incident Response Plan (Planned)</li>
+<li>Business Continuity Plan (Planned)</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product of LBS.</p>
 {% endblock %}
