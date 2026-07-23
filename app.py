@@ -25,6 +25,8 @@ import performance
 import plans
 import recognition
 import schedule
+from api import register_api
+from api.auth_routes import api_auth_bp
 from models import init_db, get_db, ensure_system_admin_bootstrap
 from orgs import get_active_org, normalize_company_code
 from payroll import get_period_bounds, calculate_payroll, get_period_entries, get_prior_periods
@@ -54,6 +56,8 @@ init_db()
 ensure_system_admin_bootstrap()
 
 app.register_blueprint(wizard_blueprint)
+register_api(app, csrf)
+limiter.limit("10 per minute")(api_auth_bp)
 
 
 @app.after_request

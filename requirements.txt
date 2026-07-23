@@ -1,6 +1,7 @@
 Flask==3.0.3
 Flask-Limiter==3.8.0
 Flask-WTF==1.2.2
+PyJWT==2.9.0
 Werkzeug==3.0.4
 psycopg2-binary==2.9.12
 python-dotenv==1.0.1

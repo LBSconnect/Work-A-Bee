@@ -356,6 +356,20 @@ def init_db():
                     created_at TIMESTAMP NOT NULL DEFAULT NOW()
                 )
             """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS api_refresh_tokens (
+                    id SERIAL PRIMARY KEY,
+                    org_id INTEGER NOT NULL REFERENCES organizations(id),
+                    subject_type TEXT NOT NULL,
+                    subject_id INTEGER NOT NULL,
+                    token_hash TEXT NOT NULL,
+                    device_label TEXT,
+                    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                    last_used_at TIMESTAMP,
+                    expires_at TIMESTAMP NOT NULL,
+                    revoked_at TIMESTAMP
+                )
+            """)
             conn.commit()
     except Exception:
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")
