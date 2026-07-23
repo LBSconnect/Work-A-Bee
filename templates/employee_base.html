@@ -36,6 +36,7 @@
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'pto_requests_page' else '' }}" href="{{ url_for('pto_requests_page') }}"><span class="admin-si">🌴</span> Time Off</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'messages_page' else '' }}" href="{{ url_for('messages_page') }}"><span class="admin-si">💬</span> Messages{% if unread_messages_count %} <span class="badge unread">{{ unread_messages_count }}</span>{% endif %}</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'performance_page' else '' }}" href="{{ url_for('performance_page') }}"><span class="admin-si">🎯</span> My Performance</a>
+        <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'recognition_page' else '' }}" href="{{ url_for('recognition_page') }}"><span class="admin-si">🏅</span> Recognition</a>
         <a class="admin-sidebar-item" href="{{ url_for('clock_action') }}#profile"><span class="admin-si">👤</span> Profile</a>
         <a class="admin-sidebar-item" href="{{ url_for('clock_action') }}#announcements"><span class="admin-si">📣</span> Announcements</a>
         <a class="admin-sidebar-item admin-sidebar-logout" href="{{ url_for('clock_exit') }}"><span class="admin-si">🚪</span> Exit</a>

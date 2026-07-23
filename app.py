@@ -18,6 +18,7 @@ import config
 import devices as devices_mod
 import performance
 import plans
+import recognition
 import schedule
 from models import init_db, get_db
 from orgs import get_active_org, normalize_company_code
@@ -529,6 +530,41 @@ def performance_page():
         summary = performance.summarize_attendance(rows)
 
     return render_template("performance.html", employee=emp, summary=summary, rows=rows)
+
+
+@app.route("/recognition")
+def recognition_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if emp is None or org is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        rows = performance.shift_attendance(conn, org_id, now_in(org["timezone"]), weeks=8, employee_id=emp_id)
+        summary = performance.summarize_attendance(rows)
+        earned = recognition.automated_badges(summary)
+
+        kudos = conn.execute(
+            "SELECT r.*, a.username AS admin_username FROM recognitions r "
+            "LEFT JOIN admin_users a ON r.given_by_admin_id = a.id "
+            "WHERE r.employee_id=%s ORDER BY r.created_at DESC",
+            (emp_id,),
+        ).fetchall()
+
+    return render_template(
+        "recognition.html", employee=emp, earned_badges=earned, kudos=kudos,
+        badge_types=recognition.BADGE_TYPES,
+    )
 
 
 @app.route("/shifts/<int:shift_id>/offer-swap", methods=["POST"])
@@ -1470,6 +1506,56 @@ def admin_performance_employee(employee_id):
         )
         summary = performance.summarize_attendance(rows)
     return render_template("admin_performance_employee.html", employee=emp, summary=summary, rows=rows)
+
+
+@app.route("/admin/recognition", methods=["GET", "POST"])
+@admin_required
+def admin_recognition():
+    if request.method == "POST":
+        try:
+            employee_id = int(request.form.get("employee_id", ""))
+        except ValueError:
+            flash("Choose an employee.")
+            return redirect(url_for("admin_recognition"))
+        badge_type = request.form.get("badge_type", "")
+        note = request.form.get("note", "").strip()
+        if badge_type not in recognition.BADGE_TYPES:
+            flash("Choose a valid badge.")
+            return redirect(url_for("admin_recognition"))
+
+        with get_db() as conn:
+            emp = conn.execute(
+                "SELECT * FROM employees WHERE id=%s AND org_id=%s", (employee_id, g.org["id"])
+            ).fetchone()
+            if emp is None:
+                flash("Employee not found.")
+                return redirect(url_for("admin_recognition"))
+            conn.execute(
+                "INSERT INTO recognitions (org_id, employee_id, given_by_admin_id, badge_type, note) "
+                "VALUES (%s,%s,%s,%s,%s)",
+                (g.org["id"], employee_id, g.admin["id"], badge_type, note or None),
+            )
+            audit.log(conn, g.org["id"], "admin", g.admin["id"], "recognition.given",
+                       f"{emp['name']}: {recognition.BADGE_TYPES[badge_type]['label']}")
+            conn.commit()
+        flash(f"Gave {emp['name']} the {recognition.BADGE_TYPES[badge_type]['label']} badge.")
+        return redirect(url_for("admin_recognition"))
+
+    with get_db() as conn:
+        employees = conn.execute(
+            "SELECT id, name FROM employees WHERE org_id=%s AND active=1 ORDER BY name", (g.org["id"],)
+        ).fetchall()
+        feed = conn.execute(
+            "SELECT r.*, e.name AS employee_name, a.username AS admin_username FROM recognitions r "
+            "JOIN employees e ON r.employee_id = e.id "
+            "LEFT JOIN admin_users a ON r.given_by_admin_id = a.id "
+            "WHERE r.org_id=%s ORDER BY r.created_at DESC LIMIT 50",
+            (g.org["id"],),
+        ).fetchall()
+
+    return render_template(
+        "admin_recognition.html", employees=employees, feed=feed, badge_types=recognition.BADGE_TYPES,
+    )
 
 
 @app.route("/admin/settings", methods=["GET", "POST"])

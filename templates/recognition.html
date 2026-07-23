@@ -1,0 +1,37 @@
+{% extends "employee_base.html" %}
+{% block title %}Recognition{% endblock %}
+{% block employee_content %}
+  <h1>Recognition</h1>
+  <p class="muted">Badges you've earned automatically, and kudos from your team.</p>
+
+  <h2 style="margin-top:24px; font-size:16px;">Earned badges</h2>
+  {% if earned_badges %}
+    <div class="quick-actions-grid">
+      {% for b in earned_badges %}
+      <div class="quick-action-card" style="cursor:default;">
+        <span class="quick-action-icon">{{ b.icon }}</span>
+        <span class="quick-action-label">{{ b.label }}</span>
+        <span class="muted" style="font-size:11px;">{{ b.detail }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">Keep up a strong attendance streak (at least 4 scheduled shifts, no misses) to earn your first badge.</p>
+  {% endif %}
+
+  <h2 style="margin-top:32px; font-size:16px;">Kudos from your team</h2>
+  {% if kudos %}
+    {% for k in kudos %}
+      <div style="border:1px solid #e5e7eb; border-radius:8px; padding:14px 16px; margin-top:12px; display:flex; gap:12px; align-items:flex-start;">
+        <span style="font-size:24px;">{{ badge_types[k.badge_type].icon if k.badge_type in badge_types else '🏅' }}</span>
+        <div>
+          <strong>{{ badge_types[k.badge_type].label if k.badge_type in badge_types else k.badge_type }}</strong>
+          <p class="muted" style="margin-top:2px;">From {{ k.admin_username or 'your manager' }} &middot; {{ k.created_at.strftime('%B %d, %Y') }}</p>
+          {% if k.note %}<p style="margin-top:8px; white-space:pre-wrap;">{{ k.note }}</p>{% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="muted">No kudos yet.</p>
+  {% endif %}
+{% endblock %}
