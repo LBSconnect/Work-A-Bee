@@ -226,6 +226,18 @@ def init_db():
                     ADD COLUMN IF NOT EXISTS is_manual BOOLEAN NOT NULL DEFAULT FALSE,
                     ADD COLUMN IF NOT EXISTS created_by_admin_id INTEGER REFERENCES admin_users(id)
             """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS shifts (
+                    id SERIAL PRIMARY KEY,
+                    org_id INTEGER NOT NULL REFERENCES organizations(id),
+                    employee_id INTEGER NOT NULL REFERENCES employees(id),
+                    shift_start TIMESTAMP NOT NULL,
+                    shift_end TIMESTAMP NOT NULL,
+                    notes TEXT,
+                    created_by_admin_id INTEGER REFERENCES admin_users(id),
+                    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+                )
+            """)
             conn.commit()
     except Exception:
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")
