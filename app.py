@@ -296,6 +296,81 @@ def clock_action():
     )
 
 
+@app.route("/pay-stubs")
+def pay_stubs():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if emp is None or org is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        period_start, period_end = get_period_bounds(today_in(org["timezone"]))
+        periods = [(period_start, period_end)] + get_prior_periods(period_start, count=11)
+        stubs = []
+        for start, end in periods:
+            rows = calculate_payroll(conn, org, start, end)
+            mine = next((r for r in rows if r["employee_code"] == emp["employee_code"]), None)
+            stubs.append({
+                "period_start": start,
+                "period_end": end,
+                "hours": mine["total_hours"] if mine else 0.0,
+                "regular_hours": mine["regular_hours"] if mine else 0.0,
+                "overtime_hours": mine["overtime_hours"] if mine else 0.0,
+                "pay": mine["pay"] if mine else 0.0,
+            })
+
+    return render_template("pay_stubs.html", employee=emp, stubs=stubs)
+
+
+@app.route("/pay-stubs/<period_start>")
+def pay_stub_detail(period_start):
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    try:
+        start_date = datetime.strptime(period_start, "%Y-%m-%d").date()
+    except ValueError:
+        abort(404)
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if emp is None or org is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        _, end_date = get_period_bounds(start_date)
+        detail = get_period_entries(conn, org, start_date, end_date)
+        mine = next((d for d in detail if d["employee_code"] == emp["employee_code"]), None)
+
+    if mine is None:
+        mine = {
+            "entries": [], "total_hours": 0.0, "regular_hours": 0.0,
+            "overtime_hours": 0.0, "total_due": 0.0, "hourly_rate": emp["hourly_rate"],
+        }
+
+    return render_template(
+        "pay_stub_detail.html", employee=emp, org=org,
+        period_start=start_date, period_end=end_date, stub=mine,
+    )
+
+
 def admin_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
