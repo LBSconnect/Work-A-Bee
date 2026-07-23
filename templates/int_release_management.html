@@ -1,31 +1,318 @@
 {% extends "internal_base.html" %}
-{% block title %}Release Management{% endblock %}
+{% block title %}Release Notes & Versioning Guide{% endblock %}
 {% block internal_content %}
-  <h1>Release Management</h1>
-  <p class="muted">Status: Draft template &middot; Section: Engineering &middot; Classification: Internal Confidential &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <h1>Release Notes & Versioning Guide</h1>
+  <p class="muted">Status: Needs Validation &middot; Classification: Internal &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This document has not been fully validated against the current codebase and mixes accurate description with idealized/aspirational practices (e.g., formal CI/CD pipelines, a REST API, multiple deployment environments, semantic-versioned releases) that are not yet implemented for Work-A-Beez today. Flagged for engineering review before being treated as authoritative.</div>
 
-  <p><em>This page is a starting template generated for LBS to complete. Replace the placeholder text in each section below with final content.</em></p>
-
-  <table style="margin-bottom:20px;">
-    <tr><th>Document Title</th><td>Release Management</td></tr>
-    <tr><th>Version</th><td>[Add version]</td></tr>
-    <tr><th>Owner</th><td>Linton Business Solutions, LLC</td></tr>
-    <tr><th>Approver</th><td>[Add approver]</td></tr>
-    <tr><th>Classification</th><td>Internal Confidential</td></tr>
-  </table>
-
-  <h2>1. Purpose</h2>
-  <p>[Add content here.]</p>
-
-  <h2>2. Scope</h2>
-  <p>[Add content here.]</p>
-
-  <h2>3. Content</h2>
-  <p>[Add content here.]</p>
-
-  <h2>4. Related Documents</h2>
-  <p>[List related documents here.]</p>
-
-  <h2>5. Revision History</h2>
-  <p>[Add revision history here.]</p>
+<p>Welcome to the Work-A-Beez Release Notes &amp; Versioning Guide.</p>
+<p>This guide defines how software releases are planned, versioned, documented, approved, and communicated to customers. Consistent release documentation helps customers understand platform improvements while enabling support, engineering, and customer success teams to quickly identify changes between versions.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Purpose</li>
+<li>Release Philosophy</li>
+<li>Version Numbering</li>
+<li>Release Types</li>
+<li>Release Schedule</li>
+<li>Release Lifecycle</li>
+<li>Release Readiness</li>
+<li>Release Notes Format</li>
+<li>Customer Communication</li>
+<li>Breaking Changes</li>
+<li>Feature Flags</li>
+<li>Deprecation Policy</li>
+<li>Hotfix Releases</li>
+<li>Rollback Communication</li>
+<li>Documentation Updates</li>
+<li>Version Support Policy</li>
+<li>Internal Release Checklist</li>
+<li>Revision History</li>
+</ol>
+<hr />
+<h2>Purpose</h2>
+<p>Release Notes provide a clear history of changes made to the Work-A-Beez platform.</p>
+<p>They enable stakeholders to:</p>
+<ul>
+<li>Understand new functionality</li>
+<li>Prepare users for upcoming changes</li>
+<li>Identify resolved defects</li>
+<li>Review security improvements</li>
+<li>Track platform evolution</li>
+<li>Verify deployed versions</li>
+</ul>
+<hr />
+<h2>Release Philosophy</h2>
+<p>Every release should deliver value while maintaining platform stability.</p>
+<p>Releases should be:</p>
+<ul>
+<li>Predictable</li>
+<li>Well tested</li>
+<li>Fully documented</li>
+<li>Backward compatible whenever practical</li>
+<li>Communicated before deployment</li>
+</ul>
+<hr />
+<h2>Version Numbering</h2>
+<p>Work-A-Beez follows Semantic Versioning.</p>
+<p><code>MAJOR.MINOR.PATCH</code></p>
+<p>Example:</p>
+<p><code>3.4.2</code></p>
+<h4>Major</h4>
+<p>Incremented when introducing breaking changes.</p>
+<p>Examples:</p>
+<ul>
+<li>API redesign</li>
+<li>Authentication changes</li>
+<li>Database model changes requiring customer action</li>
+</ul>
+<hr />
+<h4>Minor</h4>
+<p>Incremented when adding backward-compatible functionality.</p>
+<p>Examples:</p>
+<ul>
+<li>New reports</li>
+<li>New scheduling capabilities</li>
+<li>Additional integrations</li>
+<li>User interface enhancements</li>
+</ul>
+<hr />
+<h4>Patch</h4>
+<p>Incremented for maintenance releases.</p>
+<p>Examples:</p>
+<ul>
+<li>Bug fixes</li>
+<li>Performance improvements</li>
+<li>Security updates</li>
+<li>Minor usability enhancements</li>
+</ul>
+<hr />
+<h2>Release Types</h2>
+<h3>Major Release</h3>
+<p>Contains significant new functionality or architectural changes.</p>
+<p>Typically includes:</p>
+<ul>
+<li>New modules</li>
+<li>Major workflow improvements</li>
+<li>Platform redesigns</li>
+<li>API version changes</li>
+</ul>
+<hr />
+<h3>Minor Release</h3>
+<p>Introduces new features without breaking existing functionality.</p>
+<p>Examples include:</p>
+<ul>
+<li>Dashboard enhancements</li>
+<li>New reports</li>
+<li>Additional notification options</li>
+<li>Improved scheduling tools</li>
+</ul>
+<hr />
+<h3>Patch Release</h3>
+<p>Focuses on maintenance.</p>
+<p>Typical contents include:</p>
+<ul>
+<li>Defect corrections</li>
+<li>Stability improvements</li>
+<li>Security fixes</li>
+<li>Performance tuning</li>
+</ul>
+<hr />
+<h3>Emergency Hotfix</h3>
+<p>Used only to resolve critical production issues requiring immediate attention.</p>
+<p>Hotfixes follow an expedited approval and deployment process.</p>
+<hr />
+<h2>Release Schedule</h2>
+<p>Standard production releases should follow a predictable cadence.</p>
+<p>Suggested schedule:</p>
+<ul>
+<li>Major Releases: 1-2 per year</li>
+<li>Minor Releases: Monthly or quarterly</li>
+<li>Patch Releases: As needed</li>
+<li>Hotfixes: Emergency only</li>
+</ul>
+<hr />
+<h2>Release Lifecycle</h2>
+<p>Each release progresses through the following stages:</p>
+<ol>
+<li>Planning</li>
+<li>Development</li>
+<li>Code Review</li>
+<li>QA Validation</li>
+<li>User Acceptance Testing</li>
+<li>Release Approval</li>
+<li>Production Deployment</li>
+<li>Post-Deployment Verification</li>
+<li>Customer Communication</li>
+</ol>
+<hr />
+<h2>Release Readiness</h2>
+<p>A release is considered ready when:</p>
+<ul>
+<li>All planned features are complete.</li>
+<li>Acceptance criteria have been met.</li>
+<li>Required documentation has been updated.</li>
+<li>Automated testing has passed.</li>
+<li>Security scans are complete.</li>
+<li>No unresolved Critical defects remain.</li>
+<li>Product Owner approval has been obtained.</li>
+</ul>
+<hr />
+<h2>Release Notes Format</h2>
+<p>Each published release should include:</p>
+<h3>Version</h3>
+<p>Example:</p>
+<p><code>Version 3.4.2</code></p>
+<h3>Release Date</h3>
+<p><code>August 14, 2026</code></p>
+<h3>Summary</h3>
+<p>A brief overview of the release.</p>
+<h3>New Features</h3>
+<p>List customer-facing enhancements.</p>
+<h3>Improvements</h3>
+<p>Describe usability or performance enhancements.</p>
+<h3>Bug Fixes</h3>
+<p>Summarize resolved issues.</p>
+<h3>Security Updates</h3>
+<p>Describe relevant security improvements without exposing sensitive implementation details.</p>
+<h3>Known Issues</h3>
+<p>Identify any outstanding issues and available workarounds.</p>
+<hr />
+<h2>Customer Communication</h2>
+<p>Release communications should:</p>
+<ul>
+<li>Be written in customer-friendly language</li>
+<li>Focus on business value</li>
+<li>Avoid unnecessary technical jargon</li>
+<li>Link to updated documentation where appropriate</li>
+</ul>
+<p>Announcements may be delivered through:</p>
+<ul>
+<li>In-app notifications</li>
+<li>Email</li>
+<li>Customer portal</li>
+<li>Documentation site</li>
+</ul>
+<hr />
+<h2>Breaking Changes</h2>
+<p>Breaking changes require additional communication.</p>
+<p>Documentation should include:</p>
+<ul>
+<li>What changed</li>
+<li>Why it changed</li>
+<li>Customer impact</li>
+<li>Migration instructions</li>
+<li>Recommended timeline</li>
+</ul>
+<p>Customers should receive advance notice whenever feasible.</p>
+<hr />
+<h2>Feature Flags</h2>
+<p>New functionality may be controlled through feature flags.</p>
+<p>Benefits include:</p>
+<ul>
+<li>Gradual rollout</li>
+<li>Pilot programs</li>
+<li>Controlled testing</li>
+<li>Rapid rollback without redeployment</li>
+</ul>
+<p>Feature flag usage should be documented internally.</p>
+<hr />
+<h2>Deprecation Policy</h2>
+<p>Features scheduled for removal should follow a documented lifecycle.</p>
+<p>Typical stages include:</p>
+<ol>
+<li>Announcement</li>
+<li>Deprecation Notice</li>
+<li>Support Period</li>
+<li>End-of-Support</li>
+<li>Removal</li>
+</ol>
+<p>Customers should receive adequate notice before functionality is retired.</p>
+<hr />
+<h2>Hotfix Releases</h2>
+<p>Hotfix release notes should include:</p>
+<ul>
+<li>Issue summary</li>
+<li>Customer impact</li>
+<li>Resolution</li>
+<li>Deployment time</li>
+<li>Validation completed</li>
+</ul>
+<p>Hotfix documentation should be published promptly after deployment.</p>
+<hr />
+<h2>Rollback Communication</h2>
+<p>If a release is rolled back, internal documentation should record:</p>
+<ul>
+<li>Reason for rollback</li>
+<li>Affected versions</li>
+<li>Corrective actions</li>
+<li>Follow-up plan</li>
+<li>Customer communication</li>
+</ul>
+<p>Post-incident reviews should identify opportunities for process improvement.</p>
+<hr />
+<h2>Documentation Updates</h2>
+<p>Before publishing a release, verify that affected documentation has been updated, including:</p>
+<ul>
+<li>Administrator Guide</li>
+<li>Employee Guide</li>
+<li>API Documentation</li>
+<li>Knowledge Base Articles</li>
+<li>Training Materials</li>
+<li>Release Notes</li>
+</ul>
+<p>Documentation updates are part of the Definition of Done.</p>
+<hr />
+<h2>Version Support Policy</h2>
+<p>Only supported versions receive:</p>
+<ul>
+<li>Security updates</li>
+<li>Critical bug fixes</li>
+<li>Technical support</li>
+</ul>
+<p>Older versions may be retired according to the published lifecycle policy.</p>
+<hr />
+<h2>Internal Release Checklist</h2>
+<p>Before production deployment, confirm that:</p>
+<ul>
+<li>Build artifacts are finalized.</li>
+<li>QA approval is complete.</li>
+<li>Security review is complete.</li>
+<li>Documentation is updated.</li>
+<li>Release notes are approved.</li>
+<li>Rollback procedures are verified.</li>
+<li>Monitoring is enabled.</li>
+<li>Customer communications are prepared.</li>
+</ul>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>DevOps &amp; Deployment Guide</li>
+<li>Quality Assurance &amp; Testing Strategy</li>
+<li>API Developer Guide</li>
+<li>Security Overview</li>
+<li>System Architecture Guide</li>
+<li>Administrator Guide</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product of LBS.</p>
 {% endblock %}

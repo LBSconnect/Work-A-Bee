@@ -3,29 +3,358 @@
 {% block wrapclass %}wide{% endblock %}
 {% block content %}
   <h1>Work-A-Beez Responsible Disclosure Policy</h1>
-  <p class="muted">Status: Draft template &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <p class="muted">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
 
-  <p><em>This page is a starting template generated for LBS to complete. Replace the placeholder text in each section below with final content before treating this page as published.</em></p>
-
-  <h2>1. Purpose</h2>
-  <p>[Add content here.]</p>
-
-  <h2>2. Scope</h2>
-  <p>[Add content here.]</p>
-
-  <h2>3. How to Report a Vulnerability</h2>
-  <p>[Add content here.]</p>
-
-  <h2>4. What to Expect</h2>
-  <p>[Add content here.]</p>
-
-  <h2>5. Safe Harbor</h2>
-  <p>[Add content here.]</p>
-
-  <h2>6. Recognition</h2>
-  <p>[Add content here.]</p>
-
-  <h2>7. Contact</h2>
-  <p>[Add content here.]</p>
-
+<p>Effective Date: July 23, 2026</p>
+<p>At <strong>Work-A-Beez</strong>, security is one of our highest priorities.</p>
+<p>We value the efforts of security researchers, customers, and members of the security community who help us identify potential vulnerabilities responsibly.</p>
+<p>This Responsible Disclosure Policy explains how to report suspected security vulnerabilities and describes our commitment to investigating and addressing legitimate reports.</p>
+<blockquote>
+<p><strong>Important:</strong> This policy is <strong>not</strong> a Bug Bounty Program and does not provide financial compensation unless expressly stated in writing by LBS.</p>
+</blockquote>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Purpose</li>
+<li>Scope</li>
+<li>Safe Harbor</li>
+<li>What to Report</li>
+<li>What Not to Report</li>
+<li>Reporting Guidelines</li>
+<li>Our Commitment</li>
+<li>Response Timeline</li>
+<li>Coordinated Disclosure</li>
+<li>Exclusions</li>
+<li>Legal Notice</li>
+<li>Contact Information</li>
+</ol>
+<hr />
+<h2>Purpose</h2>
+<p>This policy exists to:</p>
+<ul>
+<li>Improve platform security</li>
+<li>Encourage responsible reporting</li>
+<li>Protect customers</li>
+<li>Establish a coordinated disclosure process</li>
+<li>Minimize security risks</li>
+<li>Foster collaboration with the security community</li>
+</ul>
+<hr />
+<h2>Scope</h2>
+<p>This policy applies to publicly accessible Work-A-Beez systems, including:</p>
+<ul>
+<li><a href="https://www.workabeez.net">www.workabeez.net</a></li>
+<li>app.workabeez.net</li>
+<li>docs.workabeez.net</li>
+<li>Official Work-A-Beez APIs</li>
+<li>Official mobile applications</li>
+<li>Official customer portals</li>
+</ul>
+<p>It does <strong>not</strong> apply to third-party systems, vendors, or integrations that are not owned or operated by LBS.</p>
+<hr />
+<h2>Safe Harbor</h2>
+<p>If you act in good faith and follow this policy, LBS will generally not pursue legal action against you for your security research.</p>
+<p>To qualify for Safe Harbor you must:</p>
+<ul>
+<li>Act in good faith</li>
+<li>Avoid customer disruption</li>
+<li>Avoid privacy violations</li>
+<li>Report findings promptly</li>
+<li>Give us reasonable time to investigate</li>
+<li>Avoid public disclosure before remediation</li>
+</ul>
+<p>Safe Harbor does <strong>not</strong> apply to malicious activity or violations of applicable law.</p>
+<hr />
+<h2>What to Report</h2>
+<p>Examples of reportable vulnerabilities include:</p>
+<h3>Authentication Issues</h3>
+<ul>
+<li>Authentication bypass</li>
+<li>Session hijacking</li>
+<li>Account takeover</li>
+<li>Privilege escalation</li>
+</ul>
+<hr />
+<h3>Authorization Issues</h3>
+<ul>
+<li>Broken access controls</li>
+<li>Permission bypass</li>
+<li>Unauthorized data access</li>
+<li>Tenant isolation failures</li>
+</ul>
+<hr />
+<h3>Injection Vulnerabilities</h3>
+<p>Examples include:</p>
+<ul>
+<li>SQL Injection</li>
+<li>Command Injection</li>
+<li>LDAP Injection</li>
+<li>NoSQL Injection</li>
+</ul>
+<hr />
+<h3>Cross-Site Vulnerabilities</h3>
+<p>Examples include:</p>
+<ul>
+<li>Cross-Site Scripting (XSS)</li>
+<li>Cross-Site Request Forgery (CSRF)</li>
+</ul>
+<hr />
+<h3>API Vulnerabilities</h3>
+<p>Examples include:</p>
+<ul>
+<li>Authentication weaknesses</li>
+<li>Authorization failures</li>
+<li>Sensitive data exposure</li>
+<li>Rate limiting bypass</li>
+</ul>
+<hr />
+<h3>Sensitive Data Exposure</h3>
+<p>Examples include:</p>
+<ul>
+<li>Personally identifiable information</li>
+<li>Payroll data</li>
+<li>Employee records</li>
+<li>Authentication tokens</li>
+<li>API keys</li>
+</ul>
+<hr />
+<h3>Security Misconfigurations</h3>
+<p>Examples include:</p>
+<ul>
+<li>Open administrative interfaces</li>
+<li>Misconfigured cloud resources</li>
+<li>Public storage buckets</li>
+<li>Weak TLS configurations</li>
+</ul>
+<hr />
+<h3>Other Security Issues</h3>
+<p>Examples include:</p>
+<ul>
+<li>Remote Code Execution</li>
+<li>Insecure Direct Object References</li>
+<li>Server-Side Request Forgery</li>
+<li>Path Traversal</li>
+<li>XML External Entity (XXE)</li>
+<li>Deserialization vulnerabilities</li>
+</ul>
+<hr />
+<h2>What Not to Report</h2>
+<p>The following generally do not qualify as security vulnerabilities:</p>
+<ul>
+<li>Missing security headers without exploitability</li>
+<li>Clickjacking on non-sensitive pages</li>
+<li>Outdated browser warnings</li>
+<li>Rate limiting suggestions without impact</li>
+<li>UI bugs</li>
+<li>Cosmetic issues</li>
+<li>Duplicate reports</li>
+<li>Social engineering</li>
+<li>Physical security issues</li>
+<li>Vulnerabilities affecting unsupported browsers</li>
+</ul>
+<p>Reports lacking sufficient evidence may be closed without action.</p>
+<hr />
+<h2>Activities That Are Not Permitted</h2>
+<p>Researchers must <strong>not</strong>:</p>
+<ul>
+<li>Access customer accounts</li>
+<li>View customer information</li>
+<li>Modify customer data</li>
+<li>Delete customer information</li>
+<li>Interrupt production services</li>
+<li>Deploy malware</li>
+<li>Conduct denial-of-service attacks</li>
+<li>Perform spam campaigns</li>
+<li>Attempt ransomware attacks</li>
+<li>Extort LBS or customers</li>
+</ul>
+<hr />
+<h2>Testing Guidelines</h2>
+<p>When conducting research:</p>
+<p>You should:</p>
+<ul>
+<li>Minimize requests</li>
+<li>Avoid automated scanning that impacts performance</li>
+<li>Test only your own accounts</li>
+<li>Stop testing after confirming the issue</li>
+<li>Avoid persistence mechanisms</li>
+<li>Protect any data encountered</li>
+</ul>
+<hr />
+<h2>Reporting Guidelines</h2>
+<p>Please include as much information as possible.</p>
+<p>Helpful information includes:</p>
+<ul>
+<li>Vulnerability description</li>
+<li>Steps to reproduce</li>
+<li>Affected URL</li>
+<li>Affected endpoint</li>
+<li>Screenshots</li>
+<li>Video demonstration (if applicable)</li>
+<li>Proof of Concept</li>
+<li>Estimated impact</li>
+<li>Browser and operating system</li>
+<li>Date discovered</li>
+</ul>
+<p>Reports containing sufficient detail can generally be investigated more quickly.</p>
+<hr />
+<h2>How to Report</h2>
+<p>Please send vulnerability reports to:</p>
+<p><strong>Security Team</strong></p>
+<p>Email:</p>
+<p>info@lbsconnect.net</p>
+<p>Subject Line:</p>
+<p>Security Vulnerability Report</p>
+<p>Please encrypt sensitive reports when practical.</p>
+<hr />
+<h2>Our Commitment</h2>
+<p>When receiving a legitimate report we will generally:</p>
+<ol>
+<li>Acknowledge receipt</li>
+<li>Validate the report</li>
+<li>Assign severity</li>
+<li>Investigate</li>
+<li>Develop a remediation plan</li>
+<li>Deploy a fix</li>
+<li>Notify the reporter (when appropriate)</li>
+</ol>
+<hr />
+<h2>Typical Response Timeline</h2>
+<p>Although timelines vary depending upon complexity, our general goals are:</p>
+<table>
+<thead>
+<tr>
+<th>Activity</th>
+<th>Target Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Acknowledgement</td>
+<td>Within 3 business days</td>
+</tr>
+<tr>
+<td>Initial Review</td>
+<td>Within 5 business days</td>
+</tr>
+<tr>
+<td>Investigation</td>
+<td>As soon as practical</td>
+</tr>
+<tr>
+<td>Resolution</td>
+<td>Based on severity</td>
+</tr>
+<tr>
+<td>Public Disclosure</td>
+<td>After remediation</td>
+</tr>
+</tbody>
+</table>
+<p>These timelines are goals rather than contractual commitments.</p>
+<hr />
+<h2>Coordinated Disclosure</h2>
+<p>We request that researchers:</p>
+<ul>
+<li>Keep reports confidential</li>
+<li>Avoid public disclosure</li>
+<li>Allow reasonable remediation time</li>
+<li>Coordinate announcements with LBS</li>
+</ul>
+<p>Premature public disclosure may increase customer risk.</p>
+<hr />
+<h2>Recognition</h2>
+<p>At our discretion, we may acknowledge individuals who responsibly disclose significant vulnerabilities.</p>
+<p>Recognition may include:</p>
+<ul>
+<li>Thank-you correspondence</li>
+<li>Hall of Fame listing (future)</li>
+<li>Public acknowledgement (with permission)</li>
+</ul>
+<p>Unless otherwise stated, Work-A-Beez does not currently operate a monetary bug bounty program.</p>
+<hr />
+<h2>Severity Assessment</h2>
+<p>Reports are evaluated based upon:</p>
+<ul>
+<li>Customer impact</li>
+<li>Exploitability</li>
+<li>Ease of exploitation</li>
+<li>Data sensitivity</li>
+<li>Business impact</li>
+<li>Platform exposure</li>
+</ul>
+<p>Severity may be classified internally as:</p>
+<ul>
+<li>Critical</li>
+<li>High</li>
+<li>Medium</li>
+<li>Low</li>
+<li>Informational</li>
+</ul>
+<hr />
+<h2>Exclusions</h2>
+<p>This policy does not authorize:</p>
+<ul>
+<li>Penetration testing against customer environments</li>
+<li>Testing third-party vendors</li>
+<li>Testing employee devices</li>
+<li>Phishing employees</li>
+<li>Social engineering</li>
+<li>Physical intrusion</li>
+<li>Denial-of-service attacks</li>
+</ul>
+<hr />
+<h2>Legal Notice</h2>
+<p>Nothing in this policy:</p>
+<ul>
+<li>Grants ownership rights</li>
+<li>Creates contractual obligations</li>
+<li>Waives legal protections</li>
+<li>Authorizes illegal activity</li>
+</ul>
+<p>LBS reserves all legal rights regarding unauthorized access or unlawful conduct.</p>
+<hr />
+<h2>Contact Information</h2>
+<p>Security Team</p>
+<p>Work-A-Beez by LBS</p>
+<p>Website</p>
+<p>https://www.workabeez.net</p>
+<p>Email</p>
+<p>info@lbsconnect.net</p>
+<p>General Support</p>
+<p>support@workabeez.net</p>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>Security Overview</li>
+<li>Data Protection Overview</li>
+<li>Compliance Overview</li>
+<li>Privacy Policy</li>
+<li>Terms of Service</li>
+<li>Acceptable Use Policy</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Disclaimer</h3>
+<p>This Responsible Disclosure Policy is intended to facilitate the responsible reporting of security vulnerabilities affecting Work-A-Beez. It does not constitute authorization to access systems without permission or engage in activities prohibited by law. LBS reserves the right to modify or discontinue this policy at any time without prior notice.</p>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product and trademark of LBS. All rights reserved.</p>
 {% endblock %}

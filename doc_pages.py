@@ -23,6 +23,7 @@ LIBRARY1 = [
     ("browser_support", "/browser-support", "browser_support.html", "Browser Support"),
     ("release_notes", "/release-notes", "release_notes.html", "Release Notes"),
     ("api_overview", "/api-overview", "api_overview.html", "API Overview"),
+    ("api_reference", "/api-reference", "api_reference.html", "API Reference Manual"),
     ("status_page_info", "/status", "status_page_info.html", "Status Page Information"),
     ("support_center", "/support", "support_center.html", "Support Center"),
     ("onboarding_guide", "/onboarding-guide", "onboarding_guide.html", "Customer Onboarding Guide"),

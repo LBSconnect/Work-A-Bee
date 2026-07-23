@@ -3,23 +3,1307 @@
 {% block wrapclass %}wide{% endblock %}
 {% block content %}
   <h1>Work-A-Beez Administrator Guide</h1>
-  <p class="muted">Status: Draft template &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <p class="muted">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; Multi-Factor Authentication (MFA) described in this document is a planned feature and is not yet available on Work-A-Beez.</div>
 
-  <p><em>This page is a starting template generated for LBS to complete. Replace the placeholder text in each section below with final content before treating this page as published.</em></p>
-
-  <h2>1. Managing Employees</h2>
-  <p>[Add content here.]</p>
-
-  <h2>2. Managing Devices</h2>
-  <p>[Add content here.]</p>
-
-  <h2>3. Running Payroll</h2>
-  <p>[Add content here.]</p>
-
-  <h2>4. Managing Departments</h2>
-  <p>[Add content here.]</p>
-
-  <h2>5. Reports</h2>
-  <p>[Add content here.]</p>
-
+<p>Welcome to the Work-A-Beez Administrator Guide.</p>
+<p>This guide is designed for Company Administrators, Human Resources personnel, Operations Managers, and other authorized users responsible for configuring and maintaining their organization's Work-A-Beez account.</p>
+<p>As an Administrator, you have access to powerful tools that allow you to manage your workforce, configure company settings, assign permissions, monitor employee activity, and maintain compliance.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Administrator Responsibilities</li>
+<li>Getting Started</li>
+<li>Dashboard Overview</li>
+<li>Company Settings</li>
+<li>Organization Structure</li>
+<li>Employee Management</li>
+<li>Roles &amp; Permissions</li>
+<li>Timekeeping Configuration</li>
+<li>Scheduling</li>
+<li>Leave Management</li>
+<li>Notifications</li>
+<li>Reports</li>
+<li>Security</li>
+<li>Billing</li>
+<li>Support</li>
+</ol>
+<hr />
+<h2>Administrator Responsibilities</h2>
+<p>Administrators are responsible for configuring and maintaining the Work-A-Beez platform for their organization.</p>
+<p>Typical responsibilities include:</p>
+<ul>
+<li>Managing employee accounts</li>
+<li>Creating departments</li>
+<li>Configuring locations</li>
+<li>Defining work schedules</li>
+<li>Managing leave policies</li>
+<li>Reviewing timecards</li>
+<li>Managing user permissions</li>
+<li>Running payroll reports</li>
+<li>Monitoring attendance</li>
+<li>Publishing announcements</li>
+<li>Managing company documents</li>
+</ul>
+<hr />
+<h2>Administrator Dashboard</h2>
+<p>After signing in, Administrators are presented with the Administrative Dashboard.</p>
+<p>The dashboard provides quick access to:</p>
+<ul>
+<li>Employee Summary</li>
+<li>Attendance Overview</li>
+<li>Employees Currently Clocked In</li>
+<li>Pending PTO Requests</li>
+<li>Shift Swap Requests</li>
+<li>Today's Schedule</li>
+<li>Notifications</li>
+<li>Recent Activity</li>
+<li>Labor Cost Snapshot</li>
+<li>Weekly Hours</li>
+<li>Payroll Status</li>
+</ul>
+<p>The dashboard is customizable and may vary depending on your organization's enabled features.</p>
+<hr />
+<h2>Dashboard Widgets</h2>
+<h3>Workforce Summary</h3>
+<p>Displays:</p>
+<ul>
+<li>Total Employees</li>
+<li>Active Employees</li>
+<li>Employees Clocked In</li>
+<li>Employees Off Today</li>
+<li>Employees on Leave</li>
+</ul>
+<hr />
+<h3>Attendance Snapshot</h3>
+<p>Shows:</p>
+<ul>
+<li>Late Arrivals</li>
+<li>Missed Punches</li>
+<li>Overtime Alerts</li>
+<li>Attendance Percentage</li>
+</ul>
+<hr />
+<h3>Pending Approvals</h3>
+<p>Quick access to:</p>
+<ul>
+<li>PTO Requests</li>
+<li>Shift Swaps</li>
+<li>Missed Punch Requests</li>
+<li>Employee Updates</li>
+</ul>
+<p>Administrators can approve or reject requests without navigating away from the dashboard.</p>
+<hr />
+<h3>Notifications</h3>
+<p>Displays recent activity including:</p>
+<ul>
+<li>Schedule Changes</li>
+<li>Employee Invitations</li>
+<li>Security Alerts</li>
+<li>Password Resets</li>
+<li>New Messages</li>
+<li>Platform Announcements</li>
+</ul>
+<hr />
+<h2>Company Settings</h2>
+<p>Navigate to:</p>
+<p>Administration → Company Settings</p>
+<p>From this page you can configure your organization.</p>
+<p>Settings include:</p>
+<ul>
+<li>Company Name</li>
+<li>Company Logo</li>
+<li>Company Address</li>
+<li>Phone Number</li>
+<li>Website</li>
+<li>Time Zone</li>
+<li>Currency</li>
+<li>Default Language</li>
+<li>Date Format</li>
+<li>Time Format</li>
+</ul>
+<p>Changes take effect immediately unless otherwise noted.</p>
+<hr />
+<h2>Branding</h2>
+<p>Customize your organization's appearance.</p>
+<p>Options include:</p>
+<ul>
+<li>Company Logo</li>
+<li>Brand Colors</li>
+<li>Login Background</li>
+<li>Welcome Message</li>
+<li>Email Branding</li>
+</ul>
+<p>Brand customization helps provide a consistent employee experience.</p>
+<hr />
+<h2>Business Locations</h2>
+<p>Organizations with multiple offices can create locations.</p>
+<p>Each location may include:</p>
+<ul>
+<li>Name</li>
+<li>Address</li>
+<li>Time Zone</li>
+<li>Manager</li>
+<li>Phone Number</li>
+<li>GPS Coordinates (optional)</li>
+</ul>
+<p>Locations may have independent schedules and departments.</p>
+<hr />
+<h2>Departments</h2>
+<p>Departments help organize employees.</p>
+<p>Examples include:</p>
+<ul>
+<li>Human Resources</li>
+<li>Payroll</li>
+<li>Operations</li>
+<li>Sales</li>
+<li>Customer Service</li>
+<li>Warehouse</li>
+<li>IT</li>
+<li>Accounting</li>
+<li>Security</li>
+<li>Facilities</li>
+</ul>
+<p>Departments can be used for:</p>
+<ul>
+<li>Scheduling</li>
+<li>Reporting</li>
+<li>Permissions</li>
+<li>Notifications</li>
+</ul>
+<hr />
+<h2>Job Titles</h2>
+<p>Administrators may create standardized job titles.</p>
+<p>Examples:</p>
+<ul>
+<li>Manager</li>
+<li>Supervisor</li>
+<li>Team Lead</li>
+<li>Cashier</li>
+<li>Technician</li>
+<li>Driver</li>
+<li>Customer Service Representative</li>
+<li>Payroll Specialist</li>
+</ul>
+<p>Job titles appear throughout reports and employee profiles.</p>
+<hr />
+<h2>Employee Management</h2>
+<p>Navigate to:</p>
+<p>Employees → Employee Directory</p>
+<p>Administrators can:</p>
+<ul>
+<li>Add Employees</li>
+<li>Edit Employees</li>
+<li>Disable Accounts</li>
+<li>Terminate Employment</li>
+<li>Reset Passwords</li>
+<li>Assign Departments</li>
+<li>Assign Managers</li>
+<li>Assign Roles</li>
+</ul>
+<hr />
+<h2>Adding Employees</h2>
+<p>Required information includes:</p>
+<ul>
+<li>First Name</li>
+<li>Last Name</li>
+<li>Email Address</li>
+<li>Employee ID</li>
+<li>Hire Date</li>
+<li>Department</li>
+<li>Job Title</li>
+<li>Manager</li>
+<li>Employment Type</li>
+</ul>
+<p>Optional information:</p>
+<ul>
+<li>Phone Number</li>
+<li>Emergency Contact</li>
+<li>Profile Photo</li>
+<li>Payroll ID</li>
+<li>Work Location</li>
+</ul>
+<p>After creation, an invitation email is sent automatically.</p>
+<hr />
+<h2>Employee Status</h2>
+<p>Supported statuses include:</p>
+<ul>
+<li>Active</li>
+<li>Inactive</li>
+<li>On Leave</li>
+<li>Suspended</li>
+<li>Terminated</li>
+<li>Seasonal</li>
+</ul>
+<p>Status affects scheduling, payroll exports, and employee visibility.</p>
+<hr />
+<h2>Bulk Employee Import</h2>
+<p>Administrators may import employees using CSV.</p>
+<p>Typical fields include:</p>
+<ul>
+<li>Name</li>
+<li>Email</li>
+<li>Department</li>
+<li>Job Title</li>
+<li>Employee ID</li>
+<li>Manager</li>
+<li>Hire Date</li>
+</ul>
+<p>Duplicate detection helps prevent accidental duplicate records.</p>
+<hr />
+<h2>Employee Profiles</h2>
+<p>Each employee profile includes:</p>
+<h3>Personal Information</h3>
+<ul>
+<li>Name</li>
+<li>Email</li>
+<li>Phone</li>
+<li>Address</li>
+</ul>
+<h3>Employment Information</h3>
+<ul>
+<li>Employee ID</li>
+<li>Department</li>
+<li>Position</li>
+<li>Manager</li>
+<li>Employment Status</li>
+</ul>
+<h3>Timekeeping</h3>
+<ul>
+<li>Weekly Hours</li>
+<li>Attendance</li>
+<li>Overtime</li>
+<li>PTO Balance</li>
+</ul>
+<h3>Security</h3>
+<ul>
+<li>MFA Status</li>
+<li>Last Login</li>
+<li>Password Reset History</li>
+</ul>
+<hr />
+<h2>Search &amp; Filters</h2>
+<p>Administrators can search employees by:</p>
+<ul>
+<li>Name</li>
+<li>Department</li>
+<li>Job Title</li>
+<li>Employee ID</li>
+<li>Location</li>
+<li>Status</li>
+<li>Manager</li>
+</ul>
+<p>Advanced filtering allows organizations to quickly locate specific employees.</p>
+<hr />
+<h2>Audit History</h2>
+<p>Every employee profile includes an activity history.</p>
+<p>Examples:</p>
+<ul>
+<li>Profile Updates</li>
+<li>Schedule Changes</li>
+<li>Department Transfers</li>
+<li>Manager Changes</li>
+<li>Timecard Corrections</li>
+<li>PTO Approvals</li>
+<li>Security Events</li>
+</ul>
+<p>This history cannot be edited by standard users.</p>
+<hr />
+<h2>Best Practices</h2>
+<p>We recommend:</p>
+<ul>
+<li>Reviewing permissions quarterly</li>
+<li>Removing inactive users promptly</li>
+<li>Using standardized job titles</li>
+<li>Keeping employee records current</li>
+<li>Enabling Multi-Factor Authentication</li>
+<li>Reviewing audit logs weekly</li>
+<li>Assigning at least two Company Administrators</li>
+</ul>
+<p>Following these practices helps maintain a secure and well-organized workforce management environment.</p>
+<hr />
+<h2>Roles &amp; Permissions</h2>
+<p>Work-A-Beez uses Role-Based Access Control (RBAC) to ensure users only have access to the features and information necessary for their responsibilities.</p>
+<p>Permissions are assigned through roles and may be customized by Company Administrators.</p>
+<hr />
+<h2>Default Roles</h2>
+<p>The platform includes the following default roles.</p>
+<h3>System Administrator</h3>
+<p>Typically reserved for Work-A-Beez personnel.</p>
+<p>Capabilities include:</p>
+<ul>
+<li>Platform Administration</li>
+<li>Tenant Management</li>
+<li>Platform Monitoring</li>
+<li>Customer Support</li>
+<li>Security Administration</li>
+<li>Platform Configuration</li>
+</ul>
+<p>This role is not available to customers.</p>
+<hr />
+<h3>Company Administrator</h3>
+<p>Highest permission level available to customer organizations.</p>
+<p>Capabilities include:</p>
+<ul>
+<li>Company Settings</li>
+<li>Employee Management</li>
+<li>Billing</li>
+<li>Reports</li>
+<li>Scheduling</li>
+<li>Timekeeping Rules</li>
+<li>Payroll Export</li>
+<li>Security Settings</li>
+<li>Department Management</li>
+<li>Location Management</li>
+<li>Announcements</li>
+<li>API Configuration</li>
+<li>Audit Logs</li>
+<li>Subscription Management</li>
+</ul>
+<hr />
+<h3>Human Resources</h3>
+<p>Designed for HR professionals.</p>
+<p>Capabilities include:</p>
+<ul>
+<li>Employee Profiles</li>
+<li>Leave Management</li>
+<li>Onboarding</li>
+<li>Employee Documents</li>
+<li>Policies</li>
+<li>Performance Records</li>
+<li>Attendance Reports</li>
+</ul>
+<p>Cannot:</p>
+<ul>
+<li>Modify subscription billing</li>
+<li>Change security settings</li>
+<li>Delete company records</li>
+</ul>
+<hr />
+<h3>Payroll Administrator</h3>
+<p>Responsible for payroll preparation.</p>
+<p>Capabilities include:</p>
+<ul>
+<li>Payroll Export</li>
+<li>Timecard Review</li>
+<li>Overtime Review</li>
+<li>Holiday Hours</li>
+<li>PTO Review</li>
+<li>Attendance Reports</li>
+</ul>
+<p>Cannot:</p>
+<ul>
+<li>Manage subscriptions</li>
+<li>Delete employees</li>
+<li>Modify security settings</li>
+</ul>
+<hr />
+<h3>Operations Manager</h3>
+<p>Responsible for daily workforce operations.</p>
+<p>Capabilities include:</p>
+<ul>
+<li>Scheduling</li>
+<li>Shift Management</li>
+<li>Attendance</li>
+<li>Approvals</li>
+<li>Department Reports</li>
+<li>Employee Availability</li>
+</ul>
+<hr />
+<h3>Supervisor</h3>
+<p>Supervisors manage assigned employees.</p>
+<p>Capabilities include:</p>
+<ul>
+<li>Approve PTO</li>
+<li>Approve Shift Swaps</li>
+<li>View Team Schedule</li>
+<li>View Team Reports</li>
+<li>Correct Missed Punches</li>
+</ul>
+<p>Supervisors cannot modify company-wide settings.</p>
+<hr />
+<h3>Employee</h3>
+<p>Standard employee account.</p>
+<p>Employees may:</p>
+<ul>
+<li>Clock In</li>
+<li>Clock Out</li>
+<li>View Schedule</li>
+<li>Request PTO</li>
+<li>Swap Shifts</li>
+<li>Update Availability</li>
+<li>View Announcements</li>
+<li>Change Password</li>
+<li>Update Personal Profile</li>
+</ul>
+<p>Employees cannot access other employee records.</p>
+<hr />
+<h2>Permission Categories</h2>
+<p>Permissions are grouped into categories.</p>
+<h3>Dashboard</h3>
+<p>Permissions include:</p>
+<ul>
+<li>View Dashboard</li>
+<li>Customize Dashboard</li>
+<li>View Labor Summary</li>
+<li>View Notifications</li>
+</ul>
+<hr />
+<h3>Employee Management</h3>
+<p>Permissions include:</p>
+<ul>
+<li>View Employees</li>
+<li>Create Employees</li>
+<li>Edit Employees</li>
+<li>Disable Employees</li>
+<li>Delete Employees</li>
+<li>Import Employees</li>
+<li>Export Employee Data</li>
+</ul>
+<hr />
+<h3>Scheduling</h3>
+<p>Permissions include:</p>
+<ul>
+<li>View Schedule</li>
+<li>Create Schedule</li>
+<li>Edit Schedule</li>
+<li>Delete Schedule</li>
+<li>Publish Schedule</li>
+<li>Assign Shifts</li>
+<li>Approve Shift Swaps</li>
+</ul>
+<hr />
+<h3>Timekeeping</h3>
+<p>Permissions include:</p>
+<ul>
+<li>View Timecards</li>
+<li>Edit Timecards</li>
+<li>Approve Timecards</li>
+<li>Delete Punches</li>
+<li>Correct Missed Punches</li>
+<li>Configure Overtime Rules</li>
+</ul>
+<hr />
+<h3>Leave Management</h3>
+<p>Permissions include:</p>
+<ul>
+<li>Submit Requests</li>
+<li>Approve Requests</li>
+<li>Deny Requests</li>
+<li>Edit Leave Balances</li>
+<li>Create Leave Types</li>
+</ul>
+<hr />
+<h3>Reports</h3>
+<p>Permissions include:</p>
+<ul>
+<li>Attendance Reports</li>
+<li>Payroll Reports</li>
+<li>Labor Cost Reports</li>
+<li>PTO Reports</li>
+<li>Executive Reports</li>
+<li>Export Reports</li>
+</ul>
+<hr />
+<h3>Billing</h3>
+<p>Permissions include:</p>
+<ul>
+<li>View Subscription</li>
+<li>Change Plan</li>
+<li>View Invoices</li>
+<li>Download Invoices</li>
+<li>Update Payment Method</li>
+<li>Cancel Subscription</li>
+</ul>
+<hr />
+<h3>Security</h3>
+<p>Permissions include:</p>
+<ul>
+<li>View Audit Logs</li>
+<li>Reset Passwords</li>
+<li>Require MFA</li>
+<li>Manage Roles</li>
+<li>Manage API Keys</li>
+<li>Configure Security Policies</li>
+</ul>
+<hr />
+<h2>Creating Custom Roles</h2>
+<p>Navigate to Administration &rarr; Roles &amp; Permissions &rarr; Create Role.</p>
+<p>Administrators can create unlimited custom roles.</p>
+<p>Examples:</p>
+<ul>
+<li>Store Manager</li>
+<li>Regional Manager</li>
+<li>HR Assistant</li>
+<li>Payroll Clerk</li>
+<li>Scheduler</li>
+<li>Recruiter</li>
+<li>Compliance Officer</li>
+</ul>
+<p>Each permission can be individually enabled or disabled.</p>
+<hr />
+<h2>Permission Best Practices</h2>
+<p>Follow the Principle of Least Privilege.</p>
+<p>Users should receive only the permissions necessary to perform their job.</p>
+<p>Avoid assigning Company Administrator access unless absolutely necessary.</p>
+<p>Recommended:</p>
+<ul>
+<li>HR manages HR</li>
+<li>Payroll manages Payroll</li>
+<li>Supervisors manage teams</li>
+<li>Employees manage themselves</li>
+</ul>
+<hr />
+<h2>Employee Directory</h2>
+<p>Navigate to Employees &rarr; Directory.</p>
+<p>The Employee Directory provides a searchable list of all employees.</p>
+<p>Available columns include:</p>
+<ul>
+<li>Employee Name</li>
+<li>Employee ID</li>
+<li>Department</li>
+<li>Position</li>
+<li>Location</li>
+<li>Manager</li>
+<li>Status</li>
+<li>Last Clock Activity</li>
+<li>Hire Date</li>
+</ul>
+<p>Administrators may customize visible columns.</p>
+<hr />
+<h2>Employee Profile</h2>
+<p>Selecting an employee opens their profile.</p>
+<p>Sections include:</p>
+<h3>Overview</h3>
+<ul>
+<li>Contact Information</li>
+<li>Position</li>
+<li>Manager</li>
+<li>Department</li>
+<li>Employment Status</li>
+</ul>
+<hr />
+<h3>Time</h3>
+<p>Displays:</p>
+<ul>
+<li>Hours This Week</li>
+<li>Hours This Pay Period</li>
+<li>Overtime</li>
+<li>Missed Punches</li>
+<li>Attendance Percentage</li>
+</ul>
+<hr />
+<h3>PTO</h3>
+<p>Displays:</p>
+<ul>
+<li>Vacation Balance</li>
+<li>Sick Balance</li>
+<li>Personal Time</li>
+<li>Pending Requests</li>
+<li>Leave History</li>
+</ul>
+<hr />
+<h3>Schedule</h3>
+<p>Displays:</p>
+<ul>
+<li>Upcoming Shifts</li>
+<li>Assigned Location</li>
+<li>Open Shift Requests</li>
+<li>Availability</li>
+</ul>
+<hr />
+<h3>Documents</h3>
+<p>Administrators may upload:</p>
+<ul>
+<li>Offer Letters</li>
+<li>Employment Agreements</li>
+<li>Performance Reviews</li>
+<li>Certifications</li>
+<li>Licenses</li>
+<li>Training Records</li>
+</ul>
+<p>Employees can access documents based on assigned permissions.</p>
+<hr />
+<h3>Notes</h3>
+<p>Administrators may create internal notes.</p>
+<p>Notes are:</p>
+<ul>
+<li>Timestamped</li>
+<li>User-attributed</li>
+<li>Searchable</li>
+<li>Not visible to employees</li>
+</ul>
+<p>Examples:</p>
+<ul>
+<li>Coaching conversations</li>
+<li>Performance observations</li>
+<li>Attendance discussions</li>
+</ul>
+<hr />
+<h2>Employee Timeline</h2>
+<p>Every employee includes an activity timeline.</p>
+<p>Examples include:</p>
+<ul>
+<li>Account Created</li>
+<li>Department Changed</li>
+<li>Position Updated</li>
+<li>Schedule Published</li>
+<li>PTO Approved</li>
+<li>Password Reset</li>
+<li>Clock Correction</li>
+<li>Performance Review Added</li>
+</ul>
+<p>Timeline entries cannot be modified once created.</p>
+<hr />
+<h2>Offboarding Employees</h2>
+<p>When an employee leaves, navigate to Employee &rarr; Employment Status &rarr; Terminate.</p>
+<p>Administrators should:</p>
+<ul>
+<li>Disable Login</li>
+<li>Remove Scheduled Shifts</li>
+<li>Export Payroll</li>
+<li>Archive Employee Record</li>
+<li>Recover Company Assets</li>
+<li>Remove API Access</li>
+<li>Remove MFA Devices</li>
+</ul>
+<p>Historical timecards remain available for reporting.</p>
+<hr />
+<h2>Administrator Best Practices</h2>
+<p>We recommend:</p>
+<ul>
+<li>Enable MFA for all administrators</li>
+<li>Limit Company Administrators to essential personnel</li>
+<li>Review permissions monthly</li>
+<li>Audit inactive accounts quarterly</li>
+<li>Archive terminated employees promptly</li>
+<li>Review audit logs weekly</li>
+<li>Export payroll before each payroll run</li>
+<li>Test notification emails monthly</li>
+<li>Review PTO balances quarterly</li>
+<li>Keep employee information current</li>
+</ul>
+<hr />
+<h2>Troubleshooting</h2>
+<h3>I cannot edit an employee.</h3>
+<p>Possible causes:</p>
+<ul>
+<li>Missing permission</li>
+<li>Read-only role</li>
+<li>Employee is archived</li>
+<li>Department restrictions</li>
+</ul>
+<hr />
+<h3>Schedule cannot be published.</h3>
+<p>Possible causes:</p>
+<ul>
+<li>Unassigned shifts</li>
+<li>Missing locations</li>
+<li>Department conflicts</li>
+<li>Overtime rules violated</li>
+</ul>
+<hr />
+<h3>Employee cannot clock in.</h3>
+<p>Possible causes:</p>
+<ul>
+<li>Account disabled</li>
+<li>Outside geofence</li>
+<li>Schedule restrictions</li>
+<li>Device restrictions</li>
+<li>Network connectivity</li>
+</ul>
+<hr />
+<p>Continue to <strong>Chapter 3 &ndash; Timekeeping Configuration</strong> for configuring clock rules, overtime, rounding, meal periods, geofencing, attendance policies, payroll periods, and approval workflows.</p>
+<hr />
+<h2>Timekeeping Configuration</h2>
+<p>Timekeeping is one of the core capabilities of Work-A-Beez. Proper configuration ensures accurate payroll processing, compliance with labor regulations, and a consistent employee experience.</p>
+<p>Navigate to Administration &rarr; Timekeeping.</p>
+<p>The Timekeeping Settings page allows administrators to configure company-wide rules that govern how employees record their work hours.</p>
+<hr />
+<h2>Timekeeping Overview</h2>
+<p>The Timekeeping module controls:</p>
+<ul>
+<li>Clock In rules</li>
+<li>Clock Out rules</li>
+<li>Breaks and Meal Periods</li>
+<li>Overtime calculations</li>
+<li>Shift differentials</li>
+<li>Rounding rules</li>
+<li>Attendance policies</li>
+<li>Geofencing</li>
+<li>Geolocation requirements</li>
+<li>Device restrictions</li>
+<li>Payroll periods</li>
+<li>Approval workflows</li>
+</ul>
+<p>Changes to these settings affect all users unless overridden by department or location policies.</p>
+<hr />
+<h2>Clock In Settings</h2>
+<p>Administrators can define when employees are permitted to clock in.</p>
+<p>Configuration options include:</p>
+<ul>
+<li>Allow clock-in before scheduled shift</li>
+<li>Prevent early clock-ins</li>
+<li>Require scheduled shift</li>
+<li>Allow unscheduled clock-ins</li>
+<li>Require manager approval for exceptions</li>
+</ul>
+<p>Example:</p>
+<p>Employees may clock in up to <strong>15 minutes before</strong> their scheduled shift.</p>
+<p>If an employee attempts to clock in earlier than the configured window, Work-A-Beez displays an informative message and records the attempt in the audit log.</p>
+<hr />
+<h2>Clock Out Settings</h2>
+<p>Configure when employees may end their shifts.</p>
+<p>Available options include:</p>
+<ul>
+<li>Prevent early clock-out</li>
+<li>Allow overtime clock-out</li>
+<li>Require manager approval</li>
+<li>Automatic shift completion reminders</li>
+<li>Missing clock-out notifications</li>
+</ul>
+<p>Administrators may configure automatic alerts when an employee remains clocked in beyond a specified duration.</p>
+<hr />
+<h2>Shift Grace Periods</h2>
+<p>Grace periods help reduce unnecessary attendance exceptions.</p>
+<p>Typical configuration includes:</p>
+<ul>
+<li>Early Arrival Grace Period</li>
+<li>Late Arrival Grace Period</li>
+<li>Early Departure Grace Period</li>
+<li>Late Departure Grace Period</li>
+</ul>
+<p>Example:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th style="text-align: right;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Early Clock-In</td>
+<td style="text-align: right;">15 minutes</td>
+</tr>
+<tr>
+<td>Late Arrival</td>
+<td style="text-align: right;">5 minutes</td>
+</tr>
+<tr>
+<td>Early Departure</td>
+<td style="text-align: right;">5 minutes</td>
+</tr>
+<tr>
+<td>Late Clock-Out</td>
+<td style="text-align: right;">Unlimited</td>
+</tr>
+</tbody>
+</table>
+<p>Attendance reports reflect configured grace periods when calculating tardiness.</p>
+<hr />
+<h2>Time Rounding Rules</h2>
+<p>Organizations may choose to round recorded punches.</p>
+<p>Supported options include:</p>
+<ul>
+<li>No rounding</li>
+<li>Nearest 1 minute</li>
+<li>Nearest 5 minutes</li>
+<li>Nearest 6 minutes</li>
+<li>Nearest 10 minutes</li>
+<li>Nearest 15 minutes</li>
+</ul>
+<p>Administrators should ensure rounding practices comply with applicable labor laws.</p>
+<hr />
+<h2>Automatic Meal Periods</h2>
+<p>Meal periods may be:</p>
+<ul>
+<li>Automatically deducted</li>
+<li>Employee initiated</li>
+<li>Supervisor approved</li>
+<li>Required after a specified number of hours</li>
+</ul>
+<p>Configuration options include:</p>
+<ul>
+<li>Meal duration</li>
+<li>Minimum shift length</li>
+<li>Paid meal</li>
+<li>Unpaid meal</li>
+<li>Multiple meal periods</li>
+<li>Automatic deduction exceptions</li>
+</ul>
+<p>Example:</p>
+<p>Employees working more than six consecutive hours receive a 30-minute unpaid meal deduction unless a supervisor removes the deduction based on documented business needs.</p>
+<hr />
+<h2>Rest Break Configuration</h2>
+<p>Organizations may configure paid or unpaid rest breaks.</p>
+<p>Settings include:</p>
+<ul>
+<li>Break duration</li>
+<li>Number of breaks</li>
+<li>Paid status</li>
+<li>Eligibility</li>
+<li>Reminder notifications</li>
+</ul>
+<p>Break policies can vary by department or location where permitted.</p>
+<hr />
+<h2>Overtime Rules</h2>
+<p>Administrators may configure overtime according to organizational policy and applicable law.</p>
+<p>Common configurations include:</p>
+<ul>
+<li>Daily overtime</li>
+<li>Weekly overtime</li>
+<li>Double time</li>
+<li>Holiday overtime</li>
+<li>Seventh consecutive day rules</li>
+</ul>
+<p>Supported calculation methods include:</p>
+<ul>
+<li>Time-and-a-half</li>
+<li>Double time</li>
+<li>Custom multipliers</li>
+</ul>
+<p>Example:</p>
+<ul>
+<li>Overtime begins after 40 hours worked in a workweek.</li>
+<li>Double time applies after 12 hours worked in a single day (where applicable).</li>
+</ul>
+<hr />
+<h2>Shift Differentials</h2>
+<p>Organizations may compensate employees differently based on shift characteristics.</p>
+<p>Examples include:</p>
+<ul>
+<li>Evening Shift Premium</li>
+<li>Overnight Shift Premium</li>
+<li>Weekend Differential</li>
+<li>Holiday Premium</li>
+<li>Hazard Pay</li>
+</ul>
+<p>Shift differential rules may be based on:</p>
+<ul>
+<li>Time of day</li>
+<li>Department</li>
+<li>Location</li>
+<li>Job title</li>
+<li>Employee classification</li>
+</ul>
+<hr />
+<h2>Attendance Rules</h2>
+<p>Attendance policies determine how Work-A-Beez classifies employee attendance.</p>
+<p>Configurable events include:</p>
+<ul>
+<li>Late Arrival</li>
+<li>Early Departure</li>
+<li>Missed Punch</li>
+<li>No Call / No Show</li>
+<li>Unscheduled Absence</li>
+<li>Excused Absence</li>
+<li>Unexcused Absence</li>
+</ul>
+<p>Administrators may define threshold values for each attendance event.</p>
+<hr />
+<h2>Missed Punch Management</h2>
+<p>Employees who forget to clock in or out may submit a correction request.</p>
+<p>Correction requests typically include:</p>
+<ul>
+<li>Date</li>
+<li>Time</li>
+<li>Reason</li>
+<li>Comments</li>
+<li>Supporting documentation (optional)</li>
+</ul>
+<p>Supervisors or administrators may:</p>
+<ul>
+<li>Approve</li>
+<li>Reject</li>
+<li>Request additional information</li>
+</ul>
+<p>All approved corrections are permanently recorded in the audit history.</p>
+<hr />
+<h2>Payroll Workweek</h2>
+<p>Configure the organization's payroll workweek.</p>
+<p>Settings include:</p>
+<ul>
+<li>Workweek start day</li>
+<li>Payroll period</li>
+<li>Pay frequency</li>
+<li>Pay period lock dates</li>
+<li>Payroll export schedule</li>
+</ul>
+<p>Supported payroll frequencies include:</p>
+<ul>
+<li>Weekly</li>
+<li>Biweekly</li>
+<li>Semi-monthly</li>
+<li>Monthly</li>
+</ul>
+<hr />
+<h2>Automatic Clock-Out</h2>
+<p>Administrators may enable automatic clock-out to prevent excessive recorded work hours.</p>
+<p>Configuration options include:</p>
+<ul>
+<li>Maximum shift duration</li>
+<li>Automatic reminders</li>
+<li>Manager notifications</li>
+<li>Automatic clock-out time</li>
+</ul>
+<p>Example:</p>
+<p>Employees remaining clocked in for more than 16 consecutive hours are automatically clocked out and flagged for administrative review.</p>
+<hr />
+<h2>Compliance Notifications</h2>
+<p>Work-A-Beez can notify administrators when configured rules are violated.</p>
+<p>Examples include:</p>
+<ul>
+<li>Missed meal periods</li>
+<li>Excessive overtime</li>
+<li>Consecutive workdays</li>
+<li>Unauthorized early clock-ins</li>
+<li>Missed punches</li>
+<li>Attendance threshold violations</li>
+</ul>
+<p>Notifications may be delivered through:</p>
+<ul>
+<li>Dashboard alerts</li>
+<li>Email</li>
+<li>Mobile push notifications</li>
+<li>In-app notifications</li>
+</ul>
+<hr />
+<h2>Timekeeping Audit Log</h2>
+<p>Every significant timekeeping event is recorded.</p>
+<p>Examples include:</p>
+<ul>
+<li>Clock In</li>
+<li>Clock Out</li>
+<li>Manual edits</li>
+<li>Supervisor approvals</li>
+<li>Overtime overrides</li>
+<li>Meal adjustments</li>
+<li>Policy changes</li>
+<li>Payroll exports</li>
+</ul>
+<p>Audit records include:</p>
+<ul>
+<li>User</li>
+<li>Date and time</li>
+<li>Action performed</li>
+<li>Previous value</li>
+<li>Updated value</li>
+<li>IP address (where available)</li>
+</ul>
+<p>Audit history cannot be modified by customer users and supports accountability and compliance.</p>
+<hr />
+<h2>Scheduling Management</h2>
+<p>The Scheduling module enables administrators to create, publish, manage, and optimize employee work schedules across the organization. Proper scheduling helps ensure adequate staffing, reduce overtime, improve operational efficiency, and provide employees with greater visibility into their work assignments.</p>
+<p>Navigate to Administration &rarr; Scheduling.</p>
+<p>Administrators with appropriate permissions can manage schedules for the entire organization or for specific departments and locations.</p>
+<hr />
+<h2>Scheduling Dashboard</h2>
+<p>The Scheduling Dashboard provides an overview of workforce coverage and scheduling activity.</p>
+<p>The dashboard includes:</p>
+<ul>
+<li>Today's Schedule</li>
+<li>Upcoming Shifts</li>
+<li>Open Shifts</li>
+<li>Unpublished Schedules</li>
+<li>Pending Shift Swaps</li>
+<li>Scheduling Conflicts</li>
+<li>Employees Near Overtime</li>
+<li>Employees Unavailable</li>
+<li>Coverage Gaps</li>
+<li>Labor Cost Summary</li>
+</ul>
+<p>Administrators may customize dashboard widgets based on organizational needs.</p>
+<hr />
+<h2>Schedule Views</h2>
+<p>Schedules may be displayed using several layouts.</p>
+<p>Available views include:</p>
+<ul>
+<li>Daily View</li>
+<li>Weekly View</li>
+<li>Bi-Weekly View</li>
+<li>Monthly View</li>
+<li>Department View</li>
+<li>Location View</li>
+<li>Employee View</li>
+</ul>
+<p>Each view supports filtering, searching, and printing.</p>
+<hr />
+<h2>Creating a Schedule</h2>
+<p>To create a new schedule, navigate to Scheduling &rarr; Create Schedule.</p>
+<p>Administrators must specify:</p>
+<ul>
+<li>Schedule Name</li>
+<li>Date Range</li>
+<li>Department</li>
+<li>Location</li>
+<li>Time Zone</li>
+</ul>
+<p>Optional settings include:</p>
+<ul>
+<li>Schedule Notes</li>
+<li>Default Shift Template</li>
+<li>Holiday Calendar</li>
+<li>Labor Budget</li>
+<li>Publish Immediately</li>
+</ul>
+<hr />
+<h2>Shift Creation</h2>
+<p>A shift represents a scheduled work assignment.</p>
+<p>Each shift may include:</p>
+<ul>
+<li>Employee</li>
+<li>Position</li>
+<li>Department</li>
+<li>Location</li>
+<li>Shift Start Time</li>
+<li>Shift End Time</li>
+<li>Meal Period</li>
+<li>Breaks</li>
+<li>Notes</li>
+<li>Shift Color</li>
+</ul>
+<p>Additional options include:</p>
+<ul>
+<li>Open Shift</li>
+<li>Training Shift</li>
+<li>On-Call Shift</li>
+<li>Overtime Shift</li>
+</ul>
+<hr />
+<h2>Recurring Shifts</h2>
+<p>Recurring schedules reduce repetitive scheduling tasks.</p>
+<p>Administrators may create recurring shifts using patterns such as:</p>
+<ul>
+<li>Daily</li>
+<li>Weekly</li>
+<li>Every Two Weeks</li>
+<li>Monthly</li>
+<li>Custom Recurrence</li>
+</ul>
+<p>Recurring schedules may include an expiration date or continue indefinitely until modified.</p>
+<hr />
+<h2>Shift Templates</h2>
+<p>Templates allow administrators to quickly create commonly used schedules.</p>
+<p>Examples include:</p>
+<ul>
+<li>Opening Shift</li>
+<li>Closing Shift</li>
+<li>Overnight Shift</li>
+<li>Weekend Shift</li>
+<li>Holiday Shift</li>
+<li>Training Shift</li>
+</ul>
+<p>Templates may include:</p>
+<ul>
+<li>Start Time</li>
+<li>End Time</li>
+<li>Break Rules</li>
+<li>Position</li>
+<li>Default Location</li>
+</ul>
+<hr />
+<h2>Open Shifts</h2>
+<p>An Open Shift is a scheduled shift that has not yet been assigned to a specific employee.</p>
+<p>Employees who meet eligibility requirements may request available open shifts through the Employee Portal.</p>
+<p>Administrators may restrict eligibility based on:</p>
+<ul>
+<li>Department</li>
+<li>Position</li>
+<li>Certifications</li>
+<li>Location</li>
+<li>Overtime Status</li>
+<li>Availability</li>
+</ul>
+<hr />
+<h2>Assigning Employees</h2>
+<p>Employees may be assigned to shifts manually or automatically.</p>
+<p>Assignment methods include:</p>
+<ul>
+<li>Drag-and-Drop Scheduling</li>
+<li>Employee Search</li>
+<li>Availability Matching</li>
+<li>Qualification Matching</li>
+<li>Automatic Assignment Rules</li>
+</ul>
+<p>The scheduler displays warnings if an assignment conflicts with existing schedules or policies.</p>
+<hr />
+<h2>Shift Conflicts</h2>
+<p>Work-A-Beez automatically detects scheduling conflicts.</p>
+<p>Examples include:</p>
+<ul>
+<li>Double Booking</li>
+<li>Overtime Risk</li>
+<li>Overlapping Shifts</li>
+<li>Employee Unavailable</li>
+<li>Insufficient Rest Between Shifts</li>
+<li>Location Conflict</li>
+<li>Certification Expired</li>
+</ul>
+<p>Conflicts are highlighted before schedules are published.</p>
+<hr />
+<h2>Employee Availability</h2>
+<p>Employees may submit their preferred working availability.</p>
+<p>Availability may include:</p>
+<ul>
+<li>Preferred Days</li>
+<li>Preferred Hours</li>
+<li>Maximum Weekly Hours</li>
+<li>Unavailable Dates</li>
+<li>Temporary Restrictions</li>
+<li>Permanent Restrictions</li>
+</ul>
+<p>Administrators may use availability as a scheduling recommendation or enforce it as a scheduling requirement.</p>
+<hr />
+<h2>Shift Swaps</h2>
+<p>Employees may request to exchange scheduled shifts with eligible coworkers.</p>
+<p>The Shift Swap process typically includes:</p>
+<ol>
+<li>Employee submits a request.</li>
+<li>Eligible employees may accept the request.</li>
+<li>Supervisor reviews the proposed exchange.</li>
+<li>Administrator or Supervisor approves or denies the request.</li>
+<li>The schedule updates automatically after approval.</li>
+</ol>
+<p>All approved changes are recorded in the audit log.</p>
+<hr />
+<h2>Schedule Publishing</h2>
+<p>Schedules remain in Draft status until published.</p>
+<p>Publishing a schedule:</p>
+<ul>
+<li>Makes shifts visible to employees.</li>
+<li>Sends notifications to affected employees.</li>
+<li>Updates employee calendars.</li>
+<li>Enables clock-in eligibility based on scheduled shifts.</li>
+</ul>
+<p>Administrators may publish:</p>
+<ul>
+<li>Individual Shifts</li>
+<li>Departments</li>
+<li>Locations</li>
+<li>Entire Schedules</li>
+</ul>
+<hr />
+<h2>Schedule Notifications</h2>
+<p>Employees may receive notifications when:</p>
+<ul>
+<li>New schedules are published.</li>
+<li>Shifts are assigned.</li>
+<li>Shifts are modified.</li>
+<li>Shifts are cancelled.</li>
+<li>Shift swaps are approved.</li>
+<li>Open shifts become available.</li>
+</ul>
+<p>Notifications may be delivered by:</p>
+<ul>
+<li>Email</li>
+<li>Mobile Push Notification</li>
+<li>SMS (optional)</li>
+<li>In-App Notification</li>
+</ul>
+<hr />
+<h2>Labor Cost Monitoring</h2>
+<p>The Scheduling module estimates labor costs based on scheduled hours.</p>
+<p>Administrators may monitor:</p>
+<ul>
+<li>Total Scheduled Hours</li>
+<li>Estimated Payroll Cost</li>
+<li>Overtime Cost</li>
+<li>Department Labor Cost</li>
+<li>Location Labor Cost</li>
+<li>Budget Variance</li>
+</ul>
+<p>Cost calculations are estimates and may vary based on payroll configuration.</p>
+<hr />
+<h2>Holiday Scheduling</h2>
+<p>Organizations may configure recognized holidays.</p>
+<p>Holiday settings include:</p>
+<ul>
+<li>Paid Holidays</li>
+<li>Unpaid Holidays</li>
+<li>Holiday Premium Pay</li>
+<li>Required Staffing</li>
+<li>Holiday Templates</li>
+</ul>
+<p>Holiday schedules may override standard recurring schedules.</p>
+<hr />
+<h2>Schedule Approval Workflow</h2>
+<p>Organizations may require approval before schedules become active.</p>
+<p>Approval workflow may include:</p>
+<ul>
+<li>Scheduler</li>
+<li>Department Manager</li>
+<li>Operations Manager</li>
+<li>Company Administrator</li>
+</ul>
+<p>Approval history is retained for auditing purposes.</p>
+<hr />
+<h2>Schedule Audit History</h2>
+<p>Every scheduling action is recorded.</p>
+<p>Examples include:</p>
+<ul>
+<li>Shift Created</li>
+<li>Shift Edited</li>
+<li>Employee Assigned</li>
+<li>Schedule Published</li>
+<li>Shift Cancelled</li>
+<li>Shift Swapped</li>
+<li>Open Shift Filled</li>
+<li>Schedule Deleted</li>
+</ul>
+<p>Audit entries include:</p>
+<ul>
+<li>User</li>
+<li>Date and Time</li>
+<li>Action</li>
+<li>Previous Value</li>
+<li>Updated Value</li>
+<li>Device Information (where available)</li>
+</ul>
+<hr />
+<h2>Scheduling Best Practices</h2>
+<p>To maximize scheduling efficiency, Work-A-Beez recommends:</p>
+<ul>
+<li>Publish schedules at least one week in advance.</li>
+<li>Review employee availability before assigning shifts.</li>
+<li>Monitor overtime projections during schedule creation.</li>
+<li>Use recurring shift templates whenever possible.</li>
+<li>Resolve scheduling conflicts before publishing.</li>
+<li>Maintain current employee certifications and qualifications.</li>
+<li>Review labor cost projections prior to final approval.</li>
+<li>Encourage employees to keep availability up to date.</li>
+<li>Use open shifts to fill staffing shortages before assigning overtime.</li>
+<li>Regularly review schedule audit logs for accuracy and accountability.</li>
+</ul>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>User Guide</li>
+<li>Company Setup Guide</li>
+<li>Roles &amp; Permissions Guide</li>
+<li>Password Policy</li>
+<li>Security Overview</li>
+<li>Customer Onboarding Guide</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product of LBS.</p>
 {% endblock %}

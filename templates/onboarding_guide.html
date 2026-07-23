@@ -3,23 +3,370 @@
 {% block wrapclass %}wide{% endblock %}
 {% block content %}
   <h1>Work-A-Beez Customer Onboarding Guide</h1>
-  <p class="muted">Status: Draft template &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <p class="muted">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
 
-  <p><em>This page is a starting template generated for LBS to complete. Replace the placeholder text in each section below with final content before treating this page as published.</em></p>
-
-  <h2>1. Before You Start</h2>
-  <p>[Add content here.]</p>
-
-  <h2>2. Setting Up Your Company</h2>
-  <p>[Add content here.]</p>
-
-  <h2>3. Adding Employees</h2>
-  <p>[Add content here.]</p>
-
-  <h2>4. Registering Devices</h2>
-  <p>[Add content here.]</p>
-
-  <h2>5. Going Live</h2>
-  <p>[Add content here.]</p>
-
+<p>Welcome to Work-A-Beez!</p>
+<p>Thank you for choosing Work-A-Beez to help manage your workforce. This guide walks you through every step of configuring your organization so you can confidently begin using the platform.</p>
+<p>Whether you're managing 10 employees or 10,000, following this guide will help ensure a successful implementation.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Introduction</li>
+<li>Before You Begin</li>
+<li>Creating Your Organization</li>
+<li>Administrator Setup</li>
+<li>Company Profile</li>
+<li>Business Locations</li>
+<li>Departments</li>
+<li>Job Titles</li>
+<li>Roles &amp; Permissions</li>
+<li>Employee Import</li>
+<li>Timekeeping Setup</li>
+<li>Scheduling Setup</li>
+<li>Leave Policies</li>
+<li>Company Holidays</li>
+<li>Notifications</li>
+<li>Branding</li>
+<li>Security Configuration</li>
+<li>Testing Your Configuration</li>
+<li>Go-Live Checklist</li>
+<li>After Go-Live</li>
+<li>Getting Support</li>
+</ol>
+<hr />
+<h2>Introduction</h2>
+<p>A successful implementation begins with careful planning.</p>
+<p>Most organizations complete their initial setup in a few hours, although larger organizations with multiple locations, complex scheduling requirements, or custom policies may require additional time.</p>
+<p>This guide follows the recommended implementation sequence developed by the Work-A-Beez Customer Success team.</p>
+<hr />
+<h2>Before You Begin</h2>
+<p>Before configuring your account, gather the following information:</p>
+<h4>Company Information</h4>
+<ul>
+<li>Legal Company Name</li>
+<li>Business Address</li>
+<li>Company Phone Number</li>
+<li>Website</li>
+<li>Company Logo</li>
+<li>Time Zone</li>
+<li>Payroll Schedule</li>
+</ul>
+<h4>Workforce Information</h4>
+<ul>
+<li>Employee List</li>
+<li>Departments</li>
+<li>Job Titles</li>
+<li>Managers</li>
+<li>Locations</li>
+<li>Work Schedules</li>
+</ul>
+<h4>Policies</h4>
+<ul>
+<li>PTO Policy</li>
+<li>Attendance Policy</li>
+<li>Break Policy</li>
+<li>Overtime Policy</li>
+<li>Holiday Calendar</li>
+<li>Leave Rules</li>
+</ul>
+<p>Having this information available before beginning setup will significantly reduce implementation time.</p>
+<hr />
+<h2>Creating Your Organization</h2>
+<p>Your Work-A-Beez subscription includes a dedicated organization, sometimes referred to as a tenant.</p>
+<p>Your organization provides:</p>
+<ul>
+<li>Secure data isolation</li>
+<li>Organization-specific settings</li>
+<li>Employee directory</li>
+<li>Schedules</li>
+<li>Reports</li>
+<li>Payroll data</li>
+<li>Permissions</li>
+<li>Branding</li>
+</ul>
+<p>Each organization operates independently from every other Work-A-Beez customer.</p>
+<hr />
+<h2>Administrator Account Setup</h2>
+<p>The first account created during implementation becomes the Primary Company Administrator.</p>
+<p>The Primary Administrator is responsible for:</p>
+<ul>
+<li>Completing initial setup</li>
+<li>Inviting additional administrators</li>
+<li>Managing subscriptions</li>
+<li>Configuring security settings</li>
+<li>Assigning permissions</li>
+</ul>
+<p>For business continuity, Work-A-Beez recommends assigning at least one additional Company Administrator.</p>
+<hr />
+<h2>Company Profile</h2>
+<p>Navigate to Administration &rarr; Company Settings.</p>
+<p>Complete the following information:</p>
+<ul>
+<li>Company Name</li>
+<li>Business Address</li>
+<li>Phone Number</li>
+<li>Website</li>
+<li>Primary Contact</li>
+<li>Time Zone</li>
+<li>Default Language</li>
+<li>Currency</li>
+<li>Date Format</li>
+<li>Time Format</li>
+</ul>
+<p>Accurate company information ensures reports, notifications, and exported documents display the correct organizational details.</p>
+<hr />
+<h2>Business Locations</h2>
+<p>Organizations with multiple offices, stores, branches, or facilities should create each location before importing employees.</p>
+<p>For each location, configure:</p>
+<ul>
+<li>Location Name</li>
+<li>Address</li>
+<li>Phone Number</li>
+<li>Time Zone</li>
+<li>Manager</li>
+<li>Operating Hours</li>
+<li>GPS Coordinates (optional)</li>
+<li>Geofence Radius (optional)</li>
+</ul>
+<p>Locations may have independent schedules, departments, and labor rules.</p>
+<hr />
+<h2>Departments</h2>
+<p>Departments organize employees into logical business units.</p>
+<p>Common examples include:</p>
+<ul>
+<li>Human Resources</li>
+<li>Operations</li>
+<li>Customer Service</li>
+<li>Sales</li>
+<li>Accounting</li>
+<li>Information Technology</li>
+<li>Warehouse</li>
+<li>Maintenance</li>
+<li>Administration</li>
+</ul>
+<p>Departments improve reporting, scheduling, and permission management.</p>
+<hr />
+<h2>Job Titles</h2>
+<p>Create standardized job titles before importing employees.</p>
+<p>Examples:</p>
+<ul>
+<li>Operations Manager</li>
+<li>Supervisor</li>
+<li>Customer Service Representative</li>
+<li>Cashier</li>
+<li>Technician</li>
+<li>Driver</li>
+<li>Administrative Assistant</li>
+</ul>
+<p>Consistent job titles improve reporting accuracy and simplify workforce planning.</p>
+<hr />
+<h2>Roles &amp; Permissions</h2>
+<p>Assign appropriate security roles before inviting users.</p>
+<p>Typical roles include:</p>
+<ul>
+<li>Company Administrator</li>
+<li>Human Resources</li>
+<li>Payroll Administrator</li>
+<li>Operations Manager</li>
+<li>Supervisor</li>
+<li>Employee</li>
+</ul>
+<p>Follow the Principle of Least Privilege by granting users only the permissions required to perform their responsibilities.</p>
+<hr />
+<h2>Importing Employees</h2>
+<p>Employees may be added individually or imported in bulk using a CSV file.</p>
+<p>Typical employee data includes:</p>
+<ul>
+<li>First Name</li>
+<li>Last Name</li>
+<li>Email Address</li>
+<li>Employee ID</li>
+<li>Department</li>
+<li>Job Title</li>
+<li>Manager</li>
+<li>Location</li>
+<li>Hire Date</li>
+<li>Employment Status</li>
+</ul>
+<p>After import, invitation emails can be sent to employees automatically or at a later time.</p>
+<hr />
+<h2>Timekeeping Configuration</h2>
+<p>Configure organization-wide timekeeping policies before employees begin recording time.</p>
+<p>Review:</p>
+<ul>
+<li>Clock-In Rules</li>
+<li>Clock-Out Rules</li>
+<li>Break Policies</li>
+<li>Meal Periods</li>
+<li>Overtime Rules</li>
+<li>Rounding Rules</li>
+<li>Payroll Workweek</li>
+<li>Attendance Policies</li>
+</ul>
+<p>These settings should align with your organization's policies and applicable labor regulations.</p>
+<hr />
+<h2>Scheduling Configuration</h2>
+<p>If your organization uses scheduling, configure:</p>
+<ul>
+<li>Shift Templates</li>
+<li>Business Hours</li>
+<li>Recurring Shifts</li>
+<li>Departments</li>
+<li>Locations</li>
+<li>Scheduling Rules</li>
+<li>Open Shift Policies</li>
+</ul>
+<p>Publishing a sample schedule before launch is recommended.</p>
+<hr />
+<h2>Leave Policies</h2>
+<p>Configure all applicable leave types.</p>
+<p>Examples include:</p>
+<ul>
+<li>Vacation</li>
+<li>Sick Leave</li>
+<li>Personal Leave</li>
+<li>Bereavement Leave</li>
+<li>Jury Duty</li>
+<li>Military Leave</li>
+<li>Family and Medical Leave (FMLA)</li>
+</ul>
+<p>Define accrual methods, carryover rules, approval requirements, and eligibility criteria.</p>
+<hr />
+<h2>Company Holidays</h2>
+<p>Create your organization's holiday calendar.</p>
+<p>For each holiday, specify:</p>
+<ul>
+<li>Holiday Name</li>
+<li>Date</li>
+<li>Paid or Unpaid</li>
+<li>Premium Pay Rules</li>
+<li>Required Staffing (if applicable)</li>
+</ul>
+<p>Holiday settings integrate with scheduling and payroll calculations.</p>
+<hr />
+<h2>Notifications</h2>
+<p>Review notification settings to ensure administrators and employees receive timely updates.</p>
+<p>Available notifications include:</p>
+<ul>
+<li>Schedule Published</li>
+<li>Shift Assigned</li>
+<li>Shift Swap Request</li>
+<li>PTO Request</li>
+<li>Approval Required</li>
+<li>Missed Punch</li>
+<li>Overtime Alert</li>
+<li>Company Announcement</li>
+</ul>
+<p>Notifications may be delivered by email, mobile push, SMS (if enabled), or in-app messaging.</p>
+<hr />
+<h2>Branding</h2>
+<p>Customize the platform to reflect your organization's identity.</p>
+<p>Branding options include:</p>
+<ul>
+<li>Company Logo</li>
+<li>Accent Colors</li>
+<li>Welcome Message</li>
+<li>Login Screen Background</li>
+<li>Email Header</li>
+</ul>
+<p>Branding provides employees with a familiar and professional experience.</p>
+<hr />
+<h2>Security Configuration</h2>
+<p>Before launch, review the following security settings:</p>
+<ul>
+<li>Password Requirements</li>
+<li>Multi-Factor Authentication</li>
+<li>Session Timeout</li>
+<li>IP Restrictions (if applicable)</li>
+<li>Device Policies</li>
+<li>Administrator Permissions</li>
+</ul>
+<p>Security should be reviewed periodically as your organization grows.</p>
+<hr />
+<h2>Testing Your Configuration</h2>
+<p>Before inviting employees, verify your setup by completing the following:</p>
+<ul>
+<li>Create a test employee account.</li>
+<li>Clock in and out.</li>
+<li>Submit a PTO request.</li>
+<li>Publish a sample schedule.</li>
+<li>Approve a request.</li>
+<li>Generate a payroll report.</li>
+<li>Verify notification delivery.</li>
+<li>Confirm role permissions.</li>
+</ul>
+<p>Testing helps identify configuration issues before production use.</p>
+<hr />
+<h2>Go-Live Checklist</h2>
+<p>Before launching Work-A-Beez organization-wide, verify that:</p>
+<ul>
+<li>Company information is complete.</li>
+<li>Locations have been created.</li>
+<li>Departments have been configured.</li>
+<li>Job titles are standardized.</li>
+<li>Employee records have been imported.</li>
+<li>Timekeeping rules have been tested.</li>
+<li>Scheduling rules have been reviewed.</li>
+<li>Leave policies have been configured.</li>
+<li>Security settings have been verified.</li>
+<li>At least two Company Administrators have been assigned.</li>
+<li>Notifications are functioning correctly.</li>
+<li>Branding has been applied.</li>
+</ul>
+<hr />
+<h2>After Go-Live</h2>
+<p>Following implementation, administrators should:</p>
+<ul>
+<li>Monitor employee adoption.</li>
+<li>Review audit logs.</li>
+<li>Resolve support requests promptly.</li>
+<li>Review attendance reports.</li>
+<li>Monitor overtime trends.</li>
+<li>Conduct periodic permission reviews.</li>
+<li>Update company policies as needed.</li>
+</ul>
+<p>Continuous review helps ensure the platform continues to meet organizational needs.</p>
+<hr />
+<h2>Getting Support</h2>
+<p>If you require assistance during implementation or after launch, Work-A-Beez offers several support options.</p>
+<p>Available resources include:</p>
+<ul>
+<li>Online Documentation</li>
+<li>Knowledge Base</li>
+<li>Video Tutorials</li>
+<li>Customer Support</li>
+<li>Product Release Notes</li>
+</ul>
+<p>Support contact information can be found within your organization's support portal or on the Work-A-Beez website.</p>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>Administrator Guide</li>
+<li>Employee User Guide</li>
+<li>Security Overview</li>
+<li>Timekeeping Guide</li>
+<li>Reporting &amp; Analytics Guide</li>
+<li>API Developer Guide</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a registered trademark of LBS.</p>
 {% endblock %}

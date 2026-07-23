@@ -1,31 +1,480 @@
 {% extends "internal_base.html" %}
-{% block title %}QA Strategy{% endblock %}
+{% block title %}Quality Assurance & Testing Strategy{% endblock %}
 {% block internal_content %}
-  <h1>QA Strategy</h1>
-  <p class="muted">Status: Draft template &middot; Section: Quality Assurance &middot; Classification: Internal Confidential &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <h1>Quality Assurance & Testing Strategy</h1>
+  <p class="muted">Status: Needs Validation &middot; Classification: Internal &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This document has not been fully validated against the current codebase and mixes accurate description with idealized/aspirational practices (e.g., formal CI/CD pipelines, a REST API, multiple deployment environments, semantic-versioned releases) that are not yet implemented for Work-A-Beez today. Flagged for engineering review before being treated as authoritative.</div>
 
-  <p><em>This page is a starting template generated for LBS to complete. Replace the placeholder text in each section below with final content.</em></p>
-
-  <table style="margin-bottom:20px;">
-    <tr><th>Document Title</th><td>QA Strategy</td></tr>
-    <tr><th>Version</th><td>[Add version]</td></tr>
-    <tr><th>Owner</th><td>Linton Business Solutions, LLC</td></tr>
-    <tr><th>Approver</th><td>[Add approver]</td></tr>
-    <tr><th>Classification</th><td>Internal Confidential</td></tr>
-  </table>
-
-  <h2>1. Purpose</h2>
-  <p>[Add content here.]</p>
-
-  <h2>2. Scope</h2>
-  <p>[Add content here.]</p>
-
-  <h2>3. Content</h2>
-  <p>[Add content here.]</p>
-
-  <h2>4. Related Documents</h2>
-  <p>[List related documents here.]</p>
-
-  <h2>5. Revision History</h2>
-  <p>[Add revision history here.]</p>
+<p>Welcome to the Work-A-Beez Quality Assurance &amp; Testing Strategy.</p>
+<p>This document establishes the quality standards, testing methodologies, automation practices, and release validation processes used throughout the Work-A-Beez platform.</p>
+<p>Quality is the responsibility of every member of the engineering organization. Testing is not a phase, it is an ongoing activity throughout the software development lifecycle.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Quality Philosophy</li>
+<li>Testing Objectives</li>
+<li>Testing Principles</li>
+<li>Shift-Left Testing</li>
+<li>Testing Pyramid</li>
+<li>Types of Testing</li>
+<li>Test Environments</li>
+<li>Test Data Management</li>
+<li>Automation Strategy</li>
+<li>Defect Management</li>
+<li>Bug Severity &amp; Priority</li>
+<li>Regression Testing</li>
+<li>Release Validation</li>
+<li>Performance Testing</li>
+<li>Security Testing</li>
+<li>Accessibility Testing</li>
+<li>CI/CD Quality Gates</li>
+<li>Test Metrics</li>
+<li>Roles &amp; Responsibilities</li>
+<li>Continuous Improvement</li>
+</ol>
+<hr />
+<h2>Quality Philosophy</h2>
+<p>Work-A-Beez is committed to delivering reliable, secure, and user-friendly software.</p>
+<p>Quality goals include:</p>
+<ul>
+<li>Prevent defects rather than detect them late</li>
+<li>Automate repetitive validation wherever practical</li>
+<li>Ensure consistent user experiences</li>
+<li>Protect customer data</li>
+<li>Deliver predictable releases</li>
+<li>Maintain high platform availability</li>
+</ul>
+<p>Every feature should be designed with quality in mind from the beginning.</p>
+<hr />
+<h2>Testing Objectives</h2>
+<p>The primary objectives of testing are to:</p>
+<ul>
+<li>Verify business requirements</li>
+<li>Validate technical implementation</li>
+<li>Detect defects early</li>
+<li>Prevent regressions</li>
+<li>Improve platform stability</li>
+<li>Reduce production incidents</li>
+<li>Increase customer confidence</li>
+</ul>
+<p>Testing provides evidence that the software behaves as intended under expected and unexpected conditions.</p>
+<hr />
+<h2>Testing Principles</h2>
+<p>The Work-A-Beez testing strategy is based on these principles:</p>
+<ul>
+<li>Test early and often</li>
+<li>Automate where it provides long-term value</li>
+<li>Focus on risk</li>
+<li>Test behavior, not implementation details</li>
+<li>Keep tests independent and repeatable</li>
+<li>Maintain reliable test environments</li>
+<li>Treat failed tests as blockers until investigated</li>
+</ul>
+<hr />
+<h2>Shift-Left Testing</h2>
+<p>Testing begins during requirements and design, not after development is complete.</p>
+<p>Activities include:</p>
+<ul>
+<li>Requirement reviews</li>
+<li>Acceptance criteria validation</li>
+<li>Architecture reviews</li>
+<li>Threat modeling</li>
+<li>Test case design before implementation</li>
+<li>Static code analysis</li>
+<li>Peer code reviews</li>
+</ul>
+<p>Early validation reduces the cost of correcting defects.</p>
+<hr />
+<h2>Testing Pyramid</h2>
+<p>The Work-A-Beez testing strategy follows the testing pyramid.</p>
+<h4>Unit Tests</h4>
+<p>Purpose:</p>
+<p>Validate individual functions, methods, and classes in isolation.</p>
+<p>Characteristics:</p>
+<ul>
+<li>Fast</li>
+<li>Deterministic</li>
+<li>Automated</li>
+<li>Executed on every build</li>
+</ul>
+<hr />
+<h4>Integration Tests</h4>
+<p>Purpose:</p>
+<p>Verify interactions between application components.</p>
+<p>Examples:</p>
+<ul>
+<li>API to database</li>
+<li>Service-to-service communication</li>
+<li>Authentication flows</li>
+<li>Queue processing</li>
+</ul>
+<p>Integration tests ensure components work correctly together.</p>
+<hr />
+<h4>API Tests</h4>
+<p>Purpose:</p>
+<p>Validate REST API behavior.</p>
+<p>Coverage includes:</p>
+<ul>
+<li>Authentication</li>
+<li>Authorization</li>
+<li>Request validation</li>
+<li>Response schemas</li>
+<li>Error handling</li>
+<li>Pagination</li>
+<li>Filtering</li>
+<li>Rate limiting</li>
+</ul>
+<p>API tests provide confidence that integrations remain stable.</p>
+<hr />
+<h4>User Interface Tests</h4>
+<p>Purpose:</p>
+<p>Validate critical user workflows.</p>
+<p>Examples:</p>
+<ul>
+<li>Employee login</li>
+<li>Clock in/out</li>
+<li>Schedule publication</li>
+<li>Leave request submission</li>
+<li>Manager approval</li>
+<li>Employee onboarding</li>
+</ul>
+<p>UI automation should focus on high-value business scenarios rather than exhaustive interface coverage.</p>
+<hr />
+<h4>End-to-End Tests</h4>
+<p>Purpose:</p>
+<p>Validate complete business processes across multiple system components.</p>
+<p>Examples:</p>
+<ul>
+<li>New employee onboarding</li>
+<li>Time entry to payroll export</li>
+<li>Shift assignment to completion</li>
+<li>PTO request through approval</li>
+</ul>
+<p>End-to-end tests provide confidence that major workflows operate correctly in realistic conditions.</p>
+<hr />
+<h2>Types of Testing</h2>
+<p>The platform supports multiple testing disciplines.</p>
+<h3>Functional Testing</h3>
+<p>Verifies that features perform according to business requirements.</p>
+<hr />
+<h3>Regression Testing</h3>
+<p>Ensures previously delivered functionality continues to operate after changes.</p>
+<p>Regression testing should be automated wherever feasible.</p>
+<hr />
+<h3>Smoke Testing</h3>
+<p>A lightweight validation executed after deployments to confirm critical functionality is operational.</p>
+<p>Typical smoke tests include:</p>
+<ul>
+<li>User authentication</li>
+<li>Dashboard loading</li>
+<li>API availability</li>
+<li>Database connectivity</li>
+<li>Time clock functionality</li>
+</ul>
+<p>Smoke tests provide rapid feedback following deployment.</p>
+<hr />
+<h3>Sanity Testing</h3>
+<p>Focused validation of specific functionality after a bug fix or targeted enhancement.</p>
+<p>Sanity testing confirms that the immediate change behaves as expected without executing the full regression suite.</p>
+<hr />
+<h3>Exploratory Testing</h3>
+<p>QA engineers perform unscripted testing to discover unexpected behaviors, usability issues, and edge cases not covered by automated tests.</p>
+<p>Exploratory testing is especially valuable for new features and complex workflows.</p>
+<hr />
+<h2>Test Environments</h2>
+<p>Work-A-Beez maintains separate environments for development and validation.</p>
+<p>Typical environments include:</p>
+<ul>
+<li>Local Development</li>
+<li>Development</li>
+<li>Integration</li>
+<li>Quality Assurance (QA)</li>
+<li>User Acceptance Testing (UAT)</li>
+<li>Staging</li>
+<li>Production</li>
+</ul>
+<p>Each environment should closely mirror production where practical while maintaining appropriate isolation and access controls.</p>
+<hr />
+<h2>Test Data Management</h2>
+<p>Test environments should use representative but non-production data.</p>
+<p>Guidelines include:</p>
+<ul>
+<li>Avoid using live customer data unless properly anonymized.</li>
+<li>Create reusable datasets for common scenarios.</li>
+<li>Reset test data regularly.</li>
+<li>Version control seed data where appropriate.</li>
+<li>Document assumptions about test datasets.</li>
+</ul>
+<p>Reliable test data is essential for repeatable test execution.</p>
+<hr />
+<h2>Automation Strategy</h2>
+<p>Automation should target areas that provide the greatest long-term value.</p>
+<p>Priority candidates include:</p>
+<ul>
+<li>Authentication</li>
+<li>Employee lifecycle</li>
+<li>Scheduling</li>
+<li>Timekeeping</li>
+<li>Leave management</li>
+<li>Payroll preparation</li>
+<li>Notifications</li>
+<li>Reporting</li>
+<li>API validation</li>
+</ul>
+<p>Automated tests should be reliable, maintainable, and executed as part of the CI/CD pipeline.</p>
+<hr />
+<h2>Defect Management</h2>
+<p>All defects should be recorded in the team's work management system.</p>
+<p>Each defect should include:</p>
+<ul>
+<li>Summary</li>
+<li>Description</li>
+<li>Steps to reproduce</li>
+<li>Expected result</li>
+<li>Actual result</li>
+<li>Environment</li>
+<li>Screenshots or logs (if applicable)</li>
+<li>Severity</li>
+<li>Priority</li>
+<li>Affected version</li>
+</ul>
+<p>Defects should remain reproducible throughout investigation and resolution.</p>
+<hr />
+<h2>Bug Severity</h2>
+<p>Severity reflects the technical impact of a defect.</p>
+<table>
+<thead>
+<tr>
+<th>Severity</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Critical</td>
+<td>System unavailable, security breach, or data corruption</td>
+</tr>
+<tr>
+<td>High</td>
+<td>Major feature unusable with no acceptable workaround</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td>Feature impaired but usable with a workaround</td>
+</tr>
+<tr>
+<td>Low</td>
+<td>Minor issue with limited business impact</td>
+</tr>
+<tr>
+<td>Cosmetic</td>
+<td>Visual or formatting issue only</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Bug Priority</h2>
+<p>Priority reflects the urgency of resolving a defect.</p>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1</td>
+<td>Immediate attention required</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>Resolve before next release</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>Schedule in upcoming sprint</td>
+</tr>
+<tr>
+<td>P4</td>
+<td>Address when resources permit</td>
+</tr>
+</tbody>
+</table>
+<p>Severity and priority should be assessed independently.</p>
+<hr />
+<h2>Regression Testing</h2>
+<p>A full regression suite should be executed before each production release.</p>
+<p>Regression coverage includes:</p>
+<ul>
+<li>Authentication</li>
+<li>Employee management</li>
+<li>Scheduling</li>
+<li>Timekeeping</li>
+<li>Leave management</li>
+<li>Reporting</li>
+<li>Billing</li>
+<li>Notifications</li>
+<li>Integrations</li>
+</ul>
+<p>Automation should minimize manual effort while maintaining comprehensive coverage.</p>
+<hr />
+<h2>Release Validation</h2>
+<p>Before deployment to production, each release should satisfy defined quality gates.</p>
+<p>Minimum release criteria include:</p>
+<ul>
+<li>All automated tests pass.</li>
+<li>No unresolved Critical defects.</li>
+<li>No unresolved High defects without approved risk acceptance.</li>
+<li>Security scans completed.</li>
+<li>Performance benchmarks met.</li>
+<li>Documentation updated.</li>
+<li>Product Owner approval obtained.</li>
+</ul>
+<p>Release readiness should be formally reviewed before production deployment.</p>
+<hr />
+<h2>Performance Testing</h2>
+<p>Performance testing evaluates the system under expected and peak workloads.</p>
+<p>Areas of focus include:</p>
+<ul>
+<li>Response time</li>
+<li>Throughput</li>
+<li>Resource utilization</li>
+<li>Scalability</li>
+<li>Concurrent users</li>
+<li>Background processing</li>
+</ul>
+<p>Performance objectives should be defined for critical business operations and monitored over time.</p>
+<hr />
+<h2>Security Testing</h2>
+<p>Security testing is integrated throughout the development lifecycle.</p>
+<p>Activities include:</p>
+<ul>
+<li>Static application security testing (SAST)</li>
+<li>Dynamic application security testing (DAST)</li>
+<li>Dependency vulnerability scanning</li>
+<li>Authentication testing</li>
+<li>Authorization testing</li>
+<li>Penetration testing</li>
+<li>Secure configuration reviews</li>
+</ul>
+<p>Security findings should be prioritized according to organizational risk management policies.</p>
+<hr />
+<h2>Accessibility Testing</h2>
+<p>The platform should strive to meet recognized accessibility standards.</p>
+<p>Testing should verify:</p>
+<ul>
+<li>Keyboard navigation</li>
+<li>Screen reader compatibility</li>
+<li>Color contrast</li>
+<li>Focus indicators</li>
+<li>Form labels</li>
+<li>Alternative text</li>
+<li>Responsive layouts</li>
+</ul>
+<p>Accessibility testing helps ensure the platform is usable by a broad range of users.</p>
+<hr />
+<h2>CI/CD Quality Gates</h2>
+<p>The continuous integration pipeline should prevent deployments that fail established quality criteria.</p>
+<p>Recommended quality gates include:</p>
+<ul>
+<li>Successful build</li>
+<li>Static code analysis</li>
+<li>Automated unit tests</li>
+<li>Integration tests</li>
+<li>API tests</li>
+<li>Security scans</li>
+<li>Code coverage thresholds</li>
+<li>Dependency vulnerability checks</li>
+</ul>
+<p>A failed quality gate blocks progression until resolved or formally approved.</p>
+<hr />
+<h2>Test Metrics</h2>
+<p>Engineering leadership should monitor quality trends using measurable indicators.</p>
+<p>Suggested metrics include:</p>
+<ul>
+<li>Defect escape rate</li>
+<li>Automated test pass rate</li>
+<li>Test coverage</li>
+<li>Mean time to detect defects</li>
+<li>Mean time to resolve defects</li>
+<li>Production incident rate</li>
+<li>Release success rate</li>
+<li>Customer-reported defects</li>
+</ul>
+<p>Metrics should drive continuous improvement rather than individual performance evaluation.</p>
+<hr />
+<h2>Roles &amp; Responsibilities</h2>
+<p>Quality is a shared responsibility.</p>
+<h4>Software Engineers</h4>
+<ul>
+<li>Write unit tests</li>
+<li>Fix defects</li>
+<li>Participate in code reviews</li>
+<li>Support automation efforts</li>
+</ul>
+<h4>QA Engineers</h4>
+<ul>
+<li>Design and execute test cases</li>
+<li>Maintain automated test suites</li>
+<li>Perform exploratory testing</li>
+<li>Verify defect resolutions</li>
+</ul>
+<h4>Product Owners</h4>
+<ul>
+<li>Define acceptance criteria</li>
+<li>Prioritize defect remediation</li>
+<li>Approve release readiness</li>
+</ul>
+<h4>DevOps Engineers</h4>
+<ul>
+<li>Maintain test environments</li>
+<li>Support CI/CD pipelines</li>
+<li>Monitor deployment health</li>
+</ul>
+<hr />
+<h2>Continuous Improvement</h2>
+<p>The testing strategy should evolve alongside the platform.</p>
+<p>Regular improvement activities include:</p>
+<ul>
+<li>Retrospectives after major releases</li>
+<li>Test suite optimization</li>
+<li>Automation expansion</li>
+<li>Review of escaped defects</li>
+<li>Updates to testing standards</li>
+<li>Adoption of improved tooling and practices</li>
+</ul>
+<p>Quality processes should be reviewed periodically to ensure they continue to meet the needs of the platform and its users.</p>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>Coding Standards &amp; Engineering Handbook</li>
+<li>System Architecture Guide</li>
+<li>Database Design &amp; Data Dictionary</li>
+<li>API Developer Guide</li>
+<li>Security Overview</li>
+<li>DevOps Deployment Guide (Planned)</li>
+<li>Incident Response Plan (Planned)</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a product of LBS.</p>
 {% endblock %}

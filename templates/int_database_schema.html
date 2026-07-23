@@ -1,31 +1,573 @@
 {% extends "internal_base.html" %}
-{% block title %}Database Schema{% endblock %}
+{% block title %}Database Design & Data Dictionary{% endblock %}
 {% block internal_content %}
-  <h1>Database Schema</h1>
-  <p class="muted">Status: Draft template &middot; Section: Engineering &middot; Classification: Internal Confidential &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <h1>Database Design & Data Dictionary</h1>
+  <p class="muted">Status: Needs Validation &middot; Classification: Internal &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This document has not been fully validated against the current codebase and mixes accurate description with idealized/aspirational practices (e.g., formal CI/CD pipelines, a REST API, multiple deployment environments, semantic-versioned releases) that are not yet implemented for Work-A-Beez today. Flagged for engineering review before being treated as authoritative.</div>
 
-  <p><em>This page is a starting template generated for LBS to complete. Replace the placeholder text in each section below with final content.</em></p>
-
-  <table style="margin-bottom:20px;">
-    <tr><th>Document Title</th><td>Database Schema</td></tr>
-    <tr><th>Version</th><td>[Add version]</td></tr>
-    <tr><th>Owner</th><td>Linton Business Solutions, LLC</td></tr>
-    <tr><th>Approver</th><td>[Add approver]</td></tr>
-    <tr><th>Classification</th><td>Internal Confidential</td></tr>
-  </table>
-
-  <h2>1. Purpose</h2>
-  <p>[Add content here.]</p>
-
-  <h2>2. Scope</h2>
-  <p>[Add content here.]</p>
-
-  <h2>3. Content</h2>
-  <p>[Add content here.]</p>
-
-  <h2>4. Related Documents</h2>
-  <p>[List related documents here.]</p>
-
-  <h2>5. Revision History</h2>
-  <p>[Add revision history here.]</p>
+<p>Welcome to the Work-A-Beez Database Design &amp; Data Dictionary.</p>
+<p>This document defines the logical database architecture, naming standards, entity relationships, data ownership, indexing strategy, auditing model, and data dictionary used throughout the Work-A-Beez platform.</p>
+<p>It serves as the authoritative reference for database design, application development, reporting, integrations, and future schema evolution.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Database Philosophy</li>
+<li>Design Principles</li>
+<li>Multi-Tenant Data Model</li>
+<li>Naming Standards</li>
+<li>Data Types</li>
+<li>Standard Columns</li>
+<li>Primary Keys</li>
+<li>Foreign Keys</li>
+<li>Auditing</li>
+<li>Soft Deletes</li>
+<li>Database Schema Overview</li>
+<li>Core Business Entities</li>
+<li>Relationship Model</li>
+<li>Indexing Standards</li>
+<li>Constraints</li>
+<li>Transactions</li>
+<li>Performance Guidelines</li>
+<li>Archiving</li>
+<li>Data Retention</li>
+<li>Change Management</li>
+</ol>
+<hr />
+<h2>Database Philosophy</h2>
+<p>The Work-A-Beez database is designed around the following principles:</p>
+<ul>
+<li>Data integrity</li>
+<li>Scalability</li>
+<li>Performance</li>
+<li>Simplicity</li>
+<li>Auditability</li>
+<li>Tenant isolation</li>
+<li>Extensibility</li>
+</ul>
+<p>Every table should support long-term maintainability while minimizing duplication and enforcing business rules through appropriate constraints.</p>
+<hr />
+<h2>Design Principles</h2>
+<p>The database follows these architectural standards:</p>
+<ul>
+<li>Normalize data where practical</li>
+<li>Use surrogate primary keys</li>
+<li>Enforce referential integrity</li>
+<li>Store timestamps in UTC</li>
+<li>Avoid duplicate data</li>
+<li>Soft delete business records</li>
+<li>Audit all write operations</li>
+<li>Support horizontal scaling</li>
+<li>Separate configuration from transactional data</li>
+</ul>
+<hr />
+<h2>Multi-Tenant Architecture</h2>
+<p>Every business entity belonging to a customer organization must include an Organization identifier.</p>
+<p>Example:</p>
+<p><code>Organization
+     |
+     +-- Employees
+     +-- Departments
+     +-- Locations
+     +-- Schedules
+     +-- Time Entries
+     +-- Leave Requests
+     +-- Reports
+     +-- Notifications</code></p>
+<p>All queries executed by the application must be scoped to the authenticated organization unless explicitly performing platform administration.</p>
+<hr />
+<h2>Naming Standards</h2>
+<p>Database object names use PascalCase for tables and camelCase or snake_case may be used consistently for columns depending on implementation standards adopted by the engineering team.</p>
+<p>Examples:</p>
+<p>Tables</p>
+<p><code>Organization
+Employee
+Department
+Location
+Schedule
+Shift
+TimeEntry
+LeaveRequest
+Notification</code></p>
+<p>Columns</p>
+<p><code>employeeId
+organizationId
+departmentId
+createdAt
+updatedAt</code></p>
+<p>Avoid abbreviations unless they are universally recognized.</p>
+<hr />
+<h2>Standard Data Types</h2>
+<p>Recommended logical types include:</p>
+<table>
+<thead>
+<tr>
+<th>Data</th>
+<th>Recommended Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Identifier</td>
+<td>UUID</td>
+</tr>
+<tr>
+<td>Name</td>
+<td>VARCHAR(150)</td>
+</tr>
+<tr>
+<td>Email</td>
+<td>VARCHAR(255)</td>
+</tr>
+<tr>
+<td>Phone</td>
+<td>VARCHAR(25)</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>DATE</td>
+</tr>
+<tr>
+<td>DateTime</td>
+<td>TIMESTAMP WITH TIME ZONE</td>
+</tr>
+<tr>
+<td>Currency</td>
+<td>DECIMAL(18,2)</td>
+</tr>
+<tr>
+<td>Hours</td>
+<td>DECIMAL(6,2)</td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td>BOOLEAN</td>
+</tr>
+<tr>
+<td>Notes</td>
+<td>TEXT</td>
+</tr>
+<tr>
+<td>JSON Configuration</td>
+<td>JSON / JSONB</td>
+</tr>
+</tbody>
+</table>
+<p>Specific physical types may vary by the chosen database engine.</p>
+<hr />
+<h2>Standard Columns</h2>
+<p>Every business table should include the following audit columns:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>Primary Key</td>
+</tr>
+<tr>
+<td>organizationId</td>
+<td>Tenant Identifier</td>
+</tr>
+<tr>
+<td>createdAt</td>
+<td>Record creation timestamp</td>
+</tr>
+<tr>
+<td>createdBy</td>
+<td>User that created record</td>
+</tr>
+<tr>
+<td>updatedAt</td>
+<td>Last modification timestamp</td>
+</tr>
+<tr>
+<td>updatedBy</td>
+<td>User that modified record</td>
+</tr>
+<tr>
+<td>deletedAt</td>
+<td>Soft delete timestamp</td>
+</tr>
+<tr>
+<td>deletedBy</td>
+<td>User performing deletion</td>
+</tr>
+<tr>
+<td>version</td>
+<td>Optimistic concurrency version</td>
+</tr>
+</tbody>
+</table>
+<p>Using a consistent audit model simplifies reporting, troubleshooting, and compliance.</p>
+<hr />
+<h2>Primary Keys</h2>
+<p>All tables use surrogate primary keys.</p>
+<p>Example:</p>
+<p><code>employeeId UUID</code></p>
+<p>Characteristics:</p>
+<ul>
+<li>Immutable</li>
+<li>Unique</li>
+<li>Non-business value</li>
+<li>Never reused</li>
+<li>Generated by the platform</li>
+</ul>
+<p>Business identifiers such as employee numbers should not be used as primary keys.</p>
+<hr />
+<h2>Foreign Keys</h2>
+<p>Relationships are enforced using foreign keys where appropriate.</p>
+<p>Example:</p>
+<p>```
+Employee
+   -- departmentId</p>
+<p>Department
+   -- departmentId
+```</p>
+<p>Foreign keys should prevent orphaned records while supporting valid lifecycle operations.</p>
+<hr />
+<h2>Soft Delete Strategy</h2>
+<p>Business records are not permanently deleted under normal operations.</p>
+<p>Instead, records are marked using:</p>
+<p><code>deletedAt
+deletedBy</code></p>
+<p>Soft deletion preserves:</p>
+<ul>
+<li>Audit history</li>
+<li>Payroll history</li>
+<li>Reporting accuracy</li>
+<li>Regulatory compliance</li>
+<li>Historical analytics</li>
+</ul>
+<p>Permanent deletion should be restricted to controlled administrative or legal processes.</p>
+<hr />
+<h2>Audit Model</h2>
+<p>Every create, update, and delete operation should generate an audit event.</p>
+<p>Audit events capture:</p>
+<ul>
+<li>User</li>
+<li>Organization</li>
+<li>Timestamp</li>
+<li>Entity</li>
+<li>Entity Identifier</li>
+<li>Action</li>
+<li>Previous Values</li>
+<li>New Values</li>
+<li>IP Address</li>
+<li>Device Information (where available)</li>
+</ul>
+<p>Audit records are append-only and must not be modified after creation.</p>
+<hr />
+<h2>Database Schema Overview</h2>
+<p>Core business tables include:</p>
+<p><code>Organization
+User
+Role
+Permission
+Employee
+Department
+Location
+JobTitle
+ManagerAssignment
+Schedule
+Shift
+TimeEntry
+Break
+LeaveType
+LeaveBalance
+LeaveRequest
+Holiday
+Availability
+Announcement
+Message
+Notification
+PayrollPeriod
+AuditLog
+Document
+Attachment
+ApiKey
+Webhook
+Subscription
+Invoice</code></p>
+<p>Additional lookup and configuration tables support platform operations.</p>
+<hr />
+<h2>Organization Table</h2>
+<p>Purpose:</p>
+<p>Stores customer organization information.</p>
+<p>Primary fields include:</p>
+<ul>
+<li>organizationId</li>
+<li>organizationName</li>
+<li>legalName</li>
+<li>website</li>
+<li>timezone</li>
+<li>language</li>
+<li>subscriptionStatus</li>
+<li>createdAt</li>
+</ul>
+<p>Relationships:</p>
+<ul>
+<li>One Organization has many Employees.</li>
+<li>One Organization has many Departments.</li>
+<li>One Organization has many Locations.</li>
+<li>One Organization has many Schedules.</li>
+</ul>
+<hr />
+<h2>Employee Table</h2>
+<p>Purpose:</p>
+<p>Stores employee records.</p>
+<p>Primary fields include:</p>
+<ul>
+<li>employeeId</li>
+<li>organizationId</li>
+<li>employeeNumber</li>
+<li>firstName</li>
+<li>lastName</li>
+<li>preferredName</li>
+<li>email</li>
+<li>phone</li>
+<li>hireDate</li>
+<li>employmentStatus</li>
+<li>managerId</li>
+<li>departmentId</li>
+<li>locationId</li>
+<li>jobTitleId</li>
+</ul>
+<p>Relationships:</p>
+<p>Employee belongs to:</p>
+<ul>
+<li>Organization</li>
+<li>Department</li>
+<li>Location</li>
+<li>Job Title</li>
+</ul>
+<p>Employee has:</p>
+<ul>
+<li>Time Entries</li>
+<li>Leave Requests</li>
+<li>Availability</li>
+<li>Notifications</li>
+<li>Documents</li>
+<li>Schedule Assignments</li>
+</ul>
+<hr />
+<h2>Department Table</h2>
+<p>Purpose:</p>
+<p>Groups employees for operational management.</p>
+<p>Key fields:</p>
+<ul>
+<li>departmentId</li>
+<li>organizationId</li>
+<li>departmentName</li>
+<li>managerId</li>
+<li>description</li>
+</ul>
+<p>Relationships:</p>
+<p>Department has many Employees.</p>
+<p>Department has many Schedules.</p>
+<p>Department has many Reports.</p>
+<hr />
+<h2>Location Table</h2>
+<p>Purpose:</p>
+<p>Represents physical or virtual work locations.</p>
+<p>Fields include:</p>
+<ul>
+<li>locationId</li>
+<li>organizationId</li>
+<li>locationName</li>
+<li>address</li>
+<li>city</li>
+<li>state</li>
+<li>postalCode</li>
+<li>country</li>
+<li>timezone</li>
+<li>latitude</li>
+<li>longitude</li>
+</ul>
+<p>Relationships:</p>
+<p>Location contains:</p>
+<ul>
+<li>Employees</li>
+<li>Shifts</li>
+<li>Time Entries</li>
+<li>Schedules</li>
+</ul>
+<hr />
+<h2>Schedule Table</h2>
+<p>Purpose:</p>
+<p>Represents a published schedule.</p>
+<p>Fields include:</p>
+<ul>
+<li>scheduleId</li>
+<li>organizationId</li>
+<li>name</li>
+<li>startDate</li>
+<li>endDate</li>
+<li>status</li>
+<li>publishedAt</li>
+<li>createdBy</li>
+</ul>
+<p>Relationships:</p>
+<p>Schedule contains many Shifts.</p>
+<hr />
+<h2>Shift Table</h2>
+<p>Purpose:</p>
+<p>Represents a scheduled work assignment.</p>
+<p>Fields include:</p>
+<ul>
+<li>shiftId</li>
+<li>scheduleId</li>
+<li>employeeId</li>
+<li>locationId</li>
+<li>departmentId</li>
+<li>startTime</li>
+<li>endTime</li>
+<li>status</li>
+<li>notes</li>
+</ul>
+<p>Relationships:</p>
+<p>Shift belongs to one Schedule.</p>
+<p>Shift belongs to one Employee.</p>
+<p>Shift belongs to one Department.</p>
+<hr />
+<h2>TimeEntry Table</h2>
+<p>Purpose:</p>
+<p>Stores actual worked time.</p>
+<p>Fields include:</p>
+<ul>
+<li>timeEntryId</li>
+<li>employeeId</li>
+<li>clockIn</li>
+<li>clockOut</li>
+<li>totalHours</li>
+<li>overtimeHours</li>
+<li>approvalStatus</li>
+</ul>
+<p>Relationships:</p>
+<p>TimeEntry belongs to Employee.</p>
+<p>TimeEntry belongs to Payroll Period.</p>
+<hr />
+<h2>Relationship Standards</h2>
+<p>Relationships should use consistent naming conventions.</p>
+<p>Examples:</p>
+<p><code>Organization
+    |
+    +-- Employee
+    |      +-- TimeEntry
+    |      +-- LeaveRequest
+    |      +-- Availability
+    |      +-- Notification
+    |
+    +-- Department
+    |
+    +-- Location
+    |
+    +-- Schedule
+           +-- Shift</code></p>
+<p>Relationship names should clearly communicate ownership and cardinality.</p>
+<hr />
+<h2>Indexing Standards</h2>
+<p>Indexes should be created for:</p>
+<ul>
+<li>Primary Keys</li>
+<li>Foreign Keys</li>
+<li>Frequently searched columns</li>
+<li>Frequently filtered columns</li>
+<li>Frequently joined columns</li>
+<li>Unique business identifiers</li>
+</ul>
+<p>Composite indexes should reflect common query patterns identified through monitoring.</p>
+<hr />
+<h2>Constraints</h2>
+<p>Appropriate database constraints should be used to enforce data integrity.</p>
+<p>Examples include:</p>
+<ul>
+<li>Primary Key Constraints</li>
+<li>Foreign Key Constraints</li>
+<li>Unique Constraints</li>
+<li>Check Constraints</li>
+<li>Not Null Constraints</li>
+</ul>
+<p>Business validation should primarily occur in the application layer, with the database providing an additional layer of protection.</p>
+<hr />
+<h2>Transaction Management</h2>
+<p>Database transactions should be:</p>
+<ul>
+<li>Atomic</li>
+<li>Consistent</li>
+<li>Isolated</li>
+<li>Durable (ACID)</li>
+</ul>
+<p>Long-running transactions should be avoided to reduce contention and improve scalability.</p>
+<hr />
+<h2>Performance Guidelines</h2>
+<p>To maintain performance as the platform grows:</p>
+<ul>
+<li>Retrieve only required columns.</li>
+<li>Use pagination for large result sets.</li>
+<li>Avoid N+1 query patterns.</li>
+<li>Monitor slow queries.</li>
+<li>Optimize indexes based on real-world usage.</li>
+<li>Archive historical data when appropriate.</li>
+</ul>
+<p>Regular performance reviews should be part of ongoing database maintenance.</p>
+<hr />
+<h2>Data Retention</h2>
+<p>Retention policies should align with legal, regulatory, and contractual requirements.</p>
+<p>Examples:</p>
+<ul>
+<li>Audit Logs</li>
+<li>Payroll Records</li>
+<li>Time Entries</li>
+<li>Leave Requests</li>
+<li>Employee Documents</li>
+</ul>
+<p>Retention periods may vary by jurisdiction and customer configuration.</p>
+<hr />
+<h2>Change Management</h2>
+<p>All schema changes should follow the organization's change management process.</p>
+<p>Recommended practices include:</p>
+<ul>
+<li>Version-controlled migration scripts</li>
+<li>Peer review</li>
+<li>Automated testing</li>
+<li>Rollback procedures</li>
+<li>Staging validation</li>
+<li>Production deployment approvals</li>
+</ul>
+<p>Database changes should be backward compatible whenever practical.</p>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>System Architecture Guide</li>
+<li>API Developer Guide</li>
+<li>API Reference Manual</li>
+<li>Security Overview</li>
+<li>Compliance Overview</li>
+<li>Administrator Guide</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a registered trademark of LBS.</p>
 {% endblock %}

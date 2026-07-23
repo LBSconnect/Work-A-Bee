@@ -1,31 +1,286 @@
 {% extends "internal_base.html" %}
-{% block title %}System Architecture{% endblock %}
+{% block title %}System Architecture Guide{% endblock %}
 {% block internal_content %}
-  <h1>System Architecture</h1>
-  <p class="muted">Status: Draft template &middot; Section: Engineering &middot; Classification: Internal Confidential &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <h1>System Architecture Guide</h1>
+  <p class="muted">Status: Needs Validation &middot; Classification: Internal &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This document has not been fully validated against the current codebase and mixes accurate description with idealized/aspirational practices (e.g., formal CI/CD pipelines, a REST API, multiple deployment environments, semantic-versioned releases) that are not yet implemented for Work-A-Beez today. Flagged for engineering review before being treated as authoritative.</div>
 
-  <p><em>This page is a starting template generated for LBS to complete. Replace the placeholder text in each section below with final content.</em></p>
-
-  <table style="margin-bottom:20px;">
-    <tr><th>Document Title</th><td>System Architecture</td></tr>
-    <tr><th>Version</th><td>[Add version]</td></tr>
-    <tr><th>Owner</th><td>Linton Business Solutions, LLC</td></tr>
-    <tr><th>Approver</th><td>[Add approver]</td></tr>
-    <tr><th>Classification</th><td>Internal Confidential</td></tr>
-  </table>
-
-  <h2>1. Purpose</h2>
-  <p>[Add content here.]</p>
-
-  <h2>2. Scope</h2>
-  <p>[Add content here.]</p>
-
-  <h2>3. Content</h2>
-  <p>[Add content here.]</p>
-
-  <h2>4. Related Documents</h2>
-  <p>[List related documents here.]</p>
-
-  <h2>5. Revision History</h2>
-  <p>[Add revision history here.]</p>
+<p>Welcome to the Work-A-Beez System Architecture Guide.</p>
+<p>This document describes the technical architecture of the Work-A-Beez platform, including its logical components, infrastructure, security model, deployment strategy, scalability approach, and engineering principles.</p>
+<p>The purpose of this guide is to ensure every engineer working on Work-A-Beez has a consistent understanding of how the platform is designed and how new functionality should be implemented.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Architecture Overview</li>
+<li>Design Principles</li>
+<li>High-Level Architecture</li>
+<li>Multi-Tenant Architecture</li>
+<li>Application Layers</li>
+<li>Domain-Driven Design</li>
+<li>Database Architecture</li>
+<li>Authentication &amp; Authorization</li>
+<li>API Layer</li>
+<li>Background Processing</li>
+<li>Event-Driven Architecture</li>
+<li>Notifications</li>
+<li>File Storage</li>
+<li>Caching Strategy</li>
+<li>Search</li>
+<li>Logging &amp; Monitoring</li>
+<li>Security Architecture</li>
+<li>Scalability</li>
+<li>Disaster Recovery</li>
+<li>CI/CD Pipeline</li>
+<li>Technology Stack</li>
+<li>Development Standards</li>
+<li>Future Architecture Roadmap</li>
+</ol>
+<hr />
+<h2>Purpose</h2>
+<p>The architecture of Work-A-Beez is designed around five primary goals:</p>
+<ul>
+<li>Scalability</li>
+<li>Reliability</li>
+<li>Security</li>
+<li>Maintainability</li>
+<li>Extensibility</li>
+</ul>
+<p>Every architectural decision should support one or more of these goals.</p>
+<hr />
+<h2>Architecture Overview</h2>
+<p>Work-A-Beez is a cloud-native, multi-tenant Software-as-a-Service (SaaS) platform that enables organizations to manage employees, schedules, attendance, leave, timekeeping, reporting, and workforce operations from a single application.</p>
+<p>The platform is designed to support organizations ranging from small businesses to large enterprises while ensuring complete logical isolation of customer data.</p>
+<hr />
+<h2>Architectural Principles</h2>
+<p>The Work-A-Beez platform follows these engineering principles:</p>
+<ul>
+<li>API-first development</li>
+<li>Secure by default</li>
+<li>Cloud-native deployment</li>
+<li>Modular architecture</li>
+<li>Domain-driven design</li>
+<li>Separation of concerns</li>
+<li>Least privilege security</li>
+<li>Infrastructure as Code</li>
+<li>Automated testing</li>
+<li>Continuous delivery</li>
+<li>Backward-compatible APIs whenever practical</li>
+</ul>
+<p>These principles guide all software design and implementation decisions.</p>
+<hr />
+<h2>High-Level Architecture</h2>
+<p>At a high level, the platform consists of the following logical layers:</p>
+<h3>Presentation Layer</h3>
+<p>Responsible for user interaction through:</p>
+<ul>
+<li>Web Application</li>
+<li>Mobile Applications</li>
+<li>Administrative Portal</li>
+<li>Public Website</li>
+</ul>
+<hr />
+<h3>Application Layer</h3>
+<p>Responsible for business logic including:</p>
+<ul>
+<li>Employee Management</li>
+<li>Scheduling</li>
+<li>Timekeeping</li>
+<li>Leave Management</li>
+<li>Reporting</li>
+<li>Notifications</li>
+<li>Billing</li>
+</ul>
+<p>Application services enforce business rules and orchestrate interactions between other components.</p>
+<hr />
+<h3>API Layer</h3>
+<p>Provides secure RESTful interfaces for:</p>
+<ul>
+<li>Web applications</li>
+<li>Mobile applications</li>
+<li>Third-party integrations</li>
+<li>Internal services</li>
+</ul>
+<p>All external communication passes through the API layer.</p>
+<hr />
+<h3>Domain Layer</h3>
+<p>Contains the core business rules of Work-A-Beez.</p>
+<p>Examples include:</p>
+<ul>
+<li>Employee lifecycle</li>
+<li>Schedule validation</li>
+<li>Overtime calculations</li>
+<li>PTO accrual</li>
+<li>Attendance rules</li>
+<li>Shift assignment</li>
+<li>Payroll preparation</li>
+</ul>
+<p>Business logic should reside in the domain layer rather than controllers or user interfaces.</p>
+<hr />
+<h3>Infrastructure Layer</h3>
+<p>Responsible for:</p>
+<ul>
+<li>Database access</li>
+<li>File storage</li>
+<li>Email delivery</li>
+<li>SMS messaging</li>
+<li>Authentication providers</li>
+<li>Queue processing</li>
+<li>External integrations</li>
+</ul>
+<p>Infrastructure components should remain replaceable without affecting business logic.</p>
+<hr />
+<h2>Multi-Tenant Architecture</h2>
+<p>Work-A-Beez uses a logical multi-tenant architecture.</p>
+<p>Each customer organization has:</p>
+<ul>
+<li>Unique Organization ID</li>
+<li>Independent configuration</li>
+<li>Separate user directory</li>
+<li>Isolated permissions</li>
+<li>Organization-specific branding</li>
+<li>Independent reporting</li>
+<li>Segregated business data</li>
+</ul>
+<p>Every request processed by the platform is associated with an Organization ID to enforce tenant isolation throughout the application stack.</p>
+<hr />
+<h2>Tenant Isolation</h2>
+<p>The platform enforces tenant isolation at multiple layers:</p>
+<ul>
+<li>Authentication</li>
+<li>Authorization</li>
+<li>API access</li>
+<li>Business services</li>
+<li>Database queries</li>
+<li>Reporting</li>
+<li>File storage</li>
+<li>Audit logging</li>
+</ul>
+<p>No customer should ever have access to another organization's data.</p>
+<hr />
+<h2>Domain Modules</h2>
+<p>The application is organized into functional domains.</p>
+<p>Core domains include:</p>
+<ul>
+<li>Authentication</li>
+<li>Organization Management</li>
+<li>Employee Management</li>
+<li>Scheduling</li>
+<li>Timekeeping</li>
+<li>Leave Management</li>
+<li>Availability</li>
+<li>Notifications</li>
+<li>Messaging</li>
+<li>Reports</li>
+<li>Payroll</li>
+<li>Billing</li>
+<li>Audit</li>
+<li>Administration</li>
+</ul>
+<p>Each domain owns its business rules and exposes services through well-defined interfaces.</p>
+<hr />
+<h2>Service Boundaries</h2>
+<p>Each domain should minimize dependencies on other domains.</p>
+<p>Communication between domains should occur through:</p>
+<ul>
+<li>Service interfaces</li>
+<li>Domain events</li>
+<li>Message queues</li>
+<li>APIs</li>
+</ul>
+<p>Direct database access between domains should be avoided whenever practical.</p>
+<hr />
+<h2>Data Ownership</h2>
+<p>Each domain owns its data.</p>
+<p>Examples:</p>
+<p>Scheduling owns:</p>
+<ul>
+<li>Shifts</li>
+<li>Schedule Templates</li>
+<li>Open Shifts</li>
+</ul>
+<p>Timekeeping owns:</p>
+<ul>
+<li>Time Entries</li>
+<li>Break Records</li>
+<li>Attendance Events</li>
+</ul>
+<p>Employee Management owns:</p>
+<ul>
+<li>Employee Profiles</li>
+<li>Employment Status</li>
+<li>Organizational Assignments</li>
+</ul>
+<p>Other domains should access data through published interfaces rather than directly modifying another domain's records.</p>
+<hr />
+<h2>Request Lifecycle</h2>
+<p>A typical request follows this sequence:</p>
+<ol>
+<li>Client sends request.</li>
+<li>Authentication validates identity.</li>
+<li>Authorization verifies permissions.</li>
+<li>API validates request format.</li>
+<li>Business services execute logic.</li>
+<li>Database transactions are committed.</li>
+<li>Audit events are recorded.</li>
+<li>Notifications are queued if required.</li>
+<li>Response is returned to the client.</li>
+</ol>
+<p>This standardized flow promotes consistency, security, and observability.</p>
+<hr />
+<h2>Configuration Management</h2>
+<p>Application configuration should be externalized and environment-specific.</p>
+<p>Examples include:</p>
+<ul>
+<li>Database connections</li>
+<li>API secrets</li>
+<li>Email providers</li>
+<li>Storage providers</li>
+<li>Feature flags</li>
+<li>Third-party credentials</li>
+<li>Logging levels</li>
+</ul>
+<p>Sensitive configuration values must never be hardcoded in application source code.</p>
+<hr />
+<h2>Design Objectives</h2>
+<p>When introducing new features, developers should strive to:</p>
+<ul>
+<li>Reuse existing services before creating new ones.</li>
+<li>Keep business logic centralized.</li>
+<li>Avoid duplicate implementations.</li>
+<li>Favor composition over duplication.</li>
+<li>Preserve backward compatibility whenever feasible.</li>
+<li>Document architectural decisions that introduce significant changes.</li>
+</ul>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>API Developer Guide</li>
+<li>API Reference Manual</li>
+<li>Security Overview</li>
+<li>Administrator Guide</li>
+<li>Compliance Overview</li>
+<li>DevOps Deployment Guide (Planned)</li>
+<li>Disaster Recovery Plan (Planned)</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a registered trademark of LBS.</p>
 {% endblock %}
