@@ -404,7 +404,7 @@ def admin_dashboard():
         "weekly_payroll": round(sum(d["total_due"] for d in detail), 2),
     }
 
-    day_totals = {period_start + timedelta(days=i): 0.0 for i in range(5)}
+    day_totals = {period_start + timedelta(days=i): 0.0 for i in range(7)}
     for d in detail:
         for e in d["entries"]:
             day = e["clock_in"].date()
