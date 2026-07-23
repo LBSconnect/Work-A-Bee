@@ -23,7 +23,7 @@ import performance
 import plans
 import recognition
 import schedule
-from models import init_db, get_db
+from models import init_db, get_db, ensure_system_admin_bootstrap
 from orgs import get_active_org, normalize_company_code
 from payroll import get_period_bounds, calculate_payroll, get_period_entries, get_prior_periods
 from email_report import send_report_email
@@ -48,6 +48,7 @@ app.config.update(
 limiter = Limiter(get_remote_address, app=app, default_limits=[])
 
 init_db()
+ensure_system_admin_bootstrap()
 
 app.register_blueprint(wizard_blueprint)
 
@@ -937,7 +938,117 @@ for _endpoint, _slug, _template, _title in doc_pages.LIBRARY2:
     app.add_url_rule(f"/trust-center/{_slug}", _endpoint, admin_required(_make_static_doc_view(_template)))
 
 
+# ---------------------------------------------------------------------------
+# System admin: a platform-wide role (separate from per-org admin_users) with
+# read access across every tenant. Not linked from any tenant-facing page -
+# only reachable by direct URL to /system/login. Gates /internal/*.
+# ---------------------------------------------------------------------------
+
+def system_admin_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        system_admin_id = session.get("system_admin_id")
+        if not system_admin_id:
+            return redirect(url_for("system_login"))
+        with get_db() as conn:
+            sys_admin = conn.execute(
+                "SELECT * FROM system_admins WHERE id=%s", (system_admin_id,)
+            ).fetchone()
+        if sys_admin is None:
+            session.pop("system_admin_id", None)
+            return redirect(url_for("system_login"))
+        if sys_admin["must_change_password"] and request.endpoint != "system_change_password":
+            return redirect(url_for("system_change_password"))
+        g.system_admin = sys_admin
+        return f(*args, **kwargs)
+    return wrapper
+
+
+@app.route("/system/login", methods=["GET", "POST"])
+@limiter.limit("10 per minute")
+def system_login():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        with get_db() as conn:
+            sys_admin = conn.execute(
+                "SELECT * FROM system_admins WHERE username=%s", (username,)
+            ).fetchone()
+        if sys_admin and check_password_hash(sys_admin["password_hash"], password):
+            with get_db() as conn:
+                conn.execute("UPDATE system_admins SET last_login_at=NOW() WHERE id=%s", (sys_admin["id"],))
+                conn.commit()
+            session.clear()
+            session["system_admin_id"] = sys_admin["id"]
+            if sys_admin["must_change_password"]:
+                return redirect(url_for("system_change_password"))
+            return redirect(url_for("system_dashboard"))
+        flash("Username/password not recognized.")
+    return render_template("system_login.html")
+
+
+@app.route("/system/logout")
+def system_logout():
+    session.pop("system_admin_id", None)
+    return redirect(url_for("system_login"))
+
+
+@app.route("/system/change-password", methods=["GET", "POST"])
+@system_admin_required
+def system_change_password():
+    if request.method == "POST":
+        current = request.form.get("current_password", "")
+        new = request.form.get("new_password", "")
+        confirm = request.form.get("confirm_password", "")
+        if not check_password_hash(g.system_admin["password_hash"], current):
+            flash("Current password is incorrect.")
+        elif len(new) < 12:
+            flash("New password must be at least 12 characters.")
+        elif new != confirm:
+            flash("New password and confirmation don't match.")
+        else:
+            with get_db() as conn:
+                conn.execute(
+                    "UPDATE system_admins SET password_hash=%s, must_change_password=FALSE WHERE id=%s",
+                    (generate_password_hash(new), g.system_admin["id"]),
+                )
+                conn.commit()
+            flash("Password updated.")
+            return redirect(url_for("system_dashboard"))
+    return render_template("system_change_password.html", forced=g.system_admin["must_change_password"])
+
+
+@app.route("/system")
+@system_admin_required
+def system_dashboard():
+    with get_db() as conn:
+        orgs = conn.execute(
+            "SELECT o.*, "
+            "(SELECT COUNT(*) FROM employees e WHERE e.org_id=o.id) AS employee_count, "
+            "(SELECT COUNT(*) FROM admin_users a WHERE a.org_id=o.id) AS admin_count "
+            "FROM organizations o ORDER BY o.created_at DESC"
+        ).fetchall()
+    return render_template("system_dashboard.html", orgs=orgs)
+
+
+@app.route("/system/orgs/<int:org_id>")
+@system_admin_required
+def system_org_detail(org_id):
+    with get_db() as conn:
+        org = conn.execute("SELECT * FROM organizations WHERE id=%s", (org_id,)).fetchone()
+        if org is None:
+            abort(404)
+        admins = conn.execute(
+            "SELECT * FROM admin_users WHERE org_id=%s ORDER BY id", (org_id,)
+        ).fetchall()
+        employees = conn.execute(
+            "SELECT * FROM employees WHERE org_id=%s ORDER BY name", (org_id,)
+        ).fetchall()
+    return render_template("system_org_detail.html", org=org, admins=admins, employees=employees)
+
+
 @app.route("/internal")
+@system_admin_required
 def internal_docs_index():
     return render_template(
         "internal_docs_index.html", updated=datetime.now().date(),
@@ -946,10 +1057,10 @@ def internal_docs_index():
 
 
 for _endpoint, _slug, _template, _title, _section in doc_pages.LIBRARY3:
-    app.add_url_rule(f"/internal/{_slug}", _endpoint, _make_static_doc_view(_template))
+    app.add_url_rule(f"/internal/{_slug}", _endpoint, system_admin_required(_make_static_doc_view(_template)))
 
 for _endpoint, _slug, _template, _title in doc_pages.LIBRARY3_REAL:
-    app.add_url_rule(f"/internal/{_slug}", _endpoint, _make_static_doc_view(_template))
+    app.add_url_rule(f"/internal/{_slug}", _endpoint, system_admin_required(_make_static_doc_view(_template)))
 
 
 def _locked_feature_response(org, feature_key, feature_label, for_admin, employee=None):

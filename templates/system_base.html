@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}System Admin{% endblock %}</title>
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo-workabee.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <div class="admin-topbar" style="background:#7f1d1d;">
+      <div class="admin-topbar-left">
+        <img src="{{ url_for('static', filename='logo-workabee.svg') }}" alt="Work-A-Beez">
+        <span>System Admin &middot; All Tenants</span>
+      </div>
+      <div class="admin-topbar-right">
+        <span>{{ g.system_admin.username }}</span>
+      </div>
+    </div>
+
+    <div class="admin-body-row">
+      <div class="admin-sidebar">
+        <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'system_dashboard' else '' }}" href="{{ url_for('system_dashboard') }}"><span class="admin-si">🏢</span> Organizations</a>
+        <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'internal_docs_index' else '' }}" href="{{ url_for('internal_docs_index') }}"><span class="admin-si">📁</span> Internal Docs</a>
+        <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'system_change_password' else '' }}" href="{{ url_for('system_change_password') }}"><span class="admin-si">🔑</span> Change Password</a>
+        <a class="admin-sidebar-item admin-sidebar-logout" href="{{ url_for('system_logout') }}"><span class="admin-si">🚪</span> Log out</a>
+      </div>
+
+      <div class="admin-main">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
+          {% endif %}
+        {% endwith %}
+        {% block system_content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+</body>
+</html>
