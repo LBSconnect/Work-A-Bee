@@ -215,7 +215,32 @@ def clock_action():
             (emp_id,),
         ).fetchall()
 
-        period_start, _ = get_period_bounds(today_in(org["timezone"]))
+        today = today_in(org["timezone"])
+        period_start, period_end = get_period_bounds(today)
+
+        current_period_detail = get_period_entries(conn, org, period_start, period_end)
+        my_current = next(
+            (d for d in current_period_detail if d["employee_code"] == emp["employee_code"]), None
+        )
+        current_week_hours = my_current["total_hours"] if my_current else 0.0
+        current_week_pay = my_current["total_due"] if my_current else 0.0
+
+        day_totals = {period_start + timedelta(days=i): 0.0 for i in range(7)}
+        if my_current:
+            for e in my_current["entries"]:
+                day = e["clock_in"].date()
+                if day in day_totals:
+                    day_totals[day] += e["hours"]
+        max_day_hours = max(day_totals.values()) if day_totals else 0
+        chart_days = [
+            {
+                "label": day.strftime("%a"),
+                "hours": round(hours, 1),
+                "pct": round(hours / max_day_hours * 100) if max_day_hours > 0 else 0,
+            }
+            for day, hours in sorted(day_totals.items())
+        ]
+
         weekly_history = []
         for start, end in get_prior_periods(period_start, count=4):
             rows = calculate_payroll(conn, org, start, end)
@@ -232,6 +257,17 @@ def clock_action():
             (emp_id, now_in(org["timezone"])),
         ).fetchall()
 
+        today_shift = conn.execute(
+            "SELECT * FROM shifts WHERE employee_id=%s AND shift_start::date=%s ORDER BY shift_start LIMIT 1",
+            (emp_id, today),
+        ).fetchone()
+
+        department = None
+        if emp.get("department_id"):
+            department = conn.execute(
+                "SELECT name FROM departments WHERE id=%s", (emp["department_id"],)
+            ).fetchone()
+
     history = []
     for e in recent_entries:
         hours = None
@@ -246,6 +282,12 @@ def clock_action():
         history=history,
         weekly_history=weekly_history,
         upcoming_shifts=upcoming_shifts,
+        today_shift=today_shift,
+        department=department["name"] if department else None,
+        current_week_hours=current_week_hours,
+        current_week_pay=current_week_pay,
+        chart_days=chart_days,
+        now=now_in(org["timezone"]),
     )
 
 

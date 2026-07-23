@@ -1,26 +1,72 @@
-{% extends "base.html" %}
+{% extends "employee_base.html" %}
 {% block title %}{{ employee['name'] }}{% endblock %}
-{% block content %}
-  <h1>Hi, {{ employee['name'] }}</h1>
-  <p>
-    Current status:
-    {% if is_clocked_in %}
-      <span class="badge in">Clocked in</span>
-    {% else %}
-      <span class="badge out">Clocked out</span>
-    {% endif %}
-  </p>
-  <form method="post">
-    {% if is_clocked_in %}
-      <button type="submit" class="clock-out">&#10008; CLOCK OUT</button>
-    {% else %}
-      <button type="submit">&#10004; CLOCK IN</button>
-    {% endif %}
-  </form>
-  <a class="btn secondary" style="margin-top:16px;" href="{{ url_for('clock_exit') }}">Exit</a>
+{% block employee_content %}
+  <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-bottom:8px;">
+    <div>
+      <h1 style="margin-bottom:4px;">Hi, {{ employee.name }} 👋</h1>
+      <p class="muted">
+        Clock status:
+        {% if is_clocked_in %}<span class="badge in">On Duty</span>{% else %}<span class="badge out">Off Duty</span>{% endif %}
+        &middot; Current week: <strong>{{ "%.2f"|format(current_week_hours) }} hrs</strong>
+      </p>
+    </div>
 
+    <div style="background:#FFF8E1; border:1px solid #FFE082; border-radius:12px; padding:16px 20px; min-width:220px;">
+      <p style="font-weight:700; margin-bottom:10px;">
+        {% if is_clocked_in %}Ready to head out?{% else %}Ready to start your day?{% endif %}
+      </p>
+      <form method="post" style="margin:0;">
+        {% if is_clocked_in %}
+          <button type="submit" class="clock-out" style="margin:0; width:100%;">&#10008; CLOCK OUT</button>
+        {% else %}
+          <button type="submit" style="margin:0; width:100%;">&#10004; CLOCK IN</button>
+        {% endif %}
+      </form>
+      {% if today_shift %}
+        <p class="muted" style="margin-top:10px; font-size:12px;">
+          Scheduled: {{ today_shift.shift_start.strftime('%I:%M %p') }} &ndash; {{ today_shift.shift_end.strftime('%I:%M %p') }}
+        </p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="stat-cards admin-stat-cards">
+    <div class="stat-card">
+      <div class="stat-card-label">Today's Schedule</div>
+      {% if today_shift %}
+        <div class="stat-card-value" style="font-size:16px;">{{ today_shift.shift_start.strftime('%I:%M %p') }} &ndash; {{ today_shift.shift_end.strftime('%I:%M %p') }}</div>
+        {% if today_shift.notes %}<div class="stat-card-sub">{{ today_shift.notes }}</div>{% endif %}
+      {% else %}
+        <div class="stat-card-value" style="font-size:16px;">Not scheduled</div>
+        <div class="stat-card-sub">No shift today</div>
+      {% endif %}
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Hours This Week</div>
+      <div class="stat-card-value">{{ "%.2f"|format(current_week_hours) }}</div>
+      <div class="stat-card-sub">Total Hours</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Estimated Pay</div>
+      <div class="stat-card-value">${{ "%.2f"|format(current_week_pay) }}</div>
+      <div class="stat-card-sub">This week so far</div>
+    </div>
+  </div>
+
+  <div class="dash-panel" style="margin-top:8px;">
+    <div class="dash-panel-title">Hours This Week</div>
+    <div class="bar-chart">
+      {% for day in chart_days %}
+      <div class="bar-chart-col">
+        <div class="bar-chart-bar" style="height: {{ day.pct }}%;" title="{{ day.hours }} hrs"></div>
+        <div class="bar-chart-label">{{ day.label }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <h2 id="schedule" style="margin-top:32px; font-size:16px;">Upcoming shifts</h2>
   {% if upcoming_shifts %}
-    <h2 style="margin-top:32px; font-size:16px;">Upcoming shifts</h2>
     <table>
       <tr><th>Date</th><th>Time</th><th>Notes</th></tr>
       {% for s in upcoming_shifts %}
@@ -31,10 +77,12 @@
       </tr>
       {% endfor %}
     </table>
+  {% else %}
+    <p class="muted">No upcoming shifts scheduled.</p>
   {% endif %}
 
+  <h2 id="time-history" style="margin-top:32px; font-size:16px;">Recent activity</h2>
   {% if history %}
-    <h2 style="margin-top:32px; font-size:16px;">Recent activity</h2>
     <table>
       <tr><th>Date</th><th>Clock in</th><th>Clock out</th><th>Hours</th></tr>
       {% for h in history %}
@@ -52,6 +100,8 @@
       </tr>
       {% endfor %}
     </table>
+  {% else %}
+    <p class="muted">No clock history yet.</p>
   {% endif %}
 
   {% if weekly_history %}
@@ -67,4 +117,14 @@
       {% endfor %}
     </table>
   {% endif %}
+
+  <h2 id="profile" style="margin-top:32px; font-size:16px;">Profile</h2>
+  <table>
+    <tr><th>Employee ID</th><td>{{ employee.employee_code }}</td></tr>
+    <tr><th>Type</th><td>{{ (employee.worker_type or "employee")|capitalize }}</td></tr>
+    {% if employee.job_title %}<tr><th>Job Title</th><td>{{ employee.job_title }}</td></tr>{% endif %}
+    {% if department %}<tr><th>Department</th><td>{{ department }}</td></tr>{% endif %}
+    {% if employee.email %}<tr><th>Email</th><td>{{ employee.email }}</td></tr>{% endif %}
+    {% if employee.phone %}<tr><th>Phone</th><td>{{ employee.phone }}</td></tr>{% endif %}
+  </table>
 {% endblock %}
