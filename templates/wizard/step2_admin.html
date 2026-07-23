@@ -42,10 +42,12 @@
     {% if errors.confirm_password %}<p class="field-error">{{ errors.confirm_password }}</p>{% endif %}
 
     <label class="checkbox-label">
-      <input type="checkbox" name="terms" style="width:auto;"> I agree to the Terms of Service
+      <input type="checkbox" name="terms" style="width:auto;"> I agree to the
+      <a href="{{ url_for('terms_of_service') }}" target="_blank" rel="noopener">Terms of Service</a>
     </label>
     <label class="checkbox-label">
-      <input type="checkbox" name="privacy" style="width:auto;"> I agree to the Privacy Policy
+      <input type="checkbox" name="privacy" style="width:auto;"> I agree to the
+      <a href="{{ url_for('privacy_policy') }}" target="_blank" rel="noopener">Privacy Policy</a>
     </label>
     {% if errors.terms %}<p class="field-error">{{ errors.terms }}</p>{% endif %}
 
