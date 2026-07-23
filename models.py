@@ -275,6 +275,18 @@ def init_db():
                     reviewed_at TIMESTAMP
                 )
             """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS shift_swap_requests (
+                    id SERIAL PRIMARY KEY,
+                    org_id INTEGER NOT NULL REFERENCES organizations(id),
+                    shift_id INTEGER NOT NULL REFERENCES shifts(id),
+                    requested_by_employee_id INTEGER NOT NULL REFERENCES employees(id),
+                    status TEXT NOT NULL DEFAULT 'open',
+                    claimed_by_employee_id INTEGER REFERENCES employees(id),
+                    claimed_at TIMESTAMP,
+                    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+                )
+            """)
             conn.commit()
     except Exception:
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")

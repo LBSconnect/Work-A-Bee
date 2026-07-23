@@ -257,6 +257,13 @@ def clock_action():
             (emp_id, now_in(org["timezone"])),
         ).fetchall()
 
+        offered_shift_ids = {
+            row["shift_id"] for row in conn.execute(
+                "SELECT shift_id FROM shift_swap_requests WHERE requested_by_employee_id=%s AND status='open'",
+                (emp_id,),
+            ).fetchall()
+        }
+
         today_shift = conn.execute(
             "SELECT * FROM shifts WHERE employee_id=%s AND shift_start::date=%s ORDER BY shift_start LIMIT 1",
             (emp_id, today),
@@ -293,6 +300,7 @@ def clock_action():
         chart_days=chart_days,
         now=now_in(org["timezone"]),
         announcements=announcements,
+        offered_shift_ids=offered_shift_ids,
     )
 
 
@@ -422,6 +430,120 @@ def pto_requests_page():
         ).fetchall()
 
     return render_template("pto_requests.html", employee=emp, requests=my_requests)
+
+
+@app.route("/shifts/<int:shift_id>/offer-swap", methods=["POST"])
+def shift_offer_swap(shift_id):
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        shift = conn.execute(
+            "SELECT * FROM shifts WHERE id=%s AND employee_id=%s AND org_id=%s", (shift_id, emp_id, org_id)
+        ).fetchone()
+        if shift is None:
+            flash("Shift not found.")
+            return redirect(url_for("clock_action"))
+
+        existing = conn.execute(
+            "SELECT 1 FROM shift_swap_requests WHERE shift_id=%s AND status='open'", (shift_id,)
+        ).fetchone()
+        if existing:
+            flash("This shift is already offered for swap.")
+            return redirect(url_for("clock_action"))
+
+        conn.execute(
+            "INSERT INTO shift_swap_requests (org_id, shift_id, requested_by_employee_id) VALUES (%s,%s,%s)",
+            (org_id, shift_id, emp_id),
+        )
+        audit.log(conn, org_id, "employee", emp_id, "shift.swap_offered", f"shift {shift_id}")
+        conn.commit()
+    flash("Shift offered for swap. Anyone on your team can now claim it.")
+    return redirect(url_for("clock_action"))
+
+
+@app.route("/shifts/marketplace")
+def shift_marketplace():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        if emp is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        open_swaps = conn.execute(
+            "SELECT sw.*, s.shift_start, s.shift_end, s.notes, e.name AS offered_by_name "
+            "FROM shift_swap_requests sw "
+            "JOIN shifts s ON sw.shift_id = s.id "
+            "JOIN employees e ON sw.requested_by_employee_id = e.id "
+            "WHERE sw.org_id=%s AND sw.status='open' ORDER BY s.shift_start",
+            (org_id,),
+        ).fetchall()
+
+    return render_template("shift_marketplace.html", employee=emp, open_swaps=open_swaps)
+
+
+@app.route("/shifts/marketplace/<int:swap_id>/claim", methods=["POST"])
+def shift_swap_claim(swap_id):
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        swap = conn.execute(
+            "SELECT * FROM shift_swap_requests WHERE id=%s AND org_id=%s AND status='open'",
+            (swap_id, org_id),
+        ).fetchone()
+        if swap is None:
+            flash("That shift is no longer available to claim.")
+            return redirect(url_for("shift_marketplace"))
+        if swap["requested_by_employee_id"] == emp_id:
+            flash("You can't claim your own shift offer.")
+            return redirect(url_for("shift_marketplace"))
+
+        conn.execute("UPDATE shifts SET employee_id=%s WHERE id=%s", (emp_id, swap["shift_id"]))
+        conn.execute(
+            "UPDATE shift_swap_requests SET status='claimed', claimed_by_employee_id=%s, claimed_at=NOW() "
+            "WHERE id=%s",
+            (emp_id, swap_id),
+        )
+        audit.log(conn, org_id, "employee", emp_id, "shift.swap_claimed", f"shift {swap['shift_id']}")
+        conn.commit()
+    flash("Shift claimed! It's now on your schedule.")
+    return redirect(url_for("shift_marketplace"))
+
+
+@app.route("/shifts/marketplace/<int:swap_id>/cancel", methods=["POST"])
+def shift_swap_cancel(swap_id):
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        swap = conn.execute(
+            "SELECT * FROM shift_swap_requests WHERE id=%s AND org_id=%s AND requested_by_employee_id=%s "
+            "AND status='open'",
+            (swap_id, org_id, emp_id),
+        ).fetchone()
+        if swap is None:
+            flash("That offer can't be canceled.")
+            return redirect(url_for("shift_marketplace"))
+
+        conn.execute("UPDATE shift_swap_requests SET status='canceled' WHERE id=%s", (swap_id,))
+        audit.log(conn, org_id, "employee", emp_id, "shift.swap_canceled", f"shift {swap['shift_id']}")
+        conn.commit()
+    flash("Swap offer canceled.")
+    return redirect(url_for("shift_marketplace"))
 
 
 def admin_required(f):

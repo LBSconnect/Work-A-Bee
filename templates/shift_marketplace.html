@@ -1,0 +1,37 @@
+{% extends "employee_base.html" %}
+{% block title %}Shift Marketplace{% endblock %}
+{% block employee_content %}
+  <h1>Shift marketplace</h1>
+  <p class="muted">Claim an open shift someone else has offered, or offer one of your own from the Dashboard.</p>
+
+  {% if open_swaps %}
+    <table>
+      <tr><th>Date</th><th>Time</th><th>Notes</th><th>Offered by</th><th></th></tr>
+      {% for sw in open_swaps %}
+      <tr>
+        <td>{{ sw.shift_start.strftime('%a %b %d') }}</td>
+        <td>{{ sw.shift_start.strftime('%I:%M %p') }} &ndash; {{ sw.shift_end.strftime('%I:%M %p') }}</td>
+        <td class="muted">{{ sw.notes or '' }}</td>
+        <td>{{ sw.offered_by_name }}</td>
+        <td>
+          {% if sw.requested_by_employee_id == employee.id %}
+            <form method="post" action="{{ url_for('shift_swap_cancel', swap_id=sw.id) }}"
+                  onsubmit="return confirm('Cancel this swap offer?');" style="display:inline;">
+              <button type="submit" class="secondary" style="margin:0; padding:4px 10px; font-size:12px;">Cancel Offer</button>
+            </form>
+          {% else %}
+            <form method="post" action="{{ url_for('shift_swap_claim', swap_id=sw.id) }}"
+                  onsubmit="return confirm('Claim this shift? It will be added to your schedule.');" style="display:inline;">
+              <button type="submit" style="margin:0; padding:4px 10px; font-size:12px;">Claim</button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p class="muted">No open shifts available right now.</p>
+  {% endif %}
+
+  <p class="muted" style="margin-top:24px;"><a href="{{ url_for('clock_action') }}">&larr; Back to Dashboard</a></p>
+{% endblock %}
