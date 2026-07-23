@@ -16,6 +16,7 @@ import billing
 import choices
 import config
 import devices as devices_mod
+import performance
 import plans
 import schedule
 from models import init_db, get_db
@@ -504,6 +505,30 @@ def messages_page():
         conn.commit()
 
     return render_template("messages.html", employee=emp, thread=thread)
+
+
+@app.route("/performance")
+def performance_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if emp is None or org is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        rows = performance.shift_attendance(conn, org_id, now_in(org["timezone"]), weeks=8, employee_id=emp_id)
+        summary = performance.summarize_attendance(rows)
+
+    return render_template("performance.html", employee=emp, summary=summary, rows=rows)
 
 
 @app.route("/shifts/<int:shift_id>/offer-swap", methods=["POST"])
@@ -1420,6 +1445,31 @@ def admin_message_thread(employee_id):
         conn.commit()
 
     return render_template("admin_message_thread.html", employee=emp, thread=thread)
+
+
+@app.route("/admin/performance")
+@admin_required
+def admin_performance():
+    with get_db() as conn:
+        leaderboard = performance.org_leaderboard(conn, g.org["id"], now_in(g.org["timezone"]), weeks=8)
+    return render_template("admin_performance.html", leaderboard=leaderboard)
+
+
+@app.route("/admin/performance/<int:employee_id>")
+@admin_required
+def admin_performance_employee(employee_id):
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (employee_id, g.org["id"])
+        ).fetchone()
+        if emp is None:
+            flash("Employee not found.")
+            return redirect(url_for("admin_performance"))
+        rows = performance.shift_attendance(
+            conn, g.org["id"], now_in(g.org["timezone"]), weeks=8, employee_id=employee_id
+        )
+        summary = performance.summarize_attendance(rows)
+    return render_template("admin_performance_employee.html", employee=emp, summary=summary, rows=rows)
 
 
 @app.route("/admin/settings", methods=["GET", "POST"])

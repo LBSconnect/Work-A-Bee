@@ -1,0 +1,26 @@
+{% extends "admin_base.html" %}
+{% block title %}Performance{% endblock %}
+{% block admin_content %}
+  <h1>Team performance</h1>
+  <p class="muted">Attendance and punctuality against scheduled shifts over the last 8 weeks. Only employees with at least one completed scheduled shift are listed.</p>
+
+  {% if leaderboard %}
+    <table>
+      <tr><th>Employee</th><th>Shifts</th><th>On time</th><th>Late</th><th>Missed</th><th>Attendance</th><th>Punctuality</th><th></th></tr>
+      {% for row in leaderboard %}
+      <tr>
+        <td>{{ row.employee.name }}</td>
+        <td>{{ row.total_shifts }}</td>
+        <td>{{ row.on_time }}</td>
+        <td>{{ row.late }}</td>
+        <td>{{ row.missed }}</td>
+        <td>{{ row.attendance_rate }}%</td>
+        <td>{{ row.punctuality_rate }}%</td>
+        <td><a href="{{ url_for('admin_performance_employee', employee_id=row.employee.id) }}">Details</a></td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p class="muted">No completed scheduled shifts in the last 8 weeks yet. Add shifts under Schedule to start tracking attendance.</p>
+  {% endif %}
+{% endblock %}

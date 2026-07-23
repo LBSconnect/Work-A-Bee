@@ -1,0 +1,50 @@
+{% extends "employee_base.html" %}
+{% block title %}My Performance{% endblock %}
+{% block employee_content %}
+  <h1>My performance</h1>
+  <p class="muted">Attendance and punctuality for your scheduled shifts over the last 8 weeks.</p>
+
+  {% if summary.total_shifts %}
+    <div class="stat-cards admin-stat-cards">
+      <div class="stat-card">
+        <div class="stat-card-label">Attendance Rate</div>
+        <div class="stat-card-value">{{ summary.attendance_rate }}%</div>
+        <div class="stat-card-sub">{{ summary.total_shifts - summary.missed }} of {{ summary.total_shifts }} shifts worked</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">On-Time Rate</div>
+        <div class="stat-card-value">{{ summary.punctuality_rate }}%</div>
+        <div class="stat-card-sub">{{ summary.on_time }} on time</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Late Arrivals</div>
+        <div class="stat-card-value">{{ summary.late }}</div>
+        <div class="stat-card-sub">more than 10 min after shift start</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Missed Shifts</div>
+        <div class="stat-card-value">{{ summary.missed }}</div>
+        <div class="stat-card-sub">no clock-in recorded</div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:32px; font-size:16px;">Shift history</h2>
+    <table>
+      <tr><th>Date</th><th>Scheduled</th><th>Clocked in</th><th>Status</th></tr>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.shift_start.strftime('%a %b %d') }}</td>
+        <td>{{ r.shift_start.strftime('%I:%M %p') }}</td>
+        <td>{% if r.punch_in %}{{ r.punch_in.strftime('%I:%M %p') }}{% else %}&mdash;{% endif %}</td>
+        <td>
+          {% if r.status == 'on_time' %}<span class="badge in">On time</span>
+          {% elif r.status == 'late' %}<span class="badge" style="background:#FEF3C7; color:#92400E;">Late</span>
+          {% else %}<span class="badge" style="background:#FEE2E2; color:#991B1B;">Missed</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p class="muted" style="margin-top:16px;">No completed scheduled shifts in the last 8 weeks yet, so there's nothing to measure.</p>
+  {% endif %}
+{% endblock %}
