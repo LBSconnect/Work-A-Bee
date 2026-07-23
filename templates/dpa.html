@@ -1,0 +1,644 @@
+{% extends "base.html" %}
+{% block title %}Data Processing Addendum{% endblock %}
+{% block wrapclass %}wide{% endblock %}
+{% block content %}
+  <h1>Work-A-Bee Data Processing Addendum (DPA)</h1>
+  <p class="muted">Effective Date: July 23, 2026</p>
+
+  <p>This Data Processing Addendum ("DPA") forms part of and is incorporated into the Work-A-Bee Terms of Service (the "Agreement") between Linton Business Solutions, LLC, doing business as Work-A-Bee ("LBS," "Work-A-Bee," "Processor," "Service Provider," "we," "our," or "us") and the business entity subscribing to or using the Work-A-Bee platform ("Customer," "Controller," "Business," "you," or "your").</p>
+  <p>This DPA governs the processing of Personal Data by Linton Business Solutions, LLC on behalf of the Customer in connection with the Work-A-Bee workforce management platform.</p>
+  <p>If there is a conflict between this DPA and the <a href="{{ url_for('terms_of_service') }}">Terms of Service</a> with respect to Personal Data processing, this DPA shall control to the extent of that conflict.</p>
+
+  <h2>1. Purpose</h2>
+  <p>The purpose of this DPA is to define each party's rights and responsibilities regarding the processing of Personal Data within the Work-A-Bee platform and to establish commercially reasonable safeguards for protecting Customer Data.</p>
+  <p>This DPA is intended to support compliance with applicable privacy and data protection laws, including, where applicable:</p>
+  <ul>
+    <li>U.S. state privacy laws</li>
+    <li>Texas privacy laws</li>
+    <li>California Consumer Privacy Act (CCPA), as amended by the California Privacy Rights Act (CPRA)</li>
+    <li>Other applicable privacy regulations governing Customer operations</li>
+  </ul>
+  <p>Nothing in this DPA is intended to expand or reduce any statutory rights or obligations beyond those required by applicable law.</p>
+
+  <h2>2. Scope</h2>
+  <p>This DPA applies whenever Linton Business Solutions, LLC processes Personal Data on behalf of a Customer while providing the Work-A-Bee Service. This includes data processed through:</p>
+  <ul>
+    <li>Company registration</li>
+    <li>Employee management</li>
+    <li>Timekeeping</li>
+    <li>Attendance tracking</li>
+    <li>Scheduling</li>
+    <li>PTO management</li>
+    <li>Payroll reporting</li>
+    <li>Internal messaging</li>
+    <li>Notifications</li>
+    <li>Reporting dashboards</li>
+    <li>Customer support</li>
+    <li>Platform administration</li>
+    <li>APIs and integrations</li>
+    <li>Trial accounts</li>
+    <li>Paid subscriptions</li>
+  </ul>
+  <p>This DPA does not apply to information processed by third-party services that operate under their own privacy policies, except to the extent LBS engages those providers as authorized subprocessors.</p>
+
+  <h2>3. Definitions</h2>
+  <p>For purposes of this DPA:</p>
+  <p><strong>Agreement.</strong> The Work-A-Bee Terms of Service together with all incorporated policies.</p>
+  <p><strong>Customer.</strong> The legal business entity that subscribes to Work-A-Bee.</p>
+  <p><strong>Customer Data.</strong> Any information uploaded, entered, stored, generated, or transmitted by the Customer through the Work-A-Bee platform. Customer Data includes, but is not limited to:</p>
+  <ul>
+    <li>Employee records</li>
+    <li>Time entries</li>
+    <li>Attendance records</li>
+    <li>Work schedules</li>
+    <li>Payroll reports</li>
+    <li>PTO records</li>
+    <li>Internal messages</li>
+    <li>Company settings</li>
+    <li>Business reports</li>
+  </ul>
+  <p>Customer Data remains the property of the Customer.</p>
+  <p><strong>Personal Data.</strong> Information that identifies, relates to, describes, or can reasonably be linked to an identified or identifiable individual. Examples include:</p>
+  <ul>
+    <li>Name</li>
+    <li>Email address</li>
+    <li>Telephone number</li>
+    <li>Employee ID</li>
+    <li>Job title</li>
+    <li>Department</li>
+    <li>Work schedule</li>
+    <li>Timekeeping records</li>
+    <li>Attendance history</li>
+    <li>Login information</li>
+    <li>IP address</li>
+    <li>Device identifiers</li>
+  </ul>
+  <p>Personal Data does not include information that has been anonymized so that it can no longer reasonably identify an individual.</p>
+  <p><strong>Processing.</strong> Any operation performed on Personal Data, including:</p>
+  <ul>
+    <li>Collection</li>
+    <li>Recording</li>
+    <li>Organization</li>
+    <li>Storage</li>
+    <li>Retrieval</li>
+    <li>Use</li>
+    <li>Analysis</li>
+    <li>Transmission</li>
+    <li>Disclosure</li>
+    <li>Combination</li>
+    <li>Restriction</li>
+    <li>Deletion</li>
+    <li>Destruction</li>
+  </ul>
+  <p><strong>Controller.</strong> The Customer. The Customer determines what information is collected, why it is collected, how it will be used, how long it will be retained, and who is authorized to access it.</p>
+  <p><strong>Processor.</strong> Linton Business Solutions, LLC. LBS processes Personal Data only on behalf of and according to the documented instructions of the Customer, except where otherwise required by applicable law.</p>
+  <p><strong>Data Subject.</strong> An identified or identifiable individual whose Personal Data is processed through the Service, including:</p>
+  <ul>
+    <li>Employees</li>
+    <li>Administrators</li>
+    <li>Managers</li>
+    <li>Authorized users</li>
+    <li>Job applicants (if uploaded by Customer)</li>
+    <li>Contractors (if uploaded by Customer)</li>
+  </ul>
+  <p><strong>Subprocessor.</strong> A third-party service provider engaged by Linton Business Solutions, LLC to process Personal Data in support of the Work-A-Bee platform. Examples may include providers for:</p>
+  <ul>
+    <li>Cloud hosting</li>
+    <li>Payment processing</li>
+    <li>Email delivery</li>
+    <li>Authentication</li>
+    <li>Security monitoring</li>
+    <li>Customer support</li>
+    <li>Backup services</li>
+  </ul>
+  <p><strong>Security Incident.</strong> A confirmed event resulting in unauthorized access to, acquisition of, disclosure of, alteration of, or destruction of Customer Personal Data processed by LBS. A Security Incident does not include unsuccessful attempts or activities that do not compromise Customer Data, such as routine internet scans, firewall blocks, denial-of-service attempts that do not result in unauthorized access, or failed login attempts.</p>
+
+  <h2>4. Roles of the Parties</h2>
+  <p><strong>Customer Responsibilities.</strong> The Customer acts as the Controller (or equivalent role under applicable law) with respect to Customer Data and Personal Data processed through Work-A-Bee. The Customer is solely responsible for:</p>
+  <ul>
+    <li>determining the purpose of processing;</li>
+    <li>determining the legal basis for processing;</li>
+    <li>obtaining any legally required employee notices or consents;</li>
+    <li>ensuring uploaded data is accurate and lawful;</li>
+    <li>complying with applicable employment, labor, privacy, payroll, and tax laws;</li>
+    <li>responding to employee requests where required by law;</li>
+    <li>configuring the platform to meet its business requirements.</li>
+  </ul>
+  <p><strong>Linton Business Solutions Responsibilities.</strong> Linton Business Solutions acts as a Processor or Service Provider for Customer Data. LBS shall:</p>
+  <ul>
+    <li>process Personal Data only to provide the Work-A-Bee Service;</li>
+    <li>follow documented Customer instructions as reflected through Customer use of the platform;</li>
+    <li>implement commercially reasonable technical and organizational safeguards;</li>
+    <li>maintain confidentiality of Customer Data;</li>
+    <li>use authorized subprocessors only as described in this DPA;</li>
+    <li>assist Customers in meeting certain legal obligations where commercially reasonable and required by applicable law.</li>
+  </ul>
+  <p>LBS does not determine:</p>
+  <ul>
+    <li>the Customer's employment practices;</li>
+    <li>payroll calculations or approvals;</li>
+    <li>overtime policies;</li>
+    <li>employee discipline;</li>
+    <li>retention schedules established by the Customer; or</li>
+    <li>legal compliance decisions made by the Customer.</li>
+  </ul>
+
+  <h2>5. Nature and Purpose of Processing</h2>
+  <p>LBS processes Customer Personal Data solely for purposes that are necessary to provide the Work-A-Bee Service, including:</p>
+  <ul>
+    <li>authenticating users;</li>
+    <li>maintaining customer accounts;</li>
+    <li>recording employee time entries;</li>
+    <li>displaying schedules;</li>
+    <li>calculating work hours for reporting;</li>
+    <li>supporting payroll reporting functions;</li>
+    <li>facilitating employee communications;</li>
+    <li>generating workforce analytics;</li>
+    <li>providing customer support;</li>
+    <li>securing the platform;</li>
+    <li>monitoring system health;</li>
+    <li>preventing fraud;</li>
+    <li>maintaining backups;</li>
+    <li>complying with applicable legal obligations.</li>
+  </ul>
+  <p>LBS shall not process Customer Personal Data for advertising unrelated products or services, nor sell Customer Personal Data to third parties.</p>
+
+  <h2>6. Categories of Data Processed</h2>
+  <p>Depending on Customer use of the Service, Personal Data processed may include:</p>
+  <p><strong>Company Information</strong></p>
+  <ul>
+    <li>Company name</li>
+    <li>Business address</li>
+    <li>Business phone number</li>
+    <li>Billing contact</li>
+    <li>Subscription information</li>
+  </ul>
+  <p><strong>Administrator Information</strong></p>
+  <ul>
+    <li>Name</li>
+    <li>Email address</li>
+    <li>Telephone number</li>
+    <li>Login credentials</li>
+    <li>Account settings</li>
+  </ul>
+  <p><strong>Employee Information</strong></p>
+  <ul>
+    <li>Employee name</li>
+    <li>Employee ID</li>
+    <li>Department</li>
+    <li>Job title</li>
+    <li>Work schedules</li>
+    <li>Attendance history</li>
+    <li>Clock-in and clock-out records</li>
+    <li>PTO records</li>
+    <li>Internal communications</li>
+    <li>Payroll-related information entered by the Customer</li>
+  </ul>
+  <p><strong>Technical Information</strong></p>
+  <ul>
+    <li>IP addresses</li>
+    <li>Device identifiers</li>
+    <li>Browser information</li>
+    <li>Login timestamps</li>
+    <li>Session identifiers</li>
+    <li>Security logs</li>
+    <li>Application usage metrics</li>
+  </ul>
+  <p>LBS processes only the categories of Personal Data necessary to deliver the requested Services.</p>
+
+  <h2>7. Duration of Processing</h2>
+  <p>LBS will process Customer Personal Data for the duration of the Agreement unless:</p>
+  <ul>
+    <li>the Customer deletes the information;</li>
+    <li>the Agreement terminates;</li>
+    <li>applicable law requires longer retention; or</li>
+    <li>retention is reasonably necessary to resolve disputes, enforce agreements, comply with legal obligations, or maintain secure backups.</li>
+  </ul>
+
+  <h2>8. Processing Instructions</h2>
+  <p>Linton Business Solutions, LLC ("LBS") shall process Customer Personal Data only:</p>
+  <ul>
+    <li>To provide the Work-A-Bee Services requested by the Customer;</li>
+    <li>In accordance with the Agreement, this Data Processing Addendum, and the Customer's documented instructions;</li>
+    <li>As required to maintain, secure, troubleshoot, improve, and support the Service; or</li>
+    <li>As otherwise required by applicable law.</li>
+  </ul>
+  <p>If LBS believes a Customer instruction violates applicable law, LBS may suspend the applicable processing activity until the matter is resolved or decline to process the instruction where legally required.</p>
+
+  <h2>9. Confidentiality</h2>
+  <p>LBS recognizes that Customer Data is confidential business information. LBS shall:</p>
+  <ul>
+    <li>Maintain the confidentiality of Customer Personal Data;</li>
+    <li>Limit access to authorized personnel with a legitimate business need;</li>
+    <li>Require employees, contractors, and authorized agents to maintain appropriate confidentiality obligations;</li>
+    <li>Use Customer Data solely to perform services under the Agreement.</li>
+  </ul>
+  <p>Confidentiality obligations survive termination of the Agreement.</p>
+
+  <h2>10. Personnel Security</h2>
+  <p>LBS shall implement reasonable internal safeguards, including:</p>
+  <ul>
+    <li>Role-based access to systems;</li>
+    <li>Least-privilege access principles;</li>
+    <li>Authentication controls;</li>
+    <li>Employee confidentiality obligations;</li>
+    <li>Security awareness training appropriate to personnel responsibilities;</li>
+    <li>Secure offboarding procedures for personnel with access to Customer Data.</li>
+  </ul>
+  <p>Access to Customer information is granted only when necessary to support the Service.</p>
+
+  <h2>11. Technical and Organizational Security Measures</h2>
+  <p>LBS maintains commercially reasonable administrative, technical, and physical safeguards designed to protect Customer Personal Data. Security measures may include:</p>
+  <p><strong>Access Controls</strong></p>
+  <ul>
+    <li>Role-based permissions</li>
+    <li>Administrator authorization</li>
+    <li>Strong authentication</li>
+    <li>Session management</li>
+    <li>Account lockout protections</li>
+    <li>Password hashing using industry-standard algorithms</li>
+  </ul>
+  <p><strong>Network Security</strong></p>
+  <ul>
+    <li>Firewalls</li>
+    <li>Network segmentation where appropriate</li>
+    <li>TLS encryption for data transmitted over public networks</li>
+    <li>Intrusion monitoring</li>
+    <li>Secure API authentication</li>
+    <li>Secure cloud networking</li>
+  </ul>
+  <p><strong>Data Protection</strong></p>
+  <ul>
+    <li>Encryption of sensitive information in transit</li>
+    <li>Encryption of sensitive information at rest where appropriate</li>
+    <li>Secure database architecture</li>
+    <li>Multi-tenant logical separation</li>
+    <li>Backup encryption where applicable</li>
+  </ul>
+  <p><strong>Application Security</strong></p>
+  <ul>
+    <li>Secure software development practices</li>
+    <li>Dependency management</li>
+    <li>Security patching</li>
+    <li>Vulnerability remediation</li>
+    <li>Input validation</li>
+    <li>Output encoding</li>
+    <li>Protection against common web application vulnerabilities</li>
+  </ul>
+  <p><strong>Operational Security</strong></p>
+  <ul>
+    <li>Logging</li>
+    <li>Audit trails</li>
+    <li>Monitoring</li>
+    <li>Disaster recovery procedures</li>
+    <li>Backup management</li>
+    <li>Change management</li>
+    <li>Incident response procedures</li>
+  </ul>
+  <p>LBS reserves the right to improve or modify security controls provided such changes do not materially reduce the overall level of protection.</p>
+
+  <h2>12. Multi-Tenant Data Isolation</h2>
+  <p>Work-A-Bee operates using a secure multi-tenant architecture. LBS implements logical separation mechanisms intended to ensure:</p>
+  <ul>
+    <li>Each Customer accesses only its own data;</li>
+    <li>Customer records remain isolated from other organizations;</li>
+    <li>Authorization controls restrict cross-tenant access;</li>
+    <li>Administrative tools enforce tenant boundaries.</li>
+  </ul>
+  <p>Customers acknowledge that multi-tenant cloud architecture differs from dedicated hosting while providing commercially reasonable isolation between customer environments.</p>
+
+  <h2>13. Encryption</h2>
+  <p>Where commercially reasonable, LBS uses encryption technologies designed to protect Customer Personal Data. This includes:</p>
+  <ul>
+    <li>TLS encryption for data transmitted between users and the Service;</li>
+    <li>Encryption of stored credentials;</li>
+    <li>Secure password hashing;</li>
+    <li>Encryption of backups where applicable.</li>
+  </ul>
+  <p>Payment card information is processed directly by Stripe. LBS does not receive, store, or process full payment card numbers or CVV values.</p>
+
+  <h2>14. Authentication and Access Management</h2>
+  <p>Customers are responsible for managing user access within their organizations. Customers should:</p>
+  <ul>
+    <li>Use strong passwords;</li>
+    <li>Protect administrator credentials;</li>
+    <li>Disable inactive accounts promptly;</li>
+    <li>Remove former employees without unnecessary delay;</li>
+    <li>Review user permissions regularly.</li>
+  </ul>
+  <p>LBS is not responsible for unauthorized access resulting from compromised Customer credentials that are outside the reasonable control of LBS.</p>
+
+  <h2>15. Customer Responsibilities for Security</h2>
+  <p>Customers agree to implement reasonable administrative safeguards, including:</p>
+  <ul>
+    <li>Protecting login credentials;</li>
+    <li>Maintaining current contact information;</li>
+    <li>Using supported web browsers;</li>
+    <li>Securing company devices used to access Work-A-Bee;</li>
+    <li>Installing security updates on Customer-managed devices;</li>
+    <li>Maintaining appropriate anti-malware protection;</li>
+    <li>Reporting suspected security incidents promptly.</li>
+  </ul>
+  <p>Customers remain responsible for securing their own networks, endpoints, and internal systems.</p>
+
+  <h2>16. Security Incident Response</h2>
+  <p>LBS maintains internal procedures for responding to suspected Security Incidents. These procedures include, where appropriate: identification, containment, investigation, remediation, recovery, documentation, and lessons learned.</p>
+  <p>LBS will take commercially reasonable measures to mitigate the effects of confirmed Security Incidents affecting Customer Personal Data.</p>
+
+  <h2>17. Security Incident Notification</h2>
+  <p>If LBS becomes aware of a confirmed Security Incident involving Customer Personal Data under its control, LBS will notify the affected Customer without undue delay after confirming the incident. Notification may include, as appropriate:</p>
+  <ul>
+    <li>Nature of the incident;</li>
+    <li>Categories of information involved;</li>
+    <li>Approximate number of affected records, if known;</li>
+    <li>Measures taken to contain the incident;</li>
+    <li>Recommended Customer actions;</li>
+    <li>Contact information for follow-up.</li>
+  </ul>
+  <p>Notification may be delayed where necessary to preserve forensic investigations, comply with law enforcement requests, meet legal obligations, or prevent further harm.</p>
+  <p>Notification of a Security Incident does not constitute an admission of fault or liability.</p>
+
+  <h2>18. Security Testing</h2>
+  <p>LBS may periodically perform commercially reasonable security activities including vulnerability assessments, dependency scanning, security updates, infrastructure monitoring, application testing, and logging review.</p>
+  <p>LBS is not obligated to disclose confidential security procedures, penetration testing reports, source code, or proprietary security documentation except where required by applicable law or expressly agreed in writing.</p>
+
+  <h2>19. Business Continuity and Disaster Recovery</h2>
+  <p>LBS maintains commercially reasonable business continuity and disaster recovery practices intended to support restoration of critical services following significant operational disruptions. Recovery objectives may vary depending on the nature of the incident and available infrastructure. While LBS strives to maintain service availability, uninterrupted operation cannot be guaranteed.</p>
+
+  <h2>20. Data Integrity</h2>
+  <p>LBS implements reasonable measures intended to maintain the integrity of Customer Data during processing. Customers acknowledge that:</p>
+  <ul>
+    <li>The accuracy of Customer Data depends upon information entered by Customer users;</li>
+    <li>Payroll reports are generated based upon Customer-configured rules and entered data;</li>
+    <li>Customers remain responsible for reviewing payroll calculations before processing employee compensation.</li>
+  </ul>
+
+  <h2>21. No Guarantee of Absolute Security</h2>
+  <p>Although LBS employs industry-standard safeguards, no internet-connected service or cloud platform can guarantee absolute security. Accordingly, LBS does not warrant that the Service will be immune from cyberattacks, unauthorized access attempts, distributed denial-of-service attacks, internet outages, hardware failures, software defects, force majeure events, or other circumstances beyond LBS's reasonable control.</p>
+  <p>Both parties acknowledge that cybersecurity is a shared responsibility requiring appropriate safeguards by both LBS and the Customer.</p>
+
+  <h2>22. Authorized Subprocessors</h2>
+  <p>To provide and support the Work-A-Bee platform, Linton Business Solutions, LLC ("LBS") may engage carefully selected third-party service providers ("Subprocessors") to process Customer Personal Data on its behalf. Examples of Subprocessors may include providers of:</p>
+  <ul>
+    <li>Cloud hosting and infrastructure</li>
+    <li>Database hosting</li>
+    <li>Payment processing</li>
+    <li>Authentication and identity management</li>
+    <li>Email delivery</li>
+    <li>SMS and notification services</li>
+    <li>Customer support platforms</li>
+    <li>Backup and disaster recovery</li>
+    <li>System monitoring and logging</li>
+    <li>Security monitoring</li>
+    <li>Analytics</li>
+    <li>Error reporting</li>
+  </ul>
+  <p>Current major service providers include, where applicable:</p>
+  <ul>
+    <li>Stripe (subscription billing and payment processing)</li>
+    <li>Cloud hosting providers (such as Microsoft Azure, Amazon Web Services, or equivalent enterprise cloud providers)</li>
+    <li>Transactional email providers</li>
+    <li>Authentication providers</li>
+    <li>Monitoring and logging providers</li>
+  </ul>
+  <p>LBS may replace or add Subprocessors as business needs evolve.</p>
+
+  <h2>23. Subprocessor Obligations</h2>
+  <p>LBS shall use commercially reasonable efforts to ensure that each Subprocessor is contractually obligated to:</p>
+  <ul>
+    <li>Maintain appropriate confidentiality;</li>
+    <li>Protect Personal Data using reasonable security measures;</li>
+    <li>Process Personal Data only as necessary to provide contracted services;</li>
+    <li>Comply with applicable legal obligations regarding data protection.</li>
+  </ul>
+  <p>LBS remains responsible for the performance of its Subprocessors to the extent required by applicable law and the Agreement.</p>
+
+  <h2>24. Customer Objections to Subprocessors</h2>
+  <p>If a Customer reasonably believes that a newly appointed Subprocessor presents a material risk to Customer Personal Data, the Customer may submit a written objection explaining the basis of the concern.</p>
+  <p>Upon receipt of a reasonable objection, LBS may, at its sole discretion:</p>
+  <ul>
+    <li>Provide additional information regarding the Subprocessor;</li>
+    <li>Offer a commercially reasonable alternative where feasible; or</li>
+    <li>Permit the Customer to terminate the affected Service if no reasonable alternative is available.</li>
+  </ul>
+  <p>Nothing in this section requires LBS to disclose confidential agreements or proprietary information relating to its Subprocessors.</p>
+
+  <h2>25. Assistance with Data Subject Requests</h2>
+  <p>Where required by applicable law and commercially reasonable, LBS will assist the Customer in responding to verified requests from Data Subjects regarding Personal Data processed through the Work-A-Bee platform. Assistance may include support relating to:</p>
+  <ul>
+    <li>Access requests;</li>
+    <li>Correction requests;</li>
+    <li>Deletion requests;</li>
+    <li>Data portability requests;</li>
+    <li>Processing restriction requests;</li>
+    <li>Objection requests.</li>
+  </ul>
+  <p>The Customer remains solely responsible for determining whether a request is legally valid and for responding to Data Subjects. LBS is not responsible for making legal determinations regarding Customer obligations.</p>
+
+  <h2>26. Requests Received Directly by LBS</h2>
+  <p>If LBS receives a request directly from an employee or other Data Subject relating to Customer Personal Data, LBS may:</p>
+  <ul>
+    <li>Refer the individual to the Customer;</li>
+    <li>Notify the Customer of the request where legally permitted; or</li>
+    <li>Respond only where required by applicable law.</li>
+  </ul>
+  <p>Except where prohibited by law, LBS will not disclose Customer Personal Data directly to the requesting individual without Customer authorization.</p>
+
+  <h2>27. Government and Law Enforcement Requests</h2>
+  <p>LBS may disclose Customer Personal Data when required to do so by court order, subpoena, search warrant, government agency, regulatory authority, or other legally binding legal process.</p>
+  <p>Where legally permitted, LBS will make commercially reasonable efforts to notify the affected Customer before disclosure.</p>
+  <p>Nothing in this DPA requires LBS to violate applicable law or lawful governmental directives.</p>
+
+  <h2>28. Compliance Assistance</h2>
+  <p>Upon reasonable request and where commercially feasible, LBS may provide Customers with information reasonably necessary to demonstrate compliance with this DPA. Examples may include:</p>
+  <ul>
+    <li>Security descriptions;</li>
+    <li>Privacy documentation;</li>
+    <li>Copies of published policies;</li>
+    <li>Information regarding security practices;</li>
+    <li>Confirmation of commercially reasonable safeguards.</li>
+  </ul>
+  <p>LBS is not required to disclose proprietary source code, internal security procedures, penetration testing reports, vulnerability assessments, internal audit reports, trade secrets, or information that could compromise platform security.</p>
+
+  <h2>29. Customer Audits</h2>
+  <p>Recognizing the shared importance of security and privacy, Customers may request reasonable information regarding LBS's data protection practices. To avoid disruption of operations and protect confidential information:</p>
+  <ul>
+    <li>Audits shall occur no more than once during any twelve (12) month period unless required by law or following a confirmed Security Incident.</li>
+    <li>Requests must be made in writing.</li>
+    <li>Requests must be reasonable in scope.</li>
+    <li>Audits shall occur during normal business hours.</li>
+    <li>Customers shall bear their own audit costs.</li>
+    <li>Audits must not interfere with operations or compromise other customers' confidential information.</li>
+  </ul>
+  <p>LBS may satisfy audit requests through existing documentation rather than onsite inspections where appropriate.</p>
+
+  <h2>30. International Data Transfers</h2>
+  <p>Work-A-Bee is operated primarily from the United States. Customer Personal Data may be processed or stored within the United States and, where necessary to provide the Service, may be processed by authorized Subprocessors in other jurisdictions.</p>
+  <p>Customers acknowledge that privacy laws outside the United States may differ from those in their home jurisdiction. Where required by applicable law, LBS will implement appropriate safeguards for international transfers.</p>
+
+  <h2>31. Data Localization</h2>
+  <p>Unless otherwise agreed in writing, LBS does not guarantee that Customer Data will remain within any particular geographic region. Customers with regulatory requirements regarding data residency should contact LBS before subscribing to determine whether specialized arrangements are available.</p>
+
+  <h2>32. Cooperation During Regulatory Investigations</h2>
+  <p>Where legally permitted and commercially reasonable, LBS will cooperate with Customers regarding regulatory inquiries relating to Personal Data processed through the Work-A-Bee platform. Such cooperation may include providing relevant documentation, information regarding processing activities, security information, and compliance-related records.</p>
+  <p>Customers remain responsible for communications with regulators and for satisfying their own legal obligations.</p>
+
+  <h2>33. Data Accuracy</h2>
+  <p>Customers are solely responsible for ensuring that Personal Data entered into Work-A-Bee is accurate, complete, current, and lawfully collected. LBS does not independently verify the accuracy of Customer Data.</p>
+
+  <h2>34. Privacy by Design</h2>
+  <p>LBS endeavors to incorporate commercially reasonable privacy and security considerations into the design and operation of the Work-A-Bee platform, including:</p>
+  <ul>
+    <li>Least-privilege access principles;</li>
+    <li>Secure authentication;</li>
+    <li>Logical tenant separation;</li>
+    <li>Audit logging;</li>
+    <li>Encryption where appropriate;</li>
+    <li>Data minimization practices;</li>
+    <li>Secure software development practices.</li>
+  </ul>
+  <p>Privacy and security controls may evolve over time as technology and industry standards change.</p>
+
+  <h2>35. Regulatory Changes</h2>
+  <p>If applicable privacy laws materially change after the Effective Date of this DPA, LBS may update its privacy and data protection practices as reasonably necessary to maintain compliance. Updated practices may be reflected in revised versions of this DPA, the Privacy Policy, or related documentation.</p>
+  <p>Continued use of the Work-A-Bee Service after such updates constitutes acceptance of those changes unless otherwise prohibited by applicable law.</p>
+
+  <h2>36. Data Retention</h2>
+  <p>Linton Business Solutions, LLC ("LBS") will retain Customer Personal Data only for as long as necessary to:</p>
+  <ul>
+    <li>Provide the Work-A-Bee Services;</li>
+    <li>Maintain Customer accounts;</li>
+    <li>Fulfill contractual obligations;</li>
+    <li>Resolve disputes;</li>
+    <li>Enforce the Agreement;</li>
+    <li>Maintain business continuity and disaster recovery capabilities;</li>
+    <li>Comply with applicable legal, regulatory, accounting, or tax obligations.</li>
+  </ul>
+  <p>Retention periods may vary depending on the category of data, legal requirements, and operational needs. Customers are responsible for determining their own legal retention requirements for employment, payroll, tax, and workforce records.</p>
+
+  <h2>37. Data Deletion Upon Termination</h2>
+  <p>Upon expiration or termination of the Agreement, the Customer may request the deletion of Customer Data, subject to applicable law and this DPA. Unless otherwise required by law or agreed in writing:</p>
+  <ul>
+    <li>Customer account access will be disabled following termination.</li>
+    <li>Customer Data may remain in secure backup systems for a limited period consistent with LBS's backup retention schedules.</li>
+    <li>Archived backup copies will be deleted or overwritten during normal backup rotation processes.</li>
+    <li>LBS may retain limited information necessary to comply with legal obligations, resolve disputes, enforce contractual rights, maintain financial records, or detect fraud or abuse.</li>
+  </ul>
+  <p>Deletion from backups may not occur immediately due to disaster recovery processes.</p>
+
+  <h2>38. Customer Data Export</h2>
+  <p>Where commercially available within the Work-A-Bee platform, Customers may export their data before account termination. LBS is not obligated to convert Customer Data into custom formats or perform manual data migration services unless separately agreed in writing. Professional data migration or export assistance may be offered as a paid professional service.</p>
+
+  <h2>39. Return or Destruction of Data</h2>
+  <p>Following termination and expiration of applicable retention periods, LBS will securely delete or render inaccessible Customer Personal Data under its control unless continued retention is required by applicable law, court order, regulatory obligation, or legitimate business necessity expressly permitted under the Agreement.</p>
+
+  <h2>40. Limitation of Liability</h2>
+  <p>This DPA is subject to the limitation of liability provisions contained in the Work-A-Bee Terms of Service. Except where prohibited by applicable law, LBS shall not be liable for indirect, incidental, consequential, special, or punitive damages, lost profits, lost business opportunities, loss of goodwill, or loss of anticipated savings.</p>
+  <p>Nothing in this DPA limits liability that cannot legally be limited under applicable law.</p>
+
+  <h2>41. Customer Indemnification</h2>
+  <p>The Customer agrees to indemnify and hold harmless LBS from claims, damages, penalties, costs, and reasonable attorneys' fees arising from:</p>
+  <ul>
+    <li>Customer's unlawful collection of Personal Data;</li>
+    <li>Customer's violation of applicable privacy laws;</li>
+    <li>Customer's failure to obtain required notices or consents;</li>
+    <li>Customer's misuse of the Work-A-Bee platform;</li>
+    <li>Customer's violation of this DPA or the Agreement.</li>
+  </ul>
+
+  <h2>42. Force Majeure</h2>
+  <p>LBS shall not be liable for delays or failures to perform caused by events beyond its reasonable control, including natural disasters, acts of government, internet outages, cyberattacks by third parties, utility failures, labor disputes, war, terrorism, pandemics, civil unrest, or cloud infrastructure outages. LBS will use commercially reasonable efforts to restore services following such events.</p>
+
+  <h2>43. Amendments</h2>
+  <p>LBS may update this DPA from time to time to reflect changes in applicable law, improve security practices, add or replace subprocessors, support new platform functionality, or address operational or regulatory requirements. Material changes will become effective in accordance with the notice provisions contained in the Terms of Service.</p>
+
+  <h2>44. Severability</h2>
+  <p>If any provision of this DPA is determined to be invalid or unenforceable, the remaining provisions shall remain in full force and effect. The invalid provision shall be interpreted or modified to the minimum extent necessary to make it enforceable while preserving its intended purpose.</p>
+
+  <h2>45. Order of Precedence</h2>
+  <p>In the event of a conflict: (1) this Data Processing Addendum; (2) the Work-A-Bee Terms of Service; (3) the Privacy Policy &mdash; shall govern in that order with respect to the processing of Personal Data.</p>
+
+  <h2>46. Governing Law</h2>
+  <p>This DPA shall be governed by and construed in accordance with the laws of the State of Texas, without regard to its conflict of law principles. Any legal action arising from this DPA shall be brought exclusively in the state or federal courts located within the State of Texas, unless applicable law requires otherwise.</p>
+
+  <h2>47. Entire Agreement</h2>
+  <p>This DPA, together with the Terms of Service, Privacy Policy, and any executed Order Forms or Subscription Agreements, constitutes the entire agreement between the parties regarding the processing of Customer Personal Data.</p>
+
+  <h2>48. Survival</h2>
+  <p>The following provisions survive termination of the Agreement to the extent applicable: confidentiality; data security obligations; limitation of liability; indemnification; governing law; dispute resolution; outstanding payment obligations; data deletion obligations; and record retention obligations.</p>
+
+  <h2>Appendix A &ndash; Technical and Organizational Security Measures</h2>
+  <p>LBS maintains a security program designed to protect Customer Data using commercially reasonable administrative, technical, and physical safeguards. Security measures may include:</p>
+  <p><strong>Administrative Controls</strong></p>
+  <ul>
+    <li>Information security policies</li>
+    <li>Employee confidentiality agreements</li>
+    <li>Role-based access management</li>
+    <li>Personnel onboarding and offboarding procedures</li>
+    <li>Security awareness training</li>
+    <li>Incident response procedures</li>
+    <li>Vendor risk management</li>
+  </ul>
+  <p><strong>Technical Controls</strong></p>
+  <ul>
+    <li>TLS encryption for data in transit</li>
+    <li>Encryption of sensitive stored data where appropriate</li>
+    <li>Password hashing using industry-standard algorithms</li>
+    <li>Multi-factor authentication support for administrative access where available</li>
+    <li>Secure API authentication</li>
+    <li>Audit logging</li>
+    <li>Vulnerability management</li>
+    <li>Patch management</li>
+    <li>Secure software development lifecycle (SSDLC)</li>
+    <li>Logical tenant isolation</li>
+    <li>Database access controls</li>
+    <li>Backup protection</li>
+    <li>System monitoring and alerting</li>
+  </ul>
+  <p><strong>Physical Controls</strong></p>
+  <p>Where infrastructure is hosted by third-party cloud providers, physical security measures are implemented by those providers and may include:</p>
+  <ul>
+    <li>Controlled facility access</li>
+    <li>Video surveillance</li>
+    <li>Environmental monitoring</li>
+    <li>Redundant power systems</li>
+    <li>Fire detection and suppression</li>
+    <li>Disaster recovery facilities</li>
+  </ul>
+
+  <h2>Appendix B &ndash; Categories of Processing</h2>
+  <p>The Work-A-Bee platform may process the following categories of information on behalf of Customers:</p>
+  <ul>
+    <li>Business information</li>
+    <li>Administrator information</li>
+    <li>Employee information</li>
+    <li>Timekeeping records</li>
+    <li>Attendance records</li>
+    <li>Scheduling information</li>
+    <li>PTO records</li>
+    <li>Payroll-related data entered by Customers</li>
+    <li>Authentication records</li>
+    <li>Device information</li>
+    <li>Audit logs</li>
+    <li>Usage analytics</li>
+    <li>Customer support communications</li>
+  </ul>
+
+  <h2>Appendix C &ndash; Contact Information</h2>
+  <p>
+    <strong>Data Protection Contact</strong><br>
+    Linton Business Solutions, LLC<br>
+    Work-A-Bee Privacy Office<br>
+    616 FM 1960 Road West<br>
+    Houston, Texas 77090<br>
+    United States<br>
+    Email: <a href="mailto:info@lbsconnect.net">info@lbsconnect.net</a><br>
+    General Support: <a href="mailto:info@lbsconnect.net">info@lbsconnect.net</a><br>
+    Website: <a href="https://www.workabeez.net" target="_blank" rel="noopener">www.workabeez.net</a>
+  </p>
+
+  <h2>Acceptance</h2>
+  <p>By using the Work-A-Bee Service or entering into a subscription agreement with Linton Business Solutions, LLC, the Customer acknowledges that it has read, understood, and agrees to be bound by this Data Processing Addendum.</p>
+
+  <p class="muted" style="margin-top:24px;">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+{% endblock %}

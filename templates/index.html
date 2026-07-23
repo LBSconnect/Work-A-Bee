@@ -348,73 +348,28 @@
     .feature-card h3 { font-size: 13px; font-weight: 800; margin-bottom: 8px; line-height: 1.3; }
     .feature-card p { font-size: 12px; color: #666; line-height: 1.6; }
 
-    /* ── WHY SECTION ── */
-    .why-section {
-      display: flex; align-items: center; gap: 64px;
-      padding: 80px 48px; background: var(--white);
-      border-top: 1px solid #f0f0f0;
-    }
-    .why-left { flex: 1; max-width: 460px; }
-    .why-left h2 {
-      font-size: 38px; font-weight: 900; line-height: 1.12;
-      letter-spacing: -1px; margin-bottom: 20px;
-    }
-    .why-left h2 span { color: var(--yellow); }
-    .why-left > p { font-size: 15px; color: #555; line-height: 1.7; margin-bottom: 24px; }
-    .why-bullets { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-    .why-bullets li {
-      display: flex; align-items: flex-start; gap: 10px;
-      font-size: 14px; font-weight: 500; color: #333;
-    }
-    .why-bullets li .check {
-      width: 20px; height: 20px; border-radius: 50%;
-      background: var(--yellow); display: flex; align-items: center;
-      justify-content: center; font-size: 11px; flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .why-right { flex: 1; position: relative; }
-    .why-image-wrap {
-      background: #1a1a2e; border-radius: 20px; overflow: hidden;
-      padding: 24px; position: relative;
-      box-shadow: 0 24px 64px rgba(0,0,0,.18);
-    }
-
-    /* mini dashboard inside why section */
-    .mini-dash {
-      background: #111827; border-radius: 12px; padding: 16px;
-    }
-    .mini-dash-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 12px;
-    }
-    .mini-dash-title { color: #fff; font-size: 11px; font-weight: 700; }
-    .mini-dash-sub { color: #9ca3af; font-size: 9px; }
-    .mini-stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 12px; }
-    .mini-stat { text-align: center; }
-    .mini-stat-val { font-size: 18px; font-weight: 900; color: #fff; }
-    .mini-stat-lbl { font-size: 9px; color: #9ca3af; }
-
-    .trust-pill {
-      position: absolute; bottom: 16px; right: 16px;
-      background: var(--white); border-radius: 12px;
-      padding: 12px 16px; box-shadow: 0 8px 24px rgba(0,0,0,.2);
-      display: flex; align-items: center; gap: 10px;
-      max-width: 220px;
-    }
-    .trust-bee { font-size: 28px; }
-    .trust-text { font-size: 11px; font-weight: 600; line-height: 1.4; color: #333; }
 
     /* ── CTA BANNER ── */
     .cta-banner {
-      background: var(--yellow); padding: 48px;
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 24px; flex-wrap: wrap;
+      background: var(--yellow); padding: 64px 48px;
+      position: relative; overflow: hidden;
     }
-    .cta-banner-left { display: flex; align-items: center; gap: 20px; }
-    .cta-bee { font-size: 56px; }
-    .cta-text h2 { font-size: 26px; font-weight: 900; margin-bottom: 4px; }
-    .cta-text p { font-size: 14px; color: #555; }
+    .cta-banner::before {
+      content: ""; position: absolute; top: -40px; right: -40px;
+      width: 240px; height: 240px; pointer-events: none;
+      background-image: radial-gradient(rgba(0,0,0,.08) 2px, transparent 2px);
+      background-size: 18px 18px;
+    }
+    .cta-banner-inner {
+      max-width: 1100px; margin: 0 auto; position: relative; z-index: 1;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 32px; flex-wrap: wrap;
+    }
+    .cta-banner-left { max-width: 620px; }
+    .cta-banner-left h2 { font-size: 30px; font-weight: 900; letter-spacing: -1px; line-height: 1.2; margin-bottom: 12px; }
+    .cta-banner-left p { font-size: 15px; color: #333; line-height: 1.6; margin-bottom: 16px; }
+    .cta-trust-row { display: flex; gap: 20px; flex-wrap: wrap; font-size: 13px; font-weight: 700; color: #222; }
+    .cta-banner-right { display: flex; gap: 12px; flex-wrap: wrap; }
     .btn-cta-dark {
       background: var(--black); color: var(--white);
       font-size: 15px; font-weight: 700; padding: 14px 28px;
@@ -423,6 +378,13 @@
       white-space: nowrap;
     }
     .btn-cta-dark:hover { background: #333; }
+    .btn-cta-outline {
+      background: transparent; color: var(--black);
+      font-size: 15px; font-weight: 700; padding: 14px 28px;
+      border-radius: 8px; border: 2px solid var(--black); cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-cta-outline:hover { background: rgba(0,0,0,.06); }
 
     /* ── FOOTER ── */
     footer {
@@ -469,6 +431,79 @@
       position: absolute; opacity: .05; pointer-events: none;
     }
 
+    /* ── BENEFITS ── */
+    .benefits-section {
+      padding: 80px 48px; background: var(--light-gray);
+      border-top: 1px solid #f0f0f0;
+    }
+    .benefits-header { max-width: 720px; margin: 0 auto 48px; text-align: center; }
+    .eyebrow {
+      display: inline-block; font-size: 12px; font-weight: 800; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--gray); margin-bottom: 12px;
+    }
+    .benefits-header h2 {
+      font-size: 34px; font-weight: 900; letter-spacing: -1px; line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .benefits-header h2 span { color: var(--yellow); }
+    .benefits-header p { font-size: 15px; color: #555; line-height: 1.7; }
+
+    .benefits-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .benefit-card {
+      background: var(--white); border-radius: 16px; padding: 32px 28px;
+      border: 1px solid #eee; box-shadow: 0 4px 16px rgba(0,0,0,.05);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .benefit-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,.1); }
+    .benefit-card .hex-icon { width: 56px; height: 56px; margin: 0 0 18px; }
+    .benefit-card .hex-icon .icon-inner { font-size: 22px; display: inline-block; transition: transform .2s ease; }
+    .benefit-card:hover .hex-icon .icon-inner { transform: scale(1.15); }
+    .benefit-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 18px; }
+    .benefit-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+    .benefit-list li { display: flex; align-items: flex-start; gap: 10px; }
+    .benefit-list li .check {
+      width: 20px; height: 20px; border-radius: 50%; margin-top: 1px;
+      background: var(--yellow); display: flex; align-items: center;
+      justify-content: center; font-size: 11px; flex-shrink: 0;
+    }
+    .benefit-list li strong { display: block; font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+    .benefit-list li p { font-size: 13px; color: #666; line-height: 1.6; }
+
+    /* ── FEATURE GRID ── */
+    .feature-grid-section { padding: 72px 48px 80px; background: var(--white); text-align: center; }
+    .feature-grid-section h2 {
+      font-size: 30px; font-weight: 900; letter-spacing: -1px; margin-bottom: 40px;
+    }
+    .feature-tiles {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .feature-tile {
+      background: var(--light-gray); border-radius: 14px; padding: 26px 16px;
+      transition: transform .2s ease, background .2s ease;
+    }
+    .feature-tile:hover { transform: translateY(-4px); background: var(--yellow-light); }
+    .feature-tile .hex-icon { width: 48px; height: 48px; margin: 0 auto 12px; }
+    .feature-tile .hex-icon .icon-inner { font-size: 18px; display: inline-block; transition: transform .2s ease; }
+    .feature-tile:hover .hex-icon .icon-inner { transform: scale(1.15); }
+    .feature-tile h3 { font-size: 13px; font-weight: 700; line-height: 1.3; }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.in-view { opacity: 1; transform: translateY(0); }
+    .benefits-grid .reveal:nth-child(2) { transition-delay: .1s; }
+    .benefits-grid .reveal:nth-child(3) { transition-delay: .2s; }
+    .feature-tiles .reveal:nth-child(4n+2) { transition-delay: .05s; }
+    .feature-tiles .reveal:nth-child(4n+3) { transition-delay: .1s; }
+    .feature-tiles .reveal:nth-child(4n+4) { transition-delay: .15s; }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { transition: none; opacity: 1; transform: none; }
+      .benefit-card, .feature-tile { transition: none; }
+    }
+
     /* ── FAQ ── */
     .faq {
       padding: 80px 48px; background: var(--light-gray);
@@ -505,10 +540,12 @@
       .dashboard-card { width: 100%; max-width: 520px; }
       .mobile-card { display: none; }
       .features-grid { grid-template-columns: repeat(3, 1fr); }
-      .why-section { flex-direction: column; padding: 48px 24px; text-align: center; }
-      .why-left { max-width: 100%; }
-      .why-bullets { align-items: center; }
-      .why-bullets li { text-align: left; }
+      .benefits-section { padding: 48px 24px; }
+      .benefits-grid { grid-template-columns: repeat(2, 1fr); }
+      .feature-grid-section { padding: 48px 24px 56px; }
+      .feature-tiles { grid-template-columns: repeat(2, 1fr); }
+      .cta-banner-inner { justify-content: center; text-align: center; }
+      .cta-trust-row { justify-content: center; }
       .footer-top { grid-template-columns: repeat(2, 1fr); }
     }
 
@@ -525,8 +562,13 @@
       .features-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
       .social-proof { padding: 24px 20px; }
       .logos-row { gap: 24px; }
-      .cta-banner { padding: 32px 20px; flex-direction: column; text-align: center; }
-      .cta-banner-left { flex-direction: column; }
+      .cta-banner { padding: 32px 20px; }
+      .cta-banner-inner { flex-direction: column; text-align: center; }
+      .cta-banner-right { width: 100%; flex-direction: column; }
+      .cta-banner-right button { width: 100%; }
+      .benefits-grid { grid-template-columns: 1fr; }
+      .benefits-header h2 { font-size: 27px; }
+      .feature-grid-section h2 { font-size: 24px; }
       .footer-top { grid-template-columns: 1fr; gap: 28px; }
       .faq { padding: 48px 20px; }
       .faq h2 { font-size: 26px; }
@@ -814,64 +856,147 @@
 </section>
 
 
-<!-- ═══════════ WHY SECTION ═══════════ -->
-<section class="why-section" id="why-businesses">
-  <div class="why-left">
-    <h2>Why Businesses<br>Choose <span>Work-A-Bee</span></h2>
-    <p>We built Work-A-Bee for one reason: to give businesses a simple, secure, and reliable way to track time and pay employees accurately.</p>
-    <ul class="why-bullets">
-      <li><span class="check">✓</span> Prevent time theft and buddy punching</li>
-      <li><span class="check">✓</span> Increase productivity and accountability</li>
-      <li><span class="check">✓</span> Save time on payroll and reduce errors</li>
-      <li><span class="check">✓</span> Comply with labor laws and regulations</li>
-      <li><span class="check">✓</span> Scalable for teams of any size</li>
-    </ul>
+<!-- ═══════════ BENEFITS ═══════════ -->
+<section class="benefits-section" id="why-businesses">
+  <div class="benefits-header reveal">
+    <span class="eyebrow">Benefits</span>
+    <h2>Why Businesses <span>Choose Work-A-Bee</span></h2>
+    <p>Work-A-Bee helps businesses eliminate manual time tracking, reduce payroll errors, simplify scheduling, improve communication, and give employees the tools they need&mdash;all from one easy-to-use platform.</p>
   </div>
 
-  <div class="why-right">
-    <div class="why-image-wrap">
-      <div class="mini-dash">
-        <div class="mini-dash-header">
-          <div>
-            <div class="mini-dash-title">🐝 Work-A-Bee — Welcome back, Admin! 👋</div>
-            <div class="mini-dash-sub">Here's what's happening with your team today.</div>
-          </div>
-        </div>
-        <div class="mini-stats-row">
-          <div class="mini-stat">
-            <div class="mini-stat-val">128</div>
-            <div class="mini-stat-lbl">Total Employees</div>
-          </div>
-          <div class="mini-stat">
-            <div class="mini-stat-val">96</div>
-            <div class="mini-stat-lbl">Active Today</div>
-          </div>
-          <div class="mini-stat">
-            <div class="mini-stat-val">67</div>
-            <div class="mini-stat-lbl">Clocked In</div>
-          </div>
-          <div class="mini-stat">
-            <div class="mini-stat-val">2,542</div>
-            <div class="mini-stat-lbl">Hours This Week</div>
-          </div>
-        </div>
-        <!-- decorative bar chart -->
-        <svg viewBox="0 0 260 60" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:60px;">
-          <rect x="10" y="20" width="24" height="38" rx="4" fill="#FFB800" opacity=".8"/>
-          <rect x="44" y="10" width="24" height="48" rx="4" fill="#FFB800"/>
-          <rect x="78" y="28" width="24" height="30" rx="4" fill="#FFB800" opacity=".7"/>
-          <rect x="112" y="14" width="24" height="44" rx="4" fill="#FFB800" opacity=".9"/>
-          <rect x="146" y="32" width="24" height="26" rx="4" fill="#FFB800" opacity=".6"/>
-          <rect x="180" y="22" width="24" height="36" rx="4" fill="#FFB800" opacity=".8"/>
-          <rect x="214" y="18" width="24" height="40" rx="4" fill="#FFB800"/>
+  <div class="benefits-grid">
+    <div class="benefit-card reveal">
+      <div class="hex-icon" aria-hidden="true">
+        <svg viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="36,2 68,20 68,52 36,70 4,52 4,20" fill="#fff" stroke="#111" stroke-width="2.5"/>
         </svg>
+        <span class="icon-inner">💼</span>
       </div>
-
-      <div class="trust-pill">
-        <span class="trust-bee">🐝</span>
-        <span class="trust-text">Built to help growing teams keep accurate time and payroll, free.</span>
-      </div>
+      <h3>For Business Owners &amp; Managers</h3>
+      <ul class="benefit-list">
+        <li>
+          <span class="check" aria-hidden="true">✓</span>
+          <div><strong>Accurate Payroll Every Time</strong><p>Ensure every hour worked is captured correctly&mdash;including overnight and weekend shifts&mdash;reducing payroll mistakes and costly corrections.</p></div>
+        </li>
+        <li>
+          <span class="check" aria-hidden="true">✓</span>
+          <div><strong>Save Hours on Scheduling</strong><p>Create recurring schedules, manage shift swaps, and reduce manual scheduling so you can spend more time running your business.</p></div>
+        </li>
+        <li>
+          <span class="check" aria-hidden="true">✓</span>
+          <div><strong>Identify Attendance Issues Early</strong><p>Real-time attendance dashboards and punctuality tracking help you recognize trends before they become larger performance problems.</p></div>
+        </li>
+        <li>
+          <span class="check" aria-hidden="true">✓</span>
+          <div><strong>Empower Employee Self-Service</strong><p>Employees can view schedules, request time off, access pay stubs, and communicate with management without interrupting your workday.</p></div>
+        </li>
+        <li>
+          <span class="check" aria-hidden="true">✓</span>
+          <div><strong>Stay Informed Instantly</strong><p>Receive real-time notifications for shift changes, time-off requests, employee messages, and important updates as they happen.</p></div>
+        </li>
+        <li>
+          <span class="check" aria-hidden="true">✓</span>
+          <div><strong>Transparent Subscription Pricing</strong><p>Enjoy a genuine 90-day free trial with no hidden fees. Upgrade, downgrade, or cancel your subscription anytime.</p></div>
+        </li>
+        <li>
+          <span class="check" aria-hidden="true">✓</span>
+          <div><strong>Enterprise-Level Data Security</strong><p>Every company's information is securely isolated using enterprise-grade multi-tenant architecture.</p></div>
+        </li>
+      </ul>
     </div>
+
+    <div class="benefit-card reveal">
+      <div class="hex-icon" aria-hidden="true">
+        <svg viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="36,2 68,20 68,52 36,70 4,52 4,20" fill="#fff" stroke="#111" stroke-width="2.5"/>
+        </svg>
+        <span class="icon-inner">👥</span>
+      </div>
+      <h3>For Employees</h3>
+      <ul class="benefit-list">
+        <li>
+          <span class="check" aria-hidden="true">✓</span>
+          <div><strong>Everything in One Place</strong><p>Access schedules, timecards, pay information, messages, requests, and announcements from one dashboard.</p></div>
+        </li>
+        <li>
+          <span class="check" aria-hidden="true">✓</span>
+          <div><strong>Fair Employee Recognition</strong><p>Recognition is earned through measurable attendance and performance&mdash;not subjective opinions.</p></div>
+        </li>
+        <li>
+          <span class="check" aria-hidden="true">✓</span>
+          <div><strong>Greater Schedule Flexibility</strong><p>Request shift swaps, pick up available shifts, and manage availability without unnecessary back-and-forth communication.</p></div>
+        </li>
+        <li>
+          <span class="check" aria-hidden="true">✓</span>
+          <div><strong>Faster Communication</strong><p>Receive instant notifications whenever schedules, requests, or announcements change.</p></div>
+        </li>
+        <li>
+          <span class="check" aria-hidden="true">✓</span>
+          <div><strong>Confidence in Every Paycheck</strong><p>Detailed pay summaries clearly show regular hours, overtime, and earnings.</p></div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="benefit-card reveal">
+      <div class="hex-icon" aria-hidden="true">
+        <svg viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="36,2 68,20 68,52 36,70 4,52 4,20" fill="#fff" stroke="#111" stroke-width="2.5"/>
+        </svg>
+        <span class="icon-inner">📈</span>
+      </div>
+      <h3>For Your Business</h3>
+      <ul class="benefit-list">
+        <li>
+          <span class="check" aria-hidden="true">✓</span>
+          <div><strong>Improve Employee Retention</strong><p>Modern scheduling tools and employee self-service create a better workplace experience.</p></div>
+        </li>
+        <li>
+          <span class="check" aria-hidden="true">✓</span>
+          <div><strong>Grow Without Changing Systems</strong><p>Whether you have 5 employees or 500+, Work-A-Bee scales with your organization.</p></div>
+        </li>
+        <li>
+          <span class="check" aria-hidden="true">✓</span>
+          <div><strong>Reduce Payroll &amp; Compliance Risk</strong><p>Automated overtime calculations and complete audit trails reduce labor and payroll risks.</p></div>
+        </li>
+        <li>
+          <span class="check" aria-hidden="true">✓</span>
+          <div><strong>Get Started Quickly</strong><p>Guided onboarding and bulk employee imports let you begin using the platform in a single session.</p></div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════ FEATURE GRID ═══════════ -->
+<section class="feature-grid-section" id="everything-you-need">
+  <h2 class="reveal">Everything You Need to Manage Your Workforce</h2>
+  <div class="feature-tiles">
+    {% set tiles = [
+      ('🕐', 'Employee Time Tracking'),
+      ('📋', 'Payroll-Ready Timesheets'),
+      ('🗓️', 'Smart Scheduling'),
+      ('🔄', 'Shift Swapping'),
+      ('🌴', 'Paid Time Off Requests'),
+      ('💬', 'Employee Messaging'),
+      ('💵', 'Digital Pay Stubs'),
+      ('🎯', 'Attendance & Punctuality Tracking'),
+      ('🏅', 'Performance Recognition'),
+      ('🔔', 'Real-Time Notifications'),
+      ('🔒', 'Secure Cloud Access'),
+      ('📊', 'Business Reporting & Analytics'),
+    ] %}
+    {% for emoji, label in tiles %}
+    <div class="feature-tile reveal">
+      <div class="hex-icon" aria-hidden="true">
+        <svg viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="36,2 68,20 68,52 36,70 4,52 4,20" fill="#fff" stroke="#111" stroke-width="2.5"/>
+        </svg>
+        <span class="icon-inner">{{ emoji }}</span>
+      </div>
+      <h3>{{ label }}</h3>
+    </div>
+    {% endfor %}
   </div>
 </section>
 
@@ -911,14 +1036,21 @@
 
 <!-- ═══════════ CTA BANNER ═══════════ -->
 <section class="cta-banner">
-  <div class="cta-banner-left">
-    <span class="cta-bee">🐝</span>
-    <div class="cta-text">
-      <h2>Get Started in Minutes</h2>
-      <p>Free for your first 90 days on any plan. Cancel anytime.</p>
+  <div class="cta-banner-inner">
+    <div class="cta-banner-left reveal">
+      <h2>Spend Less Time Managing Time<br>&amp; More Time Growing Your Business.</h2>
+      <p>Join businesses that are simplifying workforce management with Work-A-Bee. Start your free 90-day trial today.</p>
+      <div class="cta-trust-row">
+        <span>✓ No Upfront Charges</span>
+        <span>✓ No Contracts</span>
+        <span>✓ Cancel Anytime</span>
+      </div>
+    </div>
+    <div class="cta-banner-right reveal">
+      <a href="/signup"><button class="btn-cta-dark">Start Free Trial &nbsp;→</button></a>
+      <a href="/pricing"><button class="btn-cta-outline">View Pricing</button></a>
     </div>
   </div>
-  <a href="/signup"><button class="btn-cta-dark">Start Free Trial &nbsp;→</button></a>
 </section>
 
 
@@ -967,9 +1099,30 @@
     <div class="footer-bottom-links">
       <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
       <a href="{{ url_for('terms_of_service') }}">Terms of Service</a>
+      <a href="{{ url_for('dpa_policy') }}">Data Processing Addendum</a>
+      <a href="{{ url_for('aup_policy') }}">Acceptable Use Policy</a>
     </div>
   </div>
 </footer>
+
+<script>
+  (function () {
+    var els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) {
+      els.forEach(function (el) { el.classList.add('in-view'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    els.forEach(function (el) { io.observe(el); });
+  })();
+</script>
 
 </body>
 </html>

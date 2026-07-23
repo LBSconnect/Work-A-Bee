@@ -49,6 +49,14 @@
       <input type="checkbox" name="privacy" style="width:auto;"> I agree to the
       <a href="{{ url_for('privacy_policy') }}" target="_blank" rel="noopener">Privacy Policy</a>
     </label>
+    <label class="checkbox-label">
+      <input type="checkbox" name="dpa" style="width:auto;"> I agree to the
+      <a href="{{ url_for('dpa_policy') }}" target="_blank" rel="noopener">Data Processing Addendum</a>
+    </label>
+    <label class="checkbox-label">
+      <input type="checkbox" name="aup" style="width:auto;"> I agree to the
+      <a href="{{ url_for('aup_policy') }}" target="_blank" rel="noopener">Acceptable Use Policy</a>
+    </label>
     {% if errors.terms %}<p class="field-error">{{ errors.terms }}</p>{% endif %}
 
     <button type="submit">Continue</button>
