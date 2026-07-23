@@ -1,25 +1,410 @@
 {% extends "base.html" %}
-{% block title %}API Overview{% endblock %}
+{% block title %}API Developer Guide{% endblock %}
 {% block wrapclass %}wide{% endblock %}
 {% block content %}
-  <h1>Work-A-Beez API Overview</h1>
-  <p class="muted">Status: Draft template &middot; Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <h1>Work-A-Beez API Developer Guide</h1>
+  <p class="muted">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This guide describes a planned future API. The Work-A-Beez REST API, OAuth 2.0 authentication, API keys, and webhooks described below are not yet available - this page is a roadmap of planned functionality, not a live integration you can build against today.</div>
 
-  <p><em>This page is a starting template generated for LBS to complete. Replace the placeholder text in each section below with final content before treating this page as published.</em></p>
-
-  <h2>1. What's Available</h2>
-  <p>[Add content here.]</p>
-
-  <h2>2. Authentication</h2>
-  <p>[Add content here.]</p>
-
-  <h2>3. Rate Limits</h2>
-  <p>[Add content here.]</p>
-
-  <h2>4. Getting Access</h2>
-  <p>[Add content here.]</p>
-
-  <h2>5. Documentation</h2>
-  <p>[Add content here.]</p>
-
+<p>Welcome to the Work-A-Beez API Developer Guide.</p>
+<p>The Work-A-Beez API allows developers to securely integrate workforce management functionality with third-party applications, payroll providers, HR systems, accounting platforms, identity providers, and custom business applications.</p>
+<p>Whether you're building a custom dashboard, synchronizing employee records, automating workflows, or integrating payroll, the API provides secure and scalable access to Work-A-Beez resources.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Introduction</li>
+<li>API Overview</li>
+<li>Base URLs</li>
+<li>Authentication</li>
+<li>API Keys</li>
+<li>OAuth 2.0</li>
+<li>Permissions &amp; Scopes</li>
+<li>Making Your First Request</li>
+<li>Request Format</li>
+<li>Response Format</li>
+<li>Error Handling</li>
+<li>Pagination</li>
+<li>Filtering</li>
+<li>Sorting</li>
+<li>Rate Limits</li>
+<li>Idempotency</li>
+<li>Versioning</li>
+<li>Webhooks</li>
+<li>API Resources</li>
+<li>SDKs</li>
+<li>Testing</li>
+<li>Production Best Practices</li>
+<li>Security</li>
+<li>Support</li>
+</ol>
+<hr />
+<h2>Introduction</h2>
+<p>The Work-A-Beez API is built using REST principles and communicates using HTTPS.</p>
+<p>Features include:</p>
+<ul>
+<li>RESTful endpoints</li>
+<li>JSON request and response bodies</li>
+<li>Secure authentication</li>
+<li>OAuth 2.0 support</li>
+<li>Webhooks</li>
+<li>Role-based authorization</li>
+<li>Pagination</li>
+<li>Filtering</li>
+<li>Versioning</li>
+<li>Audit logging</li>
+</ul>
+<p>The API is designed to remain consistent across all resources to simplify development and maintenance.</p>
+<hr />
+<h2>API Overview</h2>
+<p>The API enables secure access to organizational data and operations based on the permissions granted to the authenticated user or application.</p>
+<p>Common integration scenarios include:</p>
+<ul>
+<li>Employee synchronization</li>
+<li>Payroll exports</li>
+<li>Timecard retrieval</li>
+<li>Schedule management</li>
+<li>Leave requests</li>
+<li>Attendance reporting</li>
+<li>Identity management</li>
+<li>Business intelligence dashboards</li>
+<li>Mobile applications</li>
+<li>Custom workflow automation</li>
+</ul>
+<hr />
+<h2>Base URLs</h2>
+<p>Production</p>
+<p><code>https://api.workabeez.net/v1</code></p>
+<p>Sandbox</p>
+<p><code>https://sandbox-api.workabeez.net/v1</code></p>
+<p>All API communication must occur over HTTPS.</p>
+<p>Requests made using HTTP are rejected.</p>
+<hr />
+<h2>Authentication</h2>
+<p>Every API request must be authenticated.</p>
+<p>Supported authentication methods include:</p>
+<ul>
+<li>API Keys</li>
+<li>OAuth 2.0</li>
+<li>Bearer Tokens</li>
+</ul>
+<p>Unauthenticated requests receive an HTTP <strong>401 Unauthorized</strong> response.</p>
+<hr />
+<h2>API Keys</h2>
+<p>API keys allow server-to-server communication for trusted applications.</p>
+<p>Administrators may generate API keys by navigating to Administration &rarr; Developer Settings &rarr; API Keys.</p>
+<p>Each API key is associated with:</p>
+<ul>
+<li>Organization</li>
+<li>Environment</li>
+<li>Creation Date</li>
+<li>Expiration Date (optional)</li>
+<li>Assigned Scopes</li>
+<li>Status</li>
+</ul>
+<p>API keys should be treated as confidential credentials.</p>
+<p>Never expose API keys in:</p>
+<ul>
+<li>Client-side JavaScript</li>
+<li>Mobile applications</li>
+<li>Public repositories</li>
+<li>Documentation examples containing live credentials</li>
+</ul>
+<hr />
+<h2>OAuth 2.0</h2>
+<p>Work-A-Beez supports OAuth 2.0 for applications acting on behalf of users.</p>
+<p>Supported grant types include:</p>
+<ul>
+<li>Authorization Code</li>
+<li>Client Credentials</li>
+<li>Refresh Token</li>
+</ul>
+<p>Organizations may restrict OAuth applications based on internal security policies.</p>
+<hr />
+<h2>Authorization</h2>
+<p>Authentication identifies the caller.</p>
+<p>Authorization determines what the caller may access.</p>
+<p>Every request is evaluated against:</p>
+<ul>
+<li>Organization</li>
+<li>User Role</li>
+<li>Assigned Permissions</li>
+<li>Resource Ownership</li>
+<li>API Scopes</li>
+</ul>
+<p>Access to unauthorized resources returns:</p>
+<p><code>403 Forbidden</code></p>
+<hr />
+<h2>API Scopes</h2>
+<p>Examples include:</p>
+<ul>
+<li>Employee.Read</li>
+<li>Employee.Write</li>
+<li>Schedule.Read</li>
+<li>Schedule.Write</li>
+<li>Timecard.Read</li>
+<li>Timecard.Write</li>
+<li>Leave.Read</li>
+<li>Leave.Write</li>
+<li>Reports.Read</li>
+<li>Reports.Export</li>
+<li>Admin.FullAccess</li>
+</ul>
+<p>Applications should request only the scopes required for their intended functionality.</p>
+<hr />
+<h2>Content Types</h2>
+<p>Requests must specify:</p>
+<p><code>Content-Type: application/json</code></p>
+<p>Responses are returned as:</p>
+<p><code>application/json</code></p>
+<p>File download endpoints may return other content types when appropriate.</p>
+<hr />
+<h2>Making Your First Request</h2>
+<p>Example request:</p>
+<p><code>http
+GET /employees
+Authorization: Bearer YOUR_ACCESS_TOKEN</code></p>
+<p>Successful response:</p>
+<p><code>json
+{
+  "data": [],
+  "page": 1,
+  "pageSize": 25,
+  "total": 0
+}</code></p>
+<hr />
+<h2>Request Structure</h2>
+<p>Typical requests contain:</p>
+<ul>
+<li>HTTP Method</li>
+<li>Endpoint</li>
+<li>Headers</li>
+<li>Query Parameters</li>
+<li>Request Body</li>
+</ul>
+<p>Example:</p>
+<p><code>http
+POST /employees</code></p>
+<p><code>json
+{
+  "firstName": "John",
+  "lastName": "Smith",
+  "email": "john.smith@example.com"
+}</code></p>
+<hr />
+<h2>HTTP Methods</h2>
+<p>The API supports standard HTTP methods.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td>Retrieve data</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>Create new resources</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td>Replace resources</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td>Partially update resources</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>Remove resources</td>
+</tr>
+</tbody>
+</table>
+<p>Method usage is consistent across all endpoints.</p>
+<hr />
+<h2>Response Format</h2>
+<p>Successful responses generally follow a consistent structure.</p>
+<p>Example:</p>
+<p><code>json
+{
+  "success": true,
+  "data": {},
+  "meta": {},
+  "links": {}
+}</code></p>
+<p>Error responses return descriptive information to help developers diagnose issues.</p>
+<hr />
+<h2>Status Codes</h2>
+<p>Common HTTP status codes include:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">200</td>
+<td>OK</td>
+</tr>
+<tr>
+<td style="text-align: right;">201</td>
+<td>Created</td>
+</tr>
+<tr>
+<td style="text-align: right;">202</td>
+<td>Accepted</td>
+</tr>
+<tr>
+<td style="text-align: right;">204</td>
+<td>No Content</td>
+</tr>
+<tr>
+<td style="text-align: right;">400</td>
+<td>Bad Request</td>
+</tr>
+<tr>
+<td style="text-align: right;">401</td>
+<td>Unauthorized</td>
+</tr>
+<tr>
+<td style="text-align: right;">403</td>
+<td>Forbidden</td>
+</tr>
+<tr>
+<td style="text-align: right;">404</td>
+<td>Not Found</td>
+</tr>
+<tr>
+<td style="text-align: right;">409</td>
+<td>Conflict</td>
+</tr>
+<tr>
+<td style="text-align: right;">422</td>
+<td>Validation Error</td>
+</tr>
+<tr>
+<td style="text-align: right;">429</td>
+<td>Too Many Requests</td>
+</tr>
+<tr>
+<td style="text-align: right;">500</td>
+<td>Internal Server Error</td>
+</tr>
+<tr>
+<td style="text-align: right;">503</td>
+<td>Service Unavailable</td>
+</tr>
+</tbody>
+</table>
+<p>Applications should handle each status code appropriately.</p>
+<hr />
+<h2>Error Responses</h2>
+<p>Error responses include a standardized structure.</p>
+<p>Example:</p>
+<p><code>json
+{
+  "success": false,
+  "error": {
+    "code": "ValidationError",
+    "message": "Email address is required.",
+    "details": [
+      {
+        "field": "email",
+        "message": "This field is required."
+      }
+    ]
+  }
+}</code></p>
+<p>The <code>code</code> field is intended for programmatic handling, while the <code>message</code> field is human-readable.</p>
+<hr />
+<h2>Pagination</h2>
+<p>Endpoints returning collections support pagination.</p>
+<p>Common query parameters include:</p>
+<p><code>?page=1&amp;pageSize=25</code></p>
+<p>Responses include metadata such as:</p>
+<ul>
+<li>Current Page</li>
+<li>Page Size</li>
+<li>Total Records</li>
+<li>Total Pages</li>
+<li>Next Page</li>
+<li>Previous Page</li>
+</ul>
+<p>Pagination helps improve performance and reduces response size.</p>
+<hr />
+<h2>Filtering</h2>
+<p>Many endpoints support filtering using query parameters.</p>
+<p>Examples include:</p>
+<p><code>?department=Sales</code></p>
+<p><code>?status=Active</code></p>
+<p><code>?location=Houston</code></p>
+<p>Multiple filters may be combined to narrow results.</p>
+<hr />
+<h2>Sorting</h2>
+<p>Results may be sorted in ascending or descending order.</p>
+<p>Examples:</p>
+<p><code>?sort=lastName</code></p>
+<p><code>?sort=-hireDate</code></p>
+<p>A leading minus sign (<code>-</code>) indicates descending order.</p>
+<hr />
+<h2>Rate Limits</h2>
+<p>To maintain platform stability, API requests are subject to rate limits.</p>
+<p>When a limit is exceeded, the API returns:</p>
+<p><code>429 Too Many Requests</code></p>
+<p>Responses may include rate limit headers indicating:</p>
+<ul>
+<li>Request Limit</li>
+<li>Remaining Requests</li>
+<li>Reset Time</li>
+</ul>
+<p>Applications should implement retry logic with exponential backoff where appropriate.</p>
+<hr />
+<h2>Idempotency</h2>
+<p>For operations that create or modify resources, clients may provide an idempotency key to prevent accidental duplicate processing during retries.</p>
+<p>Example header:</p>
+<p><code>Idempotency-Key: 6b7f2c1e-1234-5678-90ab-cdef12345678</code></p>
+<p>The server uses this value to safely identify repeated requests.</p>
+<hr />
+<h2>API Versioning</h2>
+<p>The Work-A-Beez API uses URI-based versioning.</p>
+<p>Example:</p>
+<p><code>https://api.workabeez.net/v1</code></p>
+<p>New API versions are introduced only for changes that are not backward compatible.</p>
+<p>Whenever practical, existing versions remain available for a transition period to support customer migrations.</p>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>Administrator Guide</li>
+<li>Security Overview</li>
+<li>API Reference</li>
+<li>Webhook Guide</li>
+<li>Authentication Guide</li>
+<li>Release Notes</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a registered trademark of LBS.</p>
 {% endblock %}

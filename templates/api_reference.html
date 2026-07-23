@@ -1,0 +1,406 @@
+{% extends "base.html" %}
+{% block title %}API Reference Manual{% endblock %}
+{% block wrapclass %}wide{% endblock %}
+{% block content %}
+  <h1>Work-A-Beez API Reference Manual</h1>
+  <p class="muted">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+  <div class="internal-doc-banner" style="background:#7c5a00;">&#9888; This reference describes a planned future API. None of the endpoints listed below exist yet - this page is a roadmap of planned functionality, not a live API you can call today. See the API Developer Guide for more context.</div>
+
+<p>Welcome to the Work-A-Beez API Reference Manual.</p>
+<p>This manual provides complete technical documentation for every publicly available REST API endpoint supported by Work-A-Beez.</p>
+<p>Each endpoint includes:</p>
+<ul>
+<li>Purpose</li>
+<li>HTTP Method</li>
+<li>Endpoint URL</li>
+<li>Authentication Requirements</li>
+<li>Required Permissions</li>
+<li>Request Headers</li>
+<li>Path Parameters</li>
+<li>Query Parameters</li>
+<li>Request Body Schema</li>
+<li>Response Schema</li>
+<li>HTTP Status Codes</li>
+<li>Error Responses</li>
+<li>JSON Examples</li>
+</ul>
+<p>This document should be used together with the <strong>API Developer Guide</strong>, which explains authentication, versioning, pagination, webhooks, and development best practices.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li>Authentication Endpoints</li>
+<li>Employee Endpoints</li>
+<li>Department Endpoints</li>
+<li>Location Endpoints</li>
+<li>Job Title Endpoints</li>
+<li>Timekeeping Endpoints</li>
+<li>Scheduling Endpoints</li>
+<li>Leave &amp; PTO Endpoints</li>
+<li>Availability Endpoints</li>
+<li>Shift Marketplace Endpoints</li>
+<li>Notification Endpoints</li>
+<li>Messaging Endpoints</li>
+<li>Document Management Endpoints</li>
+<li>Reports Endpoints</li>
+<li>Company Settings Endpoints</li>
+<li>User Management Endpoints</li>
+<li>Audit Log Endpoints</li>
+<li>Billing Endpoints</li>
+<li>Webhook Endpoints</li>
+<li>System Endpoints</li>
+</ol>
+<hr />
+<h2>Authentication Endpoints</h2>
+<p>Authentication endpoints allow applications and users to securely obtain and manage access tokens.</p>
+<hr />
+<h3>Authenticate User</h3>
+<p>Creates an authenticated session and returns an access token.</p>
+<h4>Endpoint</h4>
+<p><code>http
+POST /v1/auth/login</code></p>
+<h4>Authentication</h4>
+<p>Not required.</p>
+<h4>Request Headers</h4>
+<p><code>http
+Content-Type: application/json</code></p>
+<h4>Request Body</h4>
+<p><code>json
+{
+  "email": "john.doe@example.com",
+  "password": "StrongPassword123!"
+}</code></p>
+<h4>Successful Response</h4>
+<p><code>http
+200 OK</code></p>
+<p><code>json
+{
+  "success": true,
+  "accessToken": "eyJhbGciOi...",
+  "refreshToken": "eyJhbGciOi...",
+  "expiresIn": 3600,
+  "tokenType": "Bearer"
+}</code></p>
+<h4>Possible Errors</h4>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>400</td>
+<td>Malformed request</td>
+</tr>
+<tr>
+<td>401</td>
+<td>Invalid credentials</td>
+</tr>
+<tr>
+<td>423</td>
+<td>Account locked</td>
+</tr>
+<tr>
+<td>429</td>
+<td>Too many login attempts</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Refresh Access Token</h3>
+<p>Obtains a new access token using a valid refresh token.</p>
+<h4>Endpoint</h4>
+<p><code>http
+POST /v1/auth/refresh</code></p>
+<h4>Request</h4>
+<p><code>json
+{
+  "refreshToken":"eyJhbGc..."
+}</code></p>
+<h4>Successful Response</h4>
+<p><code>json
+{
+  "success": true,
+  "accessToken":"eyJhbGc...",
+  "expiresIn":3600
+}</code></p>
+<hr />
+<h3>Logout</h3>
+<p>Terminates the current authenticated session.</p>
+<h4>Endpoint</h4>
+<p><code>http
+POST /v1/auth/logout</code></p>
+<h4>Authentication</h4>
+<p>Bearer Token Required</p>
+<h4>Response</h4>
+<p><code>http
+204 No Content</code></p>
+<hr />
+<h2>Employee Endpoints</h2>
+<p>Employee endpoints allow administrators and authorized applications to manage employee records.</p>
+<hr />
+<h3>List Employees</h3>
+<p>Returns a paginated collection of employees.</p>
+<h4>Endpoint</h4>
+<p><code>http
+GET /v1/employees</code></p>
+<h4>Required Scope</h4>
+<p><code>Employee.Read</code></p>
+<h4>Query Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>page</td>
+<td>Current page number</td>
+</tr>
+<tr>
+<td>pageSize</td>
+<td>Results per page</td>
+</tr>
+<tr>
+<td>department</td>
+<td>Filter by department</td>
+</tr>
+<tr>
+<td>location</td>
+<td>Filter by location</td>
+</tr>
+<tr>
+<td>status</td>
+<td>Filter by status</td>
+</tr>
+<tr>
+<td>managerId</td>
+<td>Filter by manager</td>
+</tr>
+</tbody>
+</table>
+<h4>Example Request</h4>
+<p><code>http
+GET /v1/employees?page=1&amp;pageSize=25</code></p>
+<h4>Example Response</h4>
+<p><code>json
+{
+  "success": true,
+  "data":[
+    {
+      "employeeId":"EMP-10025",
+      "firstName":"John",
+      "lastName":"Smith",
+      "department":"Operations",
+      "jobTitle":"Supervisor",
+      "status":"Active"
+    }
+  ],
+  "pagination":{
+    "page":1,
+    "pageSize":25,
+    "totalRecords":684,
+    "totalPages":28
+  }
+}</code></p>
+<hr />
+<h3>Retrieve Employee</h3>
+<p>Returns detailed information about a single employee.</p>
+<h4>Endpoint</h4>
+<p><code>http
+GET /v1/employees/{employeeId}</code></p>
+<h4>Path Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>employeeId</td>
+<td>Unique employee identifier</td>
+</tr>
+</tbody>
+</table>
+<h4>Successful Response</h4>
+<p><code>json
+{
+  "success":true,
+  "data":{
+    "employeeId":"EMP-10025",
+    "firstName":"John",
+    "lastName":"Smith",
+    "email":"john.smith@example.com",
+    "department":"Operations",
+    "location":"Houston",
+    "manager":"Jane Doe",
+    "hireDate":"2025-01-12",
+    "status":"Active"
+  }
+}</code></p>
+<hr />
+<h3>Create Employee</h3>
+<p>Creates a new employee record.</p>
+<h4>Endpoint</h4>
+<p><code>http
+POST /v1/employees</code></p>
+<h4>Required Scope</h4>
+<p><code>Employee.Write</code></p>
+<h4>Request Body</h4>
+<p><code>json
+{
+  "firstName":"John",
+  "lastName":"Smith",
+  "email":"john.smith@example.com",
+  "departmentId":"OPS",
+  "locationId":"HOU",
+  "jobTitleId":"SUP"
+}</code></p>
+<h4>Successful Response</h4>
+<p><code>http
+201 Created</code></p>
+<p>Returns the complete employee object including its newly assigned Employee ID.</p>
+<hr />
+<h3>Update Employee</h3>
+<p>Updates an existing employee record.</p>
+<h4>Endpoint</h4>
+<p><code>http
+PUT /v1/employees/{employeeId}</code></p>
+<p>Only fields supplied in the request body are modified.</p>
+<hr />
+<h3>Delete Employee</h3>
+<p>Marks an employee record as inactive.</p>
+<h4>Endpoint</h4>
+<p><code>http
+DELETE /v1/employees/{employeeId}</code></p>
+<p>Employee records are retained for audit and reporting purposes. This endpoint performs a logical deletion rather than permanently removing historical records.</p>
+<hr />
+<h2>Standard Error Codes</h2>
+<p>All endpoints may return standardized error responses.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">HTTP Status</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">200</td>
+<td>Request completed successfully</td>
+</tr>
+<tr>
+<td style="text-align: right;">201</td>
+<td>Resource created</td>
+</tr>
+<tr>
+<td style="text-align: right;">204</td>
+<td>No content</td>
+</tr>
+<tr>
+<td style="text-align: right;">400</td>
+<td>Bad request</td>
+</tr>
+<tr>
+<td style="text-align: right;">401</td>
+<td>Authentication required</td>
+</tr>
+<tr>
+<td style="text-align: right;">403</td>
+<td>Permission denied</td>
+</tr>
+<tr>
+<td style="text-align: right;">404</td>
+<td>Resource not found</td>
+</tr>
+<tr>
+<td style="text-align: right;">409</td>
+<td>Conflict</td>
+</tr>
+<tr>
+<td style="text-align: right;">422</td>
+<td>Validation failed</td>
+</tr>
+<tr>
+<td style="text-align: right;">429</td>
+<td>Rate limit exceeded</td>
+</tr>
+<tr>
+<td style="text-align: right;">500</td>
+<td>Internal server error</td>
+</tr>
+<tr>
+<td style="text-align: right;">503</td>
+<td>Service temporarily unavailable</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Standard Error Response</h2>
+<p><code>json
+{
+  "success": false,
+  "error": {
+    "code":"ValidationError",
+    "message":"One or more fields failed validation.",
+    "details":[
+      {
+        "field":"email",
+        "message":"Email address already exists."
+      }
+    ],
+    "traceId":"6fb3411d-3d14-44d8-8e78-acde12345678"
+  }
+}</code></p>
+<p>The <code>traceId</code> should be included when contacting Work-A-Beez Support to help identify the associated request in server logs.</p>
+<hr />
+<h2>API Conventions</h2>
+<p>All endpoints follow these standards:</p>
+<ul>
+<li>HTTPS only</li>
+<li>UTF-8 encoding</li>
+<li>JSON request and response bodies</li>
+<li>ISO 8601 date and time format</li>
+<li>CamelCase property names</li>
+<li>Consistent pagination model</li>
+<li>Standardized error handling</li>
+<li>Audit logging for all write operations</li>
+<li>Role-based authorization checks</li>
+</ul>
+<hr />
+<h2>Related Documentation</h2>
+<ul>
+<li>API Developer Guide</li>
+<li>Webhook Reference</li>
+<li>Authentication Guide</li>
+<li>SDK Documentation</li>
+<li>Security Overview</li>
+<li>Release Notes</li>
+</ul>
+<hr />
+<h2>Revision History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>July 23, 2026</td>
+<td>Initial publication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>© 2026 LBS. All rights reserved.</p>
+<p>Work-A-Beez® is a registered trademark of LBS.</p>
+{% endblock %}
