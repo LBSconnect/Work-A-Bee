@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+{% block title %}Service Level Agreement{% endblock %}
+{% block wrapclass %}wide{% endblock %}
+{% block content %}
+  <h1>Work-A-Beez Service Level Agreement (SLA)</h1>
+  <p class="muted">Version: 1.0 &middot; Effective Date: July 23, 2026 &middot; Last Updated: July 23, 2026</p>
+
+  <h2>1. Purpose</h2>
+  <p>This Service Level Agreement ("SLA") describes the service availability objectives, support commitments, maintenance practices, and incident response targets provided by Linton Business Solutions, LLC ("LBS") for the Work-A-Beez Software-as-a-Service ("Service").</p>
+  <p>This SLA forms part of the Work-A-Beez subscription documentation and should be read together with the:</p>
+  <ul>
+    <li><a href="{{ url_for('terms_of_service') }}">Terms of Service</a></li>
+    <li><a href="{{ url_for('privacy_policy') }}">Privacy Policy</a></li>
+    <li><a href="{{ url_for('dpa_policy') }}">Data Processing Addendum</a></li>
+    <li><a href="{{ url_for('aup_policy') }}">Acceptable Use Policy</a></li>
+    <li><a href="{{ url_for('security_policy') }}">Security Policy</a></li>
+  </ul>
+  <p>This SLA establishes service objectives but does not guarantee uninterrupted or error-free operation.</p>
+
+  <h2>2. Scope</h2>
+  <p>This SLA applies to:</p>
+  <ul>
+    <li>Work-A-Beez Production Environment</li>
+    <li>Web Application</li>
+    <li>Administrative Portal</li>
+    <li>Employee Portal</li>
+    <li>APIs (where available)</li>
+    <li>Reporting Services</li>
+    <li>Authentication Services</li>
+    <li>Subscription Services</li>
+  </ul>
+  <p>Unless expressly stated otherwise, this SLA does not apply to:</p>
+  <ul>
+    <li>Beta features</li>
+    <li>Preview releases</li>
+    <li>Experimental functionality</li>
+    <li>Third-party applications</li>
+    <li>Customer-developed integrations</li>
+    <li>Customer-managed infrastructure</li>
+    <li>Internet service providers</li>
+    <li>Customer endpoint devices</li>
+  </ul>
+
+  <h2>3. Service Availability Objective</h2>
+  <p>LBS is committed to providing a reliable and highly available cloud platform. The target monthly availability for the Work-A-Beez production environment is:</p>
+  <p><strong>99.9% Monthly Uptime Objective</strong></p>
+  <p>Availability is measured on a calendar-month basis. The uptime objective excludes scheduled maintenance, emergency maintenance, force majeure events, and exclusions identified in this SLA.</p>
+  <p>The uptime objective is a service target and not a warranty.</p>
+
+  <h2>4. Availability Definition</h2>
+  <p>Service Availability is calculated using the following formula:</p>
+  <p><em>Availability (%) = ((Total Monthly Minutes &minus; Unscheduled Downtime) &divide; Total Monthly Minutes) &times; 100</em></p>
+  <p>For purposes of this SLA, Scheduled Maintenance does not count as downtime. Emergency Maintenance may not count as downtime when necessary to protect platform security or stability.</p>
+
+  <h2>5. Planned Maintenance</h2>
+  <p>To maintain security, performance, and reliability, LBS may perform scheduled maintenance. Whenever reasonably practical:</p>
+  <ul>
+    <li>Advance notice will be provided.</li>
+    <li>Maintenance will be scheduled during lower-usage periods.</li>
+    <li>Customer impact will be minimized.</li>
+    <li>Maintenance duration will be kept as short as reasonably possible.</li>
+  </ul>
+  <p>Examples include security patches, infrastructure upgrades, database maintenance, performance optimization, and platform enhancements.</p>
+
+  <h2>6. Emergency Maintenance</h2>
+  <p>Emergency maintenance may be performed without advance notice when necessary to:</p>
+  <ul>
+    <li>Address critical security vulnerabilities;</li>
+    <li>Mitigate active cybersecurity threats;</li>
+    <li>Restore service availability;</li>
+    <li>Protect Customer Data;</li>
+    <li>Prevent infrastructure failure;</li>
+    <li>Respond to cloud provider incidents.</li>
+  </ul>
+  <p>LBS will use commercially reasonable efforts to notify Customers as soon as practicable when emergency maintenance affects the Service.</p>
+
+  <h2>7. Service Monitoring</h2>
+  <p>LBS continuously monitors the production environment using automated and operational monitoring tools. Monitoring activities may include infrastructure health, database availability, API responsiveness, authentication services, system performance, error rates, resource utilization, and network connectivity.</p>
+  <p>Monitoring helps identify issues proactively and supports timely incident response.</p>
+
+  <h2>8. Scheduled Maintenance Window</h2>
+  <p>Unless urgent circumstances require otherwise, scheduled maintenance is generally performed during periods expected to have the lowest customer impact. Maintenance windows may vary depending on customer usage patterns, cloud provider maintenance, security updates, platform upgrades, and operational requirements.</p>
+  <p>Whenever feasible, maintenance notices will be communicated in advance through customer communications or the Work-A-Beez status page.</p>
+
+  <h2>9. Service Status Communications</h2>
+  <p>LBS may communicate operational status through one or more of the following: service status page, customer email notifications, administrative dashboard notifications, customer support communications, or incident advisories.</p>
+  <p>Customers are encouraged to ensure that administrative contact information remains current to receive important service notifications.</p>
+
+  <h2>10. Definitions</h2>
+  <p><strong>Availability.</strong> The percentage of time that the production Service is operational and accessible, excluding applicable exclusions identified in this SLA.</p>
+  <p><strong>Downtime.</strong> A period during which the core Work-A-Beez production service is unavailable to all or a substantial portion of Customers due to issues within the control of LBS.</p>
+  <p><strong>Scheduled Maintenance.</strong> Planned maintenance announced in advance whenever reasonably practicable.</p>
+  <p><strong>Emergency Maintenance.</strong> Maintenance performed immediately to address security, operational, or reliability concerns.</p>
+  <p><strong>Incident.</strong> An event that materially affects the availability, performance, security, or functionality of the Service.</p>
+  <p><strong>Business Hours.</strong> Unless otherwise specified in a Customer's subscription agreement: Monday through Friday, 8:00 AM &ndash; 6:00 PM Central Time, excluding recognized U.S. federal holidays.</p>
+  <p><strong>Support Request.</strong> A Customer communication requesting technical assistance, reporting an issue, or requesting service-related information.</p>
+
+  <h2>11. Customer Responsibilities</h2>
+  <p>To receive effective support under this SLA, Customers agree to:</p>
+  <ul>
+    <li>Maintain current administrator contact information.</li>
+    <li>Use supported web browsers.</li>
+    <li>Maintain reliable internet connectivity.</li>
+    <li>Install supported operating system updates.</li>
+    <li>Protect administrator credentials.</li>
+    <li>Report issues promptly.</li>
+    <li>Provide sufficient information to reproduce reported issues.</li>
+    <li>Cooperate with troubleshooting efforts.</li>
+  </ul>
+  <p>Delays caused by incomplete information or lack of Customer cooperation may affect response and resolution times.</p>
+
+  <h2>12. SLA Exclusions</h2>
+  <p>This SLA does not apply to service interruptions caused by:</p>
+  <ul>
+    <li>Customer internet connectivity</li>
+    <li>Customer hardware failures</li>
+    <li>Unsupported browsers or software</li>
+    <li>Customer-developed customizations</li>
+    <li>Third-party software not controlled by LBS</li>
+    <li>Customer misconfiguration</li>
+    <li>Force majeure events</li>
+    <li>Government actions</li>
+    <li>Utility failures</li>
+    <li>Internet backbone failures</li>
+    <li>Cloud provider regional outages beyond LBS's reasonable control</li>
+    <li>Distributed denial-of-service attacks or similar events outside LBS's reasonable control</li>
+  </ul>
+  <p>These events are excluded when calculating service availability under this SLA.</p>
+
+  <h2>13. Customer Support Services</h2>
+  <p>Linton Business Solutions, LLC ("LBS") provides technical support for the Work-A-Beez platform to assist Customers with questions, incident reporting, troubleshooting, and platform usage. Support may include:</p>
+  <ul>
+    <li>Login assistance</li>
+    <li>Application troubleshooting</li>
+    <li>Bug reporting</li>
+    <li>Service availability inquiries</li>
+    <li>Subscription assistance</li>
+    <li>Configuration guidance</li>
+    <li>Technical documentation</li>
+    <li>General platform support</li>
+  </ul>
+  <p>Support does not include Customer payroll processing, Human Resources consulting, tax advice, employment law guidance, custom software development, Customer network administration, Customer device repair, or third-party software support unless specifically included in a subscription agreement.</p>
+
+  <h2>14. Support Channels</h2>
+  <p><strong>Email Support.</strong> <a href="mailto:support@workabeez.net">support@workabeez.net</a> &mdash; recommended for general questions, non-urgent issues, documentation requests, and configuration assistance.</p>
+  <p><strong>Customer Portal.</strong> Where available, Customers may submit and track support requests through the Work-A-Beez Customer Support Portal.</p>
+  <p><strong>Administrative Dashboard.</strong> Administrative notifications and service messages may be displayed directly within the Work-A-Beez platform.</p>
+  <p><strong>Telephone Support.</strong> Telephone support may be available for Customers with qualifying subscription plans or separate support agreements. Availability and hours are subject to the Customer's subscription level.</p>
+
+  <h2>15. Incident Classification</h2>
+  <p><strong>Severity 1 &ndash; Critical.</strong> Examples include complete production outage, login unavailable for all users, platform unavailable, major security incident, widespread data corruption, or critical production failure. Business impact: business operations cannot reasonably continue.</p>
+  <p><strong>Severity 2 &ndash; High.</strong> Examples include major feature unavailable, payroll reporting unavailable, scheduling failures, significant degradation affecting many users, or authentication issues affecting multiple users. Business impact: major operational disruption with limited workarounds.</p>
+  <p><strong>Severity 3 &ndash; Medium.</strong> Examples include individual feature malfunction, reporting issues, display problems, non-critical integration issues, or administrative errors. Business impact: operations continue with available workarounds.</p>
+  <p><strong>Severity 4 &ndash; Low.</strong> Examples include cosmetic issues, documentation requests, feature questions, enhancement suggestions, or general assistance. Business impact: minimal or no operational impact.</p>
+
+  <h2>16. Initial Response Time Objectives</h2>
+  <p>LBS will use commercially reasonable efforts to acknowledge support requests within the following target timeframes:</p>
+  <table>
+    <tr><th>Severity</th><th>Target Initial Response</th></tr>
+    <tr><td>Critical</td><td>Within 1 hour</td></tr>
+    <tr><td>High</td><td>Within 4 business hours</td></tr>
+    <tr><td>Medium</td><td>Within 1 business day</td></tr>
+    <tr><td>Low</td><td>Within 2 business days</td></tr>
+  </table>
+  <p>Response times are measured during applicable support hours unless otherwise specified in a Customer agreement.</p>
+  <p>An initial response acknowledges receipt of the request and begins the investigation process. It is not a commitment to immediate resolution.</p>
+
+  <h2>17. Target Resolution Objectives</h2>
+  <p>Resolution objectives vary depending on the complexity of the issue.</p>
+  <table>
+    <tr><th>Severity</th><th>Target Resolution Objective</th></tr>
+    <tr><td>Critical</td><td>Continuous effort until service is restored; target restoration within 8 hours where reasonably achievable</td></tr>
+    <tr><td>High</td><td>1&ndash;2 business days</td></tr>
+    <tr><td>Medium</td><td>3&ndash;5 business days</td></tr>
+    <tr><td>Low</td><td>Included in a future maintenance release or resolved as resources permit</td></tr>
+  </table>
+  <p>Resolution objectives are goals and not guarantees. Some issues may require vendor coordination, cloud provider involvement, or software updates that extend resolution timelines.</p>
+
+  <h2>18. Incident Lifecycle</h2>
+  <p>Support incidents generally follow these stages:</p>
+  <ol>
+    <li>Request received</li>
+    <li>Acknowledgment</li>
+    <li>Initial assessment</li>
+    <li>Severity classification</li>
+    <li>Investigation</li>
+    <li>Containment (if required)</li>
+    <li>Root cause analysis</li>
+    <li>Resolution</li>
+    <li>Customer validation</li>
+    <li>Closure</li>
+    <li>Post-incident review (for major incidents)</li>
+  </ol>
+  <p>Customers may be contacted throughout the process to provide additional information or verify that the issue has been resolved.</p>
+
+  <h2>19. Major Incident Management</h2>
+  <p>For Severity 1 incidents, LBS will make commercially reasonable efforts to assign appropriate technical personnel, prioritize restoration of service, communicate status updates to affected Customers, coordinate with relevant cloud or third-party providers where necessary, and conduct a post-incident review after service restoration.</p>
+  <p>When appropriate, a summary of the incident and corrective actions may be provided to affected Customers.</p>
+
+  <h2>20. Escalation Procedures</h2>
+  <p>If an issue requires additional attention, LBS may escalate the matter internally based on business impact, security implications, Customer impact, regulatory considerations, or technical complexity.</p>
+  <p>Escalation may involve engineering, infrastructure, security, or executive personnel as appropriate. Customers may request an escalation if they believe the assigned severity does not accurately reflect the business impact.</p>
+
+  <h2>21. Customer Communication</h2>
+  <p>During active incidents, LBS will use commercially reasonable efforts to provide updates that include current status, known impact, actions underway, estimated next update, and expected restoration progress, if available.</p>
+  <p>Communication frequency depends on the severity and complexity of the incident.</p>
+
+  <h2>22. Service Requests</h2>
+  <p>Not all support requests involve service incidents. Examples of service requests include user account changes, configuration assistance, general product questions, documentation requests, subscription inquiries, and feature guidance.</p>
+  <p>Service requests are prioritized according to operational workload and Customer subscription level.</p>
+
+  <h2>23. Feature Requests</h2>
+  <p>Customers may submit suggestions for new features or enhancements. LBS welcomes customer feedback and evaluates requests based on factors such as customer demand, security, technical feasibility, business value, and product roadmap alignment.</p>
+  <p>Submission of a feature request does not create an obligation for LBS to implement the requested functionality.</p>
+
+  <h2>24. Customer Cooperation</h2>
+  <p>Timely resolution often depends on Customer participation. Customers agree to provide accurate descriptions of reported issues, supply screenshots, logs, or other diagnostic information when requested, test proposed solutions where appropriate, confirm whether an issue has been resolved, and notify LBS if the issue recurs.</p>
+  <p>Failure to provide requested information may delay investigation and resolution.</p>
+
+  <h2>25. Unsupported Requests</h2>
+  <p>LBS reserves the right to decline requests that fall outside the scope of standard platform support, including custom software development, customer-specific business process consulting, on-site technical support (unless separately contracted), administration of third-party products not supplied by LBS, recovery of Customer-deleted data beyond available backup capabilities, or services excluded under the applicable subscription agreement.</p>
+  <p>Professional Services may be offered separately for work beyond standard support.</p>
+
+  <h2>26. Customer Satisfaction</h2>
+  <p>LBS is committed to providing professional, courteous, and timely customer support. Customer feedback is reviewed periodically and may be used to improve support processes, documentation, product usability, knowledge base content, platform reliability, and customer experience.</p>
+  <p>Customer satisfaction is an important part of Work-A-Beez's ongoing commitment to continuous improvement.</p>
+
+  <h2>27. Service Credits</h2>
+  <p>Linton Business Solutions, LLC ("LBS") strives to achieve the Service Availability Objective described in this SLA. If the monthly uptime objective is not achieved due solely to causes within the reasonable control of LBS, an eligible Customer may request a service credit, subject to this section.</p>
+  <p><strong>Illustrative Service Credit Schedule</strong></p>
+  <table>
+    <tr><th>Monthly Availability</th><th>Service Credit</th></tr>
+    <tr><td>99.9% or greater</td><td>No credit</td></tr>
+    <tr><td>99.0% &ndash; 99.89%</td><td>5% of the affected month's subscription fee</td></tr>
+    <tr><td>95.0% &ndash; 98.99%</td><td>10% of the affected month's subscription fee</td></tr>
+    <tr><td>Below 95.0%</td><td>20% of the affected month's subscription fee</td></tr>
+  </table>
+  <p>Service credits apply only to future subscription invoices, are the Customer's sole monetary remedy for covered availability failures under this SLA, have no cash value unless required by applicable law, and may not exceed the subscription fees paid for the affected month.</p>
+  <p>To request a service credit, the Customer must submit a written request within thirty (30) days after the end of the affected month and include reasonable details regarding the claimed outage.</p>
+  <p>LBS reserves the right to verify availability calculations before approving any credit.</p>
+
+  <h2>28. Subscription Support Levels</h2>
+  <p>Support services may vary based on the Customer's subscription plan or separately negotiated agreement.</p>
+  <p><strong>Standard.</strong> Includes email support, business-hours assistance, access to product documentation, and standard response objectives.</p>
+  <p><strong>Professional.</strong> May additionally include a priority support queue, extended troubleshooting, faster response objectives where specified, and administrative guidance.</p>
+  <p><strong>Enterprise.</strong> May additionally include a dedicated Customer Success contact, scheduled service reviews, priority escalation, optional implementation assistance, and customized support arrangements under a separate agreement.</p>
+  <p>Any enhanced support commitments must be documented in the applicable Order Form, Subscription Agreement, or Enterprise Services Agreement.</p>
+
+  <h2>29. Performance Objectives</h2>
+  <p>LBS continuously works to improve the performance of the Work-A-Beez platform. Performance optimization activities may include database tuning, infrastructure scaling, query optimization, application improvements, network optimization, caching strategies, and monitoring enhancements.</p>
+  <p>Application responsiveness may vary depending on Customer internet connectivity, browser performance, device capabilities, network latency, third-party services, and overall platform usage.</p>
+
+  <h2>30. Backup and Recovery Commitments</h2>
+  <p>LBS maintains backup and recovery procedures intended to support restoration of Customer information following qualifying operational events. While exact recovery objectives may evolve as the platform matures, LBS endeavors to maintain commercially reasonable Recovery Time Objectives (RTO) and Recovery Point Objectives (RPO).</p>
+  <p>Current operational targets, where reasonably achievable, are:</p>
+  <ul>
+    <li><strong>Target Recovery Time Objective (RTO):</strong> within 8 hours for critical production systems.</li>
+    <li><strong>Target Recovery Point Objective (RPO):</strong> up to 1 hour of potential data loss in the event of a catastrophic failure.</li>
+  </ul>
+  <p>These objectives are operational targets and not guarantees.</p>
+
+  <h2>31. Business Continuity</h2>
+  <p>Business continuity planning supports continued operation of Work-A-Beez during significant disruptions. Continuity planning may include infrastructure redundancy, backup restoration, cloud failover capabilities where available, incident response coordination, operational communications, and recovery planning.</p>
+  <p>Business continuity procedures are periodically reviewed and updated.</p>
+
+  <h2>32. Maintenance Notifications</h2>
+  <p>Whenever reasonably practical, LBS will notify Customers before planned maintenance through email notifications, administrative dashboard messages, customer portal announcements, or the service status page.</p>
+  <p>Notification timing may vary depending on the nature of the maintenance and operational requirements. Emergency maintenance may occur without advance notice when necessary to protect platform security or restore service.</p>
+
+  <h2>33. SLA Reporting</h2>
+  <p>LBS may maintain internal operational metrics regarding platform availability, support responsiveness, incident trends, platform performance, and system reliability.</p>
+  <p>Enterprise Customers may request reasonable operational information where contractually agreed.</p>
+
+  <h2>34. Customer Responsibilities</h2>
+  <p>To help ensure reliable service, Customers agree to:</p>
+  <ul>
+    <li>Maintain supported browsers and operating systems;</li>
+    <li>Maintain reliable internet connectivity;</li>
+    <li>Promptly install platform updates where applicable;</li>
+    <li>Protect administrator credentials;</li>
+    <li>Maintain appropriate internal security controls;</li>
+    <li>Cooperate with support investigations;</li>
+    <li>Maintain current administrative contact information;</li>
+    <li>Review payroll reports before processing employee compensation.</li>
+  </ul>
+  <p>Failure to fulfill these responsibilities may affect service quality and support outcomes.</p>
+
+  <h2>35. SLA Limitations</h2>
+  <p>This SLA does not apply to beta or preview features, Customer-developed software, third-party applications not controlled by LBS, internet outages outside LBS's control, force majeure events, Customer misuse of the Service, unauthorized modifications to the platform, or unsupported configurations.</p>
+  <p>Availability objectives apply only to the Work-A-Beez production environment.</p>
+
+  <h2>36. Relationship to Other Agreements</h2>
+  <p>This SLA supplements the Work-A-Beez Terms of Service, Privacy Policy, Data Processing Addendum, Acceptable Use Policy, Security Policy, Subscription Agreement, and Enterprise Services Agreement, if applicable.</p>
+  <p>If a conflict exists between this SLA and an individually negotiated Enterprise Services Agreement, the Enterprise Services Agreement shall control for the affected Customer.</p>
+
+  <h2>37. Modification of SLA</h2>
+  <p>LBS may revise this SLA from time to time to reflect platform improvements, operational changes, regulatory developments, security enhancements, customer feedback, or evolving business practices. Material changes will become effective in accordance with the notice provisions contained in the Terms of Service.</p>
+
+  <h2>38. Disclaimer</h2>
+  <p>Except as expressly provided in the Terms of Service or applicable law, this SLA does not create any warranty, guarantee, or representation that the Service will operate without interruption or error.</p>
+  <p>The Service is provided subject to the limitations and disclaimers contained in the Work-A-Beez Terms of Service.</p>
+
+  <h2>39. Contact Information</h2>
+  <p>Questions regarding this SLA may be directed to:</p>
+  <p>
+    Linton Business Solutions, LLC<br>
+    Work-A-Beez Customer Success<br>
+    616 FM 1960 Road West<br>
+    Houston, Texas 77090<br>
+    United States<br>
+    Support: <a href="mailto:support@workabeez.net">support@workabeez.net</a><br>
+    Sales: <a href="mailto:sales@workabeez.net">sales@workabeez.net</a><br>
+    Website: <a href="https://www.workabeez.net" target="_blank" rel="noopener">www.workabeez.net</a>
+  </p>
+
+  <h2>40. Document Control</h2>
+  <table>
+    <tr><th>Document</th><td>Service Level Agreement</td></tr>
+    <tr><th>Product</th><td>Work-A-Beez</td></tr>
+    <tr><th>Owner</th><td>Linton Business Solutions, LLC</td></tr>
+    <tr><th>Version</th><td>1.0</td></tr>
+    <tr><th>Effective Date</th><td>July 23, 2026</td></tr>
+    <tr><th>Review Cycle</th><td>Annual or as needed</td></tr>
+    <tr><th>Classification</th><td>Public</td></tr>
+  </table>
+
+  <h2>41. Acceptance</h2>
+  <p>By subscribing to or using the Work-A-Beez Service, the Customer acknowledges that it has reviewed this Service Level Agreement and understands the service objectives and support commitments described herein.</p>
+  <p>This SLA should be interpreted together with the Work-A-Beez Terms of Service and related legal documentation.</p>
+
+  <h2>Appendix A &ndash; Incident Severity Matrix</h2>
+  <table>
+    <tr><th>Severity</th><th>Business Impact</th><th>Initial Response Target</th><th>Target Resolution Objective</th></tr>
+    <tr>
+      <td>Severity 1 &ndash; Critical</td>
+      <td>Complete production outage or major security event</td>
+      <td>1 hour</td>
+      <td>Continuous effort; target restoration within 8 hours where reasonably achievable</td>
+    </tr>
+    <tr>
+      <td>Severity 2 &ndash; High</td>
+      <td>Major functionality unavailable; significant operational impact</td>
+      <td>4 business hours</td>
+      <td>1&ndash;2 business days</td>
+    </tr>
+    <tr>
+      <td>Severity 3 &ndash; Medium</td>
+      <td>Limited functionality affected; workaround available</td>
+      <td>1 business day</td>
+      <td>3&ndash;5 business days</td>
+    </tr>
+    <tr>
+      <td>Severity 4 &ndash; Low</td>
+      <td>Cosmetic issue, question, or enhancement request</td>
+      <td>2 business days</td>
+      <td>Future release or as resources permit</td>
+    </tr>
+  </table>
+
+  <h2>Appendix B &ndash; Support Summary</h2>
+  <p><strong>Standard Support</strong></p>
+  <ul>
+    <li>Email support</li>
+    <li>Business-hours assistance</li>
+    <li>Product documentation</li>
+    <li>Standard response objectives</li>
+  </ul>
+  <p><strong>Professional Support</strong></p>
+  <ul>
+    <li>Priority email queue</li>
+    <li>Enhanced troubleshooting</li>
+    <li>Administrative guidance</li>
+    <li>Faster response objectives where specified</li>
+  </ul>
+  <p><strong>Enterprise Support</strong></p>
+  <ul>
+    <li>Dedicated Customer Success contact</li>
+    <li>Priority escalation</li>
+    <li>Scheduled operational reviews</li>
+    <li>Customized support arrangements</li>
+    <li>Optional implementation assistance</li>
+  </ul>
+
+  <p class="muted" style="margin-top:24px;">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+{% endblock %}

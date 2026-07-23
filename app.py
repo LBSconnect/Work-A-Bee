@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g, Response, make_response, send_from_directory
+from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -30,6 +31,12 @@ from tz import now_in, today_in
 
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
+
+if config.ON_RENDER:
+    # Render terminates TLS at its edge and forwards plain HTTP to gunicorn, so
+    # without this, url_for(..., _external=True) builds http:// URLs - which
+    # Stripe's live-mode Checkout API rejects for success_url/cancel_url.
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_for=1, x_host=1)
 
 app.config.update(
     SESSION_COOKIE_SECURE=config.ON_RENDER,
@@ -154,6 +161,21 @@ def dpa_policy():
 @app.route("/aup")
 def aup_policy():
     return render_template("aup.html", updated=datetime.now().date())
+
+
+@app.route("/security-policy")
+def security_policy():
+    return render_template("security_policy.html", updated=datetime.now().date())
+
+
+@app.route("/sla")
+def sla_policy():
+    return render_template("sla.html", updated=datetime.now().date())
+
+
+@app.route("/trust")
+def trust_center():
+    return render_template("trust_center.html", updated=datetime.now().date())
 
 
 @app.route("/pricing")

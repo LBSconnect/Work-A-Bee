@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+{% block title %}Security Policy{% endblock %}
+{% block wrapclass %}wide{% endblock %}
+{% block content %}
+  <h1>Work-A-Beez Security Policy</h1>
+  <p class="muted">Version: 1.0 &middot; Effective Date: July 23, 2026 &middot; Last Updated: July 23, 2026</p>
+
+  <h2>1. Purpose</h2>
+  <p>This Security Policy describes the administrative, technical, and physical safeguards implemented by Linton Business Solutions, LLC ("LBS") to protect the confidentiality, integrity, and availability of the Work-A-Beez Software-as-a-Service ("Service").</p>
+  <p>This document is intended to:</p>
+  <ul>
+    <li>Explain Work-A-Beez's security program.</li>
+    <li>Define security responsibilities.</li>
+    <li>Support customer due diligence.</li>
+    <li>Promote consistent security practices.</li>
+    <li>Reduce operational and cybersecurity risk.</li>
+    <li>Demonstrate Work-A-Beez's commitment to protecting Customer Data.</li>
+  </ul>
+  <p>This Security Policy should be read together with the:</p>
+  <ul>
+    <li><a href="{{ url_for('terms_of_service') }}">Work-A-Beez Terms of Service</a></li>
+    <li><a href="{{ url_for('privacy_policy') }}">Privacy Policy</a></li>
+    <li><a href="{{ url_for('dpa_policy') }}">Data Processing Addendum (DPA)</a></li>
+    <li><a href="{{ url_for('aup_policy') }}">Acceptable Use Policy (AUP)</a></li>
+  </ul>
+
+  <h2>2. Scope</h2>
+  <p>This Security Policy applies to all systems, personnel, contractors, technologies, and third-party services used to deliver the Work-A-Beez platform, including:</p>
+  <ul>
+    <li>Production environments</li>
+    <li>Development environments</li>
+    <li>Administrative systems</li>
+    <li>Customer Support operations</li>
+    <li>Cloud infrastructure</li>
+    <li>Databases</li>
+    <li>APIs</li>
+    <li>Web applications</li>
+    <li>Authentication systems</li>
+    <li>Backup systems</li>
+    <li>Internal administrative tools</li>
+  </ul>
+  <p>The policy applies to all employees, contractors, consultants, and authorized third parties with access to Work-A-Beez systems.</p>
+
+  <h2>3. Security Principles</h2>
+  <p>Work-A-Beez's security program is built upon the following principles:</p>
+  <p><strong>Confidentiality.</strong> Customer information is accessible only to authorized individuals with a legitimate business need.</p>
+  <p><strong>Integrity.</strong> Customer data should remain complete, accurate, and protected against unauthorized modification.</p>
+  <p><strong>Availability.</strong> Systems should remain available to authorized users through resilient infrastructure, monitoring, backups, and recovery planning.</p>
+  <p><strong>Least Privilege.</strong> Users receive only the minimum permissions necessary to perform their responsibilities.</p>
+  <p><strong>Defense in Depth.</strong> Multiple layers of administrative, technical, and operational safeguards are used to reduce risk.</p>
+  <p><strong>Continuous Improvement.</strong> Security controls are reviewed and enhanced as technology, threats, and regulatory expectations evolve.</p>
+
+  <h2>4. Shared Responsibility Model</h2>
+  <p>Security is a shared responsibility between LBS and each Customer.</p>
+  <p><strong>LBS Responsibilities.</strong> LBS is responsible for:</p>
+  <ul>
+    <li>Operating the Work-A-Beez platform.</li>
+    <li>Protecting cloud infrastructure under its control.</li>
+    <li>Maintaining application security.</li>
+    <li>Managing platform authentication.</li>
+    <li>Monitoring service health.</li>
+    <li>Performing software maintenance.</li>
+    <li>Applying security patches.</li>
+    <li>Maintaining backups.</li>
+    <li>Responding to security incidents affecting the platform.</li>
+  </ul>
+  <p><strong>Customer Responsibilities.</strong> Customers are responsible for:</p>
+  <ul>
+    <li>Protecting administrator credentials.</li>
+    <li>Managing user permissions.</li>
+    <li>Removing inactive users.</li>
+    <li>Maintaining secure endpoint devices.</li>
+    <li>Verifying payroll calculations.</li>
+    <li>Securing internal networks.</li>
+    <li>Complying with employment, payroll, and privacy laws.</li>
+    <li>Training employees on secure system use.</li>
+  </ul>
+
+  <h2>5. Security Governance</h2>
+  <p>LBS maintains a security governance program intended to support risk management and operational resilience. Security governance activities include:</p>
+  <ul>
+    <li>Periodic review of security controls.</li>
+    <li>Risk identification and assessment.</li>
+    <li>Security policy maintenance.</li>
+    <li>Vendor security evaluations.</li>
+    <li>Incident response planning.</li>
+    <li>Business continuity planning.</li>
+    <li>Disaster recovery planning.</li>
+    <li>Security awareness initiatives.</li>
+    <li>Review of significant security events.</li>
+  </ul>
+  <p>Security responsibilities may be assigned to designated personnel, service providers, or qualified contractors depending on organizational needs.</p>
+
+  <h2>6. Information Classification</h2>
+  <p>Work-A-Beez classifies information according to its sensitivity to ensure appropriate protection.</p>
+  <p><strong>Public.</strong> Information approved for public release, including marketing materials, public documentation, and published product information.</p>
+  <p><strong>Internal.</strong> Operational information intended for internal business use that is not publicly available.</p>
+  <p><strong>Confidential.</strong> Information requiring protection due to business sensitivity, including customer contracts, pricing, internal procedures, and non-public technical documentation.</p>
+  <p><strong>Restricted.</strong> The highest classification, applied to information that could result in significant harm if disclosed, including:</p>
+  <ul>
+    <li>Customer Personal Data</li>
+    <li>Authentication credentials</li>
+    <li>Security keys and secrets</li>
+    <li>Encryption keys</li>
+    <li>Production configuration details</li>
+    <li>Financial account information</li>
+    <li>Security incident records</li>
+  </ul>
+  <p>Restricted information receives the highest level of protection.</p>
+
+  <h2>7. Risk Management</h2>
+  <p>LBS maintains a risk-based approach to information security. Security risks are evaluated based on factors such as:</p>
+  <ul>
+    <li>Likelihood of occurrence</li>
+    <li>Potential business impact</li>
+    <li>Impact on Customers</li>
+    <li>Operational disruption</li>
+    <li>Regulatory obligations</li>
+    <li>Reputational impact</li>
+  </ul>
+  <p>Risk treatment strategies may include mitigation through technical controls, administrative safeguards, operational procedures, risk transfer through insurance or contractual arrangements, or acceptance of low-impact risks where appropriate.</p>
+  <p>Security priorities are reviewed periodically as business operations and technology evolve.</p>
+
+  <h2>8. Security Responsibilities</h2>
+  <p>All personnel with access to Work-A-Beez systems are expected to:</p>
+  <ul>
+    <li>Protect confidential information.</li>
+    <li>Follow established security procedures.</li>
+    <li>Report suspected security incidents promptly.</li>
+    <li>Safeguard authentication credentials.</li>
+    <li>Use company-approved systems responsibly.</li>
+    <li>Complete required security training where applicable.</li>
+    <li>Cooperate with security investigations.</li>
+  </ul>
+  <p>Managers and administrators are responsible for ensuring that appropriate access rights are granted, reviewed, and revoked in a timely manner.</p>
+
+  <h2>9. Policy Compliance</h2>
+  <p>Failure to comply with this Security Policy may result in removal of system access, corrective action, contract termination, legal action where appropriate, or referral to law enforcement when required.</p>
+  <p>LBS reserves the right to update security controls and operational procedures to address evolving threats and changing regulatory requirements.</p>
+
+  <h2>10. Policy Review</h2>
+  <p>This Security Policy will be reviewed periodically and may be updated to reflect changes in technology, new platform features, emerging cybersecurity threats, customer requirements, industry best practices, or applicable legal or regulatory changes.</p>
+  <p>The most current version of this Security Policy will supersede all previous versions.</p>
+
+  <h2>11. Identity and Access Management (IAM)</h2>
+  <p>Linton Business Solutions, LLC ("LBS") maintains an Identity and Access Management (IAM) program designed to ensure that only authorized individuals have access to Work-A-Beez systems and Customer Data. Identity management objectives include:</p>
+  <ul>
+    <li>Verifying user identity before access is granted.</li>
+    <li>Restricting access based on job responsibilities.</li>
+    <li>Removing unnecessary access promptly.</li>
+    <li>Maintaining accountability for user actions.</li>
+    <li>Reducing the risk of unauthorized access.</li>
+  </ul>
+  <p>All users are assigned unique user accounts. Shared administrator accounts are discouraged except where operationally necessary and subject to appropriate controls.</p>
+
+  <h2>12. Authentication</h2>
+  <p>Work-A-Beez requires users to authenticate before accessing protected resources. Authentication controls may include:</p>
+  <ul>
+    <li>Username and password authentication</li>
+    <li>Multi-factor authentication (MFA) where available</li>
+    <li>Secure session management</li>
+    <li>Login attempt monitoring</li>
+    <li>Account lockout after repeated failed login attempts</li>
+    <li>Secure password reset procedures</li>
+    <li>Email verification for account recovery</li>
+  </ul>
+  <p>Authentication mechanisms are periodically reviewed and updated to align with evolving security standards.</p>
+
+  <h2>13. Password Policy</h2>
+  <p>Work-A-Beez encourages Customers to adopt strong password practices. Recommended password requirements include:</p>
+  <ul>
+    <li>Minimum password length of twelve (12) characters</li>
+    <li>Combination of uppercase and lowercase letters</li>
+    <li>Numbers</li>
+    <li>Special characters</li>
+    <li>No dictionary words alone</li>
+    <li>No password reuse across critical systems</li>
+  </ul>
+  <p>Passwords are never stored in plain text. Password hashes are generated using industry-standard cryptographic algorithms. LBS personnel cannot retrieve Customer passwords.</p>
+
+  <h2>14. Multi-Factor Authentication (MFA)</h2>
+  <p>Where supported by the platform, administrator accounts should enable Multi-Factor Authentication (MFA). MFA significantly reduces the likelihood of unauthorized access resulting from compromised credentials.</p>
+  <p>Supported authentication methods may include authenticator applications, time-based one-time passwords (TOTP), hardware security keys, or other approved authentication mechanisms.</p>
+  <p>LBS reserves the right to require MFA for certain administrative or high-risk accounts.</p>
+
+  <h2>15. Authorization</h2>
+  <p>Authorization decisions are based upon user role, assigned permissions, Customer configuration, organizational hierarchy, and business requirements.</p>
+  <p>Role-Based Access Control (RBAC) is used to limit access to information necessary for each user's responsibilities. Examples of roles include:</p>
+  <ul>
+    <li>Company Administrator</li>
+    <li>Manager</li>
+    <li>Supervisor</li>
+    <li>Employee</li>
+    <li>Payroll Reviewer</li>
+    <li>Human Resources Administrator</li>
+  </ul>
+  <p>Customers are responsible for assigning appropriate roles to their users.</p>
+
+  <h2>16. Session Security</h2>
+  <p>Work-A-Beez implements session management controls designed to reduce unauthorized access risks. These controls may include:</p>
+  <ul>
+    <li>Secure session identifiers</li>
+    <li>Automatic session expiration after inactivity</li>
+    <li>Session invalidation upon logout</li>
+    <li>Protection against session fixation</li>
+    <li>Secure cookie attributes</li>
+    <li>Cross-Site Request Forgery (CSRF) protections where applicable</li>
+  </ul>
+  <p>Users should log out after completing their work, especially when using shared devices.</p>
+
+  <h2>17. Encryption</h2>
+  <p><strong>Data in Transit.</strong> Communications between users and the platform are protected using Transport Layer Security (TLS). Encrypted communications help protect against interception while data is transmitted over public networks.</p>
+  <p><strong>Data at Rest.</strong> Where commercially appropriate, sensitive information stored within Work-A-Beez is encrypted using modern cryptographic standards. Encryption may apply to:</p>
+  <ul>
+    <li>Customer databases</li>
+    <li>Backup media</li>
+    <li>Authentication secrets</li>
+    <li>Sensitive configuration information</li>
+  </ul>
+
+  <h2>18. Cryptographic Key Management</h2>
+  <p>Encryption keys and authentication secrets are managed using secure administrative procedures. Key management practices may include restricted administrative access, secure storage, periodic rotation where appropriate, separation of duties, and protection against unauthorized disclosure.</p>
+  <p>Cryptographic materials are treated as Restricted Information.</p>
+
+  <h2>19. Network Security</h2>
+  <p>LBS maintains network security controls intended to protect Work-A-Beez infrastructure. Security measures may include:</p>
+  <ul>
+    <li>Network firewalls</li>
+    <li>Security groups</li>
+    <li>Private networking</li>
+    <li>Segmentation of production resources</li>
+    <li>Denial-of-Service mitigation capabilities</li>
+    <li>Secure Virtual Private Networks (VPNs) where appropriate</li>
+    <li>Restricted administrative access</li>
+  </ul>
+  <p>Network architecture is periodically reviewed as the platform evolves.</p>
+
+  <h2>20. Infrastructure Security</h2>
+  <p>Production infrastructure is hosted using commercially recognized cloud infrastructure providers. Infrastructure security practices may include:</p>
+  <ul>
+    <li>Hardened operating system configurations</li>
+    <li>Security patch management</li>
+    <li>Infrastructure monitoring</li>
+    <li>Resource isolation</li>
+    <li>Automated provisioning</li>
+    <li>High availability architecture</li>
+    <li>Backup protection</li>
+    <li>Disaster recovery support</li>
+  </ul>
+  <p>LBS continually evaluates infrastructure security improvements as technology advances.</p>
+
+  <h2>21. Secure Software Development Lifecycle (SSDLC)</h2>
+  <p>Security is integrated throughout the software development lifecycle. Development practices may include:</p>
+  <ul>
+    <li>Secure coding standards</li>
+    <li>Code reviews</li>
+    <li>Dependency management</li>
+    <li>Automated testing</li>
+    <li>Static code analysis where appropriate</li>
+    <li>Secure release procedures</li>
+    <li>Change management</li>
+    <li>Version control</li>
+    <li>Separation of development, testing, and production environments</li>
+  </ul>
+  <p>Developers are encouraged to follow established secure development principles throughout the product lifecycle.</p>
+
+  <h2>22. Vulnerability Management</h2>
+  <p>LBS maintains procedures for identifying and addressing software vulnerabilities. Activities may include dependency scanning, security advisories, vendor notifications, security updates, vulnerability prioritization, and timely remediation based on risk.</p>
+  <p>Critical vulnerabilities are prioritized according to business impact and exploitability.</p>
+
+  <h2>23. Patch Management</h2>
+  <p>Operating systems, frameworks, third-party libraries, and platform components are periodically updated to address known security issues. Patch priorities consider the severity of the vulnerability, availability of exploits, operational impact, and vendor recommendations.</p>
+  <p>Emergency patches may be deployed outside normal maintenance schedules when necessary to protect the Service.</p>
+
+  <h2>24. Logging and Audit Trails</h2>
+  <p>Work-A-Beez maintains system logging intended to support security monitoring, operational troubleshooting, incident investigations, compliance activities, and system diagnostics. Logs may include:</p>
+  <ul>
+    <li>Authentication events</li>
+    <li>Administrative actions</li>
+    <li>System errors</li>
+    <li>API activity</li>
+    <li>Configuration changes</li>
+    <li>Security alerts</li>
+    <li>Platform events</li>
+  </ul>
+  <p>Access to logs is restricted to authorized personnel.</p>
+
+  <h2>25. Security Monitoring</h2>
+  <p>LBS performs ongoing monitoring designed to identify potential security events affecting the platform. Monitoring activities may include infrastructure health monitoring, application monitoring, error monitoring, authentication monitoring, availability monitoring, resource utilization monitoring, and security alert review.</p>
+  <p>Monitoring helps identify unusual activity and supports timely incident response.</p>
+
+  <h2>26. Change Management</h2>
+  <p>Changes affecting production systems follow controlled deployment procedures intended to reduce operational risk. Change management practices may include documentation of significant changes, testing prior to deployment, rollback planning, version tracking, production approvals where appropriate, and post-deployment verification.</p>
+  <p>Emergency changes may be implemented when necessary to address security vulnerabilities or service disruptions.</p>
+
+  <h2>27. Security by Design</h2>
+  <p>Work-A-Beez is developed using a security-by-design philosophy that seeks to incorporate security considerations throughout product planning, design, development, deployment, and ongoing maintenance. Examples include least-privilege access, defense-in-depth architecture, multi-tenant isolation, secure authentication, secure defaults, data minimization, audit logging, encryption, and continuous improvement.</p>
+  <p>Security is treated as an ongoing operational process rather than a one-time implementation.</p>
+
+  <h2>28. Security Incident Response</h2>
+  <p>Linton Business Solutions, LLC ("LBS") maintains an Incident Response Program designed to identify, contain, investigate, remediate, and recover from cybersecurity incidents affecting the Work-A-Beez platform. The primary objectives of the program are to protect Customer Data, minimize service disruption, preserve evidence where appropriate, restore normal operations efficiently, and meet applicable legal and contractual obligations.</p>
+  <p>The Incident Response lifecycle generally includes:</p>
+  <p><strong>Preparation.</strong> Security policies and procedures, employee awareness, monitoring systems, response tools, and communication plans.</p>
+  <p><strong>Identification.</strong> Potential incidents may be identified through automated monitoring, security alerts, customer reports, vendor notifications, employee observations, or third-party security researchers.</p>
+  <p><strong>Containment.</strong> Where appropriate, LBS may isolate affected systems, restrict user access, disable compromised credentials, block malicious traffic, or suspend affected services.</p>
+  <p><strong>Eradication.</strong> LBS will work to eliminate the root cause of confirmed security incidents, which may include removing malicious software, applying security patches, updating configurations, rotating credentials, or strengthening security controls.</p>
+  <p><strong>Recovery.</strong> Recovery activities may include restoring systems from backups, validating system integrity, monitoring for recurring activity, and returning systems to production.</p>
+  <p><strong>Post-Incident Review.</strong> Following significant incidents, LBS may conduct a post-incident review to document lessons learned, improve security controls, update procedures, and reduce future risk.</p>
+
+  <h2>29. Customer Notification</h2>
+  <p>If LBS confirms a Security Incident affecting Customer Personal Data under its control, LBS will notify affected Customers without undue delay, consistent with applicable law and contractual obligations. Notification may include the nature of the incident, categories of affected information, steps taken to contain the incident, recommended Customer actions, and contact information for follow-up.</p>
+  <p>Notification does not constitute an admission of fault or liability.</p>
+
+  <h2>30. Business Continuity</h2>
+  <p>LBS maintains business continuity practices designed to support continued operations during significant disruptions. Planning considers events such as cloud service interruptions, power outages, internet disruptions, severe weather, cybersecurity incidents, personnel disruptions, and other operational emergencies.</p>
+  <p>Business continuity strategies are reviewed periodically and updated as operational requirements evolve.</p>
+
+  <h2>31. Disaster Recovery</h2>
+  <p>Work-A-Beez maintains disaster recovery capabilities intended to restore critical services following major operational failures. Disaster recovery planning may include backup restoration procedures, infrastructure rebuilding, cloud resource provisioning, configuration recovery, system validation, and communication procedures.</p>
+  <p>Recovery priorities are based on business impact and operational requirements.</p>
+
+  <h2>32. Backup and Restoration</h2>
+  <p>Customer information is backed up using commercially reasonable procedures designed to support recovery from data loss or system failure. Backup practices may include automated backups, encrypted backup storage, geographic redundancy where supported by infrastructure providers, periodic verification of backup integrity, and controlled restoration procedures.</p>
+  <p>Backups are intended for disaster recovery and operational resilience and are not a substitute for Customer-maintained recordkeeping obligations.</p>
+
+  <h2>33. Vendor Risk Management</h2>
+  <p>LBS relies on selected third-party service providers to deliver components of the Work-A-Beez platform. Vendor evaluation may consider security capabilities, reliability, regulatory compliance, privacy practices, operational maturity, and business continuity capabilities.</p>
+  <p>LBS periodically reviews vendor relationships and may replace providers as business requirements evolve.</p>
+
+  <h2>34. Physical Security</h2>
+  <p>Where Work-A-Beez infrastructure is hosted by commercial cloud providers, physical security is primarily managed by those providers. Physical safeguards may include controlled facility access, visitor management, video surveillance, environmental monitoring, fire suppression systems, redundant power, climate control, and physical intrusion detection.</p>
+  <p>LBS maintains reasonable physical safeguards for any company-managed equipment used in platform administration.</p>
+
+  <h2>35. Employee Security</h2>
+  <p>Personnel with access to Customer information are expected to maintain confidentiality, protect authentication credentials, follow security procedures, report suspected incidents promptly, use approved systems responsibly, and access Customer information only when required for legitimate business purposes.</p>
+  <p>Access rights are reviewed periodically and removed when no longer required.</p>
+
+  <h2>36. Security Awareness</h2>
+  <p>LBS promotes a culture of security awareness among personnel. Security education may include password security, phishing awareness, social engineering prevention, data handling requirements, incident reporting, Acceptable Use requirements, and privacy obligations.</p>
+  <p>Training content may evolve to address emerging cybersecurity threats.</p>
+
+  <h2>37. Penetration Testing and Security Assessments</h2>
+  <p>LBS may conduct security assessments appropriate to the size and maturity of the platform, including vulnerability assessments, application security reviews, infrastructure reviews, dependency analysis, configuration reviews, and penetration testing by qualified personnel or third-party specialists.</p>
+  <p>Assessment frequency and scope are determined based on operational needs, platform changes, and identified risks.</p>
+
+  <h2>38. Compliance</h2>
+  <p>Work-A-Beez's security program is designed to support commercially reasonable compliance with applicable contractual and legal obligations. LBS continually evaluates security practices against recognized industry standards and may enhance its security program over time.</p>
+  <p>Publication of this Security Policy does not constitute certification under any specific compliance framework unless expressly stated by LBS.</p>
+
+  <h2>39. Customer Security Responsibilities</h2>
+  <p>Customers play an essential role in protecting their own environments. Customers should:</p>
+  <ul>
+    <li>Use strong authentication</li>
+    <li>Enable Multi-Factor Authentication where available</li>
+    <li>Protect administrator credentials</li>
+    <li>Maintain secure endpoint devices</li>
+    <li>Remove former employees promptly</li>
+    <li>Review user permissions regularly</li>
+    <li>Verify payroll reports</li>
+    <li>Maintain internal security policies</li>
+    <li>Train employees regarding cybersecurity best practices</li>
+  </ul>
+  <p>Security remains a shared responsibility between LBS and each Customer.</p>
+
+  <h2>40. Responsible Vulnerability Disclosure</h2>
+  <p>LBS appreciates responsible reporting of legitimate security vulnerabilities. Individuals who believe they have discovered a security issue affecting Work-A-Beez are encouraged to report it privately to LBS. Reports should include sufficient information to allow reproduction and investigation of the issue.</p>
+  <p>LBS requests that researchers avoid disrupting production systems, avoid accessing Customer Data, and avoid public disclosure until the issue has been investigated and addressed where appropriate.</p>
+  <p>LBS will make commercially reasonable efforts to acknowledge and evaluate legitimate reports.</p>
+
+  <h2>41. Security Contact</h2>
+  <p>Security-related questions or reports may be directed to:</p>
+  <p>
+    Linton Business Solutions, LLC<br>
+    Work-A-Beez Security Office<br>
+    616 FM 1960 Road West<br>
+    Houston, Texas 77090<br>
+    United States<br>
+    Email: <a href="mailto:security@workabeez.net">security@workabeez.net</a><br>
+    General Support: <a href="mailto:support@workabeez.net">support@workabeez.net</a><br>
+    Privacy: <a href="mailto:privacy@workabeez.net">privacy@workabeez.net</a><br>
+    Website: <a href="https://www.workabeez.net" target="_blank" rel="noopener">www.workabeez.net</a>
+  </p>
+
+  <h2>42. Policy Maintenance</h2>
+  <p>This Security Policy may be updated periodically to reflect changes in technology, emerging cybersecurity threats, regulatory developments, operational improvements, customer feedback, or platform enhancements.</p>
+  <p>The current version will be published through Work-A-Beez's official customer documentation.</p>
+
+  <h2>43. Questions</h2>
+  <p>Customers with questions regarding this Security Policy or Work-A-Beez's information security program are encouraged to contact LBS using the contact information provided above.</p>
+
+  <h2>44. Acknowledgment</h2>
+  <p>By using the Work-A-Beez platform, Customers acknowledge that they have reviewed this Security Policy and understand the shared security responsibilities associated with using a cloud-based workforce management service.</p>
+
+  <h2>Appendix A &ndash; Security Controls Summary</h2>
+  <p>The following summarizes the core security controls implemented by Work-A-Beez:</p>
+  <p><strong>Administrative Controls</strong></p>
+  <ul>
+    <li>Information security governance</li>
+    <li>Acceptable Use Policy</li>
+    <li>Data Processing Addendum</li>
+    <li>Privacy Policy</li>
+    <li>Role-based access administration</li>
+    <li>Incident response procedures</li>
+    <li>Vendor risk management</li>
+    <li>Change management</li>
+    <li>Security awareness initiatives</li>
+  </ul>
+  <p><strong>Technical Controls</strong></p>
+  <ul>
+    <li>TLS encryption for data in transit</li>
+    <li>Encryption of sensitive stored data where appropriate</li>
+    <li>Password hashing</li>
+    <li>Role-Based Access Control (RBAC)</li>
+    <li>Multi-Factor Authentication support</li>
+    <li>Secure authentication</li>
+    <li>Audit logging</li>
+    <li>Infrastructure monitoring</li>
+    <li>Vulnerability management</li>
+    <li>Patch management</li>
+    <li>Multi-tenant logical isolation</li>
+    <li>Automated backups</li>
+    <li>Disaster recovery capabilities</li>
+  </ul>
+  <p><strong>Operational Controls</strong></p>
+  <ul>
+    <li>Business continuity planning</li>
+    <li>Disaster recovery planning</li>
+    <li>Backup management</li>
+    <li>Personnel access reviews</li>
+    <li>Confidentiality obligations</li>
+    <li>Controlled administrative access</li>
+    <li>Security event monitoring</li>
+    <li>Continuous improvement of security practices</li>
+  </ul>
+
+  <p class="muted" style="margin-top:24px;">Last updated: {{ updated.strftime('%B %d, %Y') }}</p>
+{% endblock %}
