@@ -3,6 +3,27 @@
 {% block step_content %}
   <h1>Review &amp; Launch</h1>
 
+  <h2>Choose Your Plan</h2>
+  <p class="muted">Every plan gets full, unlimited access free for your first 90 days. You can change plans anytime after signing up.</p>
+  <div class="plan-choice-grid">
+    {% for key, p in plans.items() %}
+      <label class="plan-choice-card{{ ' selected' if key == plan else '' }}">
+        <input type="radio" name="plan" value="{{ key }}" form="review-form" {% if key == plan %}checked{% endif %}>
+        <strong>{{ p.label }}</strong>
+        <span class="plan-choice-price">{{ "$%d/mo"|format(p.price) if p.price else "Free" }}</span>
+        <span class="muted">Up to {{ p.max_employees }} employees &middot; {{ p.max_devices or "Unlimited" }} device{{ 's' if p.max_devices != 1 else '' }}</span>
+      </label>
+    {% endfor %}
+  </div>
+  <script>
+    document.querySelectorAll('.plan-choice-card').forEach(function (card) {
+      card.querySelector('input[type="radio"]').addEventListener('change', function () {
+        document.querySelectorAll('.plan-choice-card').forEach(function (c) { c.classList.remove('selected'); });
+        card.classList.add('selected');
+      });
+    });
+  </script>
+
   <h2>Company</h2>
   <table>
     <tr><th>Name</th><td>{{ company.name }}{% if company.dba_name %} (DBA {{ company.dba_name }}){% endif %}</td></tr>
@@ -49,7 +70,7 @@
   <h2 style="margin-top:24px;">Authorized Devices</h2>
   <p class="muted">{% if device.register %}{{ device.name }} (this computer){% else %}None registered yet. Clock-in stays open until you register a device.{% endif %}</p>
 
-  <form method="post" style="margin-top:32px;">
+  <form method="post" id="review-form" style="margin-top:32px;">
     <button type="submit">Create Company</button>
   </form>
   <p class="muted" style="margin-top:16px;"><a href="{{ url_for('wizard.step_devices') }}">Back</a></p>

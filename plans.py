@@ -31,6 +31,29 @@ PLANS = {
 
 DEFAULT_PLAN = "starter"
 
+TIER_RANK = {"starter": 0, "growth": 1, "business": 2}
+
+# Features that are visible on every plan but only usable once the org's plan
+# (or an active 90-day promo, which grants full access regardless of plan -
+# see the pricing page's "full, unlimited access free for the first 90 days")
+# meets the listed minimum tier.
+FEATURE_TIERS = {
+    "messaging": "growth",
+    "notifications": "growth",
+    "shift_marketplace": "growth",
+    "performance": "business",
+    "recognition": "business",
+}
+
+
+def feature_available(org, feature_key):
+    if promo_active(org):
+        return True
+    required = FEATURE_TIERS.get(feature_key)
+    if required is None:
+        return True
+    return TIER_RANK[get_plan_key(org)] >= TIER_RANK[required]
+
 
 def stripe_price_id(plan_key):
     env_name = PLANS[plan_key]["stripe_price_env"]
