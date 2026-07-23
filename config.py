@@ -14,4 +14,10 @@ MS_CLIENT_ID = os.environ.get("MS_CLIENT_ID", "")
 MS_CLIENT_SECRET = os.environ.get("MS_CLIENT_SECRET", "")
 MS_SENDER_EMAIL = os.environ.get("MS_SENDER_EMAIL", "")
 
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+STRIPE_PRICE_STARTER = os.environ.get("STRIPE_PRICE_STARTER", "")
+STRIPE_PRICE_GROWTH = os.environ.get("STRIPE_PRICE_GROWTH", "")
+STRIPE_PRICE_BUSINESS = os.environ.get("STRIPE_PRICE_BUSINESS", "")
+
 ON_RENDER = os.environ.get("RENDER", "") != ""

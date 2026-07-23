@@ -9,7 +9,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
+import stripe
+
 import audit
+import billing
 import choices
 import config
 import devices as devices_mod
@@ -97,6 +100,23 @@ def terms_of_service():
 @app.route("/pricing")
 def pricing_page():
     return render_template("pricing.html", plans=plans)
+
+
+@app.route("/stripe/webhook", methods=["POST"])
+def stripe_webhook():
+    payload = request.get_data()
+    sig_header = request.headers.get("Stripe-Signature", "")
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, config.STRIPE_WEBHOOK_SECRET)
+    except (ValueError, stripe.error.SignatureVerificationError):
+        abort(400)
+
+    try:
+        billing.process_webhook_event(event)
+    except Exception:
+        traceback.print_exc()
+        abort(500)
+    return "", 200
 
 
 @app.route("/staff/login", methods=["GET", "POST"])
@@ -942,11 +962,57 @@ def admin_plan_update():
         flash("Unknown plan selected.")
         return redirect(url_for("admin_settings"))
 
+    try:
+        if g.org.get("stripe_subscription_id"):
+            billing.change_plan(g.org["stripe_subscription_id"], plan_key)
+        else:
+            with get_db() as conn:
+                conn.execute("UPDATE organizations SET plan=%s WHERE id=%s", (plan_key, g.org["id"]))
+                conn.commit()
+    except stripe.error.StripeError:
+        flash("We couldn't update your plan with Stripe. Please try again or contact support.")
+        return redirect(url_for("admin_settings"))
+
     with get_db() as conn:
-        conn.execute("UPDATE organizations SET plan=%s WHERE id=%s", (plan_key, g.org["id"]))
         audit.log(conn, g.org["id"], "admin", g.admin["id"], "org.plan_changed", plan_key)
         conn.commit()
     flash(f"Plan changed to {plans.PLANS[plan_key]['label']}.")
+    return redirect(url_for("admin_settings"))
+
+
+@app.route("/admin/plan/cancel", methods=["POST"])
+@admin_required
+def admin_plan_cancel():
+    if not g.org.get("stripe_subscription_id"):
+        flash("No active subscription to cancel.")
+        return redirect(url_for("admin_settings"))
+    try:
+        billing.cancel_at_period_end(g.org["stripe_subscription_id"])
+    except stripe.error.StripeError:
+        flash("We couldn't cancel your subscription with Stripe. Please try again or contact support.")
+        return redirect(url_for("admin_settings"))
+    with get_db() as conn:
+        audit.log(conn, g.org["id"], "admin", g.admin["id"], "org.subscription_cancel_scheduled", None)
+        conn.commit()
+    flash("Your subscription will end at the close of your current billing period. You can resume anytime before then.")
+    return redirect(url_for("admin_settings"))
+
+
+@app.route("/admin/plan/resume", methods=["POST"])
+@admin_required
+def admin_plan_resume():
+    if not g.org.get("stripe_subscription_id"):
+        flash("No subscription to resume.")
+        return redirect(url_for("admin_settings"))
+    try:
+        billing.resume_subscription(g.org["stripe_subscription_id"])
+    except stripe.error.StripeError:
+        flash("We couldn't resume your subscription with Stripe. Please try again or contact support.")
+        return redirect(url_for("admin_settings"))
+    with get_db() as conn:
+        audit.log(conn, g.org["id"], "admin", g.admin["id"], "org.subscription_resumed", None)
+        conn.commit()
+    flash("Your subscription has been resumed.")
     return redirect(url_for("admin_settings"))
 
 

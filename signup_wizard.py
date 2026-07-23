@@ -9,9 +9,13 @@ import psycopg2.errors
 from flask import Blueprint, request, redirect, url_for, render_template, flash, session, make_response, jsonify
 from werkzeug.security import generate_password_hash
 
+import stripe
+
 import audit
+import billing
 import choices
 import devices as devices_mod
+import plans
 from drafts import get_or_create_draft, save_step, attach_cookie, delete_draft, COOKIE_NAME
 from models import get_db
 from orgs import next_company_code
@@ -460,8 +464,9 @@ def step_review():
                     "timezone, currency, week_starts_on, payroll_frequency, default_shift_minutes, "
                     "overtime_rule, overtime_threshold_hours, default_hourly_rate, "
                     "allow_employee_specific_rates, round_clock_minutes, auto_lunch_deduction, "
-                    "lunch_duration_minutes, allow_paid_breaks, report_recipients, plan, onboarding_completed_at) "
-                    "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW())",
+                    "lunch_duration_minutes, allow_paid_breaks, report_recipients, plan, status, "
+                    "onboarding_completed_at) "
+                    "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW())",
                     (next_id, code, company["name"], company.get("dba_name") or None,
                      company.get("business_type") or None, company.get("industry") or None,
                      company.get("address_line1"), company.get("city") or None, company.get("state") or None,
@@ -474,7 +479,7 @@ def step_review():
                      settings_.get("overtime_threshold_hours"), payroll.get("default_hourly_rate", 16.00),
                      payroll.get("allow_employee_specific_rates", True), payroll.get("round_clock_minutes", 0),
                      payroll.get("auto_lunch_deduction", False), payroll.get("lunch_duration_minutes", 30),
-                     payroll.get("allow_paid_breaks", False), admin.get("email"), plan),
+                     payroll.get("allow_paid_breaks", False), admin.get("email"), plan, "pending_payment"),
                 )
                 org_id = next_id
                 print(f"[wizard] checkpoint: organizations insert OK, org_id={org_id}")
@@ -583,14 +588,92 @@ def step_review():
         session["org_id"] = org_id
         session["welcome_company_code"] = code.upper()
         session["welcome_admin_creds"] = secondary_admin_creds
-
-        resp = make_response(redirect(url_for("admin_dashboard")))
-        resp.delete_cookie(COOKIE_NAME)
         if raw_device_token:
-            resp = devices_mod.issue_device_cookie(resp, org_id, raw_device_token)
+            session["pending_device_token"] = raw_device_token
+
+        try:
+            checkout_url = billing.create_checkout_session(
+                org_id, plan, admin["email"],
+                success_url=url_for("wizard.checkout_success", _external=True),
+                cancel_url=url_for("wizard.checkout_cancelled", _external=True),
+            )
+        except stripe.error.StripeError:
+            traceback.print_exc()
+            resp = make_response(redirect(url_for("wizard.checkout_cancelled")))
+            resp.delete_cookie(COOKIE_NAME)
+            flash("Your company account was created, but we couldn't reach our payment processor. Please try completing payment setup again.")
+            return resp
+
+        resp = make_response(redirect(checkout_url))
+        resp.delete_cookie(COOKIE_NAME)
         return resp
 
     return _wrap(token, render_template(
         "wizard/step7_review.html", company=company, admin=admin, settings=settings_,
         payroll=payroll, employees=employees, device=device, step_num=7,
     ))
+
+
+@wizard.route("/signup/checkout/success")
+def checkout_success():
+    session_id = request.args.get("session_id", "")
+    org_id = session.get("org_id")
+    if not session_id or not org_id:
+        flash("We couldn't confirm your payment setup. Please log in and check your plan status.")
+        return redirect(url_for("admin_login"))
+
+    try:
+        checkout_session = stripe.checkout.Session.retrieve(session_id)
+    except stripe.error.StripeError:
+        flash("We couldn't confirm your payment setup with Stripe. Please contact support.")
+        return redirect(url_for("admin_login"))
+
+    if checkout_session.get("client_reference_id") != str(org_id) or checkout_session.get("payment_status") not in ("paid", "no_payment_required") and checkout_session.get("status") != "complete":
+        flash("Payment setup isn't complete yet. Please try again or contact support.")
+        return redirect(url_for("wizard.checkout_cancelled"))
+
+    billing.handle_checkout_completed(checkout_session)
+
+    raw_device_token = session.pop("pending_device_token", None)
+    resp = make_response(redirect(url_for("admin_dashboard")))
+    if raw_device_token:
+        resp = devices_mod.issue_device_cookie(resp, org_id, raw_device_token)
+    return resp
+
+
+@wizard.route("/signup/checkout/cancelled")
+def checkout_cancelled():
+    if not session.get("org_id") or not session.get("admin_id"):
+        flash("Your signup session has expired. Please contact support to finish setting up your account.")
+        return redirect(url_for("admin_login"))
+    return render_template("wizard/checkout_cancelled.html")
+
+
+@wizard.route("/signup/checkout/retry")
+def checkout_retry():
+    org_id = session.get("org_id")
+    admin_id = session.get("admin_id")
+    if not org_id or not admin_id:
+        flash("Your signup session has expired. Please contact support to finish setting up your account.")
+        return redirect(url_for("admin_login"))
+
+    with get_db() as conn:
+        org = conn.execute("SELECT * FROM organizations WHERE id=%s", (org_id,)).fetchone()
+        admin_row = conn.execute("SELECT * FROM admin_users WHERE id=%s", (admin_id,)).fetchone()
+
+    if org is None or admin_row is None:
+        flash("We couldn't find your account. Please contact support.")
+        return redirect(url_for("admin_login"))
+
+    try:
+        checkout_url = billing.create_checkout_session(
+            org_id, plans.get_plan_key(org), admin_row["email"],
+            success_url=url_for("wizard.checkout_success", _external=True),
+            cancel_url=url_for("wizard.checkout_cancelled", _external=True),
+        )
+    except stripe.error.StripeError:
+        traceback.print_exc()
+        flash("We couldn't reach our payment processor. Please try again shortly.")
+        return redirect(url_for("wizard.checkout_cancelled"))
+
+    return redirect(checkout_url)

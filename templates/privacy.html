@@ -19,14 +19,15 @@
     <li><strong>Employee records</strong>: name, employee ID, job title, hourly rate, and a securely hashed PIN (we never store PINs in plain text).</li>
     <li><strong>Time &amp; attendance data</strong>: clock-in and clock-out timestamps, and which admin made any manual correction.</li>
     <li><strong>Device &amp; security data</strong>: a name you give each authorized device, a securely hashed device token, and the IP address last used to clock in, so we can restrict clock-ins to computers your Company has approved.</li>
+    <li><strong>Billing information</strong>: your card is collected and processed directly by our payment processor, Stripe &mdash; we never receive or store your full card number. We keep only a reference (Stripe customer and subscription ID) and your subscription status so we can manage your plan and billing.</li>
   </ul>
   <p>We do not collect biometric data of any kind &mdash; no fingerprint, face, or voice scans are used to clock employees in or out.</p>
 
   <h2>How we use it</h2>
-  <p>We use this data only to operate the service: authenticating admins and employees, tracking hours, calculating pay, generating the timesheets and payroll reports your Company requests, enforcing which devices are authorized to clock in and out, and maintaining an audit trail of admin actions like manual time entries and device changes.</p>
+  <p>We use this data only to operate the service: authenticating admins and employees, tracking hours, calculating pay, generating the timesheets and payroll reports your Company requests, enforcing which devices are authorized to clock in and out, billing your Company's selected plan after the free 90-day period ends, and maintaining an audit trail of admin actions like manual time entries and device changes.</p>
 
   <h2>Who we share it with &mdash; and who we don't sell it to</h2>
-  <p>We do not sell or rent personal data to anyone, for any purpose. Weekly payroll reports are sent only to the recipients your Company configures, using Microsoft's email sending service (Microsoft Graph API) as our email delivery provider. We don't share your data with any other third party except as required by law (for example, a valid legal request).</p>
+  <p>We do not sell or rent personal data to anyone, for any purpose. Weekly payroll reports are sent only to the recipients your Company configures, using Microsoft's email sending service (Microsoft Graph API) as our email delivery provider. Payment is handled by Stripe, our payment processor, which receives your card details directly and never passes your full card number to us. We don't share your data with any other third party except as required by law (for example, a valid legal request).</p>
 
   <h2>Data isolation between companies</h2>
   <p>Each Company's data is logically separated in our database and is only accessible to that Company's own admins and employees &mdash; never to other companies using Work-A-Bee.</p>

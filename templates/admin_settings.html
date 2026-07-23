@@ -5,13 +5,20 @@
   {% set current_plan = plans.get_plan(org) %}
   {% if plans.promo_active(org) %}
     <div class="flash">
-      <strong>Launch promo active:</strong> all plan limits are waived for {{ plans.promo_days_left(org) }} more day{{ 's' if plans.promo_days_left(org) != 1 else '' }} &mdash; add as many employees and devices as you need, free.
+      <strong>Launch promo active:</strong> all plan limits are waived for {{ plans.promo_days_left(org) }} more day{{ 's' if plans.promo_days_left(org) != 1 else '' }} &mdash; add as many employees and devices as you need, free. Your card on file won't be charged until your promo period ends.
+    </div>
+  {% endif %}
+  {% if org.cancel_at_period_end %}
+    <div class="flash">
+      Your subscription is set to cancel{% if org.current_period_end %} on {{ org.current_period_end.strftime('%B %d, %Y') }}{% endif %}. You'll keep access until then.
     </div>
   {% endif %}
   <p class="muted">
     Current plan: <strong>{{ current_plan.label }}</strong>
     ({{ current_plan.max_employees }} employees, {{ current_plan.max_devices or "unlimited" }} device{{ 's' if current_plan.max_devices != 1 else '' }})
     {% if current_plan.price %} &middot; ${{ current_plan.price }}/mo{% else %} &middot; Free{% endif %}
+    {% if org.subscription_status %} &middot; Status: {{ org.subscription_status|capitalize }}{% endif %}
+    {% if org.current_period_end and not org.cancel_at_period_end %} &middot; Next bill: {{ org.current_period_end.strftime('%B %d, %Y') }}{% endif %}
   </p>
   <form method="post" action="{{ url_for('admin_plan_update') }}" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
     <select name="plan">
@@ -23,7 +30,20 @@
     </select>
     <button type="submit" style="margin:0;">Change Plan</button>
   </form>
-  <p class="muted" style="margin-top:8px;">See <a href="{{ url_for('pricing_page') }}">full plan details</a>. Billing isn't collected yet during the launch promo &mdash; changing your plan here just updates your limits.</p>
+  <p class="muted" style="margin-top:8px;">See <a href="{{ url_for('pricing_page') }}">full plan details</a>. Your card is charged automatically once your 90-day free period ends &mdash; cancel anytime, no questions asked.</p>
+
+  {% if org.stripe_subscription_id %}
+    {% if org.cancel_at_period_end %}
+    <form method="post" action="{{ url_for('admin_plan_resume') }}" style="margin-top:8px;">
+      <button type="submit" class="secondary" style="margin:0;">Resume Subscription</button>
+    </form>
+    {% else %}
+    <form method="post" action="{{ url_for('admin_plan_cancel') }}" style="margin-top:8px;"
+          onsubmit="return confirm('Cancel your subscription? You\'ll keep access until the end of your current billing period.');">
+      <button type="submit" class="secondary" style="margin:0;">Cancel Subscription</button>
+    </form>
+    {% endif %}
+  {% endif %}
 
   <h1 style="margin-top:40px;">Company profile</h1>
 
