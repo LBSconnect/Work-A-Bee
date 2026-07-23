@@ -14,6 +14,7 @@ import choices
 import config
 import devices as devices_mod
 import plans
+import schedule
 from models import init_db, get_db
 from orgs import get_active_org, normalize_company_code
 from payroll import get_period_bounds, calculate_payroll, get_period_entries, get_prior_periods
@@ -66,6 +67,11 @@ def _active_companies():
 @app.route("/")
 def clock_home():
     return render_template("index.html")
+
+
+@app.route("/favicon.ico")
+def favicon_ico():
+    return send_from_directory(app.static_folder, "favicon.ico", mimetype="image/vnd.microsoft.icon")
 
 
 @app.route("/robots.txt")
@@ -201,6 +207,11 @@ def clock_action():
                 "pay": mine["pay"] if mine else 0.0,
             })
 
+        upcoming_shifts = conn.execute(
+            "SELECT * FROM shifts WHERE employee_id=%s AND shift_end >= %s ORDER BY shift_start LIMIT 5",
+            (emp_id, now_in(org["timezone"])),
+        ).fetchall()
+
     history = []
     for e in recent_entries:
         hours = None
@@ -214,6 +225,7 @@ def clock_action():
         is_clocked_in=bool(open_entry),
         history=history,
         weekly_history=weekly_history,
+        upcoming_shifts=upcoming_shifts,
     )
 
 
@@ -597,6 +609,177 @@ def admin_time_entry_delete(entry_id):
         conn.commit()
     flash("Time entry deleted.")
     return redirect(url_for("admin_dashboard") + "#timesheets")
+
+
+@app.route("/admin/schedule")
+@admin_required
+def admin_schedule():
+    week_param = request.args.get("week", "")
+    try:
+        reference_date = datetime.strptime(week_param, "%Y-%m-%d").date()
+    except ValueError:
+        reference_date = today_in(g.org["timezone"])
+
+    week_start, week_end = schedule.week_bounds(reference_date)
+    days = schedule.week_days(week_start)
+
+    with get_db() as conn:
+        shifts = conn.execute(
+            "SELECT s.*, e.name AS employee_name FROM shifts s "
+            "JOIN employees e ON s.employee_id = e.id "
+            "WHERE s.org_id=%s AND s.shift_start >= %s AND s.shift_start < %s "
+            "ORDER BY s.shift_start",
+            (g.org["id"], datetime.combine(week_start, datetime.min.time()),
+             datetime.combine(week_end + timedelta(days=1), datetime.min.time())),
+        ).fetchall()
+
+    shifts_by_day = {d: [] for d in days}
+    for s in shifts:
+        day = s["shift_start"].date()
+        if day in shifts_by_day:
+            shifts_by_day[day].append(s)
+
+    return render_template(
+        "admin_schedule.html",
+        week_start=week_start, week_end=week_end,
+        prev_week=(week_start - timedelta(days=7)).isoformat(),
+        next_week=(week_start + timedelta(days=7)).isoformat(),
+        shifts_by_day=shifts_by_day,
+    )
+
+
+@app.route("/admin/schedule/new", methods=["GET", "POST"])
+@admin_required
+def admin_shift_new():
+    with get_db() as conn:
+        employees = conn.execute(
+            "SELECT * FROM employees WHERE org_id=%s AND active=1 ORDER BY name", (g.org["id"],)
+        ).fetchall()
+
+    default_date = request.args.get("date", "")
+
+    if request.method == "POST":
+        emp_id = request.form.get("employee_id", "")
+        start_raw = request.form.get("shift_start", "").strip()
+        end_raw = request.form.get("shift_end", "").strip()
+        notes = request.form.get("notes", "").strip()
+
+        with get_db() as conn:
+            emp = conn.execute(
+                "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, g.org["id"])
+            ).fetchone()
+
+        if emp is None:
+            flash("Choose a valid employee.")
+            return render_template("admin_shift_form.html", employees=employees, shift=None, default_date=default_date)
+
+        try:
+            shift_start = datetime.strptime(start_raw, "%Y-%m-%dT%H:%M")
+            shift_end = datetime.strptime(end_raw, "%Y-%m-%dT%H:%M")
+        except ValueError:
+            flash("Enter valid start and end times.")
+            return render_template("admin_shift_form.html", employees=employees, shift=None, default_date=default_date)
+
+        if shift_end <= shift_start:
+            flash("Shift end must be after shift start.")
+            return render_template("admin_shift_form.html", employees=employees, shift=None, default_date=default_date)
+
+        with get_db() as conn:
+            conn.execute(
+                "INSERT INTO shifts (org_id, employee_id, shift_start, shift_end, notes, created_by_admin_id) "
+                "VALUES (%s, %s, %s, %s, %s, %s)",
+                (g.org["id"], emp_id, shift_start, shift_end, notes or None, g.admin["id"]),
+            )
+            audit.log(
+                conn, g.org["id"], "admin", g.admin["id"], "shift.created",
+                f"{emp['name']}: {shift_start} - {shift_end}",
+            )
+            conn.commit()
+        flash(f"Shift added for {emp['name']}.")
+        return redirect(url_for("admin_schedule", week=schedule.week_bounds(shift_start.date())[0].isoformat()))
+
+    return render_template("admin_shift_form.html", employees=employees, shift=None, default_date=default_date)
+
+
+@app.route("/admin/schedule/<int:shift_id>/edit", methods=["GET", "POST"])
+@admin_required
+def admin_shift_edit(shift_id):
+    with get_db() as conn:
+        shift = conn.execute(
+            "SELECT * FROM shifts WHERE id=%s AND org_id=%s", (shift_id, g.org["id"])
+        ).fetchone()
+        employees = conn.execute(
+            "SELECT * FROM employees WHERE org_id=%s AND active=1 ORDER BY name", (g.org["id"],)
+        ).fetchall()
+
+    if shift is None:
+        flash("Shift not found.")
+        return redirect(url_for("admin_schedule"))
+
+    if request.method == "POST":
+        emp_id = request.form.get("employee_id", "")
+        start_raw = request.form.get("shift_start", "").strip()
+        end_raw = request.form.get("shift_end", "").strip()
+        notes = request.form.get("notes", "").strip()
+
+        with get_db() as conn:
+            emp = conn.execute(
+                "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, g.org["id"])
+            ).fetchone()
+
+        if emp is None:
+            flash("Choose a valid employee.")
+            return render_template("admin_shift_form.html", employees=employees, shift=shift, default_date="")
+
+        try:
+            shift_start = datetime.strptime(start_raw, "%Y-%m-%dT%H:%M")
+            shift_end = datetime.strptime(end_raw, "%Y-%m-%dT%H:%M")
+        except ValueError:
+            flash("Enter valid start and end times.")
+            return render_template("admin_shift_form.html", employees=employees, shift=shift, default_date="")
+
+        if shift_end <= shift_start:
+            flash("Shift end must be after shift start.")
+            return render_template("admin_shift_form.html", employees=employees, shift=shift, default_date="")
+
+        with get_db() as conn:
+            conn.execute(
+                "UPDATE shifts SET employee_id=%s, shift_start=%s, shift_end=%s, notes=%s "
+                "WHERE id=%s AND org_id=%s",
+                (emp_id, shift_start, shift_end, notes or None, shift_id, g.org["id"]),
+            )
+            audit.log(
+                conn, g.org["id"], "admin", g.admin["id"], "shift.updated",
+                f"{emp['name']}: {shift_start} - {shift_end}",
+            )
+            conn.commit()
+        flash(f"Shift updated for {emp['name']}.")
+        return redirect(url_for("admin_schedule", week=schedule.week_bounds(shift_start.date())[0].isoformat()))
+
+    return render_template("admin_shift_form.html", employees=employees, shift=shift, default_date="")
+
+
+@app.route("/admin/schedule/<int:shift_id>/delete", methods=["POST"])
+@admin_required
+def admin_shift_delete(shift_id):
+    with get_db() as conn:
+        shift = conn.execute(
+            "SELECT s.*, e.name AS employee_name FROM shifts s JOIN employees e ON s.employee_id = e.id "
+            "WHERE s.id=%s AND s.org_id=%s",
+            (shift_id, g.org["id"]),
+        ).fetchone()
+        if shift is None:
+            flash("Shift not found.")
+            return redirect(url_for("admin_schedule"))
+
+        conn.execute("DELETE FROM shifts WHERE id=%s AND org_id=%s", (shift_id, g.org["id"]))
+        audit.log(
+            conn, g.org["id"], "admin", g.admin["id"], "shift.deleted",
+            f"{shift['employee_name']}: {shift['shift_start']} - {shift['shift_end']}",
+        )
+        conn.commit()
+    flash("Shift deleted.")
+    return redirect(url_for("admin_schedule", week=schedule.week_bounds(shift["shift_start"].date())[0].isoformat()))
 
 
 def _send_current_period_report(org):

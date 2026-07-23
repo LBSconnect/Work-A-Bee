@@ -19,6 +19,20 @@
   </form>
   <a class="btn secondary" style="margin-top:16px;" href="{{ url_for('clock_exit') }}">Exit</a>
 
+  {% if upcoming_shifts %}
+    <h2 style="margin-top:32px; font-size:16px;">Upcoming shifts</h2>
+    <table>
+      <tr><th>Date</th><th>Time</th><th>Notes</th></tr>
+      {% for s in upcoming_shifts %}
+      <tr>
+        <td>{{ s.shift_start.strftime('%a %b %d') }}</td>
+        <td>{{ s.shift_start.strftime('%I:%M %p') }} &ndash; {{ s.shift_end.strftime('%I:%M %p') }}</td>
+        <td class="muted">{{ s.notes or '' }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
   {% if history %}
     <h2 style="margin-top:32px; font-size:16px;">Recent activity</h2>
     <table>

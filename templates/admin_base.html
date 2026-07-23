@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Work-A-Bee Admin{% endblock %}</title>
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo-workabee.svg') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+  <link rel="alternate icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -27,6 +30,7 @@
       <div class="admin-sidebar">
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_dashboard' else '' }}" href="{{ url_for('admin_dashboard') }}"><span class="admin-si">📊</span> Dashboard</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_employees' else '' }}" href="{{ url_for('admin_employees') }}"><span class="admin-si">👥</span> Employees</a>
+        <a class="admin-sidebar-item{{ ' active' if request.endpoint in ('admin_schedule', 'admin_shift_new', 'admin_shift_edit') else '' }}" href="{{ url_for('admin_schedule') }}"><span class="admin-si">🗓️</span> Schedule</a>
         <a class="admin-sidebar-item" href="{{ url_for('staff_login') }}"><span class="admin-si">🕐</span> Time Clock</a>
         <a class="admin-sidebar-item" href="{{ url_for('admin_dashboard') }}#timesheets"><span class="admin-si">📋</span> Timesheets</a>
         <a class="admin-sidebar-item" href="{{ url_for('admin_dashboard') }}#reports"><span class="admin-si">📈</span> Reports</a>

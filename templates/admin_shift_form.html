@@ -1,0 +1,29 @@
+{% extends "admin_base.html" %}
+{% block title %}{% if shift %}Edit Shift{% else %}Add Shift{% endif %}{% endblock %}
+{% block admin_content %}
+  <h1>{% if shift %}Edit shift{% else %}Add a shift{% endif %}</h1>
+
+  <form method="post">
+    <label>Employee</label>
+    <select name="employee_id" required>
+      <option value="">Select...</option>
+      {% for e in employees %}
+        <option value="{{ e.id }}" {% if shift and shift.employee_id == e.id %}selected{% endif %}>{{ e.name }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Shift start</label>
+    <input type="datetime-local" name="shift_start"
+           value="{{ shift.shift_start.strftime('%Y-%m-%dT%H:%M') if shift else (default_date ~ 'T09:00' if default_date else '') }}" required>
+
+    <label>Shift end</label>
+    <input type="datetime-local" name="shift_end"
+           value="{{ shift.shift_end.strftime('%Y-%m-%dT%H:%M') if shift else (default_date ~ 'T17:00' if default_date else '') }}" required>
+
+    <label>Notes</label>
+    <input type="text" name="notes" value="{{ shift.notes if shift else '' }}" placeholder="e.g. Job site, role, reminders">
+
+    <button type="submit">{% if shift %}Save changes{% else %}Add shift{% endif %}</button>
+  </form>
+  <p class="muted" style="margin-top:24px;"><a href="{{ url_for('admin_schedule') }}">Cancel</a></p>
+{% endblock %}

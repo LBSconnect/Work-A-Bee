@@ -1,0 +1,42 @@
+{% extends "admin_base.html" %}
+{% block title %}Schedule{% endblock %}
+{% block admin_content %}
+  <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+    <h1 style="margin:0;">Schedule</h1>
+    <a class="btn" style="margin:0;" href="{{ url_for('admin_shift_new') }}">+ Add Shift</a>
+  </div>
+  <p class="muted">{{ week_start.strftime('%B %d') }} &ndash; {{ week_end.strftime('%B %d, %Y') }}</p>
+  <p style="margin-top:8px;">
+    <a href="{{ url_for('admin_schedule', week=prev_week) }}">&larr; Previous week</a>
+    &middot;
+    <a href="{{ url_for('admin_schedule') }}">This week</a>
+    &middot;
+    <a href="{{ url_for('admin_schedule', week=next_week) }}">Next week &rarr;</a>
+  </p>
+
+  {% for day, shifts in shifts_by_day.items() %}
+    <h2 style="margin-top:28px; font-size:16px;">{{ day.strftime('%A, %B %d') }}</h2>
+    {% if shifts %}
+    <table>
+      <tr><th>Employee</th><th>Time</th><th>Notes</th><th></th></tr>
+      {% for s in shifts %}
+      <tr>
+        <td>{{ s.employee_name }}</td>
+        <td>{{ s.shift_start.strftime('%I:%M %p') }} &ndash; {{ s.shift_end.strftime('%I:%M %p') }}</td>
+        <td class="muted">{{ s.notes or '' }}</td>
+        <td>
+          <a href="{{ url_for('admin_shift_edit', shift_id=s.id) }}">Edit</a>
+          &middot;
+          <form method="post" action="{{ url_for('admin_shift_delete', shift_id=s.id) }}"
+                onsubmit="return confirm('Delete this shift?');" style="display:inline;">
+            <button type="submit" class="secondary" style="margin:0; padding:2px 8px; font-size:12px;">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+    <p class="muted">No shifts scheduled.</p>
+    {% endif %}
+  {% endfor %}
+{% endblock %}
