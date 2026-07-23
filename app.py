@@ -68,6 +68,11 @@ def clock_home():
     return render_template("index.html")
 
 
+@app.route("/favicon.ico")
+def favicon_ico():
+    return send_from_directory(app.static_folder, "favicon.ico", mimetype="image/vnd.microsoft.icon")
+
+
 @app.route("/robots.txt")
 def robots_txt():
     return send_from_directory(app.static_folder, "robots.txt", mimetype="text/plain")
