@@ -1211,6 +1211,14 @@ def admin_schedule():
     days = schedule.week_days(week_start)
 
     with get_db() as conn:
+        active_series = conn.execute(
+            "SELECT * FROM shift_series WHERE org_id=%s AND active=TRUE", (g.org["id"],)
+        ).fetchall()
+        horizon = max(today_in(g.org["timezone"]) + timedelta(weeks=schedule.SERIES_GENERATE_WEEKS_AHEAD), week_end)
+        for series in active_series:
+            schedule.generate_series_occurrences(conn, series, horizon)
+        conn.commit()
+
         shifts = conn.execute(
             "SELECT s.*, e.name AS employee_name FROM shifts s "
             "JOIN employees e ON s.employee_id = e.id "
@@ -1250,6 +1258,7 @@ def admin_shift_new():
         start_raw = request.form.get("shift_start", "").strip()
         end_raw = request.form.get("shift_end", "").strip()
         notes = request.form.get("notes", "").strip()
+        repeat_weekly = request.form.get("repeat_weekly") == "on"
 
         with get_db() as conn:
             emp = conn.execute(
@@ -1272,17 +1281,37 @@ def admin_shift_new():
             return render_template("admin_shift_form.html", employees=employees, shift=None, default_date=default_date)
 
         with get_db() as conn:
-            conn.execute(
-                "INSERT INTO shifts (org_id, employee_id, shift_start, shift_end, notes, created_by_admin_id) "
-                "VALUES (%s, %s, %s, %s, %s, %s)",
-                (g.org["id"], emp_id, shift_start, shift_end, notes or None, g.admin["id"]),
-            )
-            audit.log(
-                conn, g.org["id"], "admin", g.admin["id"], "shift.created",
-                f"{emp['name']}: {shift_start} - {shift_end}",
-            )
+            if repeat_weekly:
+                conn.execute(
+                    "INSERT INTO shift_series (org_id, employee_id, anchor_date, start_time, end_time, notes, "
+                    "created_by_admin_id) VALUES (%s,%s,%s,%s,%s,%s,%s)",
+                    (g.org["id"], emp_id, shift_start.date(), shift_start.time(), shift_end.time(),
+                     notes or None, g.admin["id"]),
+                )
+                series = conn.execute(
+                    "SELECT * FROM shift_series WHERE org_id=%s AND employee_id=%s AND anchor_date=%s "
+                    "ORDER BY id DESC LIMIT 1",
+                    (g.org["id"], emp_id, shift_start.date()),
+                ).fetchone()
+                horizon = shift_start.date() + timedelta(weeks=schedule.SERIES_GENERATE_WEEKS_AHEAD)
+                schedule.generate_series_occurrences(conn, series, horizon)
+                audit.log(
+                    conn, g.org["id"], "admin", g.admin["id"], "shift.series_created",
+                    f"{emp['name']}: weekly from {shift_start.date()} {shift_start.time()}-{shift_end.time()}",
+                )
+                flash(f"Repeating weekly shift created for {emp['name']} - it'll keep going until you end the series.")
+            else:
+                conn.execute(
+                    "INSERT INTO shifts (org_id, employee_id, shift_start, shift_end, notes, created_by_admin_id) "
+                    "VALUES (%s, %s, %s, %s, %s, %s)",
+                    (g.org["id"], emp_id, shift_start, shift_end, notes or None, g.admin["id"]),
+                )
+                audit.log(
+                    conn, g.org["id"], "admin", g.admin["id"], "shift.created",
+                    f"{emp['name']}: {shift_start} - {shift_end}",
+                )
+                flash(f"Shift added for {emp['name']}.")
             conn.commit()
-        flash(f"Shift added for {emp['name']}.")
         return redirect(url_for("admin_schedule", week=schedule.week_bounds(shift_start.date())[0].isoformat()))
 
     return render_template("admin_shift_form.html", employees=employees, shift=None, default_date=default_date)
@@ -1367,6 +1396,64 @@ def admin_shift_delete(shift_id):
         conn.commit()
     flash("Shift deleted.")
     return redirect(url_for("admin_schedule", week=schedule.week_bounds(shift["shift_start"].date())[0].isoformat()))
+
+
+@app.route("/admin/schedule/<int:shift_id>/copy-4-weeks", methods=["POST"])
+@admin_required
+def admin_shift_copy_4_weeks(shift_id):
+    with get_db() as conn:
+        shift = conn.execute(
+            "SELECT s.*, e.name AS employee_name FROM shifts s JOIN employees e ON s.employee_id = e.id "
+            "WHERE s.id=%s AND s.org_id=%s",
+            (shift_id, g.org["id"]),
+        ).fetchone()
+        if shift is None:
+            flash("Shift not found.")
+            return redirect(url_for("admin_schedule"))
+
+        created = 0
+        for weeks_out in (1, 2, 3, 4):
+            new_start = shift["shift_start"] + timedelta(weeks=weeks_out)
+            new_end = shift["shift_end"] + timedelta(weeks=weeks_out)
+            exists = conn.execute(
+                "SELECT 1 FROM shifts WHERE employee_id=%s AND shift_start=%s",
+                (shift["employee_id"], new_start),
+            ).fetchone()
+            if exists:
+                continue
+            conn.execute(
+                "INSERT INTO shifts (org_id, employee_id, shift_start, shift_end, notes, created_by_admin_id) "
+                "VALUES (%s,%s,%s,%s,%s,%s)",
+                (g.org["id"], shift["employee_id"], new_start, new_end, shift["notes"], g.admin["id"]),
+            )
+            created += 1
+        audit.log(
+            conn, g.org["id"], "admin", g.admin["id"], "shift.copied_4_weeks",
+            f"{shift['employee_name']}: {shift['shift_start']} x{created}",
+        )
+        conn.commit()
+    flash(f"Copied this shift to the next 4 weeks ({created} new shift{'s' if created != 1 else ''} added).")
+    return redirect(url_for("admin_schedule", week=schedule.week_bounds(shift["shift_start"].date())[0].isoformat()))
+
+
+@app.route("/admin/schedule/series/<int:series_id>/end", methods=["POST"])
+@admin_required
+def admin_shift_series_end(series_id):
+    with get_db() as conn:
+        series = conn.execute(
+            "SELECT s.*, e.name AS employee_name FROM shift_series s JOIN employees e ON s.employee_id = e.id "
+            "WHERE s.id=%s AND s.org_id=%s",
+            (series_id, g.org["id"]),
+        ).fetchone()
+        if series is None:
+            flash("Series not found.")
+            return redirect(url_for("admin_schedule"))
+
+        conn.execute("UPDATE shift_series SET active=FALSE WHERE id=%s", (series_id,))
+        audit.log(conn, g.org["id"], "admin", g.admin["id"], "shift.series_ended", series["employee_name"])
+        conn.commit()
+    flash(f"Ended the repeating series for {series['employee_name']}. Already-scheduled shifts are untouched.")
+    return redirect(url_for("admin_schedule"))
 
 
 def _send_current_period_report(org):

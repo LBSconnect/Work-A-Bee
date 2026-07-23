@@ -315,6 +315,24 @@ def init_db():
                 )
             """)
             conn.execute("""
+                CREATE TABLE IF NOT EXISTS shift_series (
+                    id SERIAL PRIMARY KEY,
+                    org_id INTEGER NOT NULL REFERENCES organizations(id),
+                    employee_id INTEGER NOT NULL REFERENCES employees(id),
+                    anchor_date DATE NOT NULL,
+                    start_time TIME NOT NULL,
+                    end_time TIME NOT NULL,
+                    notes TEXT,
+                    active BOOLEAN NOT NULL DEFAULT TRUE,
+                    created_by_admin_id INTEGER REFERENCES admin_users(id),
+                    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+                )
+            """)
+            conn.execute("""
+                ALTER TABLE shifts
+                    ADD COLUMN IF NOT EXISTS series_id INTEGER REFERENCES shift_series(id)
+            """)
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS notifications (
                     id SERIAL PRIMARY KEY,
                     org_id INTEGER NOT NULL REFERENCES organizations(id),

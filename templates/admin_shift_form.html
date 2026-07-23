@@ -23,6 +23,13 @@
     <label>Notes</label>
     <input type="text" name="notes" value="{{ shift.notes if shift else '' }}" placeholder="e.g. Job site, role, reminders">
 
+    {% if not shift %}
+      <label style="display:flex; align-items:center; gap:8px; font-weight:400; margin-top:12px;">
+        <input type="checkbox" name="repeat_weekly" style="width:auto;">
+        Repeat this shift every week until changed
+      </label>
+    {% endif %}
+
     <button type="submit">{% if shift %}Save changes{% else %}Add shift{% endif %}</button>
   </form>
   <p class="muted" style="margin-top:24px;"><a href="{{ url_for('admin_schedule') }}">Cancel</a></p>
