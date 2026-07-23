@@ -256,6 +256,25 @@ def init_db():
                     created_at TIMESTAMP NOT NULL DEFAULT NOW()
                 )
             """)
+            conn.execute("""
+                ALTER TABLE employees
+                    ADD COLUMN IF NOT EXISTS pto_balance_hours REAL NOT NULL DEFAULT 0
+            """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS pto_requests (
+                    id SERIAL PRIMARY KEY,
+                    org_id INTEGER NOT NULL REFERENCES organizations(id),
+                    employee_id INTEGER NOT NULL REFERENCES employees(id),
+                    start_date DATE NOT NULL,
+                    end_date DATE NOT NULL,
+                    hours REAL NOT NULL,
+                    reason TEXT,
+                    status TEXT NOT NULL DEFAULT 'pending',
+                    requested_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                    reviewed_by_admin_id INTEGER REFERENCES admin_users(id),
+                    reviewed_at TIMESTAMP
+                )
+            """)
             conn.commit()
     except Exception:
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")

@@ -371,6 +371,59 @@ def pay_stub_detail(period_start):
     )
 
 
+@app.route("/pto", methods=["GET", "POST"])
+def pto_requests_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        if emp is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        if request.method == "POST":
+            start_raw = request.form.get("start_date", "").strip()
+            end_raw = request.form.get("end_date", "").strip()
+            hours_raw = request.form.get("hours", "").strip()
+            reason = request.form.get("reason", "").strip()
+
+            try:
+                start_date = datetime.strptime(start_raw, "%Y-%m-%d").date()
+                end_date = datetime.strptime(end_raw, "%Y-%m-%d").date()
+                hours = float(hours_raw)
+            except ValueError:
+                flash("Enter a valid date range and number of hours.")
+                return redirect(url_for("pto_requests_page"))
+
+            if end_date < start_date:
+                flash("End date must be on or after the start date.")
+                return redirect(url_for("pto_requests_page"))
+            if hours <= 0:
+                flash("Hours requested must be greater than zero.")
+                return redirect(url_for("pto_requests_page"))
+
+            conn.execute(
+                "INSERT INTO pto_requests (org_id, employee_id, start_date, end_date, hours, reason) "
+                "VALUES (%s,%s,%s,%s,%s,%s)",
+                (org_id, emp_id, start_date, end_date, hours, reason or None),
+            )
+            audit.log(conn, org_id, "employee", emp_id, "pto.requested", f"{start_date} - {end_date} ({hours}h)")
+            conn.commit()
+            flash("Time off request submitted.")
+            return redirect(url_for("pto_requests_page"))
+
+        my_requests = conn.execute(
+            "SELECT * FROM pto_requests WHERE employee_id=%s ORDER BY requested_at DESC", (emp_id,)
+        ).fetchall()
+
+    return render_template("pto_requests.html", employee=emp, requests=my_requests)
+
+
 def admin_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -660,18 +713,23 @@ def admin_employee_edit(emp_id):
             except ValueError:
                 flash("Hourly rate must be a number.")
                 return render_template("admin_employee_form.html", employee=emp)
+            try:
+                pto_balance = float(request.form.get("pto_balance_hours", emp["pto_balance_hours"]))
+            except ValueError:
+                flash("PTO balance must be a number.")
+                return render_template("admin_employee_form.html", employee=emp)
 
             if pin:
                 conn.execute(
-                    "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s, pin_hash=%s "
-                    "WHERE id=%s AND org_id=%s",
-                    (name, rate, worker_type, active, generate_password_hash(pin), emp_id, g.org["id"]),
+                    "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s, pin_hash=%s, "
+                    "pto_balance_hours=%s WHERE id=%s AND org_id=%s",
+                    (name, rate, worker_type, active, generate_password_hash(pin), pto_balance, emp_id, g.org["id"]),
                 )
             else:
                 conn.execute(
-                    "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s "
+                    "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s, pto_balance_hours=%s "
                     "WHERE id=%s AND org_id=%s",
-                    (name, rate, worker_type, active, emp_id, g.org["id"]),
+                    (name, rate, worker_type, active, pto_balance, emp_id, g.org["id"]),
                 )
             conn.commit()
             flash("Updated.")
@@ -1042,6 +1100,73 @@ def admin_announcement_delete(announcement_id):
         conn.commit()
     flash("Announcement deleted.")
     return redirect(url_for("admin_announcements"))
+
+
+@app.route("/admin/pto")
+@admin_required
+def admin_pto():
+    with get_db() as conn:
+        requests_ = conn.execute(
+            "SELECT r.*, e.name AS employee_name, e.employee_code, e.pto_balance_hours FROM pto_requests r "
+            "JOIN employees e ON r.employee_id = e.id "
+            "WHERE r.org_id=%s ORDER BY (r.status = 'pending') DESC, r.requested_at DESC",
+            (g.org["id"],),
+        ).fetchall()
+    return render_template("admin_pto.html", requests=requests_)
+
+
+@app.route("/admin/pto/<int:request_id>/approve", methods=["POST"])
+@admin_required
+def admin_pto_approve(request_id):
+    with get_db() as conn:
+        req = conn.execute(
+            "SELECT r.*, e.name AS employee_name, e.pto_balance_hours FROM pto_requests r "
+            "JOIN employees e ON r.employee_id = e.id "
+            "WHERE r.id=%s AND r.org_id=%s AND r.status='pending'",
+            (request_id, g.org["id"]),
+        ).fetchone()
+        if req is None:
+            flash("Request not found or already reviewed.")
+            return redirect(url_for("admin_pto"))
+
+        if req["hours"] > req["pto_balance_hours"]:
+            flash(f"{req['employee_name']} only has {req['pto_balance_hours']:.1f} PTO hours available; approve anyway from Employees if you want to allow a negative balance.")
+
+        conn.execute(
+            "UPDATE pto_requests SET status='approved', reviewed_by_admin_id=%s, reviewed_at=NOW() WHERE id=%s",
+            (g.admin["id"], request_id),
+        )
+        conn.execute(
+            "UPDATE employees SET pto_balance_hours = pto_balance_hours - %s WHERE id=%s",
+            (req["hours"], req["employee_id"]),
+        )
+        audit.log(conn, g.org["id"], "admin", g.admin["id"], "pto.approved", f"{req['employee_name']}: {req['hours']}h")
+        conn.commit()
+    flash(f"Approved {req['employee_name']}'s time off request.")
+    return redirect(url_for("admin_pto"))
+
+
+@app.route("/admin/pto/<int:request_id>/deny", methods=["POST"])
+@admin_required
+def admin_pto_deny(request_id):
+    with get_db() as conn:
+        req = conn.execute(
+            "SELECT r.*, e.name AS employee_name FROM pto_requests r JOIN employees e ON r.employee_id = e.id "
+            "WHERE r.id=%s AND r.org_id=%s AND r.status='pending'",
+            (request_id, g.org["id"]),
+        ).fetchone()
+        if req is None:
+            flash("Request not found or already reviewed.")
+            return redirect(url_for("admin_pto"))
+
+        conn.execute(
+            "UPDATE pto_requests SET status='denied', reviewed_by_admin_id=%s, reviewed_at=NOW() WHERE id=%s",
+            (g.admin["id"], request_id),
+        )
+        audit.log(conn, g.org["id"], "admin", g.admin["id"], "pto.denied", f"{req['employee_name']}: {req['hours']}h")
+        conn.commit()
+    flash(f"Denied {req['employee_name']}'s time off request.")
+    return redirect(url_for("admin_pto"))
 
 
 @app.route("/admin/settings", methods=["GET", "POST"])

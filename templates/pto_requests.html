@@ -1,0 +1,41 @@
+{% extends "employee_base.html" %}
+{% block title %}Time Off{% endblock %}
+{% block employee_content %}
+  <h1>Time off</h1>
+  <p class="muted">PTO balance: <strong>{{ "%.1f"|format(employee.pto_balance_hours) }} hours</strong></p>
+
+  <form method="post" style="max-width:420px;">
+    <label>Start date</label>
+    <input type="date" name="start_date" required>
+    <label>End date</label>
+    <input type="date" name="end_date" required>
+    <label>Hours requested</label>
+    <input type="number" step="0.5" min="0.5" name="hours" required>
+    <label>Reason (optional)</label>
+    <input type="text" name="reason">
+    <button type="submit">Submit Request</button>
+  </form>
+
+  <h2 style="margin-top:32px; font-size:16px;">Your requests</h2>
+  {% if requests %}
+    <table>
+      <tr><th>Dates</th><th>Hours</th><th>Reason</th><th>Status</th></tr>
+      {% for r in requests %}
+      <tr>
+        <td>{{ r.start_date.strftime('%b %d') }} &ndash; {{ r.end_date.strftime('%b %d, %Y') }}</td>
+        <td>{{ "%.1f"|format(r.hours) }}</td>
+        <td class="muted">{{ r.reason or '' }}</td>
+        <td>
+          {% if r.status == 'approved' %}<span class="badge in">Approved</span>
+          {% elif r.status == 'denied' %}<span class="badge out">Denied</span>
+          {% else %}<span class="badge out" style="background:#fef3c7; color:#92400e;">Pending</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p class="muted">No time off requests yet.</p>
+  {% endif %}
+
+  <p class="muted" style="margin-top:24px;"><a href="{{ url_for('clock_action') }}">&larr; Back to Dashboard</a></p>
+{% endblock %}

@@ -51,6 +51,11 @@
       <div class="stat-card-value">${{ "%.2f"|format(current_week_pay) }}</div>
       <div class="stat-card-sub"><a href="{{ url_for('pay_stubs') }}">View Pay Stubs &rarr;</a></div>
     </div>
+    <div class="stat-card">
+      <div class="stat-card-label">PTO Balance</div>
+      <div class="stat-card-value">{{ "%.1f"|format(employee.pto_balance_hours) }}</div>
+      <div class="stat-card-sub"><a href="{{ url_for('pto_requests_page') }}">Request Time Off &rarr;</a></div>
+    </div>
   </div>
 
   <div class="dash-panel" style="margin-top:8px;">
