@@ -16,6 +16,7 @@
         {% if is_clocked_in %}Ready to head out?{% else %}Ready to start your day?{% endif %}
       </p>
       <form method="post" style="margin:0;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         {% if is_clocked_in %}
           <button type="submit" class="clock-out" style="margin:0; width:100%;">&#10008; CLOCK OUT</button>
         {% else %}

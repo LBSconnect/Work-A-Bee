@@ -5,6 +5,7 @@
   <h1>System Admin Setup</h1>
   <p class="muted">Create a new system admin account, or reset the password of an existing one. This page is only reachable while SYSTEM_SETUP_TOKEN is set in the environment - remove it once you're done.</p>
   <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Setup token</label>
     <input type="password" name="token" autofocus required>
     <label>Username</label>

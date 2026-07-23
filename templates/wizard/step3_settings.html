@@ -3,6 +3,7 @@
 {% block step_content %}
   <h1>Business Settings</h1>
   <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Choose Your Time Zone</label>
     <select name="timezone">
       {% for value, label in choices.TIMEZONE_CHOICES %}

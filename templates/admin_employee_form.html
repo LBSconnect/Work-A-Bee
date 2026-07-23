@@ -4,6 +4,7 @@
   <h1>{% if employee %}Edit {{ employee.name }}{% else %}Add employee or contractor{% endif %}</h1>
 
   <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Employee ID</label>
     {% if employee %}
       <input type="text" value="{{ employee.employee_code }}" disabled>

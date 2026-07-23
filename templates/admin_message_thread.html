@@ -22,6 +22,7 @@
   </div>
 
   <form method="post" style="margin-top:16px; display:flex; gap:8px;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <textarea name="body" rows="2" required style="flex:1; padding:8px; border:1px solid #d1d5db; border-radius:8px; font-family:inherit;" placeholder="Type a message..."></textarea>
     <button type="submit" style="align-self:flex-end;">Send</button>
   </form>

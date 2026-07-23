@@ -4,6 +4,7 @@
   <h1>Work-A-Beez Staff Login</h1>
   <p class="muted">Enter your Employee ID and PIN to clock in or out.</p>
   <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     {% if not org %}
     <label>Company</label>
     <select name="company_code" autofocus required>

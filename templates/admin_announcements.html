@@ -5,6 +5,7 @@
   <p class="muted">Post updates for your whole team. They'll show up on every employee's dashboard.</p>
 
   <form method="post" style="max-width:520px;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Title</label>
     <input type="text" name="title" required>
     <label>Message</label>
@@ -23,6 +24,7 @@
           </div>
           <form method="post" action="{{ url_for('admin_announcement_delete', announcement_id=a.id) }}"
                 onsubmit="return confirm('Delete this announcement?');">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="secondary" style="margin:0; padding:4px 10px; font-size:12px;">Delete</button>
           </form>
         </div>

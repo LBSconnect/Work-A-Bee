@@ -18,6 +18,7 @@
       <td>{{ '$%.2f'|format(e.hourly_rate) if e.hourly_rate else 'Default' }}</td>
       <td>
         <form method="post" style="display:inline;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="action" value="remove">
           <input type="hidden" name="index" value="{{ loop.index0 }}">
           <button type="submit" class="secondary" style="margin:0; padding:6px 10px; font-size:13px;">Remove</button>
@@ -35,6 +36,7 @@
     <div class="flash">{% for e in errors.add %}{{ e }}<br>{% endfor %}</div>
   {% endif %}
   <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="action" value="add">
     <div class="wizard-row">
       <div>
@@ -125,12 +127,14 @@
     <div class="flash">{% for e in errors.csv %}{{ e }}<br>{% endfor %}</div>
   {% endif %}
   <form method="post" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="action" value="import_csv">
     <input type="file" name="csv_file" accept=".csv">
     <button type="submit" class="secondary">Import CSV</button>
   </form>
 
   <form method="post" style="margin-top:32px;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="action" value="continue">
     <button type="submit">Continue</button>
   </form>

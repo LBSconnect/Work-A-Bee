@@ -4,6 +4,7 @@
   <h1>Create your admin account</h1>
   <p class="muted">Create the first admin login for your organization. Your Company Code was provided when your organization was set up.</p>
   <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Company Code</label>
     <input type="text" name="company_code" value="{{ company_code or '' }}" autofocus required>
     <label>Username</label>

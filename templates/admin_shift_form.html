@@ -4,6 +4,7 @@
   <h1>{% if shift %}Edit shift{% else %}Add a shift{% endif %}</h1>
 
   <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Employee</label>
     <select name="employee_id" required>
       <option value="">Select...</option>

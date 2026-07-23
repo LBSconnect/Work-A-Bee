@@ -5,6 +5,7 @@
   <p class="muted">Let's set up your company in just a few minutes.</p>
 
   <form method="post" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Company Name *</label>
     <input type="text" name="company_name" value="{{ data.name or '' }}" autofocus required>
     {% if errors.company_name %}<p class="field-error">{{ errors.company_name }}</p>{% endif %}

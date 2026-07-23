@@ -5,6 +5,7 @@
   <p class="muted">For {{ employee.name }} ({{ employee.employee_code }}) - use this if they forgot to clock in or out.</p>
 
   <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Clock in</label>
     <input type="datetime-local" name="clock_in" required>
 

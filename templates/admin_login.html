@@ -3,6 +3,7 @@
 {% block content %}
   <h1>Admin login</h1>
   <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Company</label>
     <select name="company_code" autofocus required>
       <option value="" disabled selected>Select your company&hellip;</option>

@@ -5,6 +5,7 @@
   <h1>System Admin Login</h1>
   <p class="muted">Platform-wide access across all tenants. Not a customer login.</p>
   <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Username</label>
     <input type="text" name="username" autofocus required>
     <label>Password</label>
