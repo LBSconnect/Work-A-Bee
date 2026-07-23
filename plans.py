@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+import config
 from tz import now_in
 
 PROMO_DAYS = 90
@@ -10,22 +11,30 @@ PLANS = {
         "price": 0,
         "max_employees": 5,
         "max_devices": 1,
+        "stripe_price_env": "STRIPE_PRICE_STARTER",
     },
     "growth": {
         "label": "Growth",
         "price": 29,
         "max_employees": 25,
         "max_devices": 3,
+        "stripe_price_env": "STRIPE_PRICE_GROWTH",
     },
     "business": {
         "label": "Business",
         "price": 79,
         "max_employees": 100,
         "max_devices": None,
+        "stripe_price_env": "STRIPE_PRICE_BUSINESS",
     },
 }
 
 DEFAULT_PLAN = "starter"
+
+
+def stripe_price_id(plan_key):
+    env_name = PLANS[plan_key]["stripe_price_env"]
+    return getattr(config, env_name)
 
 
 def get_plan_key(org):

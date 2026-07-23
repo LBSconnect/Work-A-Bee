@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Complete Payment Setup{% endblock %}
+{% block content %}
+  <h1>Almost there</h1>
+  <p>Your company account was created, but we still need a payment method on file before you can log in. You won't be charged today &mdash; your card is only saved to bill automatically once your 90-day free period ends, and you can cancel anytime.</p>
+  <a class="btn" href="{{ url_for('wizard.checkout_retry') }}">Complete Payment Setup</a>
+  <p class="muted" style="margin-top:24px;">Having trouble? Email <a href="mailto:info@lbsconnect.net">info@lbsconnect.net</a> and we'll help you get set up.</p>
+{% endblock %}

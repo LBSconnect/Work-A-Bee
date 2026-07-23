@@ -227,6 +227,14 @@ def init_db():
                     ADD COLUMN IF NOT EXISTS created_by_admin_id INTEGER REFERENCES admin_users(id)
             """)
             conn.execute("""
+                ALTER TABLE organizations
+                    ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT,
+                    ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT,
+                    ADD COLUMN IF NOT EXISTS subscription_status TEXT,
+                    ADD COLUMN IF NOT EXISTS cancel_at_period_end BOOLEAN NOT NULL DEFAULT FALSE,
+                    ADD COLUMN IF NOT EXISTS current_period_end TIMESTAMP
+            """)
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS shifts (
                     id SERIAL PRIMARY KEY,
                     org_id INTEGER NOT NULL REFERENCES organizations(id),
