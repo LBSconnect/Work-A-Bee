@@ -139,6 +139,8 @@ def step_admin():
         confirm = request.form.get("confirm_password", "")
         terms = request.form.get("terms") == "on"
         privacy = request.form.get("privacy") == "on"
+        dpa = request.form.get("dpa") == "on"
+        aup = request.form.get("aup") == "on"
         checks = _password_check(password)
 
         if not fields["first_name"]:
@@ -158,8 +160,8 @@ def step_admin():
             errors["password"] = "Password doesn't meet all requirements below."
         elif password != confirm:
             errors["confirm_password"] = "Passwords don't match."
-        if not (terms and privacy):
-            errors["terms"] = "You must agree to the Terms of Service and Privacy Policy."
+        if not (terms and privacy and dpa and aup):
+            errors["terms"] = "You must agree to the Terms of Service, Privacy Policy, Data Processing Addendum, and Acceptable Use Policy."
 
         if errors:
             return _wrap(token, render_template(

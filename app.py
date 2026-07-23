@@ -146,6 +146,16 @@ def terms_of_service():
     return render_template("terms.html", updated=datetime.now().date())
 
 
+@app.route("/dpa")
+def dpa_policy():
+    return render_template("dpa.html", updated=datetime.now().date())
+
+
+@app.route("/aup")
+def aup_policy():
+    return render_template("aup.html", updated=datetime.now().date())
+
+
 @app.route("/pricing")
 def pricing_page():
     return render_template("pricing.html", plans=plans)
