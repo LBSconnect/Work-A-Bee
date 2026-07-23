@@ -2,7 +2,8 @@
 {% block title %}Complete Payment Setup{% endblock %}
 {% block content %}
   <h1>Almost there</h1>
-  <p>Your company account was created, but we still need a payment method on file before you can log in. You won't be charged today &mdash; your card is only saved to bill automatically once your 90-day free period ends, and you can cancel anytime.</p>
-  <a class="btn" href="{{ url_for('wizard.checkout_retry') }}">Complete Payment Setup</a>
+  <p>Payment setup wasn't completed, so your company account hasn't been created yet &mdash; nothing was charged and no account exists. Your progress is saved; pick up right where you left off whenever you're ready.</p>
+  <p>You won't be charged today. Your payment method is only saved to bill automatically once your 90-day free trial ends, and you can cancel anytime before then.</p>
+  <a class="btn" href="{{ url_for('wizard.step_review') }}">Continue Signup</a>
   <p class="muted" style="margin-top:24px;">Having trouble? Email <a href="mailto:info@lbsconnect.net">info@lbsconnect.net</a> and we'll help you get set up.</p>
 {% endblock %}
