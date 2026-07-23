@@ -333,6 +333,16 @@ def init_db():
                     ADD COLUMN IF NOT EXISTS series_id INTEGER REFERENCES shift_series(id)
             """)
             conn.execute("""
+                CREATE TABLE IF NOT EXISTS system_admins (
+                    id SERIAL PRIMARY KEY,
+                    username TEXT UNIQUE NOT NULL,
+                    password_hash TEXT NOT NULL,
+                    must_change_password BOOLEAN NOT NULL DEFAULT TRUE,
+                    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                    last_login_at TIMESTAMP
+                )
+            """)
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS notifications (
                     id SERIAL PRIMARY KEY,
                     org_id INTEGER NOT NULL REFERENCES organizations(id),
@@ -350,3 +360,24 @@ def init_db():
     except Exception:
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")
         traceback.print_exc()
+
+
+def ensure_system_admin_bootstrap():
+    """Creates the first system_admins row from SYSTEM_ADMIN_BOOTSTRAP_USERNAME/
+    PASSWORD, but only if the table is still completely empty - so this is a
+    one-time bootstrap, not something that can reset or duplicate accounts on
+    every restart. The created account has must_change_password=True."""
+    if not (config.SYSTEM_ADMIN_BOOTSTRAP_USERNAME and config.SYSTEM_ADMIN_BOOTSTRAP_PASSWORD):
+        return
+    from werkzeug.security import generate_password_hash
+    with get_db() as conn:
+        existing = conn.execute("SELECT 1 FROM system_admins LIMIT 1").fetchone()
+        if existing:
+            return
+        conn.execute(
+            "INSERT INTO system_admins (username, password_hash, must_change_password) "
+            "VALUES (%s, %s, TRUE)",
+            (config.SYSTEM_ADMIN_BOOTSTRAP_USERNAME, generate_password_hash(config.SYSTEM_ADMIN_BOOTSTRAP_PASSWORD)),
+        )
+        conn.commit()
+        print(f"[bootstrap] Created initial system admin account: {config.SYSTEM_ADMIN_BOOTSTRAP_USERNAME}")

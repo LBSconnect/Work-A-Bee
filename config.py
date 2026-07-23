@@ -26,3 +26,10 @@ STRIPE_PRICE_GROWTH = os.environ.get("STRIPE_PRICE_GROWTH", "")
 STRIPE_PRICE_BUSINESS = os.environ.get("STRIPE_PRICE_BUSINESS", "")
 
 ON_RENDER = os.environ.get("RENDER", "") != ""
+
+# One-time bootstrap for the first platform-wide system admin account (cross-tenant
+# access, gates /system and /internal). Only takes effect if the system_admins table
+# is still empty - see models.ensure_system_admin_bootstrap(). Set these in Render's
+# environment (sync: false, like the Stripe keys below), never commit real values here.
+SYSTEM_ADMIN_BOOTSTRAP_USERNAME = os.environ.get("SYSTEM_ADMIN_BOOTSTRAP_USERNAME", "")
+SYSTEM_ADMIN_BOOTSTRAP_PASSWORD = os.environ.get("SYSTEM_ADMIN_BOOTSTRAP_PASSWORD", "")

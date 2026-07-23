@@ -1,0 +1,23 @@
+{% extends "system_base.html" %}
+{% block title %}Organizations{% endblock %}
+{% block system_content %}
+  <h1>All Organizations ({{ orgs|length }})</h1>
+  <table>
+    <tr>
+      <th>Company</th><th>Code</th><th>Plan</th><th>Status</th>
+      <th>Admins</th><th>Employees</th><th>Created</th><th></th>
+    </tr>
+    {% for org in orgs %}
+      <tr>
+        <td>{{ org.name }}</td>
+        <td>{{ org.company_code }}</td>
+        <td>{{ org.plan or "-" }}</td>
+        <td>{{ org.status }}</td>
+        <td>{{ org.admin_count }}</td>
+        <td>{{ org.employee_count }}</td>
+        <td>{{ org.created_at.strftime('%b %d, %Y') if org.created_at else "-" }}</td>
+        <td><a href="{{ url_for('system_org_detail', org_id=org.id) }}">View</a></td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

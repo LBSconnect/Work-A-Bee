@@ -1,0 +1,31 @@
+{% extends "system_base.html" %}
+{% block title %}{{ org.name }}{% endblock %}
+{% block system_content %}
+  <p class="muted"><a href="{{ url_for('system_dashboard') }}">&larr; All Organizations</a></p>
+  <h1>{{ org.name }}</h1>
+  <table style="margin-bottom:24px;">
+    <tr><th>Company Code</th><td>{{ org.company_code }}</td></tr>
+    <tr><th>Plan</th><td>{{ org.plan or "-" }}</td></tr>
+    <tr><th>Status</th><td>{{ org.status }}</td></tr>
+    <tr><th>Timezone</th><td>{{ org.timezone }}</td></tr>
+    <tr><th>Created</th><td>{{ org.created_at.strftime('%B %d, %Y') if org.created_at else "-" }}</td></tr>
+    <tr><th>Stripe Customer</th><td>{{ org.stripe_customer_id or "-" }}</td></tr>
+    <tr><th>Subscription Status</th><td>{{ org.subscription_status or "-" }}</td></tr>
+  </table>
+
+  <h2>Administrators ({{ admins|length }})</h2>
+  <table style="margin-bottom:24px;">
+    <tr><th>Name</th><th>Username</th><th>Email</th></tr>
+    {% for a in admins %}
+      <tr><td>{{ a.first_name }} {{ a.last_name }}</td><td>{{ a.username }}</td><td>{{ a.email or "-" }}</td></tr>
+    {% endfor %}
+  </table>
+
+  <h2>Employees ({{ employees|length }})</h2>
+  <table>
+    <tr><th>Name</th><th>Employee Code</th><th>Role</th><th>Active</th></tr>
+    {% for e in employees %}
+      <tr><td>{{ e.name }}</td><td>{{ e.employee_code }}</td><td>{{ e.role|capitalize }}</td><td>{{ "Yes" if e.active else "No" }}</td></tr>
+    {% endfor %}
+  </table>
+{% endblock %}
