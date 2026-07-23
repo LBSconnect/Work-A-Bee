@@ -1,0 +1,30 @@
+{% extends "employee_base.html" %}
+{% block title %}My Schedule{% endblock %}
+{% block employee_content %}
+  <h1>My schedule</h1>
+  <p class="muted"><a href="{{ url_for('shift_marketplace') }}">Browse the shift marketplace &rarr;</a></p>
+
+  {% if upcoming_shifts %}
+    <table>
+      <tr><th>Date</th><th>Time</th><th>Notes</th><th></th></tr>
+      {% for s in upcoming_shifts %}
+      <tr>
+        <td>{{ s.shift_start.strftime('%a %b %d') }}</td>
+        <td>{{ s.shift_start.strftime('%I:%M %p') }} &ndash; {{ s.shift_end.strftime('%I:%M %p') }}</td>
+        <td class="muted">{{ s.notes or '' }}</td>
+        <td>
+          {% if s.id in offered_shift_ids %}
+            <span class="muted">Offered for swap</span>
+          {% else %}
+            <form method="post" action="{{ url_for('shift_offer_swap', shift_id=s.id) }}" style="display:inline;">
+              <button type="submit" class="secondary" style="margin:0; padding:4px 10px; font-size:12px;">Offer for Swap</button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p class="muted">No upcoming shifts scheduled.</p>
+  {% endif %}
+{% endblock %}

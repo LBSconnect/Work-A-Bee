@@ -259,11 +259,6 @@ def clock_action():
             session.pop("employee_id", None)
             return redirect(url_for("staff_login"))
 
-        recent_entries = conn.execute(
-            "SELECT * FROM time_entries WHERE employee_id=%s ORDER BY clock_in DESC LIMIT 10",
-            (emp_id,),
-        ).fetchall()
-
         today = today_in(org["timezone"])
         period_start, period_end = get_period_bounds(today)
 
@@ -290,66 +285,20 @@ def clock_action():
             for day, hours in sorted(day_totals.items())
         ]
 
-        weekly_history = []
-        for start, end in get_prior_periods(period_start, count=4):
-            rows = calculate_payroll(conn, org, start, end)
-            mine = next((r for r in rows if r["employee_code"] == emp["employee_code"]), None)
-            weekly_history.append({
-                "period_start": start,
-                "period_end": end,
-                "hours": mine["total_hours"] if mine else 0.0,
-                "pay": mine["pay"] if mine else 0.0,
-            })
-
-        upcoming_shifts = conn.execute(
-            "SELECT * FROM shifts WHERE employee_id=%s AND shift_end >= %s ORDER BY shift_start LIMIT 5",
-            (emp_id, now_in(org["timezone"])),
-        ).fetchall()
-
-        offered_shift_ids = {
-            row["shift_id"] for row in conn.execute(
-                "SELECT shift_id FROM shift_swap_requests WHERE requested_by_employee_id=%s AND status='open'",
-                (emp_id,),
-            ).fetchall()
-        }
-
         today_shift = conn.execute(
             "SELECT * FROM shifts WHERE employee_id=%s AND shift_start::date=%s ORDER BY shift_start LIMIT 1",
             (emp_id, today),
         ).fetchone()
 
-        department = None
-        if emp.get("department_id"):
-            department = conn.execute(
-                "SELECT name FROM departments WHERE id=%s", (emp["department_id"],)
-            ).fetchone()
-
-        announcements = conn.execute(
-            "SELECT * FROM announcements WHERE org_id=%s ORDER BY created_at DESC LIMIT 5", (org["id"],)
-        ).fetchall()
-
-    history = []
-    for e in recent_entries:
-        hours = None
-        if e["clock_out"]:
-            hours = round((e["clock_out"] - e["clock_in"]).total_seconds() / 3600, 2)
-        history.append({"clock_in": e["clock_in"], "clock_out": e["clock_out"], "hours": hours})
-
     return render_template(
         "clock.html",
         employee=emp,
         is_clocked_in=bool(open_entry),
-        history=history,
-        weekly_history=weekly_history,
-        upcoming_shifts=upcoming_shifts,
         today_shift=today_shift,
-        department=department["name"] if department else None,
         current_week_hours=current_week_hours,
         current_week_pay=current_week_pay,
         chart_days=chart_days,
         now=now_in(org["timezone"]),
-        announcements=announcements,
-        offered_shift_ids=offered_shift_ids,
     )
 
 
@@ -479,6 +428,132 @@ def pto_requests_page():
         ).fetchall()
 
     return render_template("pto_requests.html", employee=emp, requests=my_requests)
+
+
+@app.route("/schedule")
+def my_schedule_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if emp is None or org is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        upcoming_shifts = conn.execute(
+            "SELECT * FROM shifts WHERE employee_id=%s AND shift_end >= %s ORDER BY shift_start LIMIT 25",
+            (emp_id, now_in(org["timezone"])),
+        ).fetchall()
+
+        offered_shift_ids = {
+            row["shift_id"] for row in conn.execute(
+                "SELECT shift_id FROM shift_swap_requests WHERE requested_by_employee_id=%s AND status='open'",
+                (emp_id,),
+            ).fetchall()
+        }
+
+    return render_template(
+        "my_schedule.html", employee=emp, upcoming_shifts=upcoming_shifts, offered_shift_ids=offered_shift_ids,
+    )
+
+
+@app.route("/time-history")
+def time_history_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if emp is None or org is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        recent_entries = conn.execute(
+            "SELECT * FROM time_entries WHERE employee_id=%s ORDER BY clock_in DESC LIMIT 25",
+            (emp_id,),
+        ).fetchall()
+
+        period_start, _ = get_period_bounds(today_in(org["timezone"]))
+        weekly_history = []
+        for start, end in [(period_start, period_start + timedelta(days=6))] + get_prior_periods(period_start, count=8):
+            rows = calculate_payroll(conn, org, start, end)
+            mine = next((r for r in rows if r["employee_code"] == emp["employee_code"]), None)
+            weekly_history.append({
+                "period_start": start,
+                "period_end": end,
+                "hours": mine["total_hours"] if mine else 0.0,
+                "pay": mine["pay"] if mine else 0.0,
+            })
+
+    history = []
+    for e in recent_entries:
+        hours = None
+        if e["clock_out"]:
+            hours = round((e["clock_out"] - e["clock_in"]).total_seconds() / 3600, 2)
+        history.append({"clock_in": e["clock_in"], "clock_out": e["clock_out"], "hours": hours})
+
+    return render_template("time_history.html", employee=emp, history=history, weekly_history=weekly_history)
+
+
+@app.route("/profile")
+def profile_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        if emp is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        department = None
+        if emp.get("department_id"):
+            department = conn.execute(
+                "SELECT name FROM departments WHERE id=%s", (emp["department_id"],)
+            ).fetchone()
+
+    return render_template("profile.html", employee=emp, department=department["name"] if department else None)
+
+
+@app.route("/announcements")
+def employee_announcements_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        if emp is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        announcements = conn.execute(
+            "SELECT * FROM announcements WHERE org_id=%s ORDER BY created_at DESC LIMIT 25", (org_id,)
+        ).fetchall()
+
+    return render_template("employee_announcements.html", employee=emp, announcements=announcements)
 
 
 @app.route("/messages", methods=["GET", "POST"])

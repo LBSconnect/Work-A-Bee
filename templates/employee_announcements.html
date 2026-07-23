@@ -1,0 +1,16 @@
+{% extends "employee_base.html" %}
+{% block title %}Announcements{% endblock %}
+{% block employee_content %}
+  <h1>Company announcements</h1>
+  {% if announcements %}
+    {% for a in announcements %}
+      <div style="border:1px solid #e5e7eb; border-radius:8px; padding:14px 16px; margin-top:12px;">
+        <strong>{{ a.title }}</strong>
+        <p class="muted" style="margin-top:2px;">{{ a.created_at.strftime('%B %d, %Y') }}</p>
+        <p style="margin-top:8px; white-space:pre-wrap;">{{ a.body }}</p>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="muted">No announcements yet.</p>
+  {% endif %}
+{% endblock %}
