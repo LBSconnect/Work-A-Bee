@@ -287,6 +287,22 @@ def init_db():
                     created_at TIMESTAMP NOT NULL DEFAULT NOW()
                 )
             """)
+            conn.execute("""
+                ALTER TABLE employees
+                    ADD COLUMN IF NOT EXISTS messages_read_by_employee_at TIMESTAMP,
+                    ADD COLUMN IF NOT EXISTS messages_read_by_admin_at TIMESTAMP
+            """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS messages (
+                    id SERIAL PRIMARY KEY,
+                    org_id INTEGER NOT NULL REFERENCES organizations(id),
+                    employee_id INTEGER NOT NULL REFERENCES employees(id),
+                    sender_type TEXT NOT NULL,
+                    sender_admin_id INTEGER REFERENCES admin_users(id),
+                    body TEXT NOT NULL,
+                    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+                )
+            """)
             conn.commit()
     except Exception:
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")

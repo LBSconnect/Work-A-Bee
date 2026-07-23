@@ -60,6 +60,39 @@ app.jinja_env.filters["initials"] = avatar_initials
 app.jinja_env.filters["avatar_color"] = avatar_color
 
 
+@app.context_processor
+def inject_unread_message_counts():
+    ctx = {"unread_messages_count": 0, "unread_admin_messages_count": 0}
+    org_id = session.get("org_id")
+    if not org_id:
+        return ctx
+    emp_id = session.get("employee_id")
+    admin_id = session.get("admin_id")
+    if not emp_id and not admin_id:
+        return ctx
+    try:
+        with get_db() as conn:
+            if emp_id:
+                row = conn.execute(
+                    "SELECT COUNT(*) AS c FROM messages m JOIN employees e ON m.employee_id = e.id "
+                    "WHERE m.employee_id=%s AND m.sender_type='admin' "
+                    "AND (e.messages_read_by_employee_at IS NULL OR m.created_at > e.messages_read_by_employee_at)",
+                    (emp_id,),
+                ).fetchone()
+                ctx["unread_messages_count"] = row["c"] if row else 0
+            if admin_id:
+                row = conn.execute(
+                    "SELECT COUNT(*) AS c FROM messages m JOIN employees e ON m.employee_id = e.id "
+                    "WHERE e.org_id=%s AND m.sender_type='employee' "
+                    "AND (e.messages_read_by_admin_at IS NULL OR m.created_at > e.messages_read_by_admin_at)",
+                    (org_id,),
+                ).fetchone()
+                ctx["unread_admin_messages_count"] = row["c"] if row else 0
+    except Exception:
+        pass
+    return ctx
+
+
 def _active_companies():
     with get_db() as conn:
         return conn.execute(
@@ -430,6 +463,47 @@ def pto_requests_page():
         ).fetchall()
 
     return render_template("pto_requests.html", employee=emp, requests=my_requests)
+
+
+@app.route("/messages", methods=["GET", "POST"])
+def messages_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        if emp is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        if request.method == "POST":
+            body = request.form.get("body", "").strip()
+            if not body:
+                flash("Enter a message before sending.")
+                return redirect(url_for("messages_page"))
+            conn.execute(
+                "INSERT INTO messages (org_id, employee_id, sender_type, body) VALUES (%s,%s,'employee',%s)",
+                (org_id, emp_id, body),
+            )
+            conn.commit()
+            return redirect(url_for("messages_page"))
+
+        thread = conn.execute(
+            "SELECT m.*, a.username AS admin_username FROM messages m "
+            "LEFT JOIN admin_users a ON m.sender_admin_id = a.id "
+            "WHERE m.employee_id=%s ORDER BY m.created_at",
+            (emp_id,),
+        ).fetchall()
+        conn.execute(
+            "UPDATE employees SET messages_read_by_employee_at=NOW() WHERE id=%s", (emp_id,)
+        )
+        conn.commit()
+
+    return render_template("messages.html", employee=emp, thread=thread)
 
 
 @app.route("/shifts/<int:shift_id>/offer-swap", methods=["POST"])
@@ -1289,6 +1363,63 @@ def admin_pto_deny(request_id):
         conn.commit()
     flash(f"Denied {req['employee_name']}'s time off request.")
     return redirect(url_for("admin_pto"))
+
+
+@app.route("/admin/messages")
+@admin_required
+def admin_messages():
+    with get_db() as conn:
+        threads = conn.execute(
+            "SELECT e.id AS employee_id, e.name AS employee_name, e.employee_code, "
+            "e.messages_read_by_admin_at, "
+            "(SELECT body FROM messages m WHERE m.employee_id = e.id ORDER BY m.created_at DESC LIMIT 1) AS last_body, "
+            "(SELECT created_at FROM messages m WHERE m.employee_id = e.id ORDER BY m.created_at DESC LIMIT 1) AS last_at, "
+            "(SELECT COUNT(*) FROM messages m WHERE m.employee_id = e.id AND m.sender_type='employee' "
+            " AND (e.messages_read_by_admin_at IS NULL OR m.created_at > e.messages_read_by_admin_at)) AS unread_count "
+            "FROM employees e "
+            "WHERE e.org_id=%s AND EXISTS (SELECT 1 FROM messages m WHERE m.employee_id = e.id) "
+            "ORDER BY last_at DESC",
+            (g.org["id"],),
+        ).fetchall()
+    return render_template("admin_messages.html", threads=threads)
+
+
+@app.route("/admin/messages/<int:employee_id>", methods=["GET", "POST"])
+@admin_required
+def admin_message_thread(employee_id):
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (employee_id, g.org["id"])
+        ).fetchone()
+        if emp is None:
+            flash("Employee not found.")
+            return redirect(url_for("admin_messages"))
+
+        if request.method == "POST":
+            body = request.form.get("body", "").strip()
+            if not body:
+                flash("Enter a message before sending.")
+                return redirect(url_for("admin_message_thread", employee_id=employee_id))
+            conn.execute(
+                "INSERT INTO messages (org_id, employee_id, sender_type, sender_admin_id, body) "
+                "VALUES (%s,%s,'admin',%s,%s)",
+                (g.org["id"], employee_id, g.admin["id"], body),
+            )
+            conn.commit()
+            return redirect(url_for("admin_message_thread", employee_id=employee_id))
+
+        thread = conn.execute(
+            "SELECT m.*, a.username AS admin_username FROM messages m "
+            "LEFT JOIN admin_users a ON m.sender_admin_id = a.id "
+            "WHERE m.employee_id=%s ORDER BY m.created_at",
+            (employee_id,),
+        ).fetchall()
+        conn.execute(
+            "UPDATE employees SET messages_read_by_admin_at=NOW() WHERE id=%s", (employee_id,)
+        )
+        conn.commit()
+
+    return render_template("admin_message_thread.html", employee=emp, thread=thread)
 
 
 @app.route("/admin/settings", methods=["GET", "POST"])

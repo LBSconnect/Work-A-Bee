@@ -1,0 +1,25 @@
+{% extends "admin_base.html" %}
+{% block title %}Messages{% endblock %}
+{% block admin_content %}
+  <h1>Messages</h1>
+  <p class="muted">Conversations with your team. Message an employee from the Employees page to start a new thread.</p>
+
+  {% if threads %}
+    <table>
+      <tr><th>Employee</th><th>Last message</th><th>When</th><th></th></tr>
+      {% for t in threads %}
+      <tr>
+        <td>
+          {{ t.employee_name }}
+          {% if t.unread_count %}<span class="badge unread">{{ t.unread_count }}</span>{% endif %}
+        </td>
+        <td class="muted">{{ (t.last_body[:60] + '...') if t.last_body and t.last_body|length > 60 else t.last_body }}</td>
+        <td class="muted">{{ t.last_at.strftime('%b %d, %I:%M %p') if t.last_at else '' }}</td>
+        <td><a href="{{ url_for('admin_message_thread', employee_id=t.employee_id) }}">Open</a></td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p class="muted">No conversations yet.</p>
+  {% endif %}
+{% endblock %}
