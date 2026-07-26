@@ -111,7 +111,24 @@
     <label>Notification Email *</label>
     <input type="text" name="report_recipients" value="{{ org.report_recipients or '' }}" required>
     {% if errors.report_recipients %}<p class="field-error">{{ errors.report_recipients }}</p>{% endif %}
-    <p class="muted" style="margin-top:4px;">Where weekly reports are emailed.</p>
+    <p class="muted" style="margin-top:4px;">Where weekly reports are emailed, including the automatic weekly summary below.</p>
+
+    <label>Send Weekly Report On</label>
+    <select name="report_weekday">
+      {% for value, label in choices.REPORT_WEEKDAY_CHOICES %}
+        <option value="{{ value }}" {% if org.report_weekday == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    {% if errors.report_weekday %}<p class="field-error">{{ errors.report_weekday }}</p>{% endif %}
+
+    <label>At</label>
+    <select name="report_hour">
+      {% for value, label in choices.REPORT_HOUR_CHOICES %}
+        <option value="{{ value }}" {% if org.report_hour == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    {% if errors.report_hour %}<p class="field-error">{{ errors.report_hour }}</p>{% endif %}
+    <p class="muted" style="margin-top:4px;">Your organization's current pay period summary is emailed automatically every week at this day and time ({{ org.timezone }}).</p>
 
     <label>Company Logo</label>
     {% if org.logo_data %}
