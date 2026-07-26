@@ -381,6 +381,32 @@ def init_db():
                 UPDATE organizations SET report_weekday=0, report_hour=8
                 WHERE report_weekday=4 AND report_hour=17 AND report_minute=0
             """)
+            # promo_started_at decouples "when did the 90-day free promo start"
+            # from created_at, so a repeat signup that's denied a fresh promo
+            # (see signup_provision.py's fingerprint check) can have it left
+            # NULL - meaning promo_active() is immediately False - without
+            # having to fake an old created_at. promo_denied distinguishes that
+            # deliberate NULL from "not migrated yet" so the one-time backfill
+            # below (which reruns harmlessly on every restart) never
+            # retroactively grants a promo that was intentionally denied.
+            # DEFAULT NOW() so any insert path that doesn't explicitly set this
+            # (e.g. create_org.py, the off-band CLI provisioning script) gets a
+            # normal fresh promo rather than an immediate lockout - only the
+            # signup wizard's fingerprint check (signup_provision.py) should
+            # ever explicitly pass NULL here.
+            conn.execute("ALTER TABLE organizations ADD COLUMN IF NOT EXISTS promo_started_at TIMESTAMP DEFAULT NOW()")
+            conn.execute("ALTER TABLE organizations ADD COLUMN IF NOT EXISTS promo_denied BOOLEAN NOT NULL DEFAULT FALSE")
+            conn.execute("UPDATE organizations SET promo_started_at=created_at WHERE promo_started_at IS NULL AND NOT promo_denied")
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS promo_claims (
+                    id SERIAL PRIMARY KEY,
+                    kind TEXT NOT NULL,
+                    value TEXT NOT NULL,
+                    org_id INTEGER REFERENCES organizations(id),
+                    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                    UNIQUE (kind, value)
+                )
+            """)
             conn.commit()
     except Exception:
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")

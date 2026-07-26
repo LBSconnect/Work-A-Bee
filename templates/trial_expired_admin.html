@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Upgrade Required{% endblock %}
+{% block wrapclass %}wide{% endblock %}
+{% block content %}
+  <h1>Your free trial has ended</h1>
+  <p>{{ org.name }}'s 90-day free trial of Work-A-Beez has ended. Upgrade to a paid plan to keep using the app for your team.</p>
+  <p>
+    <a href="{{ url_for('admin_settings') }}" class="btn">Choose a Plan</a>
+    &nbsp;
+    <a href="{{ url_for('pricing_page') }}">See plan details</a>
+  </p>
+  <p class="muted">Your data hasn't gone anywhere - schedules, timecards, and employee records are all still here and will be available as soon as you upgrade.</p>
+  <p class="muted"><a href="{{ url_for('admin_logout') }}">Log out</a></p>
+{% endblock %}

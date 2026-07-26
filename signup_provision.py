@@ -1,4 +1,5 @@
 import base64
+import re
 import secrets
 
 from werkzeug.security import generate_password_hash
@@ -6,6 +7,72 @@ from werkzeug.security import generate_password_hash
 import audit
 import devices as devices_mod
 from orgs import next_company_code
+
+_COMPANY_SUFFIX_RE = re.compile(
+    r"\b(inc|incorporated|llc|l\.l\.c|corp|corporation|co|company|ltd|limited)\b\.?"
+)
+_NON_ALNUM_RE = re.compile(r"[^a-z0-9]+")
+_NON_DIGIT_RE = re.compile(r"\D+")
+
+
+def _normalize_email(email):
+    if not email:
+        return None
+    email = email.strip().lower()
+    local, _, domain = email.partition("@")
+    if not domain:
+        return email or None
+    local = local.split("+", 1)[0]  # "+tag" aliases (jane+2@x.com) are the same inbox as jane@x.com
+    return f"{local}@{domain}" or None
+
+
+def _normalize_company_name(name):
+    if not name:
+        return None
+    name = name.strip().lower()
+    name = _COMPANY_SUFFIX_RE.sub(" ", name)
+    name = _NON_ALNUM_RE.sub(" ", name).strip()
+    return name or None
+
+
+def _normalize_phone(phone):
+    if not phone:
+        return None
+    digits = _NON_DIGIT_RE.sub("", phone)
+    return digits or None
+
+
+def _promo_fingerprints(email, company_name, phone):
+    candidates = [
+        ("email", _normalize_email(email)),
+        ("company_name", _normalize_company_name(company_name)),
+        ("phone", _normalize_phone(phone)),
+    ]
+    return [(kind, value) for kind, value in candidates if value]
+
+
+def _promo_eligible(conn, email, company_name, phone):
+    """Read-only check: True if none of this signup's email/company name/
+    phone fingerprints have been used by a prior signup. Called before the
+    org exists yet, so the actual claim recording happens separately in
+    _record_promo_claims() once there's an org_id to attach it to."""
+    for kind, value in _promo_fingerprints(email, company_name, phone):
+        if conn.execute("SELECT 1 FROM promo_claims WHERE kind=%s AND value=%s", (kind, value)).fetchone():
+            return False
+    return True
+
+
+def _record_promo_claims(conn, org_id, email, company_name, phone):
+    """Records this org's fingerprints as claimed, whether or not it actually
+    got a promo - so a repeat signup that changes only one of email/company
+    name/phone still can't launder a second promo out of the field(s) it
+    didn't reuse."""
+    for kind, value in _promo_fingerprints(email, company_name, phone):
+        conn.execute(
+            "INSERT INTO promo_claims (kind, value, org_id) VALUES (%s, %s, %s) "
+            "ON CONFLICT (kind, value) DO NOTHING",
+            (kind, value, org_id),
+        )
 
 
 def create_org_from_draft_data(conn, data):
@@ -26,7 +93,14 @@ def create_org_from_draft_data(conn, data):
 
     next_id, code = next_company_code(conn)
     print(f"[signup] checkpoint: got company code {code}")
+
+    promo_eligible = _promo_eligible(conn, admin.get("email"), company.get("name"), company.get("phone"))
+    print(f"[signup] checkpoint: promo_eligible={promo_eligible}")
+
     logo_bytes = base64.b64decode(company["logo_b64"]) if company.get("logo_b64") else None
+    # promo_started_at is set via SQL NOW() (not a Python-computed timestamp) to
+    # stay on the exact same clock as created_at's own DEFAULT NOW() above.
+    promo_started_sql = "NOW()" if promo_eligible else "NULL"
     conn.execute(
         "INSERT INTO organizations (id, company_code, name, dba_name, business_type, industry, "
         "address_line1, city, state, zip, country, phone, website, logo_data, logo_mime, "
@@ -34,8 +108,9 @@ def create_org_from_draft_data(conn, data):
         "overtime_rule, overtime_threshold_hours, default_hourly_rate, "
         "allow_employee_specific_rates, round_clock_minutes, auto_lunch_deduction, "
         "lunch_duration_minutes, allow_paid_breaks, report_recipients, plan, status, "
-        "onboarding_completed_at) "
-        "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW())",
+        f"promo_started_at, promo_denied, onboarding_completed_at) "
+        "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
+        f"{promo_started_sql},%s,NOW())",
         (next_id, code, company["name"], company.get("dba_name") or None,
          company.get("business_type") or None, company.get("industry") or None,
          company.get("address_line1"), company.get("city") or None, company.get("state") or None,
@@ -49,11 +124,14 @@ def create_org_from_draft_data(conn, data):
          payroll.get("allow_employee_specific_rates", True), payroll.get("round_clock_minutes", 0),
          payroll.get("auto_lunch_deduction", False), payroll.get("lunch_duration_minutes", 30),
          payroll.get("allow_paid_breaks", False), settings_.get("report_recipients") or admin.get("email"),
-         plan, "active"),
+         plan, "active",
+         not promo_eligible),
     )
     org_id = next_id
     print(f"[signup] checkpoint: organizations insert OK, org_id={org_id}")
     audit.log(conn, org_id, "system", None, "org.created", company["name"])
+
+    _record_promo_claims(conn, org_id, admin.get("email"), company.get("name"), company.get("phone"))
 
     admin_row = conn.execute(
         "INSERT INTO admin_users (org_id, username, password_hash, first_name, last_name, "
