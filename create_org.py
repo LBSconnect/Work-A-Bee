@@ -11,7 +11,7 @@ Usage:
     python3 create_org.py --company-code acme --company-name "Acme Corp" \
         --report-recipients payroll@acme.example.com \
         [--timezone America/New_York] [--default-hourly-rate 18.00] \
-        [--report-weekday 4] [--report-hour 17] [--report-minute 0]
+        [--report-weekday 0] [--report-hour 8] [--report-minute 0]
 """
 import argparse
 
@@ -30,9 +30,9 @@ def main():
     parser.add_argument("--timezone", default="America/Chicago",
                          help="IANA timezone name, e.g. America/Chicago, America/New_York.")
     parser.add_argument("--default-hourly-rate", type=float, default=16.00)
-    parser.add_argument("--report-weekday", type=int, default=4, choices=range(7),
-                         help="0=Monday .. 6=Sunday (default 4 = Friday).")
-    parser.add_argument("--report-hour", type=int, default=17, choices=range(24))
+    parser.add_argument("--report-weekday", type=int, default=0, choices=range(7),
+                         help="0=Monday .. 6=Sunday (default 0 = Monday).")
+    parser.add_argument("--report-hour", type=int, default=8, choices=range(24))
     parser.add_argument("--report-minute", type=int, default=0, choices=range(60))
     args = parser.parse_args()
 

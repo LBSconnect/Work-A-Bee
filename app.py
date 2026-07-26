@@ -12,6 +12,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_wtf.csrf import CSRFProtect
 
+from apscheduler.schedulers.background import BackgroundScheduler
 import stripe
 
 import audit
@@ -25,6 +26,7 @@ import performance
 import plans
 import recognition
 import schedule
+import scheduled_reports
 from api import register_api
 from api.auth_routes import api_auth_bp
 from models import init_db, get_db, ensure_system_admin_bootstrap
@@ -58,6 +60,16 @@ ensure_system_admin_bootstrap()
 app.register_blueprint(wizard_blueprint)
 register_api(app, csrf)
 limiter.limit("10 per minute")(api_auth_bp)
+
+if not config.DISABLE_BACKGROUND_SCHEDULER:
+    # Sends each org's current-pay-period summary automatically once a week,
+    # per that org's own report_weekday/report_hour/report_minute (org-local
+    # time; defaults to Monday morning). See scheduled_reports.py - it's safe
+    # to run this from multiple worker processes since the actual send is
+    # guarded by a report_log INSERT ... ON CONFLICT DO NOTHING claim.
+    _report_scheduler = BackgroundScheduler(daemon=True)
+    _report_scheduler.add_job(scheduled_reports.run_due_reports, "cron", minute="*")
+    _report_scheduler.start()
 
 
 @app.after_request
@@ -1778,6 +1790,12 @@ def _send_current_period_report(org):
     period_start, period_end = get_period_bounds(today)
     with get_db() as conn:
         rows = calculate_payroll(conn, org, period_start, period_end)
+        conn.execute(
+            "INSERT INTO report_log (org_id, report_date) VALUES (%s, %s) "
+            "ON CONFLICT (org_id, report_date) DO UPDATE SET sent_at=NOW()",
+            (org["id"], today),
+        )
+        conn.commit()
     send_report_email(org["name"], recipients, period_start, period_end, rows)
     return period_start, period_end
 
