@@ -48,7 +48,8 @@ def create_org_from_draft_data(conn, data):
          settings_.get("overtime_threshold_hours"), payroll.get("default_hourly_rate", 16.00),
          payroll.get("allow_employee_specific_rates", True), payroll.get("round_clock_minutes", 0),
          payroll.get("auto_lunch_deduction", False), payroll.get("lunch_duration_minutes", 30),
-         payroll.get("allow_paid_breaks", False), admin.get("email"), plan, "active"),
+         payroll.get("allow_paid_breaks", False), settings_.get("report_recipients") or admin.get("email"),
+         plan, "active"),
     )
     org_id = next_id
     print(f"[signup] checkpoint: organizations insert OK, org_id={org_id}")

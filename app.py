@@ -330,8 +330,7 @@ def clock_action():
                 )
                 flash(f"Clocked IN at {now.strftime('%I:%M %p')}. Welcome, {emp['name']}!")
             conn.commit()
-            session.pop("employee_id", None)
-            return redirect(url_for("staff_login"))
+            return redirect(url_for("clock_action"))
 
         today = today_in(org["timezone"])
         period_start, period_end = get_period_bounds(today)

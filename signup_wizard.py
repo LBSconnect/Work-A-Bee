@@ -183,9 +183,14 @@ def step_admin():
 def step_settings():
     token, draft = _ensure_draft()
     data = dict(draft["data"].get("settings", {}))
+    if "report_recipients" not in data:
+        data["report_recipients"] = draft["data"].get("admin", {}).get("email", "")
     errors = {}
 
     if request.method == "POST":
+        report_recipients = request.form.get("report_recipients", "").strip()
+        if not report_recipients or "@" not in report_recipients:
+            errors["report_recipients"] = "Enter a valid notification email address."
         shift_raw = request.form.get("default_shift_minutes", "480")
         if shift_raw == "custom":
             try:
@@ -214,12 +219,15 @@ def step_settings():
             "default_shift_minutes": shift_minutes,
             "overtime_rule": overtime_rule,
             "overtime_threshold_hours": overtime_threshold,
+            "report_recipients": report_recipients,
         }
         if fields["timezone"] not in dict(choices.TIMEZONE_CHOICES):
             fields["timezone"] = "America/Chicago"
 
-        save_step(token, {"settings": fields}, next_step=4)
-        return _wrap(token, redirect(url_for("wizard.step_payroll")))
+        if not errors:
+            save_step(token, {"settings": fields}, next_step=4)
+            return _wrap(token, redirect(url_for("wizard.step_payroll")))
+        data = fields
 
     return _wrap(token, render_template("wizard/step3_settings.html", data=data, errors=errors, choices=choices, step_num=3))
 
