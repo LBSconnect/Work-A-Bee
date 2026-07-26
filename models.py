@@ -53,9 +53,9 @@ def init_db():
                 timezone TEXT NOT NULL DEFAULT 'America/Chicago',
                 default_hourly_rate REAL NOT NULL DEFAULT 16.00,
                 report_recipients TEXT,
-                report_hour INTEGER NOT NULL DEFAULT 17,
+                report_hour INTEGER NOT NULL DEFAULT 8,
                 report_minute INTEGER NOT NULL DEFAULT 0,
-                report_weekday INTEGER NOT NULL DEFAULT 4,
+                report_weekday INTEGER NOT NULL DEFAULT 0,
                 plan TEXT,
                 status TEXT NOT NULL DEFAULT 'active',
                 created_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -369,6 +369,17 @@ def init_db():
                     expires_at TIMESTAMP NOT NULL,
                     revoked_at TIMESTAMP
                 )
+            """)
+            # Automatic weekly reports moved from an unused Friday-5pm default to
+            # Monday-morning (0=Monday, matching date.weekday()) - see
+            # scheduled_reports.py. Existing orgs still sitting on the old
+            # inert default are backfilled too, since nothing ever actually
+            # sent on the old schedule (there was no scheduler until now).
+            conn.execute("ALTER TABLE organizations ALTER COLUMN report_weekday SET DEFAULT 0")
+            conn.execute("ALTER TABLE organizations ALTER COLUMN report_hour SET DEFAULT 8")
+            conn.execute("""
+                UPDATE organizations SET report_weekday=0, report_hour=8
+                WHERE report_weekday=4 AND report_hour=17 AND report_minute=0
             """)
             conn.commit()
     except Exception:

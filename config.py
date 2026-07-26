@@ -38,3 +38,8 @@ SYSTEM_ADMIN_BOOTSTRAP_PASSWORD = os.environ.get("SYSTEM_ADMIN_BOOTSTRAP_PASSWOR
 # create_system_admin.py from a shell. The route is a 404 unless this is set, and
 # should be unset again in Render once it's no longer needed. See app.py.
 SYSTEM_SETUP_TOKEN = os.environ.get("SYSTEM_SETUP_TOKEN", "")
+
+# Set to disable the in-process weekly-report scheduler (see scheduled_reports.py
+# and app.py) - useful for local scripts/tests that import app.py repeatedly and
+# don't want a background thread left running.
+DISABLE_BACKGROUND_SCHEDULER = os.environ.get("DISABLE_BACKGROUND_SCHEDULER", "") != ""
