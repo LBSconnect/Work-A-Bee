@@ -32,6 +32,11 @@
       {% endfor %}
     </select>
 
+    <label>Notification Email *</label>
+    <input type="text" name="report_recipients" value="{{ data.report_recipients or '' }}">
+    {% if errors.report_recipients %}<p class="field-error">{{ errors.report_recipients }}</p>{% endif %}
+    <p class="muted" style="margin-top:4px;">Where payroll reports are emailed, including when you click "Send Report Now." Defaults to your account email, but you can send them somewhere else, like a shared payroll inbox.</p>
+
     <label>Choose Default Shift Length</label>
     <select name="default_shift_minutes">
       {% for value, label in choices.SHIFT_LENGTH_CHOICES %}
