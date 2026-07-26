@@ -86,6 +86,13 @@ _TRIAL_WALL_EXEMPT_ENDPOINTS = {
 def _enforce_trial_wall():
     if request.endpoint is None or request.endpoint in _TRIAL_WALL_EXEMPT_ENDPOINTS:
         return None
+    if request.path.startswith("/api/"):
+        # The mobile/API surface enforces its own trial lock (with a proper
+        # JSON error) in api_employee_required/api_admin_required - it must
+        # never fall through to this session-cookie-based, HTML-rendering
+        # wall, which could otherwise misfire from a stale browser session
+        # cookie riding along on a same-origin API request.
+        return None
     org_id = session.get("org_id")
     if not org_id:
         return None
