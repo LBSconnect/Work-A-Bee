@@ -47,3 +47,10 @@ EMPLOYEE_ROLE_CHOICES = [
     ("supervisor", "Supervisor"),
     ("administrator", "Administrator"),
 ]
+
+REPORT_WEEKDAY_CHOICES = [
+    (0, "Monday"), (1, "Tuesday"), (2, "Wednesday"), (3, "Thursday"),
+    (4, "Friday"), (5, "Saturday"), (6, "Sunday"),
+]
+
+REPORT_HOUR_CHOICES = [(h, f"{h % 12 or 12}:00 {'AM' if h < 12 else 'PM'}") for h in range(24)]

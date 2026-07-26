@@ -2192,6 +2192,19 @@ def admin_settings():
         if not fields["report_recipients"] or "@" not in fields["report_recipients"]:
             errors["report_recipients"] = "Enter a valid notification email address."
 
+        try:
+            fields["report_weekday"] = int(request.form.get("report_weekday", org["report_weekday"]))
+            if fields["report_weekday"] not in range(7):
+                raise ValueError
+        except (TypeError, ValueError):
+            errors["report_weekday"] = "Choose a day of the week."
+        try:
+            fields["report_hour"] = int(request.form.get("report_hour", org["report_hour"]))
+            if fields["report_hour"] not in range(24):
+                raise ValueError
+        except (TypeError, ValueError):
+            errors["report_hour"] = "Choose a time."
+
         logo_data, logo_mime = None, None
         logo_file = request.files.get("logo")
         if logo_file and logo_file.filename:
@@ -2213,21 +2226,24 @@ def admin_settings():
                 conn.execute(
                     "UPDATE organizations SET name=%s, dba_name=%s, business_type=%s, industry=%s, "
                     "address_line1=%s, city=%s, state=%s, zip=%s, country=%s, phone=%s, website=%s, "
-                    "report_recipients=%s, logo_data=%s, logo_mime=%s WHERE id=%s",
+                    "report_recipients=%s, report_weekday=%s, report_hour=%s, "
+                    "logo_data=%s, logo_mime=%s WHERE id=%s",
                     (fields["name"], fields["dba_name"] or None, fields["business_type"] or None,
                      fields["industry"] or None, fields["address_line1"], fields["city"] or None,
                      fields["state"] or None, fields["zip"] or None, fields["country"], fields["phone"],
-                     fields["website"] or None, fields["report_recipients"], logo_data, logo_mime, org["id"]),
+                     fields["website"] or None, fields["report_recipients"],
+                     fields["report_weekday"], fields["report_hour"], logo_data, logo_mime, org["id"]),
                 )
             else:
                 conn.execute(
                     "UPDATE organizations SET name=%s, dba_name=%s, business_type=%s, industry=%s, "
                     "address_line1=%s, city=%s, state=%s, zip=%s, country=%s, phone=%s, website=%s, "
-                    "report_recipients=%s WHERE id=%s",
+                    "report_recipients=%s, report_weekday=%s, report_hour=%s WHERE id=%s",
                     (fields["name"], fields["dba_name"] or None, fields["business_type"] or None,
                      fields["industry"] or None, fields["address_line1"], fields["city"] or None,
                      fields["state"] or None, fields["zip"] or None, fields["country"], fields["phone"],
-                     fields["website"] or None, fields["report_recipients"], org["id"]),
+                     fields["website"] or None, fields["report_recipients"],
+                     fields["report_weekday"], fields["report_hour"], org["id"]),
                 )
             audit.log(conn, org["id"], "admin", g.admin["id"], "org.settings_updated", fields["name"])
             conn.commit()
