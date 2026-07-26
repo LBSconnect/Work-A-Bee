@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Account Unavailable{% endblock %}
+{% block wrapclass %}wide{% endblock %}
+{% block content %}
+  <h1>This account is temporarily unavailable</h1>
+  <p>{{ org.name }}'s free trial of Work-A-Beez has ended. Please contact your administrator to upgrade the company's plan before clocking in again.</p>
+  <p class="muted"><a href="{{ url_for('clock_exit') }}">Sign out</a></p>
+{% endblock %}

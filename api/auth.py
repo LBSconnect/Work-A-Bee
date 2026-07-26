@@ -7,6 +7,7 @@ import jwt
 from flask import g, request
 
 import config
+import plans
 from api.errors import ApiError
 from models import get_db
 
@@ -112,6 +113,8 @@ def api_employee_required(f):
             ).fetchone()
         if emp is None or org is None:
             raise ApiError("unauthorized", "This account is no longer active.", 401)
+        if plans.trial_locked(org):
+            raise ApiError("trial_expired", "This company's free trial has ended. Ask your administrator to upgrade.", 402)
 
         g.api_employee = emp
         g.api_org = org
@@ -137,6 +140,8 @@ def api_admin_required(f):
             ).fetchone()
         if admin is None or org is None:
             raise ApiError("unauthorized", "This account is no longer active.", 401)
+        if plans.trial_locked(org):
+            raise ApiError("trial_expired", "This company's free trial has ended. Upgrade to keep using Work-A-Beez.", 402)
 
         g.api_admin = admin
         g.api_org = org

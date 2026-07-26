@@ -72,6 +72,43 @@ if not config.DISABLE_BACKGROUND_SCHEDULER:
     _report_scheduler.start()
 
 
+# Routes that must stay reachable even when a Starter org's trial has ended -
+# viewing/changing the plan and signing out. Everything else behind a session
+# (admin or employee) is walled off by _enforce_trial_wall below until the
+# org upgrades. See plans.trial_locked().
+_TRIAL_WALL_EXEMPT_ENDPOINTS = {
+    "admin_settings", "admin_plan_update", "admin_plan_cancel", "admin_plan_resume",
+    "admin_logout", "admin_login", "admin_setup", "clock_exit", "staff_login", "org_logo", "static",
+}
+
+
+@app.before_request
+def _enforce_trial_wall():
+    if request.endpoint is None or request.endpoint in _TRIAL_WALL_EXEMPT_ENDPOINTS:
+        return None
+    if request.path.startswith("/api/"):
+        # The mobile/API surface enforces its own trial lock (with a proper
+        # JSON error) in api_employee_required/api_admin_required - it must
+        # never fall through to this session-cookie-based, HTML-rendering
+        # wall, which could otherwise misfire from a stale browser session
+        # cookie riding along on a same-origin API request.
+        return None
+    org_id = session.get("org_id")
+    if not org_id:
+        return None
+
+    with get_db() as conn:
+        org = conn.execute("SELECT * FROM organizations WHERE id=%s", (org_id,)).fetchone()
+    if org is None or not plans.trial_locked(org):
+        return None
+
+    if session.get("admin_id"):
+        return render_template("trial_expired_admin.html", org=org, plans=plans), 402
+    if session.get("employee_id"):
+        return render_template("trial_expired_employee.html", org=org), 402
+    return None
+
+
 @app.after_request
 def set_security_headers(response):
     response.headers["X-Content-Type-Options"] = "nosniff"

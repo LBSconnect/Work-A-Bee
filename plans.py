@@ -70,20 +70,28 @@ def get_plan(org):
 
 
 def promo_active(org):
-    created_at = org.get("created_at")
-    if not created_at:
+    started = org.get("promo_started_at")
+    if not started:
         return False
     now = now_in(org.get("timezone") or "America/Chicago")
-    return now - created_at < timedelta(days=PROMO_DAYS)
+    return now - started < timedelta(days=PROMO_DAYS)
 
 
 def promo_days_left(org):
-    created_at = org.get("created_at")
-    if not created_at:
+    started = org.get("promo_started_at")
+    if not started:
         return 0
     now = now_in(org.get("timezone") or "America/Chicago")
-    left = PROMO_DAYS - (now - created_at).days
+    left = PROMO_DAYS - (now - started).days
     return max(left, 0)
+
+
+def trial_locked(org):
+    """True once a Starter-plan org's 90-day promo has ended (or was denied
+    to begin with - see signup_provision.py) without upgrading. Growth/
+    Business orgs are never locked this way - their own plan already has
+    real, paid access regardless of the promo."""
+    return get_plan_key(org) == "starter" and not promo_active(org)
 
 
 def employee_limit(org):
