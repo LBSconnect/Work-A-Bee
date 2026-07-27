@@ -219,21 +219,102 @@
       flex-shrink: 0;
     }
     .dash-sidebar-item {
-      display: flex; align-items: center; gap: 8px;
+      display: flex; align-items: center; gap: 8px; width: 100%;
       padding: 9px 16px; font-size: 11.5px; color: #9ca3af;
       cursor: pointer; transition: background .15s;
+      background: none; border: none; font-family: inherit; text-align: left; outline: none;
     }
     .dash-sidebar-item:hover, .dash-sidebar-item.active {
       background: rgba(255,184,0,.15); color: var(--yellow);
     }
+    .dash-sidebar-item:focus-visible { outline: 2px solid var(--yellow); outline-offset: -2px; }
     .dash-sidebar-item .si { font-size: 13px; }
 
-    .dash-main { flex: 1; padding: 16px; background: #f9fafb; }
+    .dash-demo-badge {
+      position: absolute; top: -14px; left: 24px;
+      background: var(--yellow); color: var(--black);
+      font-size: 10.5px; font-weight: 800; padding: 5px 14px;
+      border-radius: 20px; box-shadow: 0 4px 14px rgba(0,0,0,.18);
+      z-index: 4; white-space: nowrap; pointer-events: none;
+    }
+
+    .dash-main { flex: 1; min-width: 0; padding: 16px; background: #f9fafb; }
+
+    .dash-view { display: none; }
+    .dash-view.active { display: block; }
+    .dash-view-header { margin-bottom: 10px; }
+    .dash-view-title { font-size: 14px; font-weight: 800; }
+    .dash-view-sub { font-size: 10px; color: #888; margin-top: 2px; }
+
+    .mini-search {
+      background: var(--white); border: 1px solid #e5e7eb; border-radius: 6px;
+      padding: 6px 10px; font-size: 10px; color: #999; margin-bottom: 10px;
+    }
+
+    .mini-table { background: var(--white); border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+    .mini-table-row {
+      display: grid; grid-template-columns: minmax(0,2fr) minmax(0,1fr) minmax(0,1fr); gap: 6px;
+      align-items: center; padding: 7px 10px; font-size: 10px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .mini-table-row:last-child { border-bottom: none; }
+    .mini-table-row > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mini-table-head { font-weight: 700; color: #888; font-size: 9px; text-transform: uppercase; letter-spacing: .3px; background: #f9fafb; }
+    .mt-name { display: flex; align-items: center; gap: 6px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mt-name .clocked-avatar { width: 18px; height: 18px; font-size: 8px; flex-shrink: 0; }
+
+    .status-pill {
+      display: inline-block; font-size: 8.5px; font-weight: 700; padding: 2px 8px;
+      border-radius: 20px; text-transform: uppercase; letter-spacing: .2px; width: fit-content;
+    }
+    .status-active { background: #dcfce7; color: #15803d; }
+    .status-pending { background: #fef3c7; color: #b45309; }
+    .status-approved { background: #dbeafe; color: #1d4ed8; }
+
+    .dash-stats-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+
+    .kiosk-mock { background: #111827; border-radius: 12px; padding: 22px 16px; text-align: center; }
+    .kiosk-time { color: #fff; font-size: 26px; font-weight: 900; }
+    .kiosk-sub { color: #9ca3af; font-size: 10px; margin: 4px 0 14px; }
+    .kiosk-pin { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; }
+    .pin-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #4b5563; }
+    .pin-dot.filled { background: var(--yellow); border-color: var(--yellow); }
+    .kiosk-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 160px; margin: 0 auto; }
+    .kiosk-key { background: #1f2937; color: #fff; border-radius: 8px; padding: 8px 0; font-size: 12px; font-weight: 700; }
+
+    .settings-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px; background: var(--white); border: 1px solid #e5e7eb;
+      border-radius: 8px; margin-bottom: 8px; font-size: 10.5px;
+    }
+    .settings-row-label { font-weight: 600; }
+    .settings-row-value { color: #888; }
+    .mini-toggle { width: 30px; height: 16px; border-radius: 20px; background: #e5e7eb; position: relative; flex-shrink: 0; }
+    .mini-toggle.on { background: var(--yellow); }
+    .mini-toggle::after {
+      content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px;
+      border-radius: 50%; background: #fff;
+    }
+    .mini-toggle.on::after { left: 16px; }
+
+    .mini-btn-row { display: flex; justify-content: flex-end; margin-top: 10px; }
+    .mini-btn {
+      background: var(--yellow); color: var(--black); font-size: 10.5px; font-weight: 800;
+      padding: 7px 16px; border-radius: 6px; border: none; cursor: default;
+    }
+
+    .device-row {
+      display: flex; align-items: center; gap: 10px; padding: 9px 10px;
+      background: var(--white); border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px;
+    }
+    .device-icon { font-size: 16px; }
+    .device-name { font-size: 10.5px; font-weight: 700; flex: 1; }
+    .device-meta { font-size: 9px; color: #888; }
 
     .dash-welcome { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
     .dash-welcome-sub { font-size: 10px; color: #666; margin-bottom: 12px; }
 
-    .dash-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 12px; }
+    .dash-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; margin-bottom: 12px; }
     .dash-stat {
       background: var(--white); border-radius: 8px; padding: 10px;
       border: 1px solid #e5e7eb;
@@ -242,7 +323,7 @@
     .dash-stat-value { font-size: 18px; font-weight: 800; color: var(--black); }
     .dash-stat-sub { font-size: 9px; color: #888; margin-top: 2px; }
 
-    .dash-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .dash-bottom { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
 
     .dash-panel {
       background: var(--white); border-radius: 8px; padding: 10px;
@@ -631,7 +712,8 @@
   </div>
 
   <div class="hero-right">
-    <!-- Dashboard mockup -->
+    <!-- Dashboard mockup (interactive preview, not a live login) -->
+    <div class="dash-demo-badge">🖱️ Click to Explore — Live Preview</div>
     <div class="dashboard-card">
       <div class="dash-topbar">
         <div class="dash-topbar-left">
@@ -645,113 +727,287 @@
       </div>
 
       <div class="dash-body">
-        <div class="dash-sidebar">
-          <a class="dash-sidebar-item active" href="{{ url_for('admin_dashboard') }}"><span class="si">📊</span> Dashboard</a>
-          <a class="dash-sidebar-item" href="{{ url_for('admin_employees') }}"><span class="si">👥</span> Employees</a>
-          <a class="dash-sidebar-item" href="{{ url_for('staff_login') }}"><span class="si">🕐</span> Time Clock</a>
-          <a class="dash-sidebar-item" href="{{ url_for('admin_dashboard') }}#timesheets"><span class="si">📋</span> Timesheets</a>
-          <a class="dash-sidebar-item" href="{{ url_for('admin_dashboard') }}#reports"><span class="si">📈</span> Reports</a>
-          <a class="dash-sidebar-item" href="{{ url_for('admin_dashboard') }}#payroll"><span class="si">💰</span> Payroll</a>
-          <a class="dash-sidebar-item" href="{{ url_for('admin_devices') }}"><span class="si">💻</span> Devices</a>
-          <a class="dash-sidebar-item" href="{{ url_for('admin_settings') }}"><span class="si">⚙️</span> Settings</a>
+        <div class="dash-sidebar" role="tablist" aria-label="Preview a page">
+          <button type="button" class="dash-sidebar-item active" data-view="dashboard"><span class="si">📊</span> Dashboard</button>
+          <button type="button" class="dash-sidebar-item" data-view="employees"><span class="si">👥</span> Employees</button>
+          <button type="button" class="dash-sidebar-item" data-view="clock"><span class="si">🕐</span> Time Clock</button>
+          <button type="button" class="dash-sidebar-item" data-view="timesheets"><span class="si">📋</span> Timesheets</button>
+          <button type="button" class="dash-sidebar-item" data-view="reports"><span class="si">📈</span> Reports</button>
+          <button type="button" class="dash-sidebar-item" data-view="payroll"><span class="si">💰</span> Payroll</button>
+          <button type="button" class="dash-sidebar-item" data-view="devices"><span class="si">💻</span> Devices</button>
+          <button type="button" class="dash-sidebar-item" data-view="settings"><span class="si">⚙️</span> Settings</button>
         </div>
 
         <div class="dash-main">
-          <div class="dash-welcome">Welcome back, Admin! 👋</div>
-          <div class="dash-welcome-sub">Here's what's happening with your team today.</div>
 
-          <div class="dash-stats">
-            <div class="dash-stat">
-              <div class="dash-stat-label">Total Employees</div>
-              <div class="dash-stat-value">128</div>
+          <!-- DASHBOARD -->
+          <div class="dash-view active" data-view="dashboard">
+            <div class="dash-welcome">Welcome back, Admin! 👋</div>
+            <div class="dash-welcome-sub">Here's what's happening with your team today.</div>
+
+            <div class="dash-stats">
+              <div class="dash-stat">
+                <div class="dash-stat-label">Total Employees</div>
+                <div class="dash-stat-value">128</div>
+              </div>
+              <div class="dash-stat">
+                <div class="dash-stat-label">Active Today</div>
+                <div class="dash-stat-value">96</div>
+                <div class="dash-stat-sub">75% of team</div>
+              </div>
+              <div class="dash-stat">
+                <div class="dash-stat-label">Clocked In</div>
+                <div class="dash-stat-value">67</div>
+                <div class="dash-stat-sub">As of now</div>
+              </div>
+              <div class="dash-stat">
+                <div class="dash-stat-label">Hours This Week</div>
+                <div class="dash-stat-value">2,542</div>
+                <div class="dash-stat-sub">Total Hours</div>
+              </div>
             </div>
-            <div class="dash-stat">
-              <div class="dash-stat-label">Active Today</div>
-              <div class="dash-stat-value">96</div>
-              <div class="dash-stat-sub">75% of team</div>
-            </div>
-            <div class="dash-stat">
-              <div class="dash-stat-label">Clocked In</div>
-              <div class="dash-stat-value">67</div>
-              <div class="dash-stat-sub">As of now</div>
-            </div>
-            <div class="dash-stat">
-              <div class="dash-stat-label">Hours This Week</div>
-              <div class="dash-stat-value">2,542</div>
-              <div class="dash-stat-sub">Total Hours</div>
+
+            <div class="dash-bottom">
+              <div class="dash-panel">
+                <div class="dash-panel-title">Who's Clocked In</div>
+                <div class="clocked-row">
+                  <div class="clocked-avatar" style="background:#4f46e5">JR</div>
+                  <div class="clocked-name">Jake Roberts</div>
+                  <div class="clocked-time">8:02 AM</div>
+                </div>
+                <div class="clocked-row">
+                  <div class="clocked-avatar" style="background:#059669">KM</div>
+                  <div class="clocked-name">Kevin Martinez</div>
+                  <div class="clocked-time">7:59 AM</div>
+                </div>
+                <div class="clocked-row">
+                  <div class="clocked-avatar" style="background:#dc2626">ST</div>
+                  <div class="clocked-name">Sarah Thompson</div>
+                  <div class="clocked-time">8:00 AM</div>
+                </div>
+                <div class="clocked-row">
+                  <div class="clocked-avatar" style="background:#d97706">JA</div>
+                  <div class="clocked-name">James Anderson</div>
+                  <div class="clocked-time">7:45 AM</div>
+                </div>
+                <div class="clocked-row">
+                  <div class="clocked-avatar" style="background:#7c3aed">MB</div>
+                  <div class="clocked-name">Michael Brown</div>
+                  <div class="clocked-time">7:59 AM</div>
+                </div>
+                <button type="button" class="dash-link-btn" data-goto-view="employees" style="display:block; margin-top:8px; font-size:10px; color:#FFB800; font-weight:600; background:none; border:none; padding:0; font-family:inherit; cursor:pointer;">View all employees →</button>
+              </div>
+
+              <div class="dash-panel">
+                <div class="dash-panel-title">Hours This Week</div>
+                <div class="chart-area">
+                  <svg viewBox="0 0 200 70" xmlns="http://www.w3.org/2000/svg">
+                    <!-- y-axis labels -->
+                    <text x="0" y="12" font-size="7" fill="#aaa">800</text>
+                    <text x="0" y="30" font-size="7" fill="#aaa">600</text>
+                    <text x="0" y="48" font-size="7" fill="#aaa">400</text>
+                    <text x="0" y="66" font-size="7" fill="#aaa">200</text>
+                    <!-- x-axis labels -->
+                    <text x="22" y="68" font-size="7" fill="#aaa">Mon</text>
+                    <text x="50" y="68" font-size="7" fill="#aaa">Tue</text>
+                    <text x="78" y="68" font-size="7" fill="#aaa">Wed</text>
+                    <text x="105" y="68" font-size="7" fill="#aaa">Thu</text>
+                    <text x="130" y="68" font-size="7" fill="#aaa">Fri</text>
+                    <text x="155" y="68" font-size="7" fill="#aaa">Sat</text>
+                    <text x="180" y="68" font-size="7" fill="#aaa">Sun</text>
+                    <!-- Line chart -->
+                    <polyline
+                      points="28,52 58,34 86,20 113,28 138,42 163,58 188,58"
+                      fill="none" stroke="#FFB800" stroke-width="2" stroke-linejoin="round"
+                    />
+                    <!-- Dots -->
+                    <circle cx="28" cy="52" r="3" fill="#FFB800"/>
+                    <circle cx="58" cy="34" r="3" fill="#FFB800"/>
+                    <circle cx="86" cy="20" r="3" fill="#FFB800"/>
+                    <circle cx="113" cy="28" r="3" fill="#FFB800"/>
+                    <circle cx="138" cy="42" r="3" fill="#FFB800"/>
+                    <circle cx="163" cy="58" r="3" fill="#FFB800"/>
+                    <circle cx="188" cy="58" r="3" fill="#FFB800"/>
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="dash-bottom">
-            <div class="dash-panel">
-              <div class="dash-panel-title">Who's Clocked In</div>
-              <div class="clocked-row">
-                <div class="clocked-avatar" style="background:#4f46e5">JR</div>
-                <div class="clocked-name">Jake Roberts</div>
-                <div class="clocked-time">8:02 AM</div>
-              </div>
-              <div class="clocked-row">
-                <div class="clocked-avatar" style="background:#059669">KM</div>
-                <div class="clocked-name">Kevin Martinez</div>
-                <div class="clocked-time">7:59 AM</div>
-              </div>
-              <div class="clocked-row">
-                <div class="clocked-avatar" style="background:#dc2626">ST</div>
-                <div class="clocked-name">Sarah Thompson</div>
-                <div class="clocked-time">8:00 AM</div>
-              </div>
-              <div class="clocked-row">
-                <div class="clocked-avatar" style="background:#d97706">JA</div>
-                <div class="clocked-name">James Anderson</div>
-                <div class="clocked-time">7:45 AM</div>
-              </div>
-              <div class="clocked-row">
-                <div class="clocked-avatar" style="background:#7c3aed">MB</div>
-                <div class="clocked-name">Michael Brown</div>
-                <div class="clocked-time">7:59 AM</div>
-              </div>
-              <a href="{{ url_for('admin_employees') }}" style="display:block; margin-top:8px; font-size:10px; color:#FFB800; font-weight:600;">View all employees →</a>
+          <!-- EMPLOYEES -->
+          <div class="dash-view" data-view="employees">
+            <div class="dash-view-header">
+              <div class="dash-view-title">Employees</div>
+              <div class="dash-view-sub">128 total • 8 departments</div>
             </div>
+            <div class="mini-search">🔍 Search employees…</div>
+            <div class="mini-table">
+              <div class="mini-table-row mini-table-head"><span>Name</span><span>Role</span><span>Status</span></div>
+              <div class="mini-table-row">
+                <span class="mt-name"><span class="clocked-avatar" style="background:#4f46e5">JR</span>Jake Roberts</span>
+                <span>Foreman</span><span class="status-pill status-active">Active</span>
+              </div>
+              <div class="mini-table-row">
+                <span class="mt-name"><span class="clocked-avatar" style="background:#059669">KM</span>Kevin Martinez</span>
+                <span>Electrician</span><span class="status-pill status-active">Active</span>
+              </div>
+              <div class="mini-table-row">
+                <span class="mt-name"><span class="clocked-avatar" style="background:#dc2626">ST</span>Sarah Thompson</span>
+                <span>Dispatcher</span><span class="status-pill status-active">Active</span>
+              </div>
+              <div class="mini-table-row">
+                <span class="mt-name"><span class="clocked-avatar" style="background:#d97706">JA</span>James Anderson</span>
+                <span>Laborer</span><span class="status-pill status-pending">On Leave</span>
+              </div>
+            </div>
+          </div>
 
+          <!-- TIME CLOCK -->
+          <div class="dash-view" data-view="clock">
+            <div class="dash-view-header">
+              <div class="dash-view-title">Time Clock</div>
+              <div class="dash-view-sub">Front Office PC • Trusted Device</div>
+            </div>
+            <div class="kiosk-mock">
+              <div class="kiosk-time">9:41 AM</div>
+              <div class="kiosk-sub">Enter your PIN to clock in or out</div>
+              <div class="kiosk-pin">
+                <span class="pin-dot filled"></span><span class="pin-dot filled"></span><span class="pin-dot filled"></span><span class="pin-dot"></span>
+              </div>
+              <div class="kiosk-keypad">
+                <div class="kiosk-key">1</div><div class="kiosk-key">2</div><div class="kiosk-key">3</div>
+                <div class="kiosk-key">4</div><div class="kiosk-key">5</div><div class="kiosk-key">6</div>
+                <div class="kiosk-key">7</div><div class="kiosk-key">8</div><div class="kiosk-key">9</div>
+                <div class="kiosk-key">⌫</div><div class="kiosk-key">0</div><div class="kiosk-key">✓</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TIMESHEETS -->
+          <div class="dash-view" data-view="timesheets">
+            <div class="dash-view-header">
+              <div class="dash-view-title">Timesheets</div>
+              <div class="dash-view-sub">Week of Jul 21 – Jul 27</div>
+            </div>
+            <div class="mini-table">
+              <div class="mini-table-row mini-table-head"><span>Name</span><span>Hours</span><span>Status</span></div>
+              <div class="mini-table-row">
+                <span class="mt-name"><span class="clocked-avatar" style="background:#4f46e5">JR</span>Jake Roberts</span>
+                <span>42.5</span><span class="status-pill status-approved">Approved</span>
+              </div>
+              <div class="mini-table-row">
+                <span class="mt-name"><span class="clocked-avatar" style="background:#059669">KM</span>Kevin Martinez</span>
+                <span>38.0</span><span class="status-pill status-approved">Approved</span>
+              </div>
+              <div class="mini-table-row">
+                <span class="mt-name"><span class="clocked-avatar" style="background:#dc2626">ST</span>Sarah Thompson</span>
+                <span>40.0</span><span class="status-pill status-pending">Pending</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- REPORTS -->
+          <div class="dash-view" data-view="reports">
+            <div class="dash-view-header">
+              <div class="dash-view-title">Reports</div>
+              <div class="dash-view-sub">Team performance at a glance</div>
+            </div>
+            <div class="dash-stats dash-stats-2" style="margin-bottom:10px;">
+              <div class="dash-stat">
+                <div class="dash-stat-label">Avg Hours / Week</div>
+                <div class="dash-stat-value">39.4</div>
+              </div>
+              <div class="dash-stat">
+                <div class="dash-stat-label">On-Time Rate</div>
+                <div class="dash-stat-value">97%</div>
+              </div>
+            </div>
             <div class="dash-panel">
               <div class="dash-panel-title">Hours This Week</div>
               <div class="chart-area">
                 <svg viewBox="0 0 200 70" xmlns="http://www.w3.org/2000/svg">
-                  <!-- y-axis labels -->
-                  <text x="0" y="12" font-size="7" fill="#aaa">800</text>
-                  <text x="0" y="30" font-size="7" fill="#aaa">600</text>
-                  <text x="0" y="48" font-size="7" fill="#aaa">400</text>
-                  <text x="0" y="66" font-size="7" fill="#aaa">200</text>
-                  <!-- x-axis labels -->
-                  <text x="22" y="68" font-size="7" fill="#aaa">Mon</text>
-                  <text x="50" y="68" font-size="7" fill="#aaa">Tue</text>
-                  <text x="78" y="68" font-size="7" fill="#aaa">Wed</text>
-                  <text x="105" y="68" font-size="7" fill="#aaa">Thu</text>
-                  <text x="130" y="68" font-size="7" fill="#aaa">Fri</text>
-                  <text x="155" y="68" font-size="7" fill="#aaa">Sat</text>
-                  <text x="180" y="68" font-size="7" fill="#aaa">Sun</text>
-                  <!-- Line chart -->
-                  <polyline
-                    points="28,52 58,34 86,20 113,28 138,42 163,58 188,58"
-                    fill="none" stroke="#FFB800" stroke-width="2" stroke-linejoin="round"
-                  />
-                  <!-- Dots -->
-                  <circle cx="28" cy="52" r="3" fill="#FFB800"/>
-                  <circle cx="58" cy="34" r="3" fill="#FFB800"/>
-                  <circle cx="86" cy="20" r="3" fill="#FFB800"/>
-                  <circle cx="113" cy="28" r="3" fill="#FFB800"/>
-                  <circle cx="138" cy="42" r="3" fill="#FFB800"/>
-                  <circle cx="163" cy="58" r="3" fill="#FFB800"/>
-                  <circle cx="188" cy="58" r="3" fill="#FFB800"/>
+                  <rect x="20" y="30" width="14" height="38" fill="#FFB800"/>
+                  <rect x="50" y="14" width="14" height="54" fill="#FFB800"/>
+                  <rect x="80" y="4" width="14" height="64" fill="#FFB800"/>
+                  <rect x="110" y="20" width="14" height="48" fill="#FFB800"/>
+                  <rect x="140" y="36" width="14" height="32" fill="#FFB800"/>
+                  <rect x="170" y="50" width="14" height="18" fill="#FFB800"/>
                 </svg>
               </div>
             </div>
           </div>
+
+          <!-- PAYROLL -->
+          <div class="dash-view" data-view="payroll">
+            <div class="dash-view-header">
+              <div class="dash-view-title">Payroll</div>
+              <div class="dash-view-sub">Pay period: Jul 14 – Jul 27</div>
+            </div>
+            <div class="mini-table">
+              <div class="mini-table-row mini-table-head"><span>Name</span><span>Hours</span><span>Gross Pay</span></div>
+              <div class="mini-table-row">
+                <span class="mt-name"><span class="clocked-avatar" style="background:#4f46e5">JR</span>Jake Roberts</span>
+                <span>42.5</span><span>$1,062.50</span>
+              </div>
+              <div class="mini-table-row">
+                <span class="mt-name"><span class="clocked-avatar" style="background:#059669">KM</span>Kevin Martinez</span>
+                <span>38.0</span><span>$950.00</span>
+              </div>
+            </div>
+            <div class="mini-btn-row"><span class="mini-btn">Run Payroll →</span></div>
+          </div>
+
+          <!-- DEVICES -->
+          <div class="dash-view" data-view="devices">
+            <div class="dash-view-header">
+              <div class="dash-view-title">Devices</div>
+              <div class="dash-view-sub">3 authorized devices</div>
+            </div>
+            <div class="device-row">
+              <span class="device-icon">🖥️</span>
+              <div>
+                <div class="device-name">Front Office PC</div>
+                <div class="device-meta">Trusted • Last used 2 min ago</div>
+              </div>
+            </div>
+            <div class="device-row">
+              <span class="device-icon">💻</span>
+              <div>
+                <div class="device-name">Warehouse Kiosk</div>
+                <div class="device-meta">Trusted • Last used 14 min ago</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SETTINGS -->
+          <div class="dash-view" data-view="settings">
+            <div class="dash-view-header">
+              <div class="dash-view-title">Settings</div>
+              <div class="dash-view-sub">Company preferences</div>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Company Name</span>
+              <span class="settings-row-value">ABC Construction Co.</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Pay Period</span>
+              <span class="settings-row-value">Weekly</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Overtime Rules</span>
+              <span class="mini-toggle on"></span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-row-label">Email Notifications</span>
+              <span class="mini-toggle on"></span>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
 
-    <!-- Mobile clock-in overlay -->
+    <!-- Mobile clock-in overlay (illustrative only) -->
     <div class="mobile-card">
       <div class="mobile-card-header">
         <span class="bee-tiny">🐝</span>
@@ -761,8 +1017,8 @@
       <div class="mobile-date">May 24, 2024</div>
       <div class="mobile-greeting">Good morning!</div>
       <div class="mobile-sub">Please select an option</div>
-      <a href="/staff/login" style="display:block"><button class="btn-clock-in">⏰ CLOCK IN</button></a>
-      <a href="/staff/login" style="display:block"><button class="btn-clock-out">⏰ CLOCK OUT</button></a>
+      <button type="button" class="btn-clock-in" tabindex="-1">⏰ CLOCK IN</button>
+      <button type="button" class="btn-clock-out" tabindex="-1">⏰ CLOCK OUT</button>
       <div class="mobile-device">Device: Front Office PC ⚙</div>
     </div>
   </div>
@@ -1142,6 +1398,28 @@
       });
     }, { threshold: 0.15 });
     els.forEach(function (el) { io.observe(el); });
+  })();
+
+  (function () {
+    var sidebarItems = document.querySelectorAll('.dash-sidebar-item[data-view]');
+    var views = document.querySelectorAll('.dash-view[data-view]');
+    if (!sidebarItems.length || !views.length) return;
+
+    function showView(name) {
+      sidebarItems.forEach(function (btn) {
+        btn.classList.toggle('active', btn.dataset.view === name);
+      });
+      views.forEach(function (view) {
+        view.classList.toggle('active', view.dataset.view === name);
+      });
+    }
+
+    sidebarItems.forEach(function (btn) {
+      btn.addEventListener('click', function () { showView(btn.dataset.view); });
+    });
+    document.querySelectorAll('[data-goto-view]').forEach(function (btn) {
+      btn.addEventListener('click', function () { showView(btn.dataset.gotoView); });
+    });
   })();
 </script>
 
