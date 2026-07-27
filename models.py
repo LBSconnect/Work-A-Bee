@@ -426,6 +426,11 @@ def init_db():
                     ADD COLUMN IF NOT EXISTS employee_notes TEXT,
                     ADD COLUMN IF NOT EXISTS manager_comment TEXT
             """)
+            conn.execute("""
+                ALTER TABLE employees
+                    ADD COLUMN IF NOT EXISTS photo_data BYTEA,
+                    ADD COLUMN IF NOT EXISTS photo_mime TEXT
+            """)
             conn.commit()
     except Exception:
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")

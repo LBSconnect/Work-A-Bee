@@ -2,12 +2,37 @@
 {% block title %}Profile{% endblock %}
 {% block employee_content %}
   <h1>Profile</h1>
-  <table>
-    <tr><th>Employee ID</th><td>{{ employee.employee_code }}</td></tr>
-    <tr><th>Type</th><td>{{ (employee.worker_type or "employee")|capitalize }}</td></tr>
-    {% if employee.job_title %}<tr><th>Job Title</th><td>{{ employee.job_title }}</td></tr>{% endif %}
-    {% if department %}<tr><th>Department</th><td>{{ department }}</td></tr>{% endif %}
-    {% if employee.email %}<tr><th>Email</th><td>{{ employee.email }}</td></tr>{% endif %}
-    {% if employee.phone %}<tr><th>Phone</th><td>{{ employee.phone }}</td></tr>{% endif %}
-  </table>
+
+  <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px;">
+    {% if employee.photo_data %}
+      <img src="{{ url_for('employee_photo', emp_id=employee.id) }}" alt="{{ employee.name }}"
+           style="width:64px; height:64px; border-radius:50%; object-fit:cover; flex-shrink:0;">
+    {% else %}
+      <div class="admin-avatar" style="width:64px; height:64px; font-size:22px; background: {{ employee.name|avatar_color }}; color:#fff;">{{ employee.name|initials }}</div>
+    {% endif %}
+    <div>
+      <strong style="font-size:16px;">{{ employee.name }}</strong><br>
+      <span class="muted">
+        {{ employee.employee_code }} &middot; {{ (employee.worker_type or "employee")|capitalize }}
+        {%- if employee.job_title %} &middot; {{ employee.job_title }}{% endif %}
+        {%- if department %} &middot; {{ department }}{% endif %}
+      </span>
+    </div>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" style="max-width:420px;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <label>Profile photo</label>
+    <input type="file" name="photo" accept="image/png,image/jpeg">
+    <p class="muted" style="margin-top:4px;">PNG or JPEG, up to 500KB.</p>
+
+    <label>Email</label>
+    <input type="text" name="email" value="{{ employee.email or '' }}">
+
+    <label>Phone</label>
+    <input type="text" name="phone" value="{{ employee.phone or '' }}">
+
+    <button type="submit">Save</button>
+  </form>
 {% endblock %}

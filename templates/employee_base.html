@@ -22,7 +22,11 @@
       </a>
       <div class="admin-topbar-right">
         <span>{{ employee.name }} &middot; {{ (employee.worker_type or "employee")|capitalize }}</span>
-        <div class="admin-avatar" style="background: {{ employee.name|avatar_color }}; color: #fff;">{{ employee.name|initials }}</div>
+        {% if employee.photo_data %}
+          <img src="{{ url_for('employee_photo', emp_id=employee.id) }}" alt="{{ employee.name }}" class="admin-avatar" style="object-fit:cover;">
+        {% else %}
+          <div class="admin-avatar" style="background: {{ employee.name|avatar_color }}; color: #fff;">{{ employee.name|initials }}</div>
+        {% endif %}
       </div>
     </div>
 
