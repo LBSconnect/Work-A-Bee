@@ -142,10 +142,15 @@ def missing_punches_rows(conn, org, period_start, period_end):
     ).fetchall()
     rows = [
         {
+            "employee_id": e["employee_id"],
             "employee_code": e["employee_code"],
             "name": e["name"],
             "date": e["clock_in"].date(),
             "issue": "Missing Clock-Out",
+            "issue_type": "missing_clock_out",
+            "time_entry_id": e["id"],
+            "suggested_clock_in": e["clock_in"],
+            "suggested_clock_out": None,
             "detail": f'Clocked in {e["clock_in"].strftime("%I:%M %p").lstrip("0")}, never clocked out',
         }
         for e in open_entries
@@ -165,10 +170,15 @@ def missing_punches_rows(conn, org, period_start, period_end):
         ).fetchone()
         if not has_entry:
             rows.append({
+                "employee_id": s["employee_id"],
                 "employee_code": s["employee_code"],
                 "name": s["name"],
                 "date": s["shift_start"].date(),
                 "issue": "Missing Clock-In (No-Show)",
+                "issue_type": "missing_clock_in",
+                "time_entry_id": None,
+                "suggested_clock_in": s["shift_start"],
+                "suggested_clock_out": s["shift_end"],
                 "detail": f'Scheduled {s["shift_start"].strftime("%I:%M %p").lstrip("0")}'
                           f'–{s["shift_end"].strftime("%I:%M %p").lstrip("0")}, no clock-in recorded',
             })
@@ -468,3 +478,91 @@ def my_timesheet(conn, org, employee, period_start, period_end):
         None,
     )
     return {"summary": summary, "missing_punches": missing, "approval": approval}
+
+
+def corrections_by_issue(conn, org_id, employee_id=None):
+    """Map (employee_id, issue_type, issue_date) -> most recent punch_corrections row for that issue."""
+    query = "SELECT * FROM punch_corrections WHERE org_id=%s"
+    params = [org_id]
+    if employee_id is not None:
+        query += " AND employee_id=%s"
+        params.append(employee_id)
+    query += " ORDER BY created_at"
+    result = {}
+    for r in conn.execute(query, params).fetchall():
+        result[(r["employee_id"], r["issue_type"], r["issue_date"])] = r
+    return result
+
+
+def employee_corrections(conn, employee_id, limit=20):
+    """An employee's own correction requests, most recent first."""
+    return conn.execute(
+        "SELECT * FROM punch_corrections WHERE employee_id=%s ORDER BY created_at DESC LIMIT %s",
+        (employee_id, limit),
+    ).fetchall()
+
+
+def submit_correction_request(conn, org_id, employee_id, issue_type, issue_date, time_entry_id,
+                               requested_clock_in, requested_clock_out, reason):
+    conn.execute(
+        "INSERT INTO punch_corrections "
+        "(org_id, employee_id, time_entry_id, issue_type, issue_date, requested_clock_in, requested_clock_out, reason) "
+        "VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
+        (org_id, employee_id, time_entry_id, issue_type, issue_date, requested_clock_in, requested_clock_out, reason),
+    )
+
+
+def corrections_queue(conn, org):
+    """All correction requests for the org, pending first, then most recently created."""
+    return conn.execute(
+        "SELECT pc.*, e.name, e.employee_code FROM punch_corrections pc "
+        "JOIN employees e ON pc.employee_id = e.id "
+        "WHERE pc.org_id=%s ORDER BY (pc.status='pending') DESC, pc.created_at DESC",
+        (org["id"],),
+    ).fetchall()
+
+
+def _pending_correction(conn, org_id, correction_id):
+    return conn.execute(
+        "SELECT pc.*, e.name, e.employee_code FROM punch_corrections pc "
+        "JOIN employees e ON pc.employee_id = e.id "
+        "WHERE pc.id=%s AND pc.org_id=%s AND pc.status='pending'",
+        (correction_id, org_id),
+    ).fetchone()
+
+
+def approve_correction(conn, org_id, correction_id, admin_id):
+    """Applies the requested correction to time_entries and marks the request approved.
+    Returns the correction row (with employee name/code) for notification/audit, or None if not pending."""
+    c = _pending_correction(conn, org_id, correction_id)
+    if c is None:
+        return None
+
+    if c["issue_type"] == "missing_clock_out":
+        conn.execute(
+            "UPDATE time_entries SET clock_out=%s, is_manual=TRUE, created_by_admin_id=%s WHERE id=%s",
+            (c["requested_clock_out"], admin_id, c["time_entry_id"]),
+        )
+    else:
+        conn.execute(
+            "INSERT INTO time_entries (employee_id, clock_in, clock_out, is_manual, created_by_admin_id) "
+            "VALUES (%s,%s,%s,TRUE,%s)",
+            (c["employee_id"], c["requested_clock_in"], c["requested_clock_out"], admin_id),
+        )
+    conn.execute(
+        "UPDATE punch_corrections SET status='approved', reviewed_by_admin_id=%s, reviewed_at=NOW() WHERE id=%s",
+        (admin_id, correction_id),
+    )
+    return c
+
+
+def deny_correction(conn, org_id, correction_id, admin_id, comment):
+    c = _pending_correction(conn, org_id, correction_id)
+    if c is None:
+        return None
+    conn.execute(
+        "UPDATE punch_corrections SET status='denied', reviewed_by_admin_id=%s, reviewed_at=NOW(), manager_comment=%s "
+        "WHERE id=%s",
+        (admin_id, comment, correction_id),
+    )
+    return c

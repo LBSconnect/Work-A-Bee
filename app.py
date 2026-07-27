@@ -608,6 +608,10 @@ def time_history_page():
 
         period_start, period_end = _report_period(request.args, org["timezone"])
         timesheet = reports.my_timesheet(conn, org, emp, period_start, period_end)
+        correction_lookup = reports.corrections_by_issue(conn, org_id, emp_id)
+        for m in timesheet["missing_punches"]:
+            m["correction"] = correction_lookup.get((emp_id, m["issue_type"], m["date"]))
+        my_corrections = reports.employee_corrections(conn, emp_id)
 
         recent_entries = conn.execute(
             "SELECT * FROM time_entries WHERE employee_id=%s ORDER BY clock_in DESC LIMIT 25",
@@ -638,6 +642,7 @@ def time_history_page():
         timesheet=timesheet, period_start=period_start, period_end=period_end,
         prev_week=(period_start - timedelta(days=7)).isoformat(),
         next_week=(period_start + timedelta(days=7)).isoformat(),
+        my_corrections=my_corrections,
     )
 
 
@@ -693,6 +698,72 @@ def timesheet_withdraw():
         conn.commit()
     flash("Submission withdrawn. You can make changes and resubmit.")
     return redirect(url_for("time_history_page", week=period_start.isoformat()))
+
+
+@app.route("/time-history/request-correction", methods=["POST"])
+def request_correction():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    issue_type = request.form.get("issue_type")
+    if issue_type not in ("missing_clock_in", "missing_clock_out"):
+        abort(400)
+    try:
+        issue_date = datetime.strptime(request.form["issue_date"], "%Y-%m-%d").date()
+    except (KeyError, ValueError):
+        abort(400)
+    week = request.form.get("week", "")
+    reason = request.form.get("reason", "").strip()
+
+    time_entry_id = None
+    requested_clock_in = None
+    requested_clock_out = None
+
+    if issue_type == "missing_clock_out":
+        try:
+            time_entry_id = int(request.form["time_entry_id"])
+        except (KeyError, ValueError):
+            abort(400)
+        try:
+            requested_clock_out = datetime.strptime(request.form["requested_clock_out"], "%Y-%m-%dT%H:%M")
+        except (KeyError, ValueError):
+            flash("Enter a valid clock-out time.")
+            return redirect(url_for("time_history_page", week=week))
+    else:
+        try:
+            requested_clock_in = datetime.strptime(request.form["requested_clock_in"], "%Y-%m-%dT%H:%M")
+            requested_clock_out = datetime.strptime(request.form["requested_clock_out"], "%Y-%m-%dT%H:%M")
+        except (KeyError, ValueError):
+            flash("Enter valid clock-in and clock-out times.")
+            return redirect(url_for("time_history_page", week=week))
+        if requested_clock_out <= requested_clock_in:
+            flash("Clock-out must be after clock-in.")
+            return redirect(url_for("time_history_page", week=week))
+
+    with get_db() as conn:
+        emp = conn.execute("SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)).fetchone()
+        if time_entry_id is not None:
+            entry = conn.execute(
+                "SELECT 1 FROM time_entries WHERE id=%s AND employee_id=%s", (time_entry_id, emp_id)
+            ).fetchone()
+            if entry is None:
+                abort(404)
+        reports.submit_correction_request(
+            conn, org_id, emp_id, issue_type, issue_date, time_entry_id,
+            requested_clock_in, requested_clock_out, reason or None,
+        )
+        notifications.notify_admins(
+            conn, org_id, "punch_correction_requested",
+            f"{emp['name']} requested a punch correction",
+            body=f"{issue_date.strftime('%b %d, %Y')} - {issue_type.replace('_', ' ')}"
+                 + (f'. "{reason}"' if reason else ""),
+            link=url_for("admin_corrections"),
+        )
+        conn.commit()
+    flash("Correction request submitted for manager review.")
+    return redirect(url_for("time_history_page", week=week))
 
 
 @app.route("/profile", methods=["GET", "POST"])
@@ -2191,6 +2262,17 @@ REPORT_SLUGS = {
 
 
 def _report_period(request_args, org_tz):
+    start_param = request_args.get("start", "")
+    end_param = request_args.get("end", "")
+    if start_param and end_param:
+        try:
+            start_date = datetime.strptime(start_param, "%Y-%m-%d").date()
+            end_date = datetime.strptime(end_param, "%Y-%m-%d").date()
+            if start_date <= end_date:
+                return start_date, end_date
+        except ValueError:
+            pass
+
     week_param = request_args.get("week", "")
     try:
         reference_date = datetime.strptime(week_param, "%Y-%m-%d").date()
@@ -2214,6 +2296,11 @@ def admin_reports_index():
         }
         for slug in order
     ]
+    cards.insert(order.index("missing-punches") + 1, {
+        "title": "Punch Corrections",
+        "description": "Review and approve or deny employee-submitted missing-punch correction requests.",
+        "url": url_for("admin_corrections"),
+    })
     cards.append({
         "title": "Timesheet Approval Status",
         "description": "Approve each employee's timesheet for the period before payroll.",
@@ -2337,6 +2424,65 @@ def admin_report_approval_bulk_approve():
         conn.commit()
     flash(f"Approved {count} timesheet(s)." if count else "No timesheets selected.")
     return redirect(url_for("admin_report_approval_status", week=period_start.isoformat()))
+
+
+@app.route("/admin/corrections")
+@admin_required
+def admin_corrections():
+    with get_db() as conn:
+        requests_ = reports.corrections_queue(conn, g.org)
+    return render_template("admin_corrections.html", requests=requests_)
+
+
+@app.route("/admin/corrections/<int:correction_id>/approve", methods=["POST"])
+@admin_required
+def admin_correction_approve(correction_id):
+    with get_db() as conn:
+        c = reports.approve_correction(conn, g.org["id"], correction_id, g.admin["id"])
+        if c is None:
+            flash("That request has already been reviewed.")
+            return redirect(url_for("admin_corrections"))
+        audit.log(
+            conn, g.org["id"], "admin", g.admin["id"], "time_entry.correction_approved",
+            f"{c['name']} ({c['employee_code']}): {c['issue_type']} on {c['issue_date']} - "
+            f"clock_in={c['requested_clock_in']}, clock_out={c['requested_clock_out']}",
+        )
+        notifications.notify_employee(
+            conn, g.org["id"], c["employee_id"], "punch_correction_approved",
+            "Your punch correction was approved",
+            body=f"{c['issue_date'].strftime('%b %d, %Y')} - your timecard has been updated.",
+            link=url_for("time_history_page"),
+        )
+        conn.commit()
+    flash(f"Correction approved for {c['name']}.")
+    return redirect(url_for("admin_corrections"))
+
+
+@app.route("/admin/corrections/<int:correction_id>/deny", methods=["POST"])
+@admin_required
+def admin_correction_deny(correction_id):
+    comment = request.form.get("comment", "").strip()
+    if not comment:
+        flash("A comment explaining why is required to deny a correction request.")
+        return redirect(url_for("admin_corrections"))
+    with get_db() as conn:
+        c = reports.deny_correction(conn, g.org["id"], correction_id, g.admin["id"], comment)
+        if c is None:
+            flash("That request has already been reviewed.")
+            return redirect(url_for("admin_corrections"))
+        audit.log(
+            conn, g.org["id"], "admin", g.admin["id"], "time_entry.correction_denied",
+            f"{c['name']} ({c['employee_code']}): {c['issue_type']} on {c['issue_date']} - \"{comment}\"",
+        )
+        notifications.notify_employee(
+            conn, g.org["id"], c["employee_id"], "punch_correction_denied",
+            "Your punch correction request was denied",
+            body=f"{c['issue_date'].strftime('%b %d, %Y')}. {comment}",
+            link=url_for("time_history_page"),
+        )
+        conn.commit()
+    flash(f"Correction denied for {c['name']}.")
+    return redirect(url_for("admin_corrections"))
 
 
 @app.route("/admin/reports/<slug>")

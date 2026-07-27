@@ -1,0 +1,56 @@
+{% extends "admin_base.html" %}
+{% block title %}Punch Corrections{% endblock %}
+{% block admin_content %}
+  <p class="nav"><a href="{{ url_for('admin_reports_index') }}">&larr; All Reports</a></p>
+  <h1>Punch Corrections</h1>
+  <p class="muted">Employee-submitted requests to fix a missing clock-in or clock-out.</p>
+
+  <table>
+    <tr>
+      <th>Employee ID</th><th>Name</th><th>Issue</th><th>Date</th><th>Requested</th><th>Reason</th><th>Status</th><th></th>
+    </tr>
+    {% for r in requests %}
+    <tr>
+      <td>{{ r.employee_code }}</td>
+      <td>{{ r.name }}</td>
+      <td>{{ 'Missing Clock-In' if r.issue_type == 'missing_clock_in' else 'Missing Clock-Out' }}</td>
+      <td>{{ r.issue_date.strftime('%b %d, %Y') }}</td>
+      <td class="muted">
+        {% if r.requested_clock_in %}In: {{ r.requested_clock_in.strftime('%I:%M %p').lstrip('0') }}<br>{% endif %}
+        {% if r.requested_clock_out %}Out: {{ r.requested_clock_out.strftime('%I:%M %p').lstrip('0') }}{% endif %}
+      </td>
+      <td class="muted">
+        {{ r.reason or '' }}
+        {% if r.status == 'denied' and r.manager_comment %}<br><strong>Denied:</strong> {{ r.manager_comment }}{% endif %}
+      </td>
+      <td>
+        {% if r.status == 'approved' %}
+          <span class="badge in">Approved</span>
+        {% elif r.status == 'denied' %}
+          <span class="badge" style="background:#fee2e2; color:#991b1b;">Denied</span>
+        {% else %}
+          <span class="badge unread" style="background:#2563eb;">Pending</span>
+        {% endif %}
+      </td>
+      <td style="white-space:nowrap;">
+        {% if r.status == 'pending' %}
+          <form method="post" action="{{ url_for('admin_correction_approve', correction_id=r.id) }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" style="margin:0; padding:4px 10px; font-size:12px;">Approve</button>
+          </form>
+          <details style="display:inline-block;">
+            <summary style="cursor:pointer; font-size:12px; font-weight:700; color:var(--bee-amber-link);">Deny</summary>
+            <form method="post" action="{{ url_for('admin_correction_deny', correction_id=r.id) }}" style="margin-top:8px; min-width:220px;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <textarea name="comment" rows="2" placeholder="Reason for denying (required)" required></textarea>
+              <button type="submit" class="secondary" style="margin-top:6px; padding:4px 10px; font-size:12px;">Confirm Deny</button>
+            </form>
+          </details>
+        {% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" class="muted">No correction requests yet.</td></tr>
+    {% endfor %}
+  </table>
+{% endblock %}
