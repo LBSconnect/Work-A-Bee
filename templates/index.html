@@ -646,14 +646,14 @@
 
       <div class="dash-body">
         <div class="dash-sidebar">
-          <div class="dash-sidebar-item active"><span class="si">📊</span> Dashboard</div>
-          <div class="dash-sidebar-item"><span class="si">👥</span> Employees</div>
-          <div class="dash-sidebar-item"><span class="si">🕐</span> Time Clock</div>
-          <div class="dash-sidebar-item"><span class="si">📋</span> Timesheets</div>
-          <div class="dash-sidebar-item"><span class="si">📈</span> Reports</div>
-          <div class="dash-sidebar-item"><span class="si">💰</span> Payroll</div>
-          <div class="dash-sidebar-item"><span class="si">💻</span> Devices</div>
-          <div class="dash-sidebar-item"><span class="si">⚙️</span> Settings</div>
+          <a class="dash-sidebar-item active" href="{{ url_for('admin_dashboard') }}"><span class="si">📊</span> Dashboard</a>
+          <a class="dash-sidebar-item" href="{{ url_for('admin_employees') }}"><span class="si">👥</span> Employees</a>
+          <a class="dash-sidebar-item" href="{{ url_for('staff_login') }}"><span class="si">🕐</span> Time Clock</a>
+          <a class="dash-sidebar-item" href="{{ url_for('admin_dashboard') }}#timesheets"><span class="si">📋</span> Timesheets</a>
+          <a class="dash-sidebar-item" href="{{ url_for('admin_dashboard') }}#reports"><span class="si">📈</span> Reports</a>
+          <a class="dash-sidebar-item" href="{{ url_for('admin_dashboard') }}#payroll"><span class="si">💰</span> Payroll</a>
+          <a class="dash-sidebar-item" href="{{ url_for('admin_devices') }}"><span class="si">💻</span> Devices</a>
+          <a class="dash-sidebar-item" href="{{ url_for('admin_settings') }}"><span class="si">⚙️</span> Settings</a>
         </div>
 
         <div class="dash-main">
@@ -710,7 +710,7 @@
                 <div class="clocked-name">Michael Brown</div>
                 <div class="clocked-time">7:59 AM</div>
               </div>
-              <div style="margin-top:8px; font-size:10px; color:#FFB800; font-weight:600; cursor:pointer;">View all employees →</div>
+              <a href="{{ url_for('admin_employees') }}" style="display:block; margin-top:8px; font-size:10px; color:#FFB800; font-weight:600;">View all employees →</a>
             </div>
 
             <div class="dash-panel">
