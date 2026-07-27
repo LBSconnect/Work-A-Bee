@@ -606,14 +606,17 @@ def time_history_page():
             session.pop("employee_id", None)
             return redirect(url_for("staff_login"))
 
+        period_start, period_end = _report_period(request.args, org["timezone"])
+        timesheet = reports.my_timesheet(conn, org, emp, period_start, period_end)
+
         recent_entries = conn.execute(
             "SELECT * FROM time_entries WHERE employee_id=%s ORDER BY clock_in DESC LIMIT 25",
             (emp_id,),
         ).fetchall()
 
-        period_start, _ = get_period_bounds(today_in(org["timezone"]))
+        current_period_start, _ = get_period_bounds(today_in(org["timezone"]))
         weekly_history = []
-        for start, end in [(period_start, period_start + timedelta(days=6))] + get_prior_periods(period_start, count=8):
+        for start, end in [(current_period_start, current_period_start + timedelta(days=6))] + get_prior_periods(current_period_start, count=8):
             rows = calculate_payroll(conn, org, start, end)
             mine = next((r for r in rows if r["employee_code"] == emp["employee_code"]), None)
             weekly_history.append({
@@ -630,7 +633,66 @@ def time_history_page():
             hours = round((e["clock_out"] - e["clock_in"]).total_seconds() / 3600, 2)
         history.append({"clock_in": e["clock_in"], "clock_out": e["clock_out"], "hours": hours})
 
-    return render_template("time_history.html", employee=emp, history=history, weekly_history=weekly_history)
+    return render_template(
+        "time_history.html", employee=emp, history=history, weekly_history=weekly_history,
+        timesheet=timesheet, period_start=period_start, period_end=period_end,
+        prev_week=(period_start - timedelta(days=7)).isoformat(),
+        next_week=(period_start + timedelta(days=7)).isoformat(),
+    )
+
+
+@app.route("/time-history/submit", methods=["POST"])
+def timesheet_submit():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    try:
+        period_start = datetime.strptime(request.form["period_start"], "%Y-%m-%d").date()
+        period_end = datetime.strptime(request.form["period_end"], "%Y-%m-%d").date()
+    except (KeyError, ValueError):
+        abort(400)
+    if not request.form.get("certify"):
+        flash("You must certify that your hours are accurate before submitting.")
+        return redirect(url_for("time_history_page", week=period_start.isoformat()))
+
+    notes = request.form.get("notes", "").strip() or None
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        reports.submit_timesheet(conn, org_id, emp_id, period_start, period_end, notes)
+        notifications.notify_admins(
+            conn, org_id, "timesheet_submitted",
+            f"{emp['name']} submitted their timesheet",
+            body=f"{period_start.strftime('%b %d')} - {period_end.strftime('%b %d, %Y')}"
+                 + (f'. Notes: "{notes}"' if notes else ""),
+            link=url_for("admin_report_approval_status"),
+        )
+        conn.commit()
+    flash("Timesheet submitted for approval.")
+    return redirect(url_for("time_history_page", week=period_start.isoformat()))
+
+
+@app.route("/time-history/withdraw", methods=["POST"])
+def timesheet_withdraw():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    try:
+        period_start = datetime.strptime(request.form["period_start"], "%Y-%m-%d").date()
+        period_end = datetime.strptime(request.form["period_end"], "%Y-%m-%d").date()
+    except (KeyError, ValueError):
+        abort(400)
+
+    with get_db() as conn:
+        reports.withdraw_timesheet(conn, emp_id, period_start, period_end)
+        conn.commit()
+    flash("Submission withdrawn. You can make changes and resubmit.")
+    return redirect(url_for("time_history_page", week=period_start.isoformat()))
 
 
 @app.route("/profile")
@@ -1388,14 +1450,24 @@ def admin_dashboard():
 def admin_employees():
     with get_db() as conn:
         employees = conn.execute(
-            "SELECT * FROM employees WHERE org_id=%s ORDER BY name", (g.org["id"],)
+            "SELECT e.*, d.name AS department_name FROM employees e "
+            "LEFT JOIN departments d ON e.department_id = d.id "
+            "WHERE e.org_id=%s ORDER BY e.name",
+            (g.org["id"],),
         ).fetchall()
     return render_template("admin_employees.html", employees=employees)
+
+
+def _departments_for_org(conn, org_id):
+    return conn.execute("SELECT * FROM departments WHERE org_id=%s ORDER BY name", (org_id,)).fetchall()
 
 
 @app.route("/admin/employees/new", methods=["GET", "POST"])
 @admin_required
 def admin_employee_new():
+    with get_db() as conn:
+        departments = _departments_for_org(conn, g.org["id"])
+
     if request.method == "POST":
         limit = plans.employee_limit(g.org)
         if limit is not None:
@@ -1414,43 +1486,49 @@ def admin_employee_new():
         name = request.form["name"].strip()
         worker_type = request.form["worker_type"]
         pin = request.form["pin"].strip()
+        department_id = request.form.get("department_id") or None
         try:
             rate = float(request.form["hourly_rate"])
         except ValueError:
             flash("Hourly rate must be a number.")
             return render_template(
-                "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"]
+                "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"],
+                departments=departments,
             )
 
         if not code or not name or not pin:
             flash("Employee ID, name, and PIN are all required.")
             return render_template(
-                "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"]
+                "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"],
+                departments=departments,
             )
         if len(pin) < 4:
             flash("PIN must be at least 4 digits.")
             return render_template(
-                "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"]
+                "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"],
+                departments=departments,
             )
 
         try:
             with get_db() as conn:
                 conn.execute(
-                    "INSERT INTO employees (org_id, employee_code, name, pin_hash, hourly_rate, worker_type) "
-                    "VALUES (%s, %s, %s, %s, %s, %s)",
-                    (g.org["id"], code, name, generate_password_hash(pin), rate, worker_type),
+                    "INSERT INTO employees (org_id, employee_code, name, pin_hash, hourly_rate, worker_type, department_id) "
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                    (g.org["id"], code, name, generate_password_hash(pin), rate, worker_type, department_id),
                 )
                 conn.commit()
         except Exception:
             flash(f"Employee ID '{code}' is already in use.")
             return render_template(
-                "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"]
+                "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"],
+                departments=departments,
             )
 
         flash(f"Added {name}.")
         return redirect(url_for("admin_employees"))
     return render_template(
-        "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"]
+        "admin_employee_form.html", employee=None, default_rate=g.org["default_hourly_rate"],
+        departments=departments,
     )
 
 
@@ -1464,44 +1542,113 @@ def admin_employee_edit(emp_id):
         if emp is None:
             flash("Employee not found.")
             return redirect(url_for("admin_employees"))
+        departments = _departments_for_org(conn, g.org["id"])
 
         if request.method == "POST":
             name = request.form["name"].strip()
             worker_type = request.form["worker_type"]
             active = 1 if request.form.get("active") == "on" else 0
             pin = request.form.get("pin", "").strip()
+            department_id = request.form.get("department_id") or None
             try:
                 rate = float(request.form["hourly_rate"])
             except ValueError:
                 flash("Hourly rate must be a number.")
-                return render_template("admin_employee_form.html", employee=emp)
+                return render_template("admin_employee_form.html", employee=emp, departments=departments)
             try:
                 pto_balance = float(request.form.get("pto_balance_hours", emp["pto_balance_hours"]))
             except ValueError:
                 flash("PTO balance must be a number.")
-                return render_template("admin_employee_form.html", employee=emp)
+                return render_template("admin_employee_form.html", employee=emp, departments=departments)
 
             if pin and len(pin) < 4:
                 flash("PIN must be at least 4 digits.")
-                return render_template("admin_employee_form.html", employee=emp)
+                return render_template("admin_employee_form.html", employee=emp, departments=departments)
 
             if pin:
                 conn.execute(
                     "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s, pin_hash=%s, "
-                    "pto_balance_hours=%s WHERE id=%s AND org_id=%s",
-                    (name, rate, worker_type, active, generate_password_hash(pin), pto_balance, emp_id, g.org["id"]),
+                    "pto_balance_hours=%s, department_id=%s WHERE id=%s AND org_id=%s",
+                    (name, rate, worker_type, active, generate_password_hash(pin), pto_balance,
+                     department_id, emp_id, g.org["id"]),
                 )
             else:
                 conn.execute(
-                    "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s, pto_balance_hours=%s "
-                    "WHERE id=%s AND org_id=%s",
-                    (name, rate, worker_type, active, pto_balance, emp_id, g.org["id"]),
+                    "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s, pto_balance_hours=%s, "
+                    "department_id=%s WHERE id=%s AND org_id=%s",
+                    (name, rate, worker_type, active, pto_balance, department_id, emp_id, g.org["id"]),
                 )
             conn.commit()
             flash("Updated.")
             return redirect(url_for("admin_employees"))
 
-    return render_template("admin_employee_form.html", employee=emp)
+    return render_template("admin_employee_form.html", employee=emp, departments=departments)
+
+
+@app.route("/admin/departments")
+@admin_required
+def admin_departments():
+    with get_db() as conn:
+        departments = conn.execute(
+            "SELECT d.*, (SELECT COUNT(*) FROM employees e WHERE e.department_id = d.id) AS employee_count "
+            "FROM departments d WHERE d.org_id=%s ORDER BY d.name",
+            (g.org["id"],),
+        ).fetchall()
+    return render_template("admin_departments.html", departments=departments)
+
+
+@app.route("/admin/departments/new", methods=["POST"])
+@admin_required
+def admin_departments_new():
+    name = request.form.get("name", "").strip()
+    if not name:
+        flash("Department name is required.")
+        return redirect(url_for("admin_departments"))
+    try:
+        with get_db() as conn:
+            conn.execute(
+                "INSERT INTO departments (org_id, name) VALUES (%s, %s)", (g.org["id"], name)
+            )
+            conn.commit()
+        flash(f"Added {name}.")
+    except Exception:
+        flash(f"A department named '{name}' already exists.")
+    return redirect(url_for("admin_departments"))
+
+
+@app.route("/admin/departments/<int:dept_id>/rename", methods=["POST"])
+@admin_required
+def admin_department_rename(dept_id):
+    name = request.form.get("name", "").strip()
+    if not name:
+        flash("Department name is required.")
+        return redirect(url_for("admin_departments"))
+    try:
+        with get_db() as conn:
+            conn.execute(
+                "UPDATE departments SET name=%s WHERE id=%s AND org_id=%s", (name, dept_id, g.org["id"])
+            )
+            conn.commit()
+        flash("Renamed.")
+    except Exception:
+        flash(f"A department named '{name}' already exists.")
+    return redirect(url_for("admin_departments"))
+
+
+@app.route("/admin/departments/<int:dept_id>/delete", methods=["POST"])
+@admin_required
+def admin_department_delete(dept_id):
+    with get_db() as conn:
+        in_use = conn.execute(
+            "SELECT COUNT(*) AS c FROM employees WHERE department_id=%s", (dept_id,)
+        ).fetchone()["c"]
+        if in_use:
+            flash(f"Can't delete: {in_use} employee(s) are still assigned to this department.")
+            return redirect(url_for("admin_departments"))
+        conn.execute("DELETE FROM departments WHERE id=%s AND org_id=%s", (dept_id, g.org["id"]))
+        conn.commit()
+    flash("Department deleted.")
+    return redirect(url_for("admin_departments"))
 
 
 @app.route("/admin/employees/<int:emp_id>/time-entries/new", methods=["GET", "POST"])
@@ -2029,27 +2176,44 @@ def admin_reports_index():
 @admin_required
 def admin_report_approval_status():
     period_start, period_end = _report_period(request.args, g.org["timezone"])
+    department_filter = request.args.get("department_id", "")
+    flagged_only = request.args.get("flagged") == "1"
+
     with get_db() as conn:
         rows = reports.approval_status_rows(conn, g.org, period_start, period_end)
+        flagged_codes = reports.flagged_employee_codes(conn, g.org, period_start, period_end)
+        departments = _departments_for_org(conn, g.org["id"])
+
+    for r in rows:
+        r["flagged"] = r["employee_code"] in flagged_codes
+    if department_filter:
+        rows = [r for r in rows if str(r.get("department_name")) == department_filter]
+    if flagged_only:
+        rows = [r for r in rows if r["flagged"]]
+
     return render_template(
         "admin_report_approval_status.html",
         rows=rows, period_start=period_start, period_end=period_end,
         prev_week=(period_start - timedelta(days=7)).isoformat(),
         next_week=(period_start + timedelta(days=7)).isoformat(),
+        departments=departments, department_filter=department_filter, flagged_only=flagged_only,
     )
 
 
 @app.route("/admin/reports/approval-status/<int:employee_id>/<action>", methods=["POST"])
 @admin_required
 def admin_report_approval_set(employee_id, action):
-    if action not in ("approve", "unapprove"):
+    if action not in ("approve", "return", "reopen"):
         abort(404)
-    status = "approved" if action == "approve" else "pending"
     try:
         period_start = datetime.strptime(request.form["period_start"], "%Y-%m-%d").date()
         period_end = datetime.strptime(request.form["period_end"], "%Y-%m-%d").date()
     except (KeyError, ValueError):
         abort(400)
+    comment = request.form.get("comment", "").strip()
+    if action in ("return", "reopen") and not comment:
+        flash("A comment explaining why is required to return or reopen a timesheet.")
+        return redirect(url_for("admin_report_approval_status", week=period_start.isoformat()))
 
     with get_db() as conn:
         emp = conn.execute(
@@ -2058,15 +2222,64 @@ def admin_report_approval_set(employee_id, action):
         if emp is None:
             flash("Employee not found.")
             return redirect(url_for("admin_report_approval_status"))
-        reports.set_timesheet_approval(
-            conn, g.org["id"], employee_id, period_start, period_end, status, g.admin["id"]
-        )
+
+        if action == "approve":
+            reports.approve_timesheet(conn, g.org["id"], employee_id, period_start, period_end, g.admin["id"])
+            audit_action, notif_kind, verb = "timesheet.approved", "timesheet_approved", "approved"
+        else:
+            reports.return_timesheet(conn, g.org["id"], employee_id, period_start, period_end, g.admin["id"], comment)
+            audit_action = "timesheet.reopened" if action == "reopen" else "timesheet.returned"
+            notif_kind = "timesheet_reopened" if action == "reopen" else "timesheet_returned"
+            verb = "reopened" if action == "reopen" else "returned for correction"
+
         audit.log(
-            conn, g.org["id"], "admin", g.admin["id"], f"timesheet.{status}",
-            f"{emp['name']} ({emp['employee_code']}): {period_start} - {period_end}",
+            conn, g.org["id"], "admin", g.admin["id"], audit_action,
+            f"{emp['name']} ({emp['employee_code']}): {period_start} - {period_end}"
+            + (f' - "{comment}"' if comment else ""),
+        )
+        notifications.notify_employee(
+            conn, g.org["id"], employee_id, notif_kind,
+            f"Your timesheet was {verb}",
+            body=(f'{period_start.strftime("%b %d")} - {period_end.strftime("%b %d, %Y")}'
+                  + (f'. {comment}' if comment else '')),
+            link=url_for("time_history_page", week=period_start.isoformat()),
         )
         conn.commit()
-    flash(f"Timesheet for {emp['name']} marked {status}.")
+    flash(f"Timesheet for {emp['name']} {verb}.")
+    return redirect(url_for("admin_report_approval_status", week=period_start.isoformat()))
+
+
+@app.route("/admin/reports/approval-status/bulk-approve", methods=["POST"])
+@admin_required
+def admin_report_approval_bulk_approve():
+    try:
+        period_start = datetime.strptime(request.form["period_start"], "%Y-%m-%d").date()
+        period_end = datetime.strptime(request.form["period_end"], "%Y-%m-%d").date()
+    except (KeyError, ValueError):
+        abort(400)
+    employee_ids = [int(i) for i in request.form.getlist("employee_ids") if i.isdigit()]
+
+    count = 0
+    with get_db() as conn:
+        for employee_id in employee_ids:
+            emp = conn.execute(
+                "SELECT * FROM employees WHERE id=%s AND org_id=%s", (employee_id, g.org["id"])
+            ).fetchone()
+            if emp is None:
+                continue
+            reports.approve_timesheet(conn, g.org["id"], employee_id, period_start, period_end, g.admin["id"])
+            audit.log(
+                conn, g.org["id"], "admin", g.admin["id"], "timesheet.approved",
+                f"{emp['name']} ({emp['employee_code']}): {period_start} - {period_end} (bulk)",
+            )
+            notifications.notify_employee(
+                conn, g.org["id"], employee_id, "timesheet_approved", "Your timesheet was approved",
+                body=f'{period_start.strftime("%b %d")} - {period_end.strftime("%b %d, %Y")}',
+                link=url_for("time_history_page", week=period_start.isoformat()),
+            )
+            count += 1
+        conn.commit()
+    flash(f"Approved {count} timesheet(s)." if count else "No timesheets selected.")
     return redirect(url_for("admin_report_approval_status", week=period_start.isoformat()))
 
 

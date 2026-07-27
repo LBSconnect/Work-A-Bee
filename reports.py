@@ -261,10 +261,18 @@ def time_off_rows(conn, org, period_start, period_end):
 
 
 def approval_status_rows(conn, org, period_start, period_end):
-    """Each active employee's timesheet-approval status for the period."""
+    """Each active employee's timesheet-approval status for the period.
+
+    Status is one of: not_submitted, submitted, returned, approved.
+    "returned" means a manager sent it back for correction (either after
+    review, or by reopening a previously-approved timesheet).
+    """
     org_id = org["id"]
     employees = conn.execute(
-        "SELECT * FROM employees WHERE org_id=%s AND active=1 ORDER BY name", (org_id,)
+        "SELECT e.*, d.name AS department_name FROM employees e "
+        "LEFT JOIN departments d ON e.department_id = d.id "
+        "WHERE e.org_id=%s AND e.active=1 ORDER BY e.name",
+        (org_id,),
     ).fetchall()
     approvals = conn.execute(
         "SELECT ta.*, a.username AS approved_by_username FROM timesheet_approvals ta "
@@ -273,30 +281,91 @@ def approval_status_rows(conn, org, period_start, period_end):
         (org_id, period_start, period_end),
     ).fetchall()
     by_employee = {a["employee_id"]: a for a in approvals}
+    summary_by_code = {r["employee_code"]: r for r in timesheet_summary_rows(conn, org, period_start, period_end)}
 
     rows = []
     for emp in employees:
         a = by_employee.get(emp["id"])
+        s = summary_by_code.get(emp["employee_code"])
+        regular_hours = s["regular_hours"] if s else 0.0
+        overtime_hours = s["overtime_hours"] if s else 0.0
+        total_hours = s["total_hours"] if s else 0.0
+        gross_pay = round(regular_hours * emp["hourly_rate"] + overtime_hours * emp["hourly_rate"] * 1.5, 2)
         rows.append({
             "employee_id": emp["id"],
             "employee_code": emp["employee_code"],
             "name": emp["name"],
-            "status": a["status"] if a else "pending",
+            "department_name": emp["department_name"] or "Unassigned",
+            "status": a["status"] if a else "not_submitted",
+            "submitted_at": a["submitted_at"] if a else None,
+            "employee_notes": a["employee_notes"] if a else None,
+            "manager_comment": a["manager_comment"] if a else None,
             "approved_by": a["approved_by_username"] if a and a["status"] == "approved" else None,
             "approved_at": a["approved_at"] if a else None,
+            "total_hours": total_hours,
+            "gross_pay": gross_pay,
         })
     return rows
 
 
-def set_timesheet_approval(conn, org_id, employee_id, period_start, period_end, status, admin_id):
+def flagged_employee_codes(conn, org, period_start, period_end):
+    """Employee codes with an attendance flag, overtime, or a missing punch this period."""
+    flagged = set()
+    for r in daily_attendance_rows(conn, org, period_start, period_end):
+        if r["flags"] != "OK":
+            flagged.add(r["employee_code"])
+    for r in overtime_rows(conn, org, period_start, period_end):
+        if r["status"] != "OK":
+            flagged.add(r["employee_code"])
+    for r in missing_punches_rows(conn, org, period_start, period_end):
+        flagged.add(r["employee_code"])
+    return flagged
+
+
+def _upsert_approval(conn, org_id, employee_id, period_start, period_end, **fields):
+    columns = ["org_id", "employee_id", "period_start", "period_end"] + list(fields.keys())
+    values = [org_id, employee_id, period_start, period_end] + list(fields.values())
+    placeholders = ",".join(["%s"] * len(values))
+    update_clause = ", ".join(f"{k}=EXCLUDED.{k}" for k in fields.keys())
     conn.execute(
-        "INSERT INTO timesheet_approvals "
-        "(org_id, employee_id, period_start, period_end, status, approved_by_admin_id, approved_at) "
-        "VALUES (%s,%s,%s,%s,%s,%s, CASE WHEN %s='approved' THEN NOW() ELSE NULL END) "
-        "ON CONFLICT (employee_id, period_start, period_end) DO UPDATE SET "
-        "status=EXCLUDED.status, approved_by_admin_id=EXCLUDED.approved_by_admin_id, "
-        "approved_at=CASE WHEN EXCLUDED.status='approved' THEN NOW() ELSE NULL END",
-        (org_id, employee_id, period_start, period_end, status, admin_id, status),
+        f"INSERT INTO timesheet_approvals ({', '.join(columns)}) VALUES ({placeholders}) "
+        f"ON CONFLICT (employee_id, period_start, period_end) DO UPDATE SET {update_clause}",
+        values,
+    )
+
+
+def submit_timesheet(conn, org_id, employee_id, period_start, period_end, notes):
+    """Employee certifies and submits their timesheet for the period."""
+    _upsert_approval(
+        conn, org_id, employee_id, period_start, period_end,
+        status="submitted", submitted_at=datetime.utcnow(), employee_notes=notes,
+        manager_comment=None, approved_by_admin_id=None, approved_at=None,
+    )
+
+
+def withdraw_timesheet(conn, employee_id, period_start, period_end):
+    """Employee pulls back a submission that hasn't been reviewed yet."""
+    conn.execute(
+        "DELETE FROM timesheet_approvals WHERE employee_id=%s AND period_start=%s AND period_end=%s "
+        "AND status='submitted'",
+        (employee_id, period_start, period_end),
+    )
+
+
+def approve_timesheet(conn, org_id, employee_id, period_start, period_end, admin_id):
+    """Manager approves a timesheet, locking it from further employee edits."""
+    _upsert_approval(
+        conn, org_id, employee_id, period_start, period_end,
+        status="approved", approved_by_admin_id=admin_id, approved_at=datetime.utcnow(),
+        manager_comment=None,
+    )
+
+
+def return_timesheet(conn, org_id, employee_id, period_start, period_end, admin_id, comment):
+    """Manager sends a timesheet back for correction (or reopens an approved one), with a required comment/reason."""
+    _upsert_approval(
+        conn, org_id, employee_id, period_start, period_end,
+        status="returned", manager_comment=comment, approved_by_admin_id=admin_id, approved_at=None,
     )
 
 
@@ -377,6 +446,25 @@ def payroll_export_rows(conn, org, period_start, period_end):
             "pto_hours": s["pto_hours"],
             "rate": rate,
             "gross_pay": gross_pay,
-            "approval_status": approval["status"] if approval else "pending",
+            "approval_status": (approval["status"] if approval else "not_submitted").replace("_", " ").title(),
         })
     return rows
+
+
+def my_timesheet(conn, org, employee, period_start, period_end):
+    """A single employee's own timesheet: hours breakdown, missing punches, and approval state."""
+    summary = next(
+        (r for r in timesheet_summary_rows(conn, org, period_start, period_end)
+         if r["employee_code"] == employee["employee_code"]),
+        {"regular_hours": 0.0, "overtime_hours": 0.0, "pto_hours": 0.0, "total_hours": 0.0, "incomplete": False},
+    )
+    missing = [
+        r for r in missing_punches_rows(conn, org, period_start, period_end)
+        if r["employee_code"] == employee["employee_code"]
+    ]
+    approval = next(
+        (r for r in approval_status_rows(conn, org, period_start, period_end)
+         if r["employee_code"] == employee["employee_code"]),
+        None,
+    )
+    return {"summary": summary, "missing_punches": missing, "approval": approval}

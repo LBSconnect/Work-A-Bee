@@ -5,52 +5,58 @@
     <h1 style="margin:0;">Schedule</h1>
     <a class="btn" style="margin:0;" href="{{ url_for('admin_shift_new') }}">+ Add Shift</a>
   </div>
-  <p class="muted">{{ week_start.strftime('%B %d') }} &ndash; {{ week_end.strftime('%B %d, %Y') }}</p>
-  <p style="margin-top:8px;">
-    <a href="{{ url_for('admin_schedule', week=prev_week) }}">&larr; Previous week</a>
-    &middot;
-    <a href="{{ url_for('admin_schedule') }}">This week</a>
-    &middot;
-    <a href="{{ url_for('admin_schedule', week=next_week) }}">Next week &rarr;</a>
-  </p>
 
-  {% for day, shifts in shifts_by_day.items() %}
-    <h2 style="margin-top:28px; font-size:16px;">{{ day.strftime('%A, %B %d') }}</h2>
-    {% if shifts %}
-    <table>
-      <tr><th>Employee</th><th>Time</th><th>Notes</th><th></th></tr>
-      {% for s in shifts %}
-      <tr>
-        <td>{{ s.employee_name }}{% if s.series_id %} <span title="Part of a weekly repeating series">🔁</span>{% endif %}</td>
-        <td>{{ s.shift_start.strftime('%I:%M %p') }} &ndash; {{ s.shift_end.strftime('%I:%M %p') }}</td>
-        <td class="muted">{{ s.notes or '' }}</td>
-        <td>
-          <a href="{{ url_for('admin_shift_edit', shift_id=s.id) }}">Edit</a>
-          &middot;
-          <form method="post" action="{{ url_for('admin_shift_copy_4_weeks', shift_id=s.id) }}" style="display:inline;">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="secondary" style="margin:0; padding:2px 8px; font-size:12px;">Copy 4 weeks</button>
-          </form>
-          &middot;
-          <form method="post" action="{{ url_for('admin_shift_delete', shift_id=s.id) }}"
-                onsubmit="return confirm('Delete this shift?');" style="display:inline;">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" class="secondary" style="margin:0; padding:2px 8px; font-size:12px;">Delete</button>
-          </form>
-          {% if s.series_id %}
-            &middot;
-            <form method="post" action="{{ url_for('admin_shift_series_end', series_id=s.series_id) }}"
-                  onsubmit="return confirm('End this repeating series? Already-scheduled shifts stay put.');" style="display:inline;">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button type="submit" class="secondary" style="margin:0; padding:2px 8px; font-size:12px;">End series</button>
-            </form>
-          {% endif %}
-        </td>
-      </tr>
+  <div class="report-period-nav">
+    <a class="btn secondary" href="{{ url_for('admin_schedule', week=prev_week) }}">&larr; Previous Week</a>
+    <span class="report-period-label">{{ week_start.strftime('%B %d') }} &ndash; {{ week_end.strftime('%B %d, %Y') }}</span>
+    <a class="btn secondary" href="{{ url_for('admin_schedule', week=next_week) }}">Next Week &rarr;</a>
+    <a class="btn secondary report-export" href="{{ url_for('admin_schedule') }}">This Week</a>
+  </div>
+
+  <div class="schedule-calendar-wrap">
+    <div class="schedule-calendar">
+      {% for day, shifts in shifts_by_day.items() %}
+        <div class="schedule-day">
+          <div class="schedule-day-header">
+            <div class="schedule-day-name">{{ day.strftime('%A') }}</div>
+            <div class="schedule-day-date muted">{{ day.strftime('%b %d') }}</div>
+          </div>
+          {% for s in shifts %}
+            <details class="schedule-shift">
+              <summary>
+                <span class="clocked-avatar" style="background: {{ s.employee_name|avatar_color }}; width:20px; height:20px; font-size:9px;">{{ s.employee_name|initials }}</span>
+                <span class="schedule-shift-name">{{ s.employee_name }}</span>{% if s.series_id %} 🔁{% endif %}
+                <span class="schedule-shift-time">{{ s.shift_start.strftime('%I:%M %p').lstrip('0') }}&ndash;{{ s.shift_end.strftime('%I:%M %p').lstrip('0') }}</span>
+              </summary>
+              <div class="schedule-shift-actions">
+                {% if s.notes %}<div class="muted" style="margin-bottom:6px;">{{ s.notes }}</div>{% endif %}
+                <a href="{{ url_for('admin_shift_edit', shift_id=s.id) }}">Edit</a>
+                &middot;
+                <form method="post" action="{{ url_for('admin_shift_copy_4_weeks', shift_id=s.id) }}" style="display:inline;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="secondary" style="margin:0; padding:2px 8px; font-size:11px;">Copy 4wk</button>
+                </form>
+                &middot;
+                <form method="post" action="{{ url_for('admin_shift_delete', shift_id=s.id) }}"
+                      onsubmit="return confirm('Delete this shift?');" style="display:inline;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="secondary" style="margin:0; padding:2px 8px; font-size:11px;">Delete</button>
+                </form>
+                {% if s.series_id %}
+                  &middot;
+                  <form method="post" action="{{ url_for('admin_shift_series_end', series_id=s.series_id) }}"
+                        onsubmit="return confirm('End this repeating series? Already-scheduled shifts stay put.');" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="secondary" style="margin:0; padding:2px 8px; font-size:11px;">End series</button>
+                  </form>
+                {% endif %}
+              </div>
+            </details>
+          {% else %}
+            <p class="muted schedule-empty">No shifts</p>
+          {% endfor %}
+        </div>
       {% endfor %}
-    </table>
-    {% else %}
-    <p class="muted">No shifts scheduled.</p>
-    {% endif %}
-  {% endfor %}
+    </div>
+  </div>
 {% endblock %}

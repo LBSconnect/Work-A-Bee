@@ -112,12 +112,13 @@ a { color: var(--bee-amber-link); }
 h1 { font-size: 22px; margin-top: 0; }
 h2 { font-size: 18px; }
 label { display: block; margin: 14px 0 6px; font-weight: 600; font-size: 14px; }
-input[type=text], input[type=password], input[type=number], input[type=datetime-local], select {
+input[type=text], input[type=password], input[type=number], input[type=datetime-local], select, textarea {
   width: 100%;
   padding: 12px;
   font-size: 16px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
+  font-family: inherit;
 }
 button, .btn {
   display: inline-block;
@@ -358,6 +359,35 @@ th { background: #f9fafb; }
 .report-period-nav .btn { margin-top: 0; padding: 8px 14px; font-size: 13px; }
 .report-period-label { font-weight: 700; font-size: 14px; }
 .report-period-nav .report-export { margin-left: auto; }
+
+.schedule-calendar-wrap { overflow-x: auto; margin-top: 8px; }
+.schedule-calendar {
+  display: grid; grid-template-columns: repeat(7, minmax(140px, 1fr));
+  gap: 10px; min-width: 980px;
+}
+.schedule-day {
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+  padding: 10px; min-height: 140px;
+}
+.schedule-day-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid #f3f4f6;
+}
+.schedule-day-name { font-weight: 700; font-size: 13px; }
+.schedule-day-date { font-size: 11px; }
+.schedule-empty { font-size: 12px; margin: 0; }
+.schedule-shift {
+  background: #FFF8E1; border: 1px solid #FFE082; border-radius: 8px;
+  padding: 6px 8px; margin-bottom: 6px;
+}
+.schedule-shift summary {
+  cursor: pointer; list-style: none; display: flex; align-items: center; gap: 6px;
+  flex-wrap: wrap; font-size: 12px;
+}
+.schedule-shift summary::-webkit-details-marker { display: none; }
+.schedule-shift-name { font-weight: 700; }
+.schedule-shift-time { color: #6b7280; font-size: 11px; width: 100%; }
+.schedule-shift-actions { margin-top: 8px; padding-top: 8px; border-top: 1px solid #FFE082; font-size: 12px; }
 
 /* Collapsible sections (Prior 4 weeks) */
 .collapsible > summary { cursor: pointer; list-style: none; }
