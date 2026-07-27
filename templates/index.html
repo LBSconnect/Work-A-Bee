@@ -212,11 +212,11 @@
       font-size: 11px; font-weight: 800;
     }
 
-    .dash-body { display: flex; }
+    .dash-body { display: flex; height: 460px; }
 
     .dash-sidebar {
       width: 130px; background: #111827; padding: 16px 0;
-      flex-shrink: 0;
+      flex-shrink: 0; overflow-y: auto;
     }
     .dash-sidebar-item {
       display: flex; align-items: center; gap: 8px; width: 100%;
@@ -238,7 +238,7 @@
       z-index: 4; white-space: nowrap; pointer-events: none;
     }
 
-    .dash-main { flex: 1; min-width: 0; padding: 16px; background: #f9fafb; }
+    .dash-main { flex: 1; min-width: 0; padding: 16px; background: #f9fafb; overflow-y: auto; }
 
     .dash-view { display: none; }
     .dash-view.active { display: block; }
@@ -310,6 +310,7 @@
     .device-icon { font-size: 16px; }
     .device-name { font-size: 10.5px; font-weight: 700; flex: 1; }
     .device-meta { font-size: 9px; color: #888; }
+    .unread-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #dc2626; margin-left: 4px; vertical-align: middle; }
 
     .dash-welcome { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
     .dash-welcome-sub { font-size: 10px; color: #666; margin-bottom: 12px; }
@@ -730,11 +731,19 @@
         <div class="dash-sidebar" role="tablist" aria-label="Preview a page">
           <button type="button" class="dash-sidebar-item active" data-view="dashboard"><span class="si">📊</span> Dashboard</button>
           <button type="button" class="dash-sidebar-item" data-view="employees"><span class="si">👥</span> Employees</button>
+          <button type="button" class="dash-sidebar-item" data-view="schedule"><span class="si">🗓️</span> Schedule</button>
           <button type="button" class="dash-sidebar-item" data-view="clock"><span class="si">🕐</span> Time Clock</button>
           <button type="button" class="dash-sidebar-item" data-view="timesheets"><span class="si">📋</span> Timesheets</button>
           <button type="button" class="dash-sidebar-item" data-view="reports"><span class="si">📈</span> Reports</button>
           <button type="button" class="dash-sidebar-item" data-view="payroll"><span class="si">💰</span> Payroll</button>
+          <button type="button" class="dash-sidebar-item" data-view="announcements"><span class="si">📣</span> Announcements</button>
+          <button type="button" class="dash-sidebar-item" data-view="pto"><span class="si">🌴</span> Time Off</button>
+          <button type="button" class="dash-sidebar-item" data-view="notifications"><span class="si">🔔</span> Notifications</button>
+          <button type="button" class="dash-sidebar-item" data-view="messages"><span class="si">💬</span> Messages</button>
+          <button type="button" class="dash-sidebar-item" data-view="performance"><span class="si">🎯</span> Performance</button>
+          <button type="button" class="dash-sidebar-item" data-view="recognition"><span class="si">🏅</span> Recognition</button>
           <button type="button" class="dash-sidebar-item" data-view="devices"><span class="si">💻</span> Devices</button>
+          <button type="button" class="dash-sidebar-item" data-view="trust"><span class="si">🛡️</span> Trust Center</button>
           <button type="button" class="dash-sidebar-item" data-view="settings"><span class="si">⚙️</span> Settings</button>
         </div>
 
@@ -862,6 +871,29 @@
             </div>
           </div>
 
+          <!-- SCHEDULE -->
+          <div class="dash-view" data-view="schedule">
+            <div class="dash-view-header">
+              <div class="dash-view-title">Schedule</div>
+              <div class="dash-view-sub">Week of Jul 21 – Jul 27</div>
+            </div>
+            <div class="mini-table">
+              <div class="mini-table-row mini-table-head"><span>Name</span><span>Day</span><span>Shift</span></div>
+              <div class="mini-table-row">
+                <span class="mt-name"><span class="clocked-avatar" style="background:#4f46e5">JR</span>Jake Roberts</span>
+                <span>Mon</span><span>7:00–3:30</span>
+              </div>
+              <div class="mini-table-row">
+                <span class="mt-name"><span class="clocked-avatar" style="background:#059669">KM</span>Kevin Martinez</span>
+                <span>Mon</span><span>8:00–4:30</span>
+              </div>
+              <div class="mini-table-row">
+                <span class="mt-name"><span class="clocked-avatar" style="background:#dc2626">ST</span>Sarah Thompson</span>
+                <span>Tue</span><span>7:00–3:30</span>
+              </div>
+            </div>
+          </div>
+
           <!-- TIME CLOCK -->
           <div class="dash-view" data-view="clock">
             <div class="dash-view-header">
@@ -957,6 +989,139 @@
             <div class="mini-btn-row"><span class="mini-btn">Run Payroll →</span></div>
           </div>
 
+          <!-- ANNOUNCEMENTS -->
+          <div class="dash-view" data-view="announcements">
+            <div class="dash-view-header">
+              <div class="dash-view-title">Announcements</div>
+              <div class="dash-view-sub">Company-wide updates</div>
+            </div>
+            <div class="device-row">
+              <span class="device-icon">📣</span>
+              <div>
+                <div class="device-name">Holiday Schedule Posted</div>
+                <div class="device-meta">Jul 25 • Office closed Sep 1 for Labor Day</div>
+              </div>
+            </div>
+            <div class="device-row">
+              <span class="device-icon">📣</span>
+              <div>
+                <div class="device-name">New Safety Policy</div>
+                <div class="device-meta">Jul 20 • All job sites now require hard hats</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TIME OFF -->
+          <div class="dash-view" data-view="pto">
+            <div class="dash-view-header">
+              <div class="dash-view-title">Time Off</div>
+              <div class="dash-view-sub">3 pending requests</div>
+            </div>
+            <div class="mini-table">
+              <div class="mini-table-row mini-table-head"><span>Name</span><span>Dates</span><span>Status</span></div>
+              <div class="mini-table-row">
+                <span class="mt-name"><span class="clocked-avatar" style="background:#dc2626">ST</span>Sarah Thompson</span>
+                <span>Aug 4–6</span><span class="status-pill status-pending">Pending</span>
+              </div>
+              <div class="mini-table-row">
+                <span class="mt-name"><span class="clocked-avatar" style="background:#d97706">JA</span>James Anderson</span>
+                <span>Aug 12</span><span class="status-pill status-approved">Approved</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- NOTIFICATIONS -->
+          <div class="dash-view" data-view="notifications">
+            <div class="dash-view-header">
+              <div class="dash-view-title">Notifications</div>
+              <div class="dash-view-sub">4 new</div>
+            </div>
+            <div class="device-row">
+              <span class="device-icon">🔄</span>
+              <div>
+                <div class="device-name">New shift offer available <span class="unread-dot"></span></div>
+                <div class="device-meta">Sat 8/2, 7:00 AM–3:00 PM (Warehouse) • 2 min ago</div>
+              </div>
+            </div>
+            <div class="device-row">
+              <span class="device-icon">🌴</span>
+              <div>
+                <div class="device-name">James Anderson requested time off</div>
+                <div class="device-meta">Aug 12 • 1 hr ago</div>
+              </div>
+            </div>
+            <div class="device-row">
+              <span class="device-icon">💬</span>
+              <div>
+                <div class="device-name">New message from Sarah Thompson</div>
+                <div class="device-meta">3 hrs ago</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MESSAGES -->
+          <div class="dash-view" data-view="messages">
+            <div class="dash-view-header">
+              <div class="dash-view-title">Messages</div>
+              <div class="dash-view-sub">2 unread</div>
+            </div>
+            <div class="device-row">
+              <span class="clocked-avatar" style="background:#dc2626">ST</span>
+              <div>
+                <div class="device-name">Sarah Thompson <span class="unread-dot"></span></div>
+                <div class="device-meta">Can I swap my Friday shift? • 9:12 AM</div>
+              </div>
+            </div>
+            <div class="device-row">
+              <span class="clocked-avatar" style="background:#059669">KM</span>
+              <div>
+                <div class="device-name">Kevin Martinez</div>
+                <div class="device-meta">Timesheet submitted ✅ • Yesterday</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PERFORMANCE -->
+          <div class="dash-view" data-view="performance">
+            <div class="dash-view-header">
+              <div class="dash-view-title">Performance</div>
+              <div class="dash-view-sub">Team performance overview</div>
+            </div>
+            <div class="mini-table">
+              <div class="mini-table-row mini-table-head"><span>Name</span><span>Punctuality</span><span>Score</span></div>
+              <div class="mini-table-row">
+                <span class="mt-name"><span class="clocked-avatar" style="background:#4f46e5">JR</span>Jake Roberts</span>
+                <span>98%</span><span>⭐ 4.8</span>
+              </div>
+              <div class="mini-table-row">
+                <span class="mt-name"><span class="clocked-avatar" style="background:#059669">KM</span>Kevin Martinez</span>
+                <span>95%</span><span>⭐ 4.6</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RECOGNITION -->
+          <div class="dash-view" data-view="recognition">
+            <div class="dash-view-header">
+              <div class="dash-view-title">Recognition</div>
+              <div class="dash-view-sub">Recent shoutouts</div>
+            </div>
+            <div class="device-row">
+              <span class="device-icon">🏅</span>
+              <div>
+                <div class="device-name">Jake Roberts</div>
+                <div class="device-meta">Earned "Perfect Attendance" • Jul 24</div>
+              </div>
+            </div>
+            <div class="device-row">
+              <span class="device-icon">🏅</span>
+              <div>
+                <div class="device-name">Sarah Thompson</div>
+                <div class="device-meta">Earned "Team Player" • Jul 18</div>
+              </div>
+            </div>
+          </div>
+
           <!-- DEVICES -->
           <div class="dash-view" data-view="devices">
             <div class="dash-view-header">
@@ -975,6 +1140,32 @@
               <div>
                 <div class="device-name">Warehouse Kiosk</div>
                 <div class="device-meta">Trusted • Last used 14 min ago</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TRUST CENTER -->
+          <div class="dash-view" data-view="trust">
+            <div class="dash-view-header">
+              <div class="dash-view-title">Trust Center</div>
+              <div class="dash-view-sub">Security &amp; compliance</div>
+            </div>
+            <div class="device-row">
+              <span class="device-icon">🔒</span>
+              <div>
+                <div class="device-name">Enterprise Security Overview</div>
+              </div>
+            </div>
+            <div class="device-row">
+              <span class="device-icon">🛡️</span>
+              <div>
+                <div class="device-name">Data Encryption Standards</div>
+              </div>
+            </div>
+            <div class="device-row">
+              <span class="device-icon">📄</span>
+              <div>
+                <div class="device-name">SOC 2 Readiness</div>
               </div>
             </div>
           </div>

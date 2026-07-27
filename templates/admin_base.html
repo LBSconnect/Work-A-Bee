@@ -16,10 +16,10 @@
 <body class="admin-body">
   <div class="admin-shell">
     <div class="admin-topbar">
-      <div class="admin-topbar-left">
+      <a class="admin-topbar-left" href="{{ url_for('clock_home') }}">
         <img src="{{ url_for('static', filename='logo-workabee.svg') }}" alt="Work-A-Beez">
         <span>Work-A-Beez</span>
-      </div>
+      </a>
       <div class="admin-topbar-right">
         <span>{{ g.org.name }}</span>
         <div class="admin-avatar">{{ (g.admin.username or "?")[:1]|upper }}</div>

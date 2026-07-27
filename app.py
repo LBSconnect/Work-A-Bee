@@ -861,6 +861,21 @@ def shift_offer_swap(shift_id):
             (org_id, shift_id, emp_id),
         )
         audit.log(conn, org_id, "employee", emp_id, "shift.swap_offered", f"shift {shift_id}")
+
+        offerer = conn.execute("SELECT name FROM employees WHERE id=%s", (emp_id,)).fetchone()
+        teammates = conn.execute(
+            "SELECT id FROM employees WHERE org_id=%s AND active=1 AND id!=%s", (org_id, emp_id)
+        ).fetchall()
+        for teammate in teammates:
+            notifications.notify_employee(
+                conn, org_id, teammate["id"], "shift_offered",
+                f"New shift offer from {offerer['name']}",
+                body=f"{shift['shift_start'].strftime('%a %b %d')} "
+                     f"({shift['shift_start'].strftime('%I:%M %p')} - {shift['shift_end'].strftime('%I:%M %p')}) "
+                     "is now available to claim.",
+                link=url_for("shift_marketplace"),
+            )
+
         conn.commit()
     flash("Shift offered for swap. Anyone on your team can now claim it.")
     return redirect(url_for("clock_action"))
