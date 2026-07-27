@@ -1938,39 +1938,69 @@ def admin_shift_new():
             flash("Shift end must be after shift start.")
             return render_template("admin_shift_form.html", employees=employees, shift=None, default_date=default_date)
 
+        selected_days = set()
+        for d in request.form.getlist("days"):
+            try:
+                di = int(d)
+            except ValueError:
+                continue
+            if 0 <= di <= 6:
+                selected_days.add(di)
+
+        if selected_days and shift_end.time() <= shift_start.time():
+            flash("When applying a shift to multiple days, the end time must be later in the day than the start time.")
+            return render_template("admin_shift_form.html", employees=employees, shift=None, default_date=default_date)
+
+        if selected_days:
+            monday = shift_start.date() - timedelta(days=shift_start.weekday())
+            occurrence_dates = sorted(monday + timedelta(days=d) for d in selected_days)
+        else:
+            occurrence_dates = [shift_start.date()]
+
         with get_db() as conn:
             if repeat_weekly:
-                conn.execute(
-                    "INSERT INTO shift_series (org_id, employee_id, anchor_date, start_time, end_time, notes, "
-                    "created_by_admin_id) VALUES (%s,%s,%s,%s,%s,%s,%s)",
-                    (g.org["id"], emp_id, shift_start.date(), shift_start.time(), shift_end.time(),
-                     notes or None, g.admin["id"]),
-                )
-                series = conn.execute(
-                    "SELECT * FROM shift_series WHERE org_id=%s AND employee_id=%s AND anchor_date=%s "
-                    "ORDER BY id DESC LIMIT 1",
-                    (g.org["id"], emp_id, shift_start.date()),
-                ).fetchone()
-                horizon = shift_start.date() + timedelta(weeks=schedule.SERIES_GENERATE_WEEKS_AHEAD)
-                schedule.generate_series_occurrences(conn, series, horizon)
-                audit.log(
-                    conn, g.org["id"], "admin", g.admin["id"], "shift.series_created",
-                    f"{emp['name']}: weekly from {shift_start.date()} {shift_start.time()}-{shift_end.time()}",
-                )
-                flash(f"Repeating weekly shift created for {emp['name']} - it'll keep going until you end the series.")
+                for occ_date in occurrence_dates:
+                    conn.execute(
+                        "INSERT INTO shift_series (org_id, employee_id, anchor_date, start_time, end_time, notes, "
+                        "created_by_admin_id) VALUES (%s,%s,%s,%s,%s,%s,%s)",
+                        (g.org["id"], emp_id, occ_date, shift_start.time(), shift_end.time(),
+                         notes or None, g.admin["id"]),
+                    )
+                    series = conn.execute(
+                        "SELECT * FROM shift_series WHERE org_id=%s AND employee_id=%s AND anchor_date=%s "
+                        "ORDER BY id DESC LIMIT 1",
+                        (g.org["id"], emp_id, occ_date),
+                    ).fetchone()
+                    horizon = occ_date + timedelta(weeks=schedule.SERIES_GENERATE_WEEKS_AHEAD)
+                    schedule.generate_series_occurrences(conn, series, horizon)
+                    audit.log(
+                        conn, g.org["id"], "admin", g.admin["id"], "shift.series_created",
+                        f"{emp['name']}: weekly from {occ_date} {shift_start.time()}-{shift_end.time()}",
+                    )
+                if len(occurrence_dates) > 1:
+                    flash(f"Repeating weekly shifts created for {emp['name']} on {len(occurrence_dates)} days - "
+                          f"they'll keep going until you end each series.")
+                else:
+                    flash(f"Repeating weekly shift created for {emp['name']} - it'll keep going until you end the series.")
             else:
-                conn.execute(
-                    "INSERT INTO shifts (org_id, employee_id, shift_start, shift_end, notes, created_by_admin_id) "
-                    "VALUES (%s, %s, %s, %s, %s, %s)",
-                    (g.org["id"], emp_id, shift_start, shift_end, notes or None, g.admin["id"]),
-                )
-                audit.log(
-                    conn, g.org["id"], "admin", g.admin["id"], "shift.created",
-                    f"{emp['name']}: {shift_start} - {shift_end}",
-                )
-                flash(f"Shift added for {emp['name']}.")
+                for occ_date in occurrence_dates:
+                    occ_start = datetime.combine(occ_date, shift_start.time())
+                    occ_end = datetime.combine(occ_date, shift_end.time()) if selected_days else shift_end
+                    conn.execute(
+                        "INSERT INTO shifts (org_id, employee_id, shift_start, shift_end, notes, created_by_admin_id) "
+                        "VALUES (%s, %s, %s, %s, %s, %s)",
+                        (g.org["id"], emp_id, occ_start, occ_end, notes or None, g.admin["id"]),
+                    )
+                    audit.log(
+                        conn, g.org["id"], "admin", g.admin["id"], "shift.created",
+                        f"{emp['name']}: {occ_start} - {occ_end}",
+                    )
+                if len(occurrence_dates) > 1:
+                    flash(f"{len(occurrence_dates)} shifts added for {emp['name']}.")
+                else:
+                    flash(f"Shift added for {emp['name']}.")
             conn.commit()
-        return redirect(url_for("admin_schedule", week=schedule.week_bounds(shift_start.date())[0].isoformat()))
+        return redirect(url_for("admin_schedule", week=schedule.week_bounds(occurrence_dates[0])[0].isoformat()))
 
     return render_template("admin_shift_form.html", employees=employees, shift=None, default_date=default_date)
 

@@ -25,6 +25,17 @@
     <input type="text" name="notes" value="{{ shift.notes if shift else '' }}" placeholder="e.g. Job site, role, reminders">
 
     {% if not shift %}
+      <label style="margin-top:12px;">Apply to these days this week</label>
+      <div style="display:flex; gap:14px; flex-wrap:wrap; margin:4px 0 4px;">
+        {% for idx, day_label in [(0,'Mon'),(1,'Tue'),(2,'Wed'),(3,'Thu'),(4,'Fri'),(5,'Sat'),(6,'Sun')] %}
+          <label style="display:flex; align-items:center; gap:6px; font-weight:400;">
+            <input type="checkbox" name="days" value="{{ idx }}" style="width:auto;">
+            {{ day_label }}
+          </label>
+        {% endfor %}
+      </div>
+      <p class="muted" style="margin-top:0;">Leave unchecked to create the shift only on the date above. Check additional days to create the same time range on each of them within that week.</p>
+
       <label style="display:flex; align-items:center; gap:8px; font-weight:400; margin-top:12px;">
         <input type="checkbox" name="repeat_weekly" style="width:auto;">
         Repeat this shift every week until changed
