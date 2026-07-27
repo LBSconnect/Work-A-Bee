@@ -33,7 +33,7 @@
         <a class="admin-sidebar-item{{ ' active' if request.endpoint in ('admin_schedule', 'admin_shift_new', 'admin_shift_edit') else '' }}" href="{{ url_for('admin_schedule') }}"><span class="admin-si">🗓️</span> Schedule</a>
         <a class="admin-sidebar-item" href="{{ url_for('staff_login') }}"><span class="admin-si">🕐</span> Time Clock</a>
         <a class="admin-sidebar-item" href="{{ url_for('admin_dashboard') }}#timesheets"><span class="admin-si">📋</span> Timesheets</a>
-        <a class="admin-sidebar-item" href="{{ url_for('admin_dashboard') }}#reports"><span class="admin-si">📈</span> Reports</a>
+        <a class="admin-sidebar-item{{ ' active' if request.endpoint in ('admin_reports_index', 'admin_report_view', 'admin_report_approval_status') else '' }}" href="{{ url_for('admin_reports_index') }}"><span class="admin-si">📈</span> Reports</a>
         <a class="admin-sidebar-item" href="{{ url_for('admin_dashboard') }}#payroll"><span class="admin-si">💰</span> Payroll</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_announcements' else '' }}" href="{{ url_for('admin_announcements') }}"><span class="admin-si">📣</span> Announcements</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_pto' else '' }}" href="{{ url_for('admin_pto') }}"><span class="admin-si">🌴</span> Time Off</a>

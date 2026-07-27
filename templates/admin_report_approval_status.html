@@ -1,0 +1,56 @@
+{% extends "admin_base.html" %}
+{% block title %}Timesheet Approval Status{% endblock %}
+{% block admin_content %}
+  <p class="nav"><a href="{{ url_for('admin_reports_index') }}">&larr; All Reports</a></p>
+  <h1>Timesheet Approval Status</h1>
+  <p class="muted">Approve each employee's timesheet for the period before running payroll.</p>
+
+  <div class="report-period-nav">
+    <a class="btn secondary" href="?week={{ prev_week }}">&larr; Previous Week</a>
+    <span class="report-period-label">{{ period_start.strftime('%B %d') }} &ndash; {{ period_end.strftime('%B %d, %Y') }}</span>
+    <a class="btn secondary" href="?week={{ next_week }}">Next Week &rarr;</a>
+  </div>
+
+  <table>
+    <tr>
+      <th>Employee ID</th><th>Name</th><th>Status</th><th>Approved By</th><th></th>
+    </tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.employee_code }}</td>
+      <td>{{ r.name }}</td>
+      <td>
+        {% if r.status == 'approved' %}
+          <span class="badge in">Approved</span>
+        {% else %}
+          <span class="badge out">Pending</span>
+        {% endif %}
+      </td>
+      <td class="muted">
+        {% if r.status == 'approved' and r.approved_by %}
+          {{ r.approved_by }} &middot; {{ r.approved_at.strftime('%b %d, %I:%M %p').replace(' 0', ' ') }}
+        {% endif %}
+      </td>
+      <td>
+        {% if r.status == 'approved' %}
+          <form method="post" action="{{ url_for('admin_report_approval_set', employee_id=r.employee_id, action='unapprove') }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="period_start" value="{{ period_start.isoformat() }}">
+            <input type="hidden" name="period_end" value="{{ period_end.isoformat() }}">
+            <button type="submit" class="secondary" style="margin:0; padding:4px 10px; font-size:12px;">Unapprove</button>
+          </form>
+        {% else %}
+          <form method="post" action="{{ url_for('admin_report_approval_set', employee_id=r.employee_id, action='approve') }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="period_start" value="{{ period_start.isoformat() }}">
+            <input type="hidden" name="period_end" value="{{ period_end.isoformat() }}">
+            <button type="submit" style="margin:0; padding:4px 10px; font-size:12px;">Approve</button>
+          </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="muted">No active employees yet.</td></tr>
+    {% endfor %}
+  </table>
+{% endblock %}

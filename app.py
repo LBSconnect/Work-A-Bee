@@ -25,6 +25,7 @@ import notifications
 import performance
 import plans
 import recognition
+import reports
 import schedule
 import scheduled_reports
 from api import register_api
@@ -1861,6 +1862,237 @@ def admin_send_report_now():
     except Exception as e:
         flash(f"Failed to send report: {e}")
     return redirect(url_for("admin_dashboard"))
+
+
+REPORT_SLUGS = {
+    "timesheet-summary": {
+        "title": "Timesheet Summary",
+        "description": "Regular, overtime, PTO, and total hours by employee for the selected period.",
+        "fn": reports.timesheet_summary_rows,
+        "columns": [
+            ("employee_code", "Employee ID", "text"),
+            ("name", "Name", "text"),
+            ("regular_hours", "Regular Hours", "hours"),
+            ("overtime_hours", "Overtime Hours", "hours"),
+            ("pto_hours", "PTO Hours", "hours"),
+            ("total_hours", "Total Hours", "hours"),
+        ],
+    },
+    "payroll-export": {
+        "title": "Payroll Export",
+        "description": "Hours and gross pay by employee, with approval status, ready to hand off to payroll.",
+        "fn": reports.payroll_export_rows,
+        "columns": [
+            ("employee_code", "Employee ID", "text"),
+            ("name", "Name", "text"),
+            ("regular_hours", "Regular Hours", "hours"),
+            ("overtime_hours", "Overtime Hours", "hours"),
+            ("pto_hours", "PTO Hours", "hours"),
+            ("rate", "Rate", "currency"),
+            ("gross_pay", "Gross Pay", "currency"),
+            ("approval_status", "Approval Status", "text"),
+        ],
+    },
+    "daily-attendance": {
+        "title": "Daily Attendance",
+        "description": "Clock-in/out times against schedule, with late, early-departure, no-show, and missing-punch flags.",
+        "fn": reports.daily_attendance_rows,
+        "columns": [
+            ("employee_code", "Employee ID", "text"),
+            ("name", "Name", "text"),
+            ("date", "Date", "date"),
+            ("scheduled_start", "Scheduled Start", "datetime"),
+            ("scheduled_end", "Scheduled End", "datetime"),
+            ("actual_in", "Actual Clock-In", "datetime"),
+            ("actual_out", "Actual Clock-Out", "datetime"),
+            ("flags", "Flags", "text"),
+        ],
+    },
+    "missing-punches": {
+        "title": "Missing Punches",
+        "description": "Missing clock-ins, clock-outs, and incomplete shifts.",
+        "fn": reports.missing_punches_rows,
+        "columns": [
+            ("employee_code", "Employee ID", "text"),
+            ("name", "Name", "text"),
+            ("date", "Date", "date"),
+            ("issue", "Issue", "text"),
+            ("detail", "Detail", "text"),
+        ],
+    },
+    "overtime": {
+        "title": "Overtime",
+        "description": "Employees approaching or exceeding the overtime threshold.",
+        "fn": reports.overtime_rows,
+        "columns": [
+            ("employee_code", "Employee ID", "text"),
+            ("name", "Name", "text"),
+            ("regular_hours", "Regular Hours", "hours"),
+            ("overtime_hours", "Overtime Hours", "hours"),
+            ("total_hours", "Total Hours", "hours"),
+            ("threshold_hours", "Threshold", "hours"),
+            ("pct_of_threshold", "% of Threshold", "pct"),
+            ("status", "Status", "text"),
+        ],
+    },
+    "schedule-vs-actual": {
+        "title": "Schedule vs. Actual",
+        "description": "Scheduled hours compared with hours actually worked.",
+        "fn": reports.schedule_vs_actual_rows,
+        "columns": [
+            ("employee_code", "Employee ID", "text"),
+            ("name", "Name", "text"),
+            ("scheduled_hours", "Scheduled Hours", "hours"),
+            ("actual_hours", "Actual Hours", "hours"),
+            ("variance_hours", "Variance", "hours"),
+        ],
+    },
+    "time-off": {
+        "title": "Time-Off & PTO Balances",
+        "description": "PTO requests overlapping the period, with each employee's current balance.",
+        "fn": reports.time_off_rows,
+        "columns": [
+            ("employee_code", "Employee ID", "text"),
+            ("name", "Name", "text"),
+            ("start_date", "Start Date", "date"),
+            ("end_date", "End Date", "date"),
+            ("hours", "Hours", "hours"),
+            ("status", "Status", "text"),
+            ("balance_hours", "Current Balance", "hours"),
+        ],
+    },
+    "labor-cost": {
+        "title": "Labor Cost Summary",
+        "description": "Regular, overtime, and PTO labor cost by department.",
+        "fn": reports.labor_cost_rows,
+        "columns": [
+            ("department", "Department", "text"),
+            ("regular_cost", "Regular Cost", "currency"),
+            ("overtime_cost", "Overtime Cost", "currency"),
+            ("pto_cost", "PTO Cost", "currency"),
+            ("total_cost", "Total Cost", "currency"),
+        ],
+    },
+    "timecard-audit": {
+        "title": "Timecard Edit Audit",
+        "description": "Manual time-entry additions and deletions: who, what, and when.",
+        "fn": reports.timecard_audit_rows,
+        "columns": [
+            ("timestamp", "When", "datetime"),
+            ("actor", "Who", "text"),
+            ("action", "Action", "text"),
+            ("detail", "Detail", "text"),
+        ],
+    },
+}
+
+
+def _report_period(request_args, org_tz):
+    week_param = request_args.get("week", "")
+    try:
+        reference_date = datetime.strptime(week_param, "%Y-%m-%d").date()
+    except ValueError:
+        reference_date = today_in(org_tz)
+    return get_period_bounds(reference_date)
+
+
+@app.route("/admin/reports")
+@admin_required
+def admin_reports_index():
+    order = [
+        "timesheet-summary", "payroll-export", "daily-attendance", "missing-punches",
+        "overtime", "schedule-vs-actual", "time-off",
+    ]
+    cards = [
+        {
+            "title": REPORT_SLUGS[slug]["title"],
+            "description": REPORT_SLUGS[slug]["description"],
+            "url": url_for("admin_report_view", slug=slug),
+        }
+        for slug in order
+    ]
+    cards.append({
+        "title": "Timesheet Approval Status",
+        "description": "Approve each employee's timesheet for the period before payroll.",
+        "url": url_for("admin_report_approval_status"),
+    })
+    for slug in ["labor-cost", "timecard-audit"]:
+        cards.append({
+            "title": REPORT_SLUGS[slug]["title"],
+            "description": REPORT_SLUGS[slug]["description"],
+            "url": url_for("admin_report_view", slug=slug),
+        })
+    return render_template("admin_reports_index.html", cards=cards)
+
+
+@app.route("/admin/reports/approval-status")
+@admin_required
+def admin_report_approval_status():
+    period_start, period_end = _report_period(request.args, g.org["timezone"])
+    with get_db() as conn:
+        rows = reports.approval_status_rows(conn, g.org, period_start, period_end)
+    return render_template(
+        "admin_report_approval_status.html",
+        rows=rows, period_start=period_start, period_end=period_end,
+        prev_week=(period_start - timedelta(days=7)).isoformat(),
+        next_week=(period_start + timedelta(days=7)).isoformat(),
+    )
+
+
+@app.route("/admin/reports/approval-status/<int:employee_id>/<action>", methods=["POST"])
+@admin_required
+def admin_report_approval_set(employee_id, action):
+    if action not in ("approve", "unapprove"):
+        abort(404)
+    status = "approved" if action == "approve" else "pending"
+    try:
+        period_start = datetime.strptime(request.form["period_start"], "%Y-%m-%d").date()
+        period_end = datetime.strptime(request.form["period_end"], "%Y-%m-%d").date()
+    except (KeyError, ValueError):
+        abort(400)
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (employee_id, g.org["id"])
+        ).fetchone()
+        if emp is None:
+            flash("Employee not found.")
+            return redirect(url_for("admin_report_approval_status"))
+        reports.set_timesheet_approval(
+            conn, g.org["id"], employee_id, period_start, period_end, status, g.admin["id"]
+        )
+        audit.log(
+            conn, g.org["id"], "admin", g.admin["id"], f"timesheet.{status}",
+            f"{emp['name']} ({emp['employee_code']}): {period_start} - {period_end}",
+        )
+        conn.commit()
+    flash(f"Timesheet for {emp['name']} marked {status}.")
+    return redirect(url_for("admin_report_approval_status", week=period_start.isoformat()))
+
+
+@app.route("/admin/reports/<slug>")
+@admin_required
+def admin_report_view(slug):
+    spec = REPORT_SLUGS.get(slug)
+    if spec is None:
+        abort(404)
+    period_start, period_end = _report_period(request.args, g.org["timezone"])
+
+    with get_db() as conn:
+        rows = spec["fn"](conn, g.org, period_start, period_end)
+
+    if request.args.get("export") == "csv":
+        columns = [(key, label) for key, label, _ in spec["columns"]]
+        filename = f"{slug}-{period_start.isoformat()}-{period_end.isoformat()}.csv"
+        return reports.csv_response(filename, columns, rows)
+
+    return render_template(
+        "admin_report_view.html",
+        slug=slug, spec=spec, rows=rows,
+        period_start=period_start, period_end=period_end,
+        prev_week=(period_start - timedelta(days=7)).isoformat(),
+        next_week=(period_start + timedelta(days=7)).isoformat(),
+    )
 
 
 @app.route("/admin/devices", methods=["GET", "POST"])

@@ -1,0 +1,17 @@
+{% extends "admin_base.html" %}
+{% block title %}Reports{% endblock %}
+{% block admin_content %}
+  <h1>Reports</h1>
+  <p class="muted">Timesheets, attendance, overtime, and payroll data for your team. Pick a report to view it for any week, or export to CSV.</p>
+
+  <div class="report-cards">
+    {% for card in cards %}
+      <a class="report-card" href="{{ card.url }}">
+        <div class="report-card-title">{{ card.title }}</div>
+        <div class="report-card-desc">{{ card.description }}</div>
+      </a>
+    {% endfor %}
+  </div>
+
+  <p class="muted">Want the current pay period's hours emailed to your report recipients instead? <a href="{{ url_for('admin_send_report_now') }}" onclick="return confirm('Email this week\'s hours report now?');">Send report now</a>.</p>
+{% endblock %}
