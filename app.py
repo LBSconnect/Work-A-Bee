@@ -695,7 +695,7 @@ def timesheet_withdraw():
     return redirect(url_for("time_history_page", week=period_start.isoformat()))
 
 
-@app.route("/profile")
+@app.route("/profile", methods=["GET", "POST"])
 def profile_page():
     emp_id = session.get("employee_id")
     org_id = session.get("org_id")
@@ -710,6 +710,46 @@ def profile_page():
             session.pop("employee_id", None)
             return redirect(url_for("staff_login"))
 
+        if request.method == "POST":
+            email = request.form.get("email", "").strip()
+            phone = request.form.get("phone", "").strip()
+            errors = {}
+            if email and ("@" not in email or "." not in email.split("@")[-1]):
+                errors["email"] = "Enter a valid email address."
+
+            photo_data, photo_mime = None, None
+            photo_file = request.files.get("photo")
+            if photo_file and photo_file.filename:
+                raw = photo_file.read()
+                if len(raw) > 500 * 1024:
+                    errors["photo"] = "Photo must be 500KB or smaller."
+                elif photo_file.mimetype not in ("image/png", "image/jpeg"):
+                    errors["photo"] = "Photo must be a PNG or JPEG file."
+                else:
+                    photo_data, photo_mime = raw, photo_file.mimetype
+
+            if errors:
+                flash(next(iter(errors.values())))
+            else:
+                if photo_data is not None:
+                    conn.execute(
+                        "UPDATE employees SET email=%s, phone=%s, photo_data=%s, photo_mime=%s "
+                        "WHERE id=%s AND org_id=%s",
+                        (email or None, phone or None, photo_data, photo_mime, emp_id, org_id),
+                    )
+                else:
+                    conn.execute(
+                        "UPDATE employees SET email=%s, phone=%s WHERE id=%s AND org_id=%s",
+                        (email or None, phone or None, emp_id, org_id),
+                    )
+                conn.commit()
+                flash("Profile updated.")
+                return redirect(url_for("profile_page"))
+
+            emp = conn.execute(
+                "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+            ).fetchone()
+
         department = None
         if emp.get("department_id"):
             department = conn.execute(
@@ -717,6 +757,22 @@ def profile_page():
             ).fetchone()
 
     return render_template("profile.html", employee=emp, department=department["name"] if department else None)
+
+
+@app.route("/employee/<int:emp_id>/photo")
+def employee_photo(emp_id):
+    admin_id = session.get("admin_id")
+    session_emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not org_id or not (admin_id or session_emp_id == emp_id):
+        abort(403)
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT photo_data, photo_mime FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+    if emp is None or not emp["photo_data"]:
+        abort(404)
+    return Response(bytes(emp["photo_data"]), mimetype=emp["photo_mime"] or "image/png")
 
 
 @app.route("/announcements")
