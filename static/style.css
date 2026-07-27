@@ -222,7 +222,7 @@ th { background: #f9fafb; }
   display: flex; align-items: center; justify-content: space-between;
   flex-shrink: 0;
 }
-.admin-topbar-left { display: flex; align-items: center; gap: 10px; }
+.admin-topbar-left { display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; }
 .admin-topbar-left img { height: 28px; display: block; }
 .admin-topbar-left span { color: var(--bee-yellow); font-size: 15px; font-weight: 700; }
 .admin-topbar-right { display: flex; align-items: center; gap: 12px; }

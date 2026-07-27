@@ -11,10 +11,10 @@
 <body class="admin-body">
   <div class="admin-shell">
     <div class="admin-topbar" style="background:#7f1d1d;">
-      <div class="admin-topbar-left">
+      <a class="admin-topbar-left" href="{{ url_for('clock_home') }}">
         <img src="{{ url_for('static', filename='logo-workabee.svg') }}" alt="Work-A-Beez">
         <span>System Admin &middot; All Tenants</span>
-      </div>
+      </a>
       <div class="admin-topbar-right">
         <span>{{ g.system_admin.username }}</span>
       </div>
