@@ -58,9 +58,16 @@ body {
   margin: 0 auto;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.site-footer-brand {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
-.site-footer-inner img {
+.site-footer-brand img {
   height: 28px;
   display: block;
 }
@@ -73,6 +80,24 @@ body {
   color: #d1d5db;
   font-size: 13px;
   margin: 4px 0 0;
+}
+.site-footer-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.site-footer-btn {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--bee-black-soft);
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.site-footer-btn:hover {
+  border-color: #9ca3af;
 }
 .site-footer-copyright {
   max-width: 900px;
