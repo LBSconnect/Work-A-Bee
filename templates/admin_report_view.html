@@ -9,8 +9,20 @@
     <a class="btn secondary" href="?week={{ prev_week }}">&larr; Previous Week</a>
     <span class="report-period-label">{{ period_start.strftime('%B %d') }} &ndash; {{ period_end.strftime('%B %d, %Y') }}</span>
     <a class="btn secondary" href="?week={{ next_week }}">Next Week &rarr;</a>
-    <a class="btn report-export" href="?week={{ period_start.isoformat() }}&export=csv">Export CSV</a>
+    <a class="btn report-export" href="?start={{ period_start.isoformat() }}&end={{ period_end.isoformat() }}&export=csv">Export CSV</a>
   </div>
+
+  <form method="get" class="report-range-form">
+    <div>
+      <label>From</label>
+      <input type="date" name="start" value="{{ period_start.isoformat() }}">
+    </div>
+    <div>
+      <label>To</label>
+      <input type="date" name="end" value="{{ period_end.isoformat() }}">
+    </div>
+    <button type="submit" class="secondary">Apply Custom Range</button>
+  </form>
 
   <table>
     <tr>

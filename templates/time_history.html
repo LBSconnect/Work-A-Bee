@@ -22,13 +22,47 @@
     </table>
 
     {% if timesheet.missing_punches %}
-      <p style="margin-top:16px; margin-bottom:4px;"><strong>&#9888; Missing punches this period:</strong></p>
-      <ul style="margin-top:0;">
+      <p style="margin-top:16px; margin-bottom:8px;"><strong>&#9888; Missing punches this period:</strong></p>
+      <ul style="margin-top:0; list-style:none; padding:0;">
         {% for m in timesheet.missing_punches %}
-          <li>{{ m.date.strftime('%b %d') }} &mdash; {{ m.issue }}: {{ m.detail }}</li>
+          <li style="margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid #f3f4f6;">
+            <div>{{ m.date.strftime('%b %d') }} &mdash; {{ m.issue }}: {{ m.detail }}</div>
+            {% if m.correction and m.correction.status == 'pending' %}
+              <span class="badge unread" style="background:#2563eb;">Correction Pending</span>
+            {% elif m.correction and m.correction.status == 'approved' %}
+              <span class="badge in">Correction Approved</span>
+            {% else %}
+              {% if m.correction and m.correction.status == 'denied' %}
+                <div class="muted" style="margin:4px 0;">Previous request denied{% if m.correction.manager_comment %}: &ldquo;{{ m.correction.manager_comment }}&rdquo;{% endif %}</div>
+              {% endif %}
+              <details style="margin-top:6px;">
+                <summary style="cursor:pointer; font-size:13px; font-weight:700; color:var(--bee-amber-link);">Request Correction</summary>
+                <form method="post" action="{{ url_for('request_correction') }}" style="margin-top:8px; max-width:380px;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="issue_type" value="{{ m.issue_type }}">
+                  <input type="hidden" name="issue_date" value="{{ m.date.isoformat() }}">
+                  <input type="hidden" name="week" value="{{ period_start.isoformat() }}">
+                  {% if m.issue_type == 'missing_clock_out' %}
+                    <input type="hidden" name="time_entry_id" value="{{ m.time_entry_id }}">
+                    <label>Clock-out time</label>
+                    <input type="datetime-local" name="requested_clock_out" required>
+                  {% else %}
+                    <label>Clock-in time</label>
+                    <input type="datetime-local" name="requested_clock_in"
+                           value="{{ m.suggested_clock_in.strftime('%Y-%m-%dT%H:%M') if m.suggested_clock_in else '' }}" required>
+                    <label>Clock-out time</label>
+                    <input type="datetime-local" name="requested_clock_out"
+                           value="{{ m.suggested_clock_out.strftime('%Y-%m-%dT%H:%M') if m.suggested_clock_out else '' }}" required>
+                  {% endif %}
+                  <label>Reason</label>
+                  <textarea name="reason" rows="2" placeholder="e.g. Forgot to clock out"></textarea>
+                  <button type="submit" class="secondary" style="margin-top:8px;">Submit Request</button>
+                </form>
+              </details>
+            {% endif %}
+          </li>
         {% endfor %}
       </ul>
-      <p class="muted">Ask your manager to add or correct these entries before submitting.</p>
     {% endif %}
 
     {% set approval = timesheet.approval %}
@@ -100,6 +134,32 @@
         <td>{{ w.period_start.strftime('%b %d') }} &ndash; {{ w.period_end.strftime('%b %d') }}</td>
         <td>{{ "%.2f"|format(w.hours) }}</td>
         <td>${{ "%.2f"|format(w.pay) }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+  {% if my_corrections %}
+    <h2 style="margin-top:32px; font-size:16px;">My correction requests</h2>
+    <table>
+      <tr><th>Date</th><th>Issue</th><th>Requested</th><th>Status</th></tr>
+      {% for c in my_corrections %}
+      <tr>
+        <td>{{ c.issue_date.strftime('%b %d, %Y') }}</td>
+        <td>{{ 'Missing Clock-In' if c.issue_type == 'missing_clock_in' else 'Missing Clock-Out' }}</td>
+        <td class="muted">
+          {% if c.requested_clock_in %}In: {{ c.requested_clock_in.strftime('%I:%M %p').lstrip('0') }}<br>{% endif %}
+          {% if c.requested_clock_out %}Out: {{ c.requested_clock_out.strftime('%I:%M %p').lstrip('0') }}{% endif %}
+        </td>
+        <td>
+          {% if c.status == 'approved' %}
+            <span class="badge in">Approved</span>
+          {% elif c.status == 'denied' %}
+            <span class="badge" style="background:#fee2e2; color:#991b1b;">Denied</span>
+          {% else %}
+            <span class="badge unread" style="background:#2563eb;">Pending</span>
+          {% endif %}
+        </td>
       </tr>
       {% endfor %}
     </table>

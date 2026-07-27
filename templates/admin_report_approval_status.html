@@ -16,10 +16,17 @@
   </div>
 
   <form method="get" style="display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap; margin-bottom:16px;">
-    <input type="hidden" name="week" value="{{ period_start.isoformat() }}">
+    <div>
+      <label>From</label>
+      <input type="date" name="start" value="{{ period_start.isoformat() }}">
+    </div>
+    <div>
+      <label>To</label>
+      <input type="date" name="end" value="{{ period_end.isoformat() }}">
+    </div>
     <div>
       <label>Department</label>
-      <select name="department_id" onchange="this.form.submit()">
+      <select name="department_id">
         <option value="">All departments</option>
         {% for d in departments %}
           <option value="{{ d.name }}" {% if department_filter == d.name %}selected{% endif %}>{{ d.name }}</option>
@@ -27,10 +34,10 @@
       </select>
     </div>
     <label style="display:flex; align-items:center; gap:6px; margin:0;">
-      <input type="checkbox" name="flagged" value="1" style="width:auto;" onchange="this.form.submit()" {% if flagged_only %}checked{% endif %}>
+      <input type="checkbox" name="flagged" value="1" style="width:auto;" {% if flagged_only %}checked{% endif %}>
       Flagged only
     </label>
-    <noscript><button type="submit" class="secondary">Filter</button></noscript>
+    <button type="submit" class="secondary" style="margin:0; padding:8px 14px; font-size:13px;">Apply</button>
   </form>
 
   <form method="post" action="{{ url_for('admin_report_approval_bulk_approve') }}">

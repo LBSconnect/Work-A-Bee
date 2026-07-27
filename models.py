@@ -431,6 +431,24 @@ def init_db():
                     ADD COLUMN IF NOT EXISTS photo_data BYTEA,
                     ADD COLUMN IF NOT EXISTS photo_mime TEXT
             """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS punch_corrections (
+                    id SERIAL PRIMARY KEY,
+                    org_id INTEGER NOT NULL REFERENCES organizations(id),
+                    employee_id INTEGER NOT NULL REFERENCES employees(id),
+                    time_entry_id INTEGER REFERENCES time_entries(id),
+                    issue_type TEXT NOT NULL,
+                    issue_date DATE NOT NULL,
+                    requested_clock_in TIMESTAMP,
+                    requested_clock_out TIMESTAMP,
+                    reason TEXT,
+                    status TEXT NOT NULL DEFAULT 'pending',
+                    reviewed_by_admin_id INTEGER REFERENCES admin_users(id),
+                    reviewed_at TIMESTAMP,
+                    manager_comment TEXT,
+                    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+                )
+            """)
             conn.commit()
     except Exception:
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")
