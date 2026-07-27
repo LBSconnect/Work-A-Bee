@@ -52,6 +52,11 @@
       <div class="stat-card-value">{{ "%.0f"|format(stats.hours_this_week) }}</div>
       <div class="stat-card-sub">Total Hours</div>
     </div>
+    <a class="stat-card" href="{{ url_for('admin_exceptions') }}">
+      <div class="stat-card-label">Open Exceptions</div>
+      <div class="stat-card-value">{{ stats.open_exceptions }}</div>
+      <div class="stat-card-sub">{{ 'Needs attention →' if stats.open_exceptions else 'All clear' }}</div>
+    </a>
   </div>
 
   <div class="admin-panels-row">

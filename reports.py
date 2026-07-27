@@ -566,3 +566,140 @@ def deny_correction(conn, org_id, correction_id, admin_id, comment):
         (admin_id, comment, correction_id),
     )
     return c
+
+
+def overlapping_shifts_rows(conn, org, period_start, period_end):
+    """Pairs of shifts for the same employee whose time ranges intersect."""
+    org_id = org["id"]
+    period_start_dt = datetime.combine(period_start, datetime.min.time())
+    period_end_dt = datetime.combine(period_end, datetime.max.time())
+    shifts = conn.execute(
+        "SELECT s.*, e.name, e.employee_code FROM shifts s JOIN employees e ON s.employee_id = e.id "
+        "WHERE s.org_id=%s AND s.shift_start<=%s AND s.shift_end>=%s "
+        "ORDER BY s.employee_id, s.shift_start",
+        (org_id, period_end_dt, period_start_dt),
+    ).fetchall()
+
+    by_employee = {}
+    for s in shifts:
+        by_employee.setdefault(s["employee_id"], []).append(s)
+
+    rows = []
+    for emp_id, emp_shifts in by_employee.items():
+        emp_shifts.sort(key=lambda s: s["shift_start"])
+        for i in range(len(emp_shifts) - 1):
+            a, b = emp_shifts[i], emp_shifts[i + 1]
+            if b["shift_start"] < a["shift_end"]:
+                rows.append({
+                    "employee_id": emp_id,
+                    "employee_code": a["employee_code"],
+                    "name": a["name"],
+                    "date": a["shift_start"].date(),
+                    "detail": f'{a["shift_start"].strftime("%I:%M %p").lstrip("0")}–'
+                              f'{a["shift_end"].strftime("%I:%M %p").lstrip("0")} overlaps '
+                              f'{b["shift_start"].strftime("%I:%M %p").lstrip("0")}–'
+                              f'{b["shift_end"].strftime("%I:%M %p").lstrip("0")}',
+                })
+    return rows
+
+
+def exceptions_inbox(conn, org, period_start, period_end):
+    """Aggregated, actionable list of attendance/scheduling exceptions for the period.
+
+    Covers what's detectable from existing data: late arrivals, early departures,
+    missing punches, overtime, overlapping shifts, unsubmitted timesheets (for
+    periods that have already ended), and pending punch-correction requests.
+    Missed-break and location-mismatch exceptions aren't included - the app
+    doesn't track breaks or clock-in location yet.
+    """
+    org_id = org["id"]
+    now = now_in(org["timezone"])
+    exceptions = []
+
+    for r in daily_attendance_rows(conn, org, period_start, period_end):
+        if "Late" in r["flags"]:
+            exceptions.append({
+                "employee_id": None, "employee_code": r["employee_code"], "name": r["name"],
+                "date": r["date"], "exception_type": "late_arrival", "label": "Late Arrival",
+                "detail": f'Scheduled {r["scheduled_start"].strftime("%I:%M %p").lstrip("0")}, '
+                          f'clocked in {r["actual_in"].strftime("%I:%M %p").lstrip("0")}',
+            })
+        if "Early Departure" in r["flags"]:
+            exceptions.append({
+                "employee_id": None, "employee_code": r["employee_code"], "name": r["name"],
+                "date": r["date"], "exception_type": "early_departure", "label": "Early Departure",
+                "detail": f'Scheduled until {r["scheduled_end"].strftime("%I:%M %p").lstrip("0")}, '
+                          f'clocked out {r["actual_out"].strftime("%I:%M %p").lstrip("0")}',
+            })
+
+    for r in missing_punches_rows(conn, org, period_start, period_end):
+        exceptions.append({
+            "employee_id": r.get("employee_id"), "employee_code": r["employee_code"], "name": r["name"],
+            "date": r["date"], "exception_type": "missing_punch", "label": r["issue"],
+            "detail": r["detail"],
+        })
+
+    for r in overtime_rows(conn, org, period_start, period_end):
+        if r["status"] != "OK":
+            exceptions.append({
+                "employee_id": None, "employee_code": r["employee_code"], "name": r["name"],
+                "date": period_end, "exception_type": "overtime", "label": f'Overtime: {r["status"]}',
+                "detail": f'{r["total_hours"]} hrs vs {r["threshold_hours"]} hr threshold '
+                          f'({r["pct_of_threshold"]}%)',
+            })
+
+    for r in overlapping_shifts_rows(conn, org, period_start, period_end):
+        exceptions.append({
+            "employee_id": r["employee_id"], "employee_code": r["employee_code"], "name": r["name"],
+            "date": r["date"], "exception_type": "overlapping_shifts", "label": "Overlapping Shifts",
+            "detail": r["detail"],
+        })
+
+    if period_end < now.date():
+        for r in approval_status_rows(conn, org, period_start, period_end):
+            if r["status"] == "not_submitted":
+                exceptions.append({
+                    "employee_id": r["employee_id"], "employee_code": r["employee_code"], "name": r["name"],
+                    "date": period_end, "exception_type": "timesheet_not_submitted",
+                    "label": "Timesheet Not Submitted",
+                    "detail": f'No timesheet submitted for {period_start.strftime("%b %d")}'
+                              f'–{period_end.strftime("%b %d, %Y")}',
+                })
+
+    for c in corrections_queue(conn, org):
+        if c["status"] == "pending" and period_start <= c["issue_date"] <= period_end:
+            exceptions.append({
+                "employee_id": c["employee_id"], "employee_code": c["employee_code"], "name": c["name"],
+                "date": c["issue_date"], "exception_type": "correction_pending", "label": "Correction Pending",
+                "detail": f'{c["issue_type"].replace("_", " ").title()} – awaiting review',
+            })
+
+    employees_by_code = _employees_by_code(conn, org_id)
+    for e in exceptions:
+        if e["employee_id"] is None:
+            emp = employees_by_code.get(e["employee_code"])
+            e["employee_id"] = emp["id"] if emp else None
+
+    dismissed = {
+        (d["employee_id"], d["exception_type"], d["exception_date"]): d
+        for d in conn.execute(
+            "SELECT * FROM exception_dismissals WHERE org_id=%s AND exception_date BETWEEN %s AND %s",
+            (org_id, period_start, period_end),
+        ).fetchall()
+    }
+    for e in exceptions:
+        e["dismissal"] = dismissed.get((e["employee_id"], e["exception_type"], e["date"]))
+
+    exceptions.sort(key=lambda e: (e["dismissal"] is not None, e["date"]))
+    return exceptions
+
+
+def dismiss_exception(conn, org_id, employee_id, exception_type, exception_date, admin_id, note):
+    conn.execute(
+        "INSERT INTO exception_dismissals "
+        "(org_id, employee_id, exception_type, exception_date, note, dismissed_by_admin_id) "
+        "VALUES (%s,%s,%s,%s,%s,%s) "
+        "ON CONFLICT (employee_id, exception_type, exception_date) DO UPDATE SET "
+        "note=EXCLUDED.note, dismissed_by_admin_id=EXCLUDED.dismissed_by_admin_id, dismissed_at=NOW()",
+        (org_id, employee_id, exception_type, exception_date, note, admin_id),
+    )

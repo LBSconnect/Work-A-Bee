@@ -1501,6 +1501,10 @@ def admin_dashboard():
         has_sent_report = conn.execute(
             "SELECT 1 FROM report_log WHERE org_id=%s LIMIT 1", (g.org["id"],)
         ).fetchone() is not None
+        open_exceptions = [
+            e for e in reports.exceptions_inbox(conn, g.org, period_start, period_end)
+            if e["dismissal"] is None
+        ]
 
     rows = [
         {
@@ -1523,6 +1527,7 @@ def admin_dashboard():
         "clocked_in_now": clocked_in_now,
         "hours_this_week": round(sum(d["total_hours"] for d in detail), 2),
         "weekly_payroll": round(sum(d["total_due"] for d in detail), 2),
+        "open_exceptions": len(open_exceptions),
     }
 
     day_totals = {period_start + timedelta(days=i): 0.0 for i in range(7)}
@@ -2288,7 +2293,13 @@ def admin_reports_index():
         "timesheet-summary", "payroll-export", "daily-attendance", "missing-punches",
         "overtime", "schedule-vs-actual", "time-off",
     ]
-    cards = [
+    cards = [{
+        "title": "Exceptions Inbox",
+        "description": "Every attendance and scheduling exception in one place: late arrivals, "
+                        "missing punches, overtime, overlapping shifts, and unsubmitted timesheets.",
+        "url": url_for("admin_exceptions"),
+    }]
+    cards += [
         {
             "title": REPORT_SLUGS[slug]["title"],
             "description": REPORT_SLUGS[slug]["description"],
@@ -2424,6 +2435,55 @@ def admin_report_approval_bulk_approve():
         conn.commit()
     flash(f"Approved {count} timesheet(s)." if count else "No timesheets selected.")
     return redirect(url_for("admin_report_approval_status", week=period_start.isoformat()))
+
+
+@app.route("/admin/exceptions")
+@admin_required
+def admin_exceptions():
+    period_start, period_end = _report_period(request.args, g.org["timezone"])
+    show_dismissed = request.args.get("show_dismissed") == "1"
+    with get_db() as conn:
+        exceptions = reports.exceptions_inbox(conn, g.org, period_start, period_end)
+    if not show_dismissed:
+        exceptions = [e for e in exceptions if e["dismissal"] is None]
+    return render_template(
+        "admin_exceptions.html", exceptions=exceptions,
+        period_start=period_start, period_end=period_end,
+        prev_week=(period_start - timedelta(days=7)).isoformat(),
+        next_week=(period_start + timedelta(days=7)).isoformat(),
+        show_dismissed=show_dismissed,
+    )
+
+
+@app.route("/admin/exceptions/dismiss", methods=["POST"])
+@admin_required
+def admin_exception_dismiss():
+    try:
+        employee_id = int(request.form["employee_id"])
+        exception_date = datetime.strptime(request.form["exception_date"], "%Y-%m-%d").date()
+    except (KeyError, ValueError):
+        abort(400)
+    exception_type = request.form.get("exception_type", "")
+    note = request.form.get("note", "").strip()
+    week = request.form.get("week", "")
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (employee_id, g.org["id"])
+        ).fetchone()
+        if emp is None:
+            abort(404)
+        reports.dismiss_exception(
+            conn, g.org["id"], employee_id, exception_type, exception_date, g.admin["id"], note or None
+        )
+        audit.log(
+            conn, g.org["id"], "admin", g.admin["id"], "exception.dismissed",
+            f"{emp['name']} ({emp['employee_code']}): {exception_type} on {exception_date}"
+            + (f' - "{note}"' if note else ""),
+        )
+        conn.commit()
+    flash("Exception dismissed.")
+    return redirect(url_for("admin_exceptions", week=week))
 
 
 @app.route("/admin/corrections")
