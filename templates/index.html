@@ -195,6 +195,12 @@
       position: relative;
       z-index: 2;
     }
+    .dashboard-card.pulse { animation: dash-pulse 0.9s ease; }
+    @keyframes dash-pulse {
+      0% { box-shadow: 0 24px 64px rgba(0,0,0,.15), 0 0 0 0 rgba(255,184,0,.6); }
+      60% { box-shadow: 0 24px 64px rgba(0,0,0,.15), 0 0 0 10px rgba(255,184,0,0); }
+      100% { box-shadow: 0 24px 64px rgba(0,0,0,.15), 0 0 0 0 rgba(255,184,0,0); }
+    }
 
     .dash-topbar {
       background: #1a1a2e; padding: 10px 16px;
@@ -273,14 +279,10 @@
 
     .dash-stats-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
 
-    .kiosk-mock { background: #111827; border-radius: 12px; padding: 22px 16px; text-align: center; }
-    .kiosk-time { color: #fff; font-size: 26px; font-weight: 900; }
-    .kiosk-sub { color: #9ca3af; font-size: 10px; margin: 4px 0 14px; }
-    .kiosk-pin { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; }
-    .pin-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #4b5563; }
-    .pin-dot.filled { background: var(--yellow); border-color: var(--yellow); }
-    .kiosk-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 160px; margin: 0 auto; }
-    .kiosk-key { background: #1f2937; color: #fff; border-radius: 8px; padding: 8px 0; font-size: 12px; font-weight: 700; }
+    .clock-card { background: #FFF8E1; border: 1px solid #FFE082; border-radius: 12px; padding: 20px; text-align: center; }
+    .clock-card-title { font-weight: 700; font-size: 13px; margin-bottom: 14px; }
+    .clock-card .btn-clock-in, .clock-card .btn-clock-out { width: 100%; }
+    .clock-card-meta { font-size: 10px; color: #888; margin-top: 12px; }
 
     .settings-row {
       display: flex; align-items: center; justify-content: space-between;
@@ -898,20 +900,13 @@
           <div class="dash-view" data-view="clock">
             <div class="dash-view-header">
               <div class="dash-view-title">Time Clock</div>
-              <div class="dash-view-sub">Front Office PC • Trusted Device</div>
+              <div class="dash-view-sub">Hi, Jake Roberts 👋 • Status: Off Duty</div>
             </div>
-            <div class="kiosk-mock">
-              <div class="kiosk-time">9:41 AM</div>
-              <div class="kiosk-sub">Enter your PIN to clock in or out</div>
-              <div class="kiosk-pin">
-                <span class="pin-dot filled"></span><span class="pin-dot filled"></span><span class="pin-dot filled"></span><span class="pin-dot"></span>
-              </div>
-              <div class="kiosk-keypad">
-                <div class="kiosk-key">1</div><div class="kiosk-key">2</div><div class="kiosk-key">3</div>
-                <div class="kiosk-key">4</div><div class="kiosk-key">5</div><div class="kiosk-key">6</div>
-                <div class="kiosk-key">7</div><div class="kiosk-key">8</div><div class="kiosk-key">9</div>
-                <div class="kiosk-key">⌫</div><div class="kiosk-key">0</div><div class="kiosk-key">✓</div>
-              </div>
+            <div class="clock-card">
+              <div class="clock-card-title">Ready to start your day?</div>
+              <button type="button" class="btn-clock-in" tabindex="-1">✔ CLOCK IN</button>
+              <button type="button" class="btn-clock-out" tabindex="-1">✖ CLOCK OUT</button>
+              <div class="clock-card-meta">Scheduled: 7:00 AM – 3:30 PM</div>
             </div>
           </div>
 
@@ -1208,8 +1203,8 @@
       <div class="mobile-date">May 24, 2024</div>
       <div class="mobile-greeting">Good morning!</div>
       <div class="mobile-sub">Please select an option</div>
-      <button type="button" class="btn-clock-in" tabindex="-1">⏰ CLOCK IN</button>
-      <button type="button" class="btn-clock-out" tabindex="-1">⏰ CLOCK OUT</button>
+      <button type="button" class="btn-clock-in" data-goto-view="clock">⏰ CLOCK IN</button>
+      <button type="button" class="btn-clock-out" data-goto-view="clock">⏰ CLOCK OUT</button>
       <div class="mobile-device">Device: Front Office PC ⚙</div>
     </div>
   </div>
@@ -1540,6 +1535,8 @@
       <ul>
         <li><a href="#features">Features</a></li>
         <li><a href="/pricing">Pricing</a></li>
+        <li><a href="{{ url_for('staff_login') }}">Employee Clock In</a></li>
+        <li><a href="{{ url_for('admin_login') }}">Admin Login</a></li>
       </ul>
     </div>
 
@@ -1609,7 +1606,16 @@
       btn.addEventListener('click', function () { showView(btn.dataset.view); });
     });
     document.querySelectorAll('[data-goto-view]').forEach(function (btn) {
-      btn.addEventListener('click', function () { showView(btn.dataset.gotoView); });
+      btn.addEventListener('click', function () {
+        showView(btn.dataset.gotoView);
+        var card = document.querySelector('.dashboard-card');
+        if (card) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          card.classList.remove('pulse');
+          void card.offsetWidth;
+          card.classList.add('pulse');
+        }
+      });
     });
   })();
 </script>

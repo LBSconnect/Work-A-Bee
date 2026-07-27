@@ -35,10 +35,16 @@
 
   <footer class="site-footer">
     <div class="site-footer-inner">
-      <img src="{{ url_for('static', filename='logo-workabee.svg') }}" alt="Work-A-Beez">
-      <div>
-        <div class="site-footer-brand-name">Work-A-Beez</div>
-        <p class="site-footer-tagline">Simple time tracking for hardworking teams.</p>
+      <div class="site-footer-brand">
+        <img src="{{ url_for('static', filename='logo-workabee.svg') }}" alt="Work-A-Beez">
+        <div>
+          <div class="site-footer-brand-name">Work-A-Beez</div>
+          <p class="site-footer-tagline">Simple time tracking for hardworking teams.</p>
+        </div>
+      </div>
+      <div class="site-footer-actions">
+        <a href="{{ url_for('staff_login') }}" class="site-footer-btn">Employee Clock In</a>
+        <a href="{{ url_for('admin_login') }}" class="site-footer-btn">Admin Login</a>
       </div>
     </div>
     <p class="site-footer-copyright">&copy; 2026 Work-A-Beez. All Rights Reserved.</p>
