@@ -32,9 +32,10 @@
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_employees' else '' }}" href="{{ url_for('admin_employees') }}"><span class="admin-si">👥</span> Employees</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint in ('admin_schedule', 'admin_shift_new', 'admin_shift_edit') else '' }}" href="{{ url_for('admin_schedule') }}"><span class="admin-si">🗓️</span> Schedule</a>
         <a class="admin-sidebar-item" href="{{ url_for('staff_login') }}"><span class="admin-si">🕐</span> Time Clock</a>
-        <a class="admin-sidebar-item" href="{{ url_for('admin_dashboard') }}#timesheets"><span class="admin-si">📋</span> Timesheets</a>
-        <a class="admin-sidebar-item{{ ' active' if request.endpoint in ('admin_reports_index', 'admin_report_view', 'admin_report_approval_status') else '' }}" href="{{ url_for('admin_reports_index') }}"><span class="admin-si">📈</span> Reports</a>
-        <a class="admin-sidebar-item" href="{{ url_for('admin_dashboard') }}#payroll"><span class="admin-si">💰</span> Payroll</a>
+        {% set report_slug = request.view_args.get('slug') if request.endpoint == 'admin_report_view' and request.view_args else none %}
+        <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_report_approval_status' else '' }}" href="{{ url_for('admin_report_approval_status') }}"><span class="admin-si">📋</span> Timesheets</a>
+        <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_reports_index' or (request.endpoint == 'admin_report_view' and report_slug != 'payroll-export') else '' }}" href="{{ url_for('admin_reports_index') }}"><span class="admin-si">📈</span> Reports</a>
+        <a class="admin-sidebar-item{{ ' active' if report_slug == 'payroll-export' else '' }}" href="{{ url_for('admin_report_view', slug='payroll-export') }}"><span class="admin-si">💰</span> Payroll</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_announcements' else '' }}" href="{{ url_for('admin_announcements') }}"><span class="admin-si">📣</span> Announcements</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_pto' else '' }}" href="{{ url_for('admin_pto') }}"><span class="admin-si">🌴</span> Time Off</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_notifications' else '' }}" href="{{ url_for('admin_notifications') }}"><span class="admin-si">🔔</span> Notifications{% if 'notifications' in locked_features %} <span class="lock-icon" title="Requires a higher plan">🔒</span>{% elif unread_admin_notifications_count %} <span class="badge unread">{{ unread_admin_notifications_count }}</span>{% endif %}</a>

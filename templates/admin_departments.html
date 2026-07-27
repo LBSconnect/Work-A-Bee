@@ -1,0 +1,41 @@
+{% extends "admin_base.html" %}
+{% block title %}Departments{% endblock %}
+{% block admin_content %}
+  <p class="nav"><a href="{{ url_for('admin_employees') }}">&larr; Employees</a></p>
+  <h1>Departments</h1>
+  <p class="muted">Group employees by department for scheduling, filtering, and the Labor Cost Summary report.</p>
+
+  <form method="post" action="{{ url_for('admin_departments_new') }}" style="display:flex; gap:10px; align-items:flex-end; max-width:420px;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div style="flex:1;">
+      <label>New department name</label>
+      <input type="text" name="name" required>
+    </div>
+    <button type="submit" style="margin-top:0;">Add</button>
+  </form>
+
+  <table style="max-width:600px;">
+    <tr><th>Name</th><th>Employees</th><th></th></tr>
+    {% for d in departments %}
+    <tr>
+      <td>
+        <form method="post" action="{{ url_for('admin_department_rename', dept_id=d.id) }}" style="display:flex; gap:8px;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="text" name="name" value="{{ d.name }}" style="margin:0;">
+          <button type="submit" class="secondary" style="margin:0; padding:6px 12px; font-size:12px;">Rename</button>
+        </form>
+      </td>
+      <td>{{ d.employee_count }}</td>
+      <td>
+        <form method="post" action="{{ url_for('admin_department_delete', dept_id=d.id) }}"
+              onsubmit="return confirm('Delete the {{ d.name }} department?');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="secondary" style="margin:0; padding:6px 12px; font-size:12px;">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="3" class="muted">No departments yet.</td></tr>
+    {% endfor %}
+  </table>
+{% endblock %}

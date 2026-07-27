@@ -3,6 +3,71 @@
 {% block employee_content %}
   <h1>Time history</h1>
 
+  <div class="report-period-nav">
+    <a class="btn secondary" href="?week={{ prev_week }}">&larr; Previous Week</a>
+    <span class="report-period-label">{{ period_start.strftime('%B %d') }} &ndash; {{ period_end.strftime('%B %d, %Y') }}</span>
+    <a class="btn secondary" href="?week={{ next_week }}">Next Week &rarr;</a>
+  </div>
+
+  <div class="dash-panel" style="margin-bottom:24px;">
+    <div class="dash-panel-title">Timesheet for this period</div>
+    <table style="margin-top:0;">
+      <tr><th>Regular</th><th>Overtime</th><th>PTO</th><th>Total</th></tr>
+      <tr>
+        <td>{{ "%.2f"|format(timesheet.summary.regular_hours) }}</td>
+        <td>{{ "%.2f"|format(timesheet.summary.overtime_hours) }}</td>
+        <td>{{ "%.2f"|format(timesheet.summary.pto_hours) }}</td>
+        <td><strong>{{ "%.2f"|format(timesheet.summary.total_hours) }}</strong></td>
+      </tr>
+    </table>
+
+    {% if timesheet.missing_punches %}
+      <p style="margin-top:16px; margin-bottom:4px;"><strong>&#9888; Missing punches this period:</strong></p>
+      <ul style="margin-top:0;">
+        {% for m in timesheet.missing_punches %}
+          <li>{{ m.date.strftime('%b %d') }} &mdash; {{ m.issue }}: {{ m.detail }}</li>
+        {% endfor %}
+      </ul>
+      <p class="muted">Ask your manager to add or correct these entries before submitting.</p>
+    {% endif %}
+
+    {% set approval = timesheet.approval %}
+    {% if approval and approval.status == 'approved' %}
+      <div class="flash" style="background:#dcfce7; border-color:#86efac;">
+        &#10004; Approved by {{ approval.approved_by }} on {{ approval.approved_at.strftime('%b %d, %Y') }}. This timesheet is locked.
+      </div>
+    {% elif approval and approval.status == 'submitted' %}
+      <div class="flash">
+        Submitted {{ approval.submitted_at.strftime('%b %d, %Y %I:%M %p').replace(' 0', ' ') }} &middot; awaiting manager approval.
+        {% if approval.employee_notes %}<br>Your notes: &ldquo;{{ approval.employee_notes }}&rdquo;{% endif %}
+      </div>
+      <form method="post" action="{{ url_for('timesheet_withdraw') }}" style="margin-top:8px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="period_start" value="{{ period_start.isoformat() }}">
+        <input type="hidden" name="period_end" value="{{ period_end.isoformat() }}">
+        <button type="submit" class="secondary" style="margin-top:0;">Withdraw submission</button>
+      </form>
+    {% else %}
+      {% if approval and approval.status == 'returned' %}
+        <div class="flash" style="background:#fee2e2; border-color:#fca5a5;">
+          Returned for correction by your manager{% if approval.manager_comment %}: &ldquo;{{ approval.manager_comment }}&rdquo;{% endif %}
+        </div>
+      {% endif %}
+      <form method="post" action="{{ url_for('timesheet_submit') }}" style="margin-top:16px; max-width:480px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="period_start" value="{{ period_start.isoformat() }}">
+        <input type="hidden" name="period_end" value="{{ period_end.isoformat() }}">
+        <label>Notes (optional)</label>
+        <textarea name="notes" rows="2">{{ approval.employee_notes if approval else '' }}</textarea>
+        <label style="display:flex; align-items:center; gap:8px; margin-top:14px;">
+          <input type="checkbox" name="certify" required style="width:auto;">
+          I certify that these hours are accurate.
+        </label>
+        <button type="submit">Submit Timesheet</button>
+      </form>
+    {% endif %}
+  </div>
+
   <h2 style="font-size:16px;">Recent activity</h2>
   {% if history %}
     <table>

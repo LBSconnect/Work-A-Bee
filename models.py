@@ -420,6 +420,12 @@ def init_db():
                     UNIQUE (employee_id, period_start, period_end)
                 )
             """)
+            conn.execute("""
+                ALTER TABLE timesheet_approvals
+                    ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMP,
+                    ADD COLUMN IF NOT EXISTS employee_notes TEXT,
+                    ADD COLUMN IF NOT EXISTS manager_comment TEXT
+            """)
             conn.commit()
     except Exception:
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")
