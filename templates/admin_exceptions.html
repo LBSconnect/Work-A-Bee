@@ -1,0 +1,57 @@
+{% extends "admin_base.html" %}
+{% block title %}Exceptions Inbox{% endblock %}
+{% block admin_content %}
+  <p class="nav"><a href="{{ url_for('admin_reports_index') }}">&larr; All Reports</a></p>
+  <h1>Exceptions Inbox</h1>
+  <p class="muted">Late arrivals, missing punches, overtime, overlapping shifts, unsubmitted timesheets, and pending corrections, all in one place.</p>
+
+  <div class="report-period-nav">
+    <a class="btn secondary" href="?week={{ prev_week }}{% if show_dismissed %}&show_dismissed=1{% endif %}">&larr; Previous Week</a>
+    <span class="report-period-label">{{ period_start.strftime('%B %d') }} &ndash; {{ period_end.strftime('%B %d, %Y') }}</span>
+    <a class="btn secondary" href="?week={{ next_week }}{% if show_dismissed %}&show_dismissed=1{% endif %}">Next Week &rarr;</a>
+  </div>
+
+  <p class="muted">
+    {% if show_dismissed %}
+      <a href="?week={{ period_start.isoformat() }}">Hide dismissed</a>
+    {% else %}
+      <a href="?week={{ period_start.isoformat() }}&show_dismissed=1">Show dismissed</a>
+    {% endif %}
+  </p>
+
+  <table>
+    <tr>
+      <th>Employee ID</th><th>Name</th><th>Date</th><th>Type</th><th>Detail</th><th></th>
+    </tr>
+    {% for e in exceptions %}
+    <tr {% if e.dismissal %}style="opacity:0.55;"{% endif %}>
+      <td>{{ e.employee_code }}</td>
+      <td>{{ e.name }}</td>
+      <td>{{ e.date.strftime('%b %d, %Y') }}</td>
+      <td>{{ e.label }}</td>
+      <td class="muted">
+        {{ e.detail }}
+        {% if e.dismissal %}<br><strong>Dismissed</strong>{% if e.dismissal.note %}: {{ e.dismissal.note }}{% endif %}{% endif %}
+      </td>
+      <td style="white-space:nowrap;">
+        {% if not e.dismissal %}
+          <details style="display:inline-block;">
+            <summary style="cursor:pointer; font-size:12px; font-weight:700; color:var(--bee-amber-link);">Dismiss</summary>
+            <form method="post" action="{{ url_for('admin_exception_dismiss') }}" style="margin-top:8px; min-width:220px;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="employee_id" value="{{ e.employee_id }}">
+              <input type="hidden" name="exception_type" value="{{ e.exception_type }}">
+              <input type="hidden" name="exception_date" value="{{ e.date.isoformat() }}">
+              <input type="hidden" name="week" value="{{ period_start.isoformat() }}">
+              <textarea name="note" rows="2" placeholder="Note (optional) - e.g. approved by phone"></textarea>
+              <button type="submit" class="secondary" style="margin-top:6px; padding:4px 10px; font-size:12px;">Confirm Dismiss</button>
+            </form>
+          </details>
+        {% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="muted">No open exceptions for this period. 🎉</td></tr>
+    {% endfor %}
+  </table>
+{% endblock %}
