@@ -407,6 +407,19 @@ def init_db():
                     UNIQUE (kind, value)
                 )
             """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS timesheet_approvals (
+                    id SERIAL PRIMARY KEY,
+                    org_id INTEGER NOT NULL REFERENCES organizations(id),
+                    employee_id INTEGER NOT NULL REFERENCES employees(id),
+                    period_start DATE NOT NULL,
+                    period_end DATE NOT NULL,
+                    status TEXT NOT NULL DEFAULT 'pending',
+                    approved_by_admin_id INTEGER REFERENCES admin_users(id),
+                    approved_at TIMESTAMP,
+                    UNIQUE (employee_id, period_start, period_end)
+                )
+            """)
             conn.commit()
     except Exception:
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")

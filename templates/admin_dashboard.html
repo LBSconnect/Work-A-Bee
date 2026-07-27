@@ -107,8 +107,9 @@
 
   <div id="reports" style="margin-top:40px;">
     <h1>Reports</h1>
-    <p class="muted">Email the current pay period's hours and pay to your configured report recipients.</p>
-    <a class="btn" href="{{ url_for('admin_send_report_now') }}"
+    <p class="muted">Timesheets, attendance, overtime, and payroll reports for your team.</p>
+    <a class="btn" href="{{ url_for('admin_reports_index') }}">View All Reports &rarr;</a>
+    <a class="btn secondary" href="{{ url_for('admin_send_report_now') }}"
        onclick="return confirm('Email this week\'s hours report now?');">Send report now</a>
   </div>
 

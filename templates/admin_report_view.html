@@ -1,0 +1,46 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ spec.title }}{% endblock %}
+{% block admin_content %}
+  <p class="nav"><a href="{{ url_for('admin_reports_index') }}">&larr; All Reports</a></p>
+  <h1>{{ spec.title }}</h1>
+  <p class="muted">{{ spec.description }}</p>
+
+  <div class="report-period-nav">
+    <a class="btn secondary" href="?week={{ prev_week }}">&larr; Previous Week</a>
+    <span class="report-period-label">{{ period_start.strftime('%B %d') }} &ndash; {{ period_end.strftime('%B %d, %Y') }}</span>
+    <a class="btn secondary" href="?week={{ next_week }}">Next Week &rarr;</a>
+    <a class="btn report-export" href="?week={{ period_start.isoformat() }}&export=csv">Export CSV</a>
+  </div>
+
+  <table>
+    <tr>
+      {% for key, label, fmt in spec.columns %}<th>{{ label }}</th>{% endfor %}
+    </tr>
+    {% for row in rows %}
+    <tr>
+      {% for key, label, fmt in spec.columns %}
+        {% set value = row.get(key) %}
+        <td>
+          {%- if value is none -%}
+            <span class="muted">&mdash;</span>
+          {%- elif fmt == 'hours' -%}
+            {{ "%.2f"|format(value) }}
+          {%- elif fmt == 'currency' -%}
+            ${{ "%.2f"|format(value) }}
+          {%- elif fmt == 'pct' -%}
+            {{ value }}%
+          {%- elif fmt == 'date' -%}
+            {{ value.strftime('%b %d, %Y') }}
+          {%- elif fmt == 'datetime' -%}
+            {{ value.strftime('%b %d, %I:%M %p').replace(' 0', ' ') }}
+          {%- else -%}
+            {{ value }}
+          {%- endif -%}
+        </td>
+      {% endfor %}
+    </tr>
+    {% else %}
+    <tr><td colspan="{{ spec.columns|length }}" class="muted">No data for this period.</td></tr>
+    {% endfor %}
+  </table>
+{% endblock %}

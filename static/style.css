@@ -339,6 +339,26 @@ th { background: #f9fafb; }
   .admin-panels-row { grid-template-columns: 1fr; }
 }
 
+.report-cards {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px; margin: 16px 0 24px;
+}
+.report-card {
+  display: block; padding: 18px; background: #fff; border: 1px solid #e5e7eb;
+  border-radius: 12px; text-decoration: none; color: #1f2937;
+  transition: box-shadow 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+}
+.report-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-2px); border-color: var(--bee-yellow);
+}
+.report-card-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.report-card-desc { font-size: 13px; color: #6b7280; line-height: 1.5; }
+
+.report-period-nav { display: flex; align-items: center; gap: 12px; margin: 12px 0 20px; flex-wrap: wrap; }
+.report-period-nav .btn { margin-top: 0; padding: 8px 14px; font-size: 13px; }
+.report-period-label { font-weight: 700; font-size: 14px; }
+.report-period-nav .report-export { margin-left: auto; }
+
 /* Collapsible sections (Prior 4 weeks) */
 .collapsible > summary { cursor: pointer; list-style: none; }
 .collapsible > summary::-webkit-details-marker { display: none; }
