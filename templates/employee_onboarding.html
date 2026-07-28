@@ -1,0 +1,41 @@
+{% extends "employee_base.html" %}
+{% block title %}Onboarding{% endblock %}
+{% block employee_content %}
+  <h1>Welcome aboard!</h1>
+  {% if employee.onboarding_completed_at %}
+    <div class="flash" style="background:#dcfce7; border-color:#86efac;">
+      <strong>&#9989; You're all set!</strong> Onboarding is complete.
+    </div>
+  {% elif total_count %}
+    <p class="muted">Here's what's left to get you fully set up. Check off the ones below that are yours to do &mdash; your manager is handling the rest.</p>
+    <div style="background:#e5e7eb; border-radius:4px; height:8px; max-width:400px; margin-bottom:20px;">
+      <div style="background:#16a34a; border-radius:4px; height:8px; width:{{ (100 * completed_count / total_count)|round|int }}%;"></div>
+    </div>
+  {% else %}
+    <p class="muted">There's nothing on your onboarding checklist yet.</p>
+  {% endif %}
+
+  <table style="max-width:600px;">
+    <tr><th></th><th>Task</th><th>Status</th></tr>
+    {% for t in tasks %}
+    <tr>
+      <td>
+        {% if t.assigned_to == 'employee' %}
+          <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="task_id" value="{{ t.id }}">
+            <button type="submit" class="secondary" style="margin:0; padding:4px 10px; font-size:12px;">{{ 'Undo' if t.completed else 'Mark done' }}</button>
+          </form>
+        {% endif %}
+      </td>
+      <td style="{% if t.completed %}text-decoration:line-through; color:#6b7280;{% endif %}">
+        {{ t.title }}{% if t.assigned_to == 'admin' %} <span class="muted">(your manager)</span>{% endif %}
+      </td>
+      <td>
+        {% if t.completed %}<span class="badge" style="background:#dcfce7; color:#166534;">Done</span>
+        {% else %}<span class="badge out">Pending</span>{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

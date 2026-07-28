@@ -30,6 +30,7 @@
       <div class="admin-sidebar">
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_dashboard' else '' }}" href="{{ url_for('admin_dashboard') }}"><span class="admin-si">📊</span> Dashboard</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'admin_employees' else '' }}" href="{{ url_for('admin_employees') }}"><span class="admin-si">👥</span> Employees</a>
+        <a class="admin-sidebar-item{{ ' active' if request.endpoint in ('admin_onboarding', 'admin_onboarding_employee', 'admin_onboarding_tasks') else '' }}" href="{{ url_for('admin_onboarding') }}"><span class="admin-si">🧑‍💼</span> Onboarding{% if onboarding_in_progress_count %} <span class="badge unread">{{ onboarding_in_progress_count }}</span>{% endif %}</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint in ('admin_schedule', 'admin_shift_new', 'admin_shift_edit') else '' }}" href="{{ url_for('admin_schedule') }}"><span class="admin-si">🗓️</span> Schedule</a>
         <a class="admin-sidebar-item" href="{{ url_for('staff_login') }}"><span class="admin-si">🕐</span> Time Clock</a>
         {% set report_slug = request.view_args.get('slug') if request.endpoint == 'admin_report_view' and request.view_args else none %}

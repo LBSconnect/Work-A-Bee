@@ -1,0 +1,52 @@
+{% extends "admin_base.html" %}
+{% block title %}Onboarding Checklist{% endblock %}
+{% block admin_content %}
+  <p class="nav"><a href="{{ url_for('admin_onboarding') }}">&larr; Onboarding</a></p>
+  <h1>Onboarding Checklist</h1>
+  <p class="muted">These tasks apply to every new hire. "Admin" tasks are checked off by a manager; "Employee" tasks are checked off by the new hire themselves.</p>
+
+  <form method="post" style="display:flex; gap:10px; align-items:flex-end; max-width:560px;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div style="flex:1;">
+      <label>New task</label>
+      <input type="text" name="title" required>
+    </div>
+    <div>
+      <label>Assigned to</label>
+      <select name="assigned_to">
+        <option value="admin">Admin</option>
+        <option value="employee">Employee</option>
+      </select>
+    </div>
+    <button type="submit" style="margin-top:0;">Add</button>
+  </form>
+
+  <table style="max-width:700px;">
+    <tr><th>Task</th><th>Assigned to</th><th></th><th></th></tr>
+    {% for t in tasks %}
+    <tr {% if not t.active %}style="opacity:0.5;"{% endif %}>
+      <td>
+        <form method="post" action="{{ url_for('admin_onboarding_task_edit', task_id=t.id) }}" style="display:flex; gap:8px;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="text" name="title" value="{{ t.title }}" style="margin:0;">
+          <select name="assigned_to" style="margin:0;">
+            <option value="admin" {% if t.assigned_to == 'admin' %}selected{% endif %}>Admin</option>
+            <option value="employee" {% if t.assigned_to == 'employee' %}selected{% endif %}>Employee</option>
+          </select>
+          <button type="submit" class="secondary" style="margin:0; padding:6px 12px; font-size:12px;">Save</button>
+        </form>
+      </td>
+      <td>{{ 'Admin' if t.assigned_to == 'admin' else 'Employee' }}</td>
+      <td>{% if not t.active %}<span class="badge out">Inactive</span>{% endif %}</td>
+      <td>
+        <form method="post" action="{{ url_for('admin_onboarding_task_toggle_active', task_id=t.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="secondary" style="margin:0; padding:6px 12px; font-size:12px;">{{ 'Deactivate' if t.active else 'Activate' }}</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="muted">No tasks yet.</td></tr>
+    {% endfor %}
+  </table>
+{% endblock %}

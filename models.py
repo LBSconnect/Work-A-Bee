@@ -472,6 +472,37 @@ def init_db():
                     created_at TIMESTAMP NOT NULL DEFAULT NOW()
                 )
             """)
+            # hire_date is left NULL for employees created before this feature
+            # shipped, which is what keeps them out of the onboarding checklist
+            # without any one-time backfill: admin_employee_new sets it going
+            # forward, so "has a hire_date" doubles as "should go through
+            # onboarding" with no extra flag to maintain.
+            conn.execute("""
+                ALTER TABLE employees
+                    ADD COLUMN IF NOT EXISTS hire_date DATE,
+                    ADD COLUMN IF NOT EXISTS onboarding_completed_at TIMESTAMP
+            """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS onboarding_tasks (
+                    id SERIAL PRIMARY KEY,
+                    org_id INTEGER NOT NULL REFERENCES organizations(id),
+                    title TEXT NOT NULL,
+                    assigned_to TEXT NOT NULL DEFAULT 'admin',
+                    sort_order INTEGER NOT NULL DEFAULT 0,
+                    active INTEGER NOT NULL DEFAULT 1,
+                    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+                )
+            """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS onboarding_task_completions (
+                    id SERIAL PRIMARY KEY,
+                    employee_id INTEGER NOT NULL REFERENCES employees(id),
+                    task_id INTEGER NOT NULL REFERENCES onboarding_tasks(id),
+                    completed_by TEXT NOT NULL DEFAULT 'admin',
+                    completed_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                    UNIQUE (employee_id, task_id)
+                )
+            """)
             conn.commit()
     except Exception:
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")
