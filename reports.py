@@ -710,3 +710,26 @@ def dismiss_exception(conn, org_id, employee_id, exception_type, exception_date,
         "note=EXCLUDED.note, dismissed_by_admin_id=EXCLUDED.dismissed_by_admin_id, dismissed_at=NOW()",
         (org_id, employee_id, exception_type, exception_date, note, admin_id),
     )
+
+
+def payroll_readiness_summary(conn, org, period_start, period_end):
+    """Rolls up everything blocking a clean payroll run for the period:
+    timesheet approval status across the team and any open exceptions."""
+    approval_rows = approval_status_rows(conn, org, period_start, period_end)
+    status_counts = {"not_submitted": 0, "submitted": 0, "returned": 0, "approved": 0}
+    for r in approval_rows:
+        status_counts[r["status"]] = status_counts.get(r["status"], 0) + 1
+
+    open_exceptions = [e for e in exceptions_inbox(conn, org, period_start, period_end) if e["dismissal"] is None]
+    not_approved_rows = [r for r in approval_rows if r["status"] != "approved"]
+    total_employees = len(approval_rows)
+
+    return {
+        "total_employees": total_employees,
+        "status_counts": status_counts,
+        "not_approved_rows": not_approved_rows,
+        "open_exceptions": open_exceptions,
+        "open_exceptions_count": len(open_exceptions),
+        "total_gross_pay": round(sum(r["gross_pay"] for r in approval_rows), 2),
+        "is_ready": total_employees > 0 and not not_approved_rows and not open_exceptions,
+    }

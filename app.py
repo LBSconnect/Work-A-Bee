@@ -2438,6 +2438,11 @@ def admin_reports_index():
         "description": "Approve each employee's timesheet for the period before payroll.",
         "url": url_for("admin_report_approval_status"),
     })
+    cards.append({
+        "title": "Payroll Readiness",
+        "description": "One checklist for the period: approval status and open exceptions, before you export.",
+        "url": url_for("admin_payroll_readiness"),
+    })
     for slug in ["labor-cost", "timecard-audit"]:
         cards.append({
             "title": REPORT_SLUGS[slug]["title"],
@@ -2556,6 +2561,20 @@ def admin_report_approval_bulk_approve():
         conn.commit()
     flash(f"Approved {count} timesheet(s)." if count else "No timesheets selected.")
     return redirect(url_for("admin_report_approval_status", week=period_start.isoformat()))
+
+
+@app.route("/admin/payroll")
+@admin_required
+def admin_payroll_readiness():
+    period_start, period_end = _report_period(request.args, g.org["timezone"])
+    with get_db() as conn:
+        summary = reports.payroll_readiness_summary(conn, g.org, period_start, period_end)
+    return render_template(
+        "admin_payroll_readiness.html",
+        summary=summary, period_start=period_start, period_end=period_end,
+        prev_week=(period_start - timedelta(days=7)).isoformat(),
+        next_week=(period_start + timedelta(days=7)).isoformat(),
+    )
 
 
 @app.route("/admin/exceptions")
