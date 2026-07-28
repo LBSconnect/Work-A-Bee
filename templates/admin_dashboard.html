@@ -114,8 +114,11 @@
     <h1>Reports</h1>
     <p class="muted">Timesheets, attendance, overtime, and payroll reports for your team.</p>
     <a class="btn" href="{{ url_for('admin_reports_index') }}">View All Reports &rarr;</a>
-    <a class="btn secondary" href="{{ url_for('admin_send_report_now') }}"
-       onclick="return confirm('Email this week\'s hours report now?');">Send report now</a>
+    <form method="post" action="{{ url_for('admin_send_report_now') }}" style="display:inline;"
+          onsubmit="return confirm('Email this week\'s hours report now?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn secondary">Send report now</button>
+    </form>
   </div>
 
   <h1 style="margin-top:40px;">Clock in/out details &amp; running total due</h1>
