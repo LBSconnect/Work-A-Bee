@@ -138,6 +138,7 @@
           {% else %}
             <span class="muted">In progress</span>
           {% endif %}
+          {% if e.break_minutes %}<br><span class="muted" style="font-size:12px;">{{ e.break_minutes }} min break{{ '' if g.org.allow_paid_breaks else ' (unpaid, deducted)' }}</span>{% endif %}
         </td>
         <td>{{ "%.2f"|format(e.hours) }}</td>
         <td>{{ "%.2f"|format(e.running_hours) }}</td>
