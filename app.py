@@ -1696,7 +1696,7 @@ def admin_dashboard():
             {"label": "Add More Employees", "done": employee_count > 0, "url": url_for("admin_employees")},
             {"label": "Test Clock In", "done": has_clocked_in_ever, "url": url_for("staff_login")},
             {"label": "Configure Reports", "done": True, "url": url_for("admin_dashboard")},
-            {"label": "Generate First Payroll Report", "done": has_sent_report, "url": url_for("admin_send_report_now")},
+            {"label": "Generate First Payroll Report", "done": has_sent_report, "url": url_for("admin_reports_index")},
         ]
         if all(item["done"] for item in checklist):
             checklist = None
@@ -2411,7 +2411,7 @@ def _send_current_period_report(org):
     return period_start, period_end
 
 
-@app.route("/admin/report/send-now")
+@app.route("/admin/report/send-now", methods=["POST"])
 @admin_required
 def admin_send_report_now():
     try:
