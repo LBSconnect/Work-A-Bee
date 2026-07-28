@@ -57,6 +57,7 @@ def get_period_entries(conn, org, period_start: date, period_end: date):
     lunch_minutes = org.get("lunch_duration_minutes") or 30
     overtime_rule = org.get("overtime_rule") or "none"
     overtime_threshold = org.get("overtime_threshold_hours")
+    paid_breaks = bool(org.get("allow_paid_breaks"))
 
     period_start_dt = datetime.combine(period_start, datetime.min.time())
     period_end_dt = datetime.combine(period_end, datetime.max.time())
@@ -75,6 +76,16 @@ def get_period_entries(conn, org, period_start: date, period_end: date):
             (emp["id"], period_start_dt, period_end_dt),
         ).fetchall()
 
+        entry_ids = [e["id"] for e in time_entries]
+        breaks_by_entry = {}
+        if entry_ids:
+            break_rows = conn.execute(
+                "SELECT time_entry_id, break_start, break_end FROM breaks WHERE time_entry_id = ANY(%s)",
+                (entry_ids,),
+            ).fetchall()
+            for b in break_rows:
+                breaks_by_entry.setdefault(b["time_entry_id"], []).append(b)
+
         entries = []
         running_hours = 0.0
         incomplete = False
@@ -83,13 +94,22 @@ def get_period_entries(conn, org, period_start: date, period_end: date):
             clock_in = _round_dt(e["clock_in"], round_minutes)
             if e["clock_out"]:
                 clock_out = _round_dt(e["clock_out"], round_minutes)
+                cap = clock_out
                 hours = (clock_out - clock_in).total_seconds() / 3600
                 if auto_lunch and hours > 6:
                     hours = max(hours - lunch_minutes / 60, 0)
             else:
                 incomplete = True
-                accrued_through = min(now, period_end_dt)
-                hours = max((accrued_through - clock_in).total_seconds(), 0) / 3600
+                cap = min(now, period_end_dt)
+                hours = max((cap - clock_in).total_seconds(), 0) / 3600
+
+            break_minutes = 0.0
+            for b in breaks_by_entry.get(e["id"], []):
+                b_end = b["break_end"] or cap
+                break_minutes += max((b_end - b["break_start"]).total_seconds(), 0) / 60
+            if not paid_breaks and break_minutes:
+                hours = max(hours - break_minutes / 60, 0)
+
             running_hours += hours
             hours_by_day[clock_in.date()] = hours_by_day.get(clock_in.date(), 0.0) + hours
             entries.append({
@@ -97,6 +117,7 @@ def get_period_entries(conn, org, period_start: date, period_end: date):
                 "clock_in": e["clock_in"],
                 "clock_out": e["clock_out"],
                 "hours": round(hours, 2),
+                "break_minutes": round(break_minutes),
                 "running_hours": round(running_hours, 2),
                 "running_due": round(running_hours * emp["hourly_rate"], 2),
                 "is_manual": bool(e.get("is_manual")),

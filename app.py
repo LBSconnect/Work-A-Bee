@@ -365,9 +365,19 @@ def clock_action():
             (emp_id,),
         ).fetchone()
 
+        open_break = None
+        if open_entry:
+            open_break = conn.execute(
+                "SELECT * FROM breaks WHERE time_entry_id=%s AND break_end IS NULL",
+                (open_entry["id"],),
+            ).fetchone()
+
         if request.method == "POST":
             now = now_in(org["timezone"])
             if open_entry:
+                if open_break:
+                    flash("End your break before clocking out.")
+                    return redirect(url_for("clock_action"))
                 conn.execute(
                     "UPDATE time_entries SET clock_out=%s WHERE id=%s",
                     (now, open_entry["id"]),
@@ -417,12 +427,93 @@ def clock_action():
         "clock.html",
         employee=emp,
         is_clocked_in=bool(open_entry),
+        on_break=bool(open_break),
+        break_started_at=open_break["break_start"] if open_break else None,
         today_shift=today_shift,
         current_week_hours=current_week_hours,
         current_week_pay=current_week_pay,
         chart_days=chart_days,
         now=now_in(org["timezone"]),
     )
+
+
+@app.route("/clock/break/start", methods=["POST"])
+def clock_break_start():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if emp is None or org is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        open_entry = conn.execute(
+            "SELECT * FROM time_entries WHERE employee_id=%s AND clock_out IS NULL",
+            (emp_id,),
+        ).fetchone()
+        if open_entry is None:
+            flash("You need to be clocked in to start a break.")
+            return redirect(url_for("clock_action"))
+
+        open_break = conn.execute(
+            "SELECT * FROM breaks WHERE time_entry_id=%s AND break_end IS NULL",
+            (open_entry["id"],),
+        ).fetchone()
+        if open_break is not None:
+            flash("You're already on a break.")
+            return redirect(url_for("clock_action"))
+
+        now = now_in(org["timezone"])
+        conn.execute(
+            "INSERT INTO breaks (time_entry_id, employee_id, break_start) VALUES (%s, %s, %s)",
+            (open_entry["id"], emp_id, now),
+        )
+        conn.commit()
+        flash(f"Break started at {now.strftime('%I:%M %p')}.")
+    return redirect(url_for("clock_action"))
+
+
+@app.route("/clock/break/end", methods=["POST"])
+def clock_break_end():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        org = conn.execute(
+            "SELECT * FROM organizations WHERE id=%s AND status='active'", (org_id,)
+        ).fetchone()
+        if emp is None or org is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        open_break = conn.execute(
+            "SELECT b.* FROM breaks b JOIN time_entries t ON t.id = b.time_entry_id "
+            "WHERE b.employee_id=%s AND b.break_end IS NULL AND t.clock_out IS NULL",
+            (emp_id,),
+        ).fetchone()
+        if open_break is None:
+            flash("You're not currently on a break.")
+            return redirect(url_for("clock_action"))
+
+        now = now_in(org["timezone"])
+        conn.execute("UPDATE breaks SET break_end=%s WHERE id=%s", (now, open_break["id"]))
+        conn.commit()
+        mins = round((now - open_break["break_start"]).total_seconds() / 60)
+        flash(f"Break ended at {now.strftime('%I:%M %p')} ({mins} min).")
+    return redirect(url_for("clock_action"))
 
 
 @app.route("/pay-stubs")

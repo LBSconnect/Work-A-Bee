@@ -6,23 +6,40 @@
       <h1 style="margin-bottom:4px;">Hi, {{ employee.name }} 👋</h1>
       <p class="muted">
         Clock status:
-        {% if is_clocked_in %}<span class="badge in">On Duty</span>{% else %}<span class="badge out">Off Duty</span>{% endif %}
+        {% if on_break %}<span class="badge out">On Break</span>
+        {% elif is_clocked_in %}<span class="badge in">On Duty</span>
+        {% else %}<span class="badge out">Off Duty</span>{% endif %}
         &middot; Current week: <strong>{{ "%.2f"|format(current_week_hours) }} hrs</strong>
       </p>
     </div>
 
     <div style="background:#FFF8E1; border:1px solid #FFE082; border-radius:12px; padding:16px 20px; min-width:220px;">
       <p style="font-weight:700; margin-bottom:10px;">
-        {% if is_clocked_in %}Ready to head out?{% else %}Ready to start your day?{% endif %}
+        {% if on_break %}On break since {{ break_started_at.strftime('%I:%M %p') }}
+        {% elif is_clocked_in %}Ready to head out?
+        {% else %}Ready to start your day?{% endif %}
       </p>
-      <form method="post" style="margin:0;">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% if on_break %}
+        <form method="post" action="{{ url_for('clock_break_end') }}" style="margin:0;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" style="margin:0; width:100%;">&#9199; END BREAK</button>
+        </form>
+      {% else %}
+        <form method="post" style="margin:0;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% if is_clocked_in %}
+            <button type="submit" class="clock-out" style="margin:0; width:100%;">&#10008; CLOCK OUT</button>
+          {% else %}
+            <button type="submit" style="margin:0; width:100%;">&#10004; CLOCK IN</button>
+          {% endif %}
+        </form>
         {% if is_clocked_in %}
-          <button type="submit" class="clock-out" style="margin:0; width:100%;">&#10008; CLOCK OUT</button>
-        {% else %}
-          <button type="submit" style="margin:0; width:100%;">&#10004; CLOCK IN</button>
+          <form method="post" action="{{ url_for('clock_break_start') }}" style="margin:8px 0 0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="secondary" style="margin:0; width:100%;">&#9199; START BREAK</button>
+          </form>
         {% endif %}
-      </form>
+      {% endif %}
       {% if today_shift %}
         <p class="muted" style="margin-top:10px; font-size:12px;">
           Scheduled: {{ today_shift.shift_start.strftime('%I:%M %p') }} &ndash; {{ today_shift.shift_end.strftime('%I:%M %p') }}

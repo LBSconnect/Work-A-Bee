@@ -462,6 +462,16 @@ def init_db():
                     UNIQUE (employee_id, exception_type, exception_date)
                 )
             """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS breaks (
+                    id SERIAL PRIMARY KEY,
+                    time_entry_id INTEGER NOT NULL REFERENCES time_entries(id),
+                    employee_id INTEGER NOT NULL REFERENCES employees(id),
+                    break_start TIMESTAMP NOT NULL,
+                    break_end TIMESTAMP,
+                    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+                )
+            """)
             conn.commit()
     except Exception:
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")
