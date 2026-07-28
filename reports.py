@@ -278,11 +278,18 @@ def approval_status_rows(conn, org, period_start, period_end):
     review, or by reopening a previously-approved timesheet).
     """
     org_id = org["id"]
+    period_start_dt = datetime.combine(period_start, datetime.min.time())
+    period_end_dt = datetime.combine(period_end, datetime.max.time())
     employees = conn.execute(
         "SELECT e.*, d.name AS department_name FROM employees e "
         "LEFT JOIN departments d ON e.department_id = d.id "
-        "WHERE e.org_id=%s AND e.active=1 ORDER BY e.name",
-        (org_id,),
+        "WHERE e.org_id=%s AND (e.active=1 "
+        "OR EXISTS (SELECT 1 FROM timesheet_approvals ta WHERE ta.employee_id=e.id AND ta.org_id=%s "
+        "AND ta.period_start=%s AND ta.period_end=%s) "
+        "OR EXISTS (SELECT 1 FROM time_entries te WHERE te.employee_id=e.id "
+        "AND te.clock_in>=%s AND te.clock_in<=%s)) "
+        "ORDER BY e.name",
+        (org_id, org_id, period_start, period_end, period_start_dt, period_end_dt),
     ).fetchall()
     approvals = conn.execute(
         "SELECT ta.*, a.username AS approved_by_username FROM timesheet_approvals ta "

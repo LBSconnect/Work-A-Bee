@@ -64,8 +64,11 @@ def get_period_entries(conn, org, period_start: date, period_end: date):
     now = now_in(tz_name)
 
     employees = conn.execute(
-        "SELECT * FROM employees WHERE org_id=%s AND active=1 ORDER BY name",
-        (org_id,),
+        "SELECT * FROM employees WHERE org_id=%s AND (active=1 OR EXISTS ("
+        "SELECT 1 FROM time_entries te WHERE te.employee_id=employees.id "
+        "AND te.clock_in>=%s AND te.clock_in<=%s"
+        ")) ORDER BY name",
+        (org_id, period_start_dt, period_end_dt),
     ).fetchall()
 
     results = []
