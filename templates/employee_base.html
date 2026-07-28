@@ -36,6 +36,9 @@
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'my_schedule_page' else '' }}" href="{{ url_for('my_schedule_page') }}"><span class="admin-si">🗓️</span> Schedule</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'shift_marketplace' else '' }}" href="{{ url_for('shift_marketplace') }}"><span class="admin-si">🔄</span> Shift Marketplace{% if 'shift_marketplace' in locked_features %} <span class="lock-icon" title="Requires a higher plan">🔒</span>{% endif %}</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'time_history_page' else '' }}" href="{{ url_for('time_history_page') }}"><span class="admin-si">🕐</span> Time</a>
+        {% if employee.hire_date %}
+        <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'employee_onboarding_page' else '' }}" href="{{ url_for('employee_onboarding_page') }}"><span class="admin-si">🧑‍💼</span> Onboarding{% if employee_onboarding_pending_count %} <span class="badge unread">{{ employee_onboarding_pending_count }}</span>{% endif %}</a>
+        {% endif %}
         <a class="admin-sidebar-item{{ ' active' if request.endpoint in ('pay_stubs', 'pay_stub_detail') else '' }}" href="{{ url_for('pay_stubs') }}"><span class="admin-si">💵</span> Pay Stubs</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'pto_requests_page' else '' }}" href="{{ url_for('pto_requests_page') }}"><span class="admin-si">🌴</span> Time Off</a>
         <a class="admin-sidebar-item{{ ' active' if request.endpoint == 'notifications_page' else '' }}" href="{{ url_for('notifications_page') }}"><span class="admin-si">🔔</span> Notifications{% if 'notifications' in locked_features %} <span class="lock-icon" title="Requires a higher plan">🔒</span>{% elif unread_notifications_count %} <span class="badge unread">{{ unread_notifications_count }}</span>{% endif %}</a>

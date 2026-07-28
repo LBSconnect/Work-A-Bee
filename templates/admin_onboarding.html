@@ -1,0 +1,29 @@
+{% extends "admin_base.html" %}
+{% block title %}Onboarding{% endblock %}
+{% block admin_content %}
+  <h1>Employee Onboarding</h1>
+  <p class="muted">New hires currently working through their onboarding checklist. Employees drop off this list automatically once every task is complete.</p>
+
+  <p class="nav"><a href="{{ url_for('admin_onboarding_tasks') }}">Manage checklist ({{ task_count }} active task{{ 's' if task_count != 1 else '' }}) &rarr;</a></p>
+
+  <table>
+    <tr><th>Employee</th><th>Hire Date</th><th>Progress</th><th></th></tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.employee.name }}</td>
+      <td>{{ r.employee.hire_date.strftime('%b %d, %Y') if r.employee.hire_date else '' }}</td>
+      <td>
+        {{ r.completed_count }} / {{ r.total_count }}
+        {% if r.total_count %}
+          <div style="background:#e5e7eb; border-radius:4px; height:6px; width:140px; margin-top:4px;">
+            <div style="background:#16a34a; border-radius:4px; height:6px; width:{{ (100 * r.completed_count / r.total_count)|round|int }}%;"></div>
+          </div>
+        {% endif %}
+      </td>
+      <td><a class="btn secondary" href="{{ url_for('admin_onboarding_employee', emp_id=r.employee.id) }}">Review &rarr;</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="muted">No one is currently onboarding. New employees appear here automatically after they're added.</td></tr>
+    {% endfor %}
+  </table>
+{% endblock %}

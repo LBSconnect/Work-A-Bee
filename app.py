@@ -22,6 +22,7 @@ import config
 import devices as devices_mod
 import doc_pages
 import notifications
+import onboarding
 import performance
 import plans
 import recognition
@@ -145,6 +146,7 @@ def inject_unread_message_counts():
     ctx = {
         "unread_messages_count": 0, "unread_admin_messages_count": 0,
         "unread_notifications_count": 0, "unread_admin_notifications_count": 0,
+        "onboarding_in_progress_count": 0, "employee_onboarding_pending_count": 0,
         "locked_features": set(),
     }
     org_id = session.get("org_id")
@@ -174,6 +176,16 @@ def inject_unread_message_counts():
                     (emp_id,),
                 ).fetchone()
                 ctx["unread_notifications_count"] = row["c"] if row else 0
+                emp = conn.execute("SELECT hire_date FROM employees WHERE id=%s", (emp_id,)).fetchone()
+                if emp and emp["hire_date"]:
+                    row = conn.execute(
+                        "SELECT COUNT(*) AS c FROM onboarding_tasks t "
+                        "WHERE t.org_id=%s AND t.active=1 AND t.assigned_to='employee' "
+                        "AND NOT EXISTS (SELECT 1 FROM onboarding_task_completions c "
+                        "WHERE c.task_id=t.id AND c.employee_id=%s)",
+                        (org_id, emp_id),
+                    ).fetchone()
+                    ctx["employee_onboarding_pending_count"] = row["c"] if row else 0
             if admin_id:
                 row = conn.execute(
                     "SELECT COUNT(*) AS c FROM messages m JOIN employees e ON m.employee_id = e.id "
@@ -187,6 +199,12 @@ def inject_unread_message_counts():
                     (admin_id,),
                 ).fetchone()
                 ctx["unread_admin_notifications_count"] = row["c"] if row else 0
+                row = conn.execute(
+                    "SELECT COUNT(*) AS c FROM employees WHERE org_id=%s AND active=1 "
+                    "AND hire_date IS NOT NULL AND onboarding_completed_at IS NULL",
+                    (org_id,),
+                ).fetchone()
+                ctx["onboarding_in_progress_count"] = row["c"] if row else 0
     except Exception:
         pass
     return ctx
@@ -919,6 +937,39 @@ def profile_page():
             ).fetchone()
 
     return render_template("profile.html", employee=emp, department=department["name"] if department else None)
+
+
+@app.route("/onboarding", methods=["GET", "POST"])
+def employee_onboarding_page():
+    emp_id = session.get("employee_id")
+    org_id = session.get("org_id")
+    if not emp_id or not org_id:
+        return redirect(url_for("staff_login"))
+
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, org_id)
+        ).fetchone()
+        if emp is None:
+            session.pop("employee_id", None)
+            return redirect(url_for("staff_login"))
+
+        if request.method == "POST":
+            task_id = request.form.get("task_id", type=int)
+            task = conn.execute(
+                "SELECT * FROM onboarding_tasks WHERE id=%s AND org_id=%s AND assigned_to='employee'",
+                (task_id, org_id),
+            ).fetchone()
+            if task is not None:
+                onboarding.toggle_completion(conn, org_id, emp_id, task_id, "employee")
+            return redirect(url_for("employee_onboarding_page"))
+
+        tasks, completed_count, total_count = onboarding.progress_for_employee(conn, org_id, emp_id)
+
+    return render_template(
+        "employee_onboarding.html", employee=emp, tasks=tasks,
+        completed_count=completed_count, total_count=total_count,
+    )
 
 
 @app.route("/employee/<int:emp_id>/photo")
@@ -1735,8 +1786,8 @@ def admin_employee_new():
         try:
             with get_db() as conn:
                 conn.execute(
-                    "INSERT INTO employees (org_id, employee_code, name, pin_hash, hourly_rate, worker_type, department_id) "
-                    "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                    "INSERT INTO employees (org_id, employee_code, name, pin_hash, hourly_rate, worker_type, department_id, hire_date) "
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_DATE)",
                     (g.org["id"], code, name, generate_password_hash(pin), rate, worker_type, department_id),
                 )
                 conn.commit()
@@ -1773,6 +1824,7 @@ def admin_employee_edit(emp_id):
             active = 1 if request.form.get("active") == "on" else 0
             pin = request.form.get("pin", "").strip()
             department_id = request.form.get("department_id") or None
+            hire_date = request.form.get("hire_date") or None
             try:
                 rate = float(request.form["hourly_rate"])
             except ValueError:
@@ -1791,15 +1843,15 @@ def admin_employee_edit(emp_id):
             if pin:
                 conn.execute(
                     "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s, pin_hash=%s, "
-                    "pto_balance_hours=%s, department_id=%s WHERE id=%s AND org_id=%s",
+                    "pto_balance_hours=%s, department_id=%s, hire_date=%s WHERE id=%s AND org_id=%s",
                     (name, rate, worker_type, active, generate_password_hash(pin), pto_balance,
-                     department_id, emp_id, g.org["id"]),
+                     department_id, hire_date, emp_id, g.org["id"]),
                 )
             else:
                 conn.execute(
                     "UPDATE employees SET name=%s, hourly_rate=%s, worker_type=%s, active=%s, pto_balance_hours=%s, "
-                    "department_id=%s WHERE id=%s AND org_id=%s",
-                    (name, rate, worker_type, active, pto_balance, department_id, emp_id, g.org["id"]),
+                    "department_id=%s, hire_date=%s WHERE id=%s AND org_id=%s",
+                    (name, rate, worker_type, active, pto_balance, department_id, hire_date, emp_id, g.org["id"]),
                 )
             conn.commit()
             flash("Updated.")
@@ -1872,6 +1924,112 @@ def admin_department_delete(dept_id):
         conn.commit()
     flash("Department deleted.")
     return redirect(url_for("admin_departments"))
+
+
+@app.route("/admin/onboarding")
+@admin_required
+def admin_onboarding():
+    with get_db() as conn:
+        onboarding.ensure_default_tasks(conn, g.org["id"])
+        rows = onboarding.onboarding_summary(conn, g.org["id"])
+        task_count = len(onboarding.list_tasks(conn, g.org["id"], include_inactive=False))
+    return render_template("admin_onboarding.html", rows=rows, task_count=task_count)
+
+
+@app.route("/admin/onboarding/tasks", methods=["GET", "POST"])
+@admin_required
+def admin_onboarding_tasks():
+    with get_db() as conn:
+        onboarding.ensure_default_tasks(conn, g.org["id"])
+        if request.method == "POST":
+            title = request.form.get("title", "").strip()
+            assigned_to = request.form.get("assigned_to") if request.form.get("assigned_to") in ("admin", "employee") else "admin"
+            if not title:
+                flash("Task title is required.")
+            else:
+                onboarding.create_task(conn, g.org["id"], title, assigned_to)
+                flash("Added.")
+            return redirect(url_for("admin_onboarding_tasks"))
+        tasks = onboarding.list_tasks(conn, g.org["id"])
+    return render_template("admin_onboarding_tasks.html", tasks=tasks)
+
+
+@app.route("/admin/onboarding/tasks/<int:task_id>/edit", methods=["POST"])
+@admin_required
+def admin_onboarding_task_edit(task_id):
+    title = request.form.get("title", "").strip()
+    assigned_to = request.form.get("assigned_to") if request.form.get("assigned_to") in ("admin", "employee") else "admin"
+    if not title:
+        flash("Task title is required.")
+    else:
+        with get_db() as conn:
+            onboarding.update_task(conn, g.org["id"], task_id, title, assigned_to)
+        flash("Updated.")
+    return redirect(url_for("admin_onboarding_tasks"))
+
+
+@app.route("/admin/onboarding/tasks/<int:task_id>/toggle-active", methods=["POST"])
+@admin_required
+def admin_onboarding_task_toggle_active(task_id):
+    with get_db() as conn:
+        task = conn.execute(
+            "SELECT * FROM onboarding_tasks WHERE id=%s AND org_id=%s", (task_id, g.org["id"])
+        ).fetchone()
+        if task is None:
+            flash("Task not found.")
+            return redirect(url_for("admin_onboarding_tasks"))
+        onboarding.set_task_active(conn, g.org["id"], task_id, not task["active"])
+    flash("Deactivated." if task["active"] else "Activated.")
+    return redirect(url_for("admin_onboarding_tasks"))
+
+
+@app.route("/admin/onboarding/<int:emp_id>")
+@admin_required
+def admin_onboarding_employee(emp_id):
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, g.org["id"])
+        ).fetchone()
+        if emp is None:
+            flash("Employee not found.")
+            return redirect(url_for("admin_onboarding"))
+        tasks, completed_count, total_count = onboarding.progress_for_employee(conn, g.org["id"], emp_id)
+    return render_template(
+        "admin_onboarding_employee.html", employee=emp, tasks=tasks,
+        completed_count=completed_count, total_count=total_count,
+    )
+
+
+@app.route("/admin/onboarding/<int:emp_id>/tasks/<int:task_id>/toggle", methods=["POST"])
+@admin_required
+def admin_onboarding_task_toggle(emp_id, task_id):
+    with get_db() as conn:
+        emp = conn.execute(
+            "SELECT * FROM employees WHERE id=%s AND org_id=%s", (emp_id, g.org["id"])
+        ).fetchone()
+        if emp is None:
+            flash("Employee not found.")
+            return redirect(url_for("admin_onboarding"))
+        onboarding.toggle_completion(conn, g.org["id"], emp_id, task_id, "admin")
+    return redirect(url_for("admin_onboarding_employee", emp_id=emp_id))
+
+
+@app.route("/admin/onboarding/<int:emp_id>/complete", methods=["POST"])
+@admin_required
+def admin_onboarding_complete(emp_id):
+    with get_db() as conn:
+        onboarding.set_complete(conn, g.org["id"], emp_id, True)
+    flash("Marked onboarding complete.")
+    return redirect(url_for("admin_onboarding"))
+
+
+@app.route("/admin/onboarding/<int:emp_id>/reopen", methods=["POST"])
+@admin_required
+def admin_onboarding_reopen(emp_id):
+    with get_db() as conn:
+        onboarding.set_complete(conn, g.org["id"], emp_id, False)
+    flash("Reopened onboarding.")
+    return redirect(url_for("admin_onboarding_employee", emp_id=emp_id))
 
 
 @app.route("/admin/employees/<int:emp_id>/time-entries/new", methods=["GET", "POST"])

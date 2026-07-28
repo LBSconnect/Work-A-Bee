@@ -40,6 +40,9 @@
 
       <label>PTO balance (hours)</label>
       <input type="number" step="0.5" name="pto_balance_hours" value="{{ employee.pto_balance_hours }}">
+
+      <label>Hire date</label>
+      <input type="date" name="hire_date" value="{{ employee.hire_date.isoformat() if employee.hire_date else '' }}">
     {% endif %}
 
     <button type="submit">Save</button>

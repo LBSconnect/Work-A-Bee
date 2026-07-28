@@ -1,0 +1,47 @@
+{% extends "admin_base.html" %}
+{% block title %}Onboarding &middot; {{ employee.name }}{% endblock %}
+{% block admin_content %}
+  <p class="nav"><a href="{{ url_for('admin_onboarding') }}">&larr; Onboarding</a></p>
+  <h1>{{ employee.name }}</h1>
+  <p class="muted">
+    Hired {{ employee.hire_date.strftime('%B %d, %Y') if employee.hire_date else 'unknown' }} &middot;
+    {{ completed_count }} of {{ total_count }} tasks complete
+    {% if employee.onboarding_completed_at %} &middot; <strong>Onboarding complete</strong> ({{ employee.onboarding_completed_at.strftime('%b %d, %Y') }}){% endif %}
+  </p>
+
+  <table style="max-width:700px;">
+    <tr><th></th><th>Task</th><th>Who</th><th>Status</th></tr>
+    {% for t in tasks %}
+    <tr>
+      <td>
+        <form method="post" action="{{ url_for('admin_onboarding_task_toggle', emp_id=employee.id, task_id=t.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="secondary" style="margin:0; padding:4px 10px; font-size:12px;">{{ 'Undo' if t.completed else 'Mark done' }}</button>
+        </form>
+      </td>
+      <td style="{% if t.completed %}text-decoration:line-through; color:#6b7280;{% endif %}">{{ t.title }}</td>
+      <td>{{ 'Admin' if t.assigned_to == 'admin' else 'Employee' }}</td>
+      <td>
+        {% if t.completed %}<span class="badge" style="background:#dcfce7; color:#166534;">Done{% if t.completed_by == 'employee' %} (by employee){% endif %}</span>
+        {% else %}<span class="badge out">Pending</span>{% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="muted">No active onboarding tasks. <a href="{{ url_for('admin_onboarding_tasks') }}">Add some</a>.</td></tr>
+    {% endfor %}
+  </table>
+
+  <p style="margin-top:24px;">
+    {% if employee.onboarding_completed_at %}
+      <form method="post" action="{{ url_for('admin_onboarding_reopen', emp_id=employee.id) }}" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="secondary">Reopen onboarding</button>
+      </form>
+    {% else %}
+      <form method="post" action="{{ url_for('admin_onboarding_complete', emp_id=employee.id) }}" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="secondary">Mark onboarding complete</button>
+      </form>
+    {% endif %}
+  </p>
+{% endblock %}
