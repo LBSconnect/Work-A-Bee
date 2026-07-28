@@ -1,0 +1,79 @@
+{% extends "admin_base.html" %}
+{% block title %}Payroll Readiness{% endblock %}
+{% block admin_content %}
+  <h1>Payroll Readiness</h1>
+  <p class="muted">Check that every timesheet is approved and no exceptions are open before exporting payroll.</p>
+
+  <div class="report-period-nav">
+    <a class="btn secondary" href="?week={{ prev_week }}">&larr; Previous Week</a>
+    <span class="report-period-label">{{ period_start.strftime('%B %d') }} &ndash; {{ period_end.strftime('%B %d, %Y') }}</span>
+    <a class="btn secondary" href="?week={{ next_week }}">Next Week &rarr;</a>
+  </div>
+
+  {% if summary.is_ready %}
+    <div class="flash" style="background:#dcfce7; border-color:#86efac;">
+      <strong>&#9989; Ready to run payroll</strong> &mdash; all {{ summary.total_employees }} timesheet(s) are approved and there are no open exceptions for this period.
+    </div>
+  {% else %}
+    <div class="flash" style="background:#fef3c7; border-color:#fde68a;">
+      <strong>&#9888; Not ready yet</strong> &mdash;
+      {%- if summary.not_approved_rows %} {{ summary.not_approved_rows|length }} timesheet(s) still need approval{% endif -%}
+      {%- if summary.not_approved_rows and summary.open_exceptions_count %} and{% endif -%}
+      {%- if summary.open_exceptions_count %} {{ summary.open_exceptions_count }} open exception(s){% endif -%}.
+    </div>
+  {% endif %}
+
+  <div class="stat-cards admin-stat-cards">
+    <div class="stat-card">
+      <div class="stat-card-label">Total Employees</div>
+      <div class="stat-card-value">{{ summary.total_employees }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Approved</div>
+      <div class="stat-card-value">{{ summary.status_counts.approved }}</div>
+      <div class="stat-card-sub">of {{ summary.total_employees }}</div>
+    </div>
+    <a class="stat-card" href="{{ url_for('admin_report_approval_status', week=period_start.isoformat()) }}">
+      <div class="stat-card-label">Needs Approval</div>
+      <div class="stat-card-value">{{ summary.not_approved_rows|length }}</div>
+      <div class="stat-card-sub">{{ 'Review timesheets →' if summary.not_approved_rows else 'All clear' }}</div>
+    </a>
+    <a class="stat-card" href="{{ url_for('admin_exceptions', week=period_start.isoformat()) }}">
+      <div class="stat-card-label">Open Exceptions</div>
+      <div class="stat-card-value">{{ summary.open_exceptions_count }}</div>
+      <div class="stat-card-sub">{{ 'Review exceptions →' if summary.open_exceptions_count else 'All clear' }}</div>
+    </a>
+    <div class="stat-card">
+      <div class="stat-card-label">Projected Gross Pay</div>
+      <div class="stat-card-value">${{ "%.2f"|format(summary.total_gross_pay) }}</div>
+      <div class="stat-card-sub">For this period</div>
+    </div>
+  </div>
+
+  {% if summary.not_approved_rows %}
+  <h2 style="margin-top:32px;">Timesheets needing approval</h2>
+  <table>
+    <tr><th>Employee ID</th><th>Name</th><th>Status</th><th>Hours</th><th>Gross Pay</th></tr>
+    {% for r in summary.not_approved_rows %}
+    <tr>
+      <td>{{ r.employee_code }}</td>
+      <td>{{ r.name }}</td>
+      <td>
+        {% if r.status == 'submitted' %}<span class="badge unread" style="background:#2563eb;">Submitted</span>
+        {% elif r.status == 'returned' %}<span class="badge" style="background:#fee2e2; color:#991b1b;">Returned</span>
+        {% else %}<span class="badge out">Not Submitted</span>{% endif %}
+      </td>
+      <td>{{ "%.2f"|format(r.total_hours) }}</td>
+      <td>${{ "%.2f"|format(r.gross_pay) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  <p style="margin-top:32px;">
+    <a class="btn{% if not summary.is_ready %} secondary{% endif %}" href="{{ url_for('admin_report_view', slug='payroll-export', start=period_start.isoformat(), end=period_end.isoformat()) }}">
+      Proceed to Payroll Export &rarr;
+    </a>
+    {% if not summary.is_ready %}<span class="muted" style="margin-left:10px;">You can still export, but review the items above first.</span>{% endif %}
+  </p>
+{% endblock %}
