@@ -1,0 +1,243 @@
+name: Weekly Site Health & Repair
+
+# GitHub Actions cron is UTC-only and does NOT adjust for daylight saving on
+# its own. Friday 00:00 America/Chicago is 05:00 UTC during CDT (summer) and
+# 06:00 UTC during CST (winter). Rather than hand-editing this file twice a
+# year, we fire at BOTH times every Friday and let the "Guard" step below
+# check the *actual* local Chicago clock and no-op unless it's really
+# ~00:00 local - so exactly one of the two firings does real work, whichever
+# UTC offset is currently in effect, with no silent wrong-time runs.
+on:
+  schedule:
+    - cron: "0 5 * * 5"   # covers Fri 00:00 CDT (UTC-5)
+    - cron: "0 6 * * 5"   # covers Fri 00:00 CST (UTC-6)
+  workflow_dispatch: {}    # manual "run it now" button for testing
+
+concurrency:
+  group: weekly-site-health
+  cancel-in-progress: false
+
+env:
+  PRODUCTION_URL: https://www.workabeez.net
+  TZ: America/Chicago
+
+jobs:
+  guard:
+    name: Guard (DST-correct local-time check)
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+      report_date: ${{ steps.check.outputs.report_date }}
+    steps:
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            hour=$(TZ=America/Chicago date +%H)
+            if [ "$hour" = "00" ]; then
+              echo "should_run=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "should_run=false" >> "$GITHUB_OUTPUT"
+              echo "Not actually midnight America/Chicago right now (it's $hour:xx local) - skipping, the other cron firing will handle it."
+            fi
+          fi
+          echo "report_date=$(TZ=America/Chicago date +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+  audit:
+    name: Audit, repair, and report
+    needs: guard
+    if: needs.guard.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: workabee
+          POSTGRES_PASSWORD: workabee
+          POSTGRES_DB: workabee_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://workabee:workabee@localhost:5432/workabee_ci
+      SECRET_KEY: ci-test-secret-key-not-used-in-production
+      DISABLE_BACKGROUND_SCHEDULER: "1"
+      REPORT_DATE: ${{ needs.guard.outputs.report_date }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Record baseline commit
+        id: baseline
+        run: echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      # --- 1. Full existing test suite against a real, ephemeral DB --------
+      - name: Build + lint + unit + template + smoke tests
+        id: tests_before
+        run: |
+          set +e
+          find . -maxdepth 1 -name "*.py" -print0 | xargs -0 -n1 python -m py_compile
+          flake8 --select=E9,F --exclude=mobile,.venv,venv,.claude . > flake8-report.txt 2>&1
+          flake8_exit=$?
+          pytest tests/ -v > pytest-report.txt 2>&1
+          pytest_exit=$?
+          echo "flake8_exit=$flake8_exit" >> "$GITHUB_OUTPUT"
+          echo "pytest_exit=$pytest_exit" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      # --- 2. Read-only production crawl -----------------------------------
+      - name: Crawl production (read-only)
+        id: crawl
+        run: |
+          set +e
+          mkdir -p reports/site-health/$REPORT_DATE
+          python3 scripts/site_health_crawl.py \
+            --base-url "$PRODUCTION_URL" \
+            --out reports/site-health/$REPORT_DATE/crawl.json
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+
+      # --- 3. Dependency vulnerability scan + SAFE auto-fix attempt --------
+      # pip-audit --fix only ever bumps a pin to the nearest version that
+      # resolves the advisory - it cannot introduce an unrelated major
+      # version jump on its own, which is what makes this the one category
+      # of fix this workflow applies automatically.
+      - name: Dependency scan
+        id: depscan
+        run: |
+          set +e
+          pip-audit -r requirements.txt -f json -o reports/site-health/$REPORT_DATE/pip-audit-before.json
+          cp requirements.txt requirements.txt.orig
+          pip-audit -r requirements.txt --fix --dry-run -f json -o /tmp/pip-audit-fix-plan.json
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Security lint (bandit)
+        run: |
+          set +e
+          bandit -r . -x ./mobile,./tests,./.claude,./.github -ll -ii -f json -o reports/site-health/$REPORT_DATE/bandit.json
+
+      # --- 4. Decide whether the dependency fix is safe to actually apply --
+      - name: Evaluate and apply safe dependency fixes only
+        id: apply_fix
+        run: |
+          python3 scripts/site_health_apply_safe_fixes.py \
+            --fix-plan /tmp/pip-audit-fix-plan.json \
+            --requirements requirements.txt \
+            --out-flag /tmp/applied_fix.flag
+
+      - name: Re-run full test suite if a dependency fix was applied
+        id: tests_after
+        if: steps.apply_fix.outputs.applied == 'true'
+        run: |
+          set +e
+          pip install -r requirements.txt
+          pytest tests/ -v > pytest-report-after-fix.txt 2>&1
+          echo "pytest_exit=$?" >> "$GITHUB_OUTPUT"
+
+      # --- 5. Compare against last week's baseline -------------------------
+      - name: Compare against previous baseline
+        run: |
+          python3 scripts/site_health_report.py \
+            --report-date "$REPORT_DATE" \
+            --baseline-commit "${{ steps.baseline.outputs.commit }}" \
+            --production-url "$PRODUCTION_URL" \
+            --flake8-exit "${{ steps.tests_before.outputs.flake8_exit }}" \
+            --pytest-exit "${{ steps.tests_before.outputs.pytest_exit }}" \
+            --crawl-exit "${{ steps.crawl.outputs.exit }}" \
+            --dep-fix-applied "${{ steps.apply_fix.outputs.applied }}" \
+            --dep-fix-retest-exit "${{ steps.tests_after.outputs.pytest_exit }}" \
+            --out reports/site-health/$REPORT_DATE
+
+      - name: Upload report artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-health-${{ env.REPORT_DATE }}
+          path: |
+            reports/site-health/${{ env.REPORT_DATE }}/
+            flake8-report.txt
+            pytest-report.txt
+            pytest-report-after-fix.txt
+          if-no-files-found: ignore
+
+      # --- 6. Commit + PR only if there's something to propose -------------
+      - name: Create repair branch and PR
+        if: steps.apply_fix.outputs.applied == 'true' || always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          git config user.name "site-health-bot"
+          git config user.email "actions@github.com"
+
+          # Always commit the dated report for the historical record, even on
+          # a fully clean week - this is what next week's comparison reads.
+          git add reports/site-health/$REPORT_DATE
+
+          low_risk="false"
+          if [ "${{ steps.apply_fix.outputs.applied }}" = "true" ] && \
+             [ "${{ steps.tests_after.outputs.pytest_exit }}" = "0" ]; then
+            git add requirements.txt
+            low_risk="true"
+          fi
+
+          if git diff --cached --quiet; then
+            echo "Nothing to commit this week."
+            exit 0
+          fi
+
+          branch="site-health/$REPORT_DATE"
+          git checkout -b "$branch"
+          git commit -m "Weekly site health report + $( [ "$low_risk" = "true" ] && echo "dependency security fix" || echo "findings only" ) ($REPORT_DATE)"
+          git push -u origin "$branch"
+
+          body_file="reports/site-health/$REPORT_DATE/report.md"
+          pr_url=$(gh pr create --base main --head "$branch" \
+            --title "Weekly site health report - $REPORT_DATE" \
+            --body-file "$body_file")
+          echo "Opened $pr_url"
+
+          # Auto-merge ONLY the narrow, verified-safe case: a dependency
+          # security patch where the full suite still passes, and nothing
+          # outside requirements.txt + the report itself changed. Everything
+          # else (broken links, accessibility, perf, anything touching app
+          # code) always waits for human review, per policy.
+          changed_files=$(git diff --name-only main.."$branch")
+          only_safe_files="true"
+          while IFS= read -r f; do
+            case "$f" in
+              requirements.txt|reports/site-health/*) ;;
+              *) only_safe_files="false" ;;
+            esac
+          done <<< "$changed_files"
+
+          if [ "$low_risk" = "true" ] && [ "$only_safe_files" = "true" ]; then
+            echo "Enabling auto-merge (low-risk dependency patch, all tests green, no other files touched)."
+            gh pr merge "$pr_url" --auto --squash || \
+              echo "::warning::Could not enable auto-merge - repo setting 'Allow auto-merge' may need to be turned on. PR is open for manual merge instead."
+          else
+            echo "Leaving PR for manual review (findings-only week, or changes touch more than requirements.txt)."
+          fi

@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build, lint, test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: workabee
+          POSTGRES_PASSWORD: workabee
+          POSTGRES_DB: workabee_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://workabee:workabee@localhost:5432/workabee_ci
+      SECRET_KEY: ci-test-secret-key-not-used-in-production
+      DISABLE_BACKGROUND_SCHEDULER: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Syntax check (py_compile)
+        run: |
+          find . -maxdepth 1 -name "*.py" -print0 | xargs -0 -n1 python -m py_compile
+          find api -name "*.py" -print0 | xargs -0 -n1 python -m py_compile
+
+      - name: Lint (flake8 - real errors only, not style)
+        run: flake8 --select=E9,F --exclude=mobile,.venv,venv,.claude .
+
+      - name: Verify the app actually boots against a real database
+        run: |
+          python -c "
+          import app
+          print('app.py imported successfully - init_db() and ensure_system_admin_bootstrap() ran clean against a real Postgres instance')
+          "
+
+      - name: Unit + template tests
+        run: pytest tests/ -v
+
+      - name: Security lint (bandit, report only for now)
+        if: always()
+        run: bandit -r . -x ./mobile,./tests,./.claude,./.github -ll -ii -f txt -o bandit-report.txt || true
+
+      - name: Dependency vulnerability scan (report only for now)
+        if: always()
+        run: pip-audit -r requirements.txt -f json -o pip-audit-report.json || true
+
+      - name: Upload security/dependency reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            bandit-report.txt
+            pip-audit-report.json
+          if-no-files-found: ignore
