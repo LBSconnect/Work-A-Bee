@@ -3,7 +3,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-change-me")
+_DEV_SECRET_KEY = "dev-only-change-me"
+SECRET_KEY = os.environ.get("SECRET_KEY", _DEV_SECRET_KEY)
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 if DATABASE_URL.startswith("postgres://"):
@@ -26,6 +27,18 @@ STRIPE_PRICE_GROWTH = os.environ.get("STRIPE_PRICE_GROWTH", "")
 STRIPE_PRICE_BUSINESS = os.environ.get("STRIPE_PRICE_BUSINESS", "")
 
 ON_RENDER = os.environ.get("RENDER", "") != ""
+
+# SECRET_KEY signs both Flask session cookies and the mobile API's JWT access
+# tokens (see api/auth.py). Falling back to a well-known default is fine for
+# local dev, but would be a critical vulnerability if it ever happened on a
+# real deployment (Render already auto-generates a real value via render.yaml's
+# `generateValue: true` - this is a fail-loud backstop in case that ever
+# regresses, rather than silently running insecurely).
+if ON_RENDER and SECRET_KEY == _DEV_SECRET_KEY:
+    raise RuntimeError(
+        "SECRET_KEY is not set (or still the dev default) in a deployed environment. "
+        "Refusing to start - set a real SECRET_KEY in Render's environment."
+    )
 
 # One-time bootstrap for the first platform-wide system admin account (cross-tenant
 # access, gates /system and /internal). Only takes effect if the system_admins table

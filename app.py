@@ -62,6 +62,10 @@ ensure_system_admin_bootstrap()
 app.register_blueprint(wizard_blueprint)
 register_api(app, csrf)
 limiter.limit("10 per minute")(api_auth_bp)
+# The signup wizard has no per-route limiter of its own (unlike staff/admin/system
+# login) - a blanket blueprint-level limit closes that gap without constraining a
+# legitimate signup, which is ~7 sequential POSTs in one sitting.
+limiter.limit("30 per minute")(wizard_blueprint)
 
 if not config.DISABLE_BACKGROUND_SCHEDULER:
     # Sends each org's current-pay-period summary automatically once a week,
