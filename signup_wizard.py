@@ -3,7 +3,7 @@ import csv
 import io
 import traceback
 
-from flask import Blueprint, request, redirect, url_for, render_template, flash, session, make_response, jsonify
+from flask import Blueprint, request, redirect, url_for, render_template, flash, session, make_response
 from werkzeug.security import generate_password_hash
 
 import stripe
