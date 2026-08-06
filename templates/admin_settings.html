@@ -134,7 +134,7 @@
     {% if org.logo_data %}
       <p><img src="{{ url_for('org_logo', org_id=org.id) }}" alt="{{ org.name }}" style="height:48px;"></p>
     {% endif %}
-    <input type="file" name="logo" accept="image/png,image/jpeg,image/svg+xml">
+    <input type="file" name="logo" accept="image/png,image/jpeg">
     {% if org.logo_data %}<p class="muted">Choose a new file to replace the logo above.</p>{% endif %}
     {% if errors.logo %}<p class="field-error">{{ errors.logo }}</p>{% endif %}
 

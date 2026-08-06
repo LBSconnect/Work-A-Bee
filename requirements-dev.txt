@@ -1,0 +1,6 @@
+# Dev/CI-only tooling. Not needed at runtime - never installed on Render.
+# Kept separate from requirements.txt so production installs stay minimal.
+pytest>=8.0
+flake8>=7.0
+bandit>=1.7
+pip-audit>=2.7

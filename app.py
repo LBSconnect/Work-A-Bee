@@ -62,6 +62,10 @@ ensure_system_admin_bootstrap()
 app.register_blueprint(wizard_blueprint)
 register_api(app, csrf)
 limiter.limit("10 per minute")(api_auth_bp)
+# The signup wizard has no per-route limiter of its own (unlike staff/admin/system
+# login) - a blanket blueprint-level limit closes that gap without constraining a
+# legitimate signup, which is ~7 sequential POSTs in one sitting.
+limiter.limit("30 per minute")(wizard_blueprint)
 
 if not config.DISABLE_BACKGROUND_SCHEDULER:
     # Sends each org's current-pay-period summary automatically once a week,
@@ -118,6 +122,12 @@ def set_security_headers(response):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     if config.ON_RENDER:
         response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
+    if request.path.startswith("/static/"):
+        # These filenames aren't content-hashed, so a moderate max-age (not
+        # "immutable") - a changed logo/stylesheet is visible to returning
+        # visitors within a day instead of every asset re-validating on
+        # every single page load.
+        response.headers["Cache-Control"] = "public, max-age=86400"
     return response
 
 
@@ -2417,8 +2427,16 @@ def admin_send_report_now():
     try:
         _send_current_period_report(g.org)
         flash("Report emailed successfully.")
-    except Exception as e:
-        flash(f"Failed to send report: {e}")
+    except RuntimeError as e:
+        # Raised by _send_current_period_report itself for known, user-actionable
+        # conditions (e.g. no report_recipients configured) - safe to show as-is.
+        flash(str(e))
+    except Exception:
+        # Anything else (Microsoft Graph/network failure, DB error, ...) could
+        # carry internal URLs or other details in its message - never put that
+        # in a flashed message. Log server-side and show a generic message.
+        traceback.print_exc()
+        flash("Failed to send report. Please try again or contact support.")
     return redirect(url_for("admin_dashboard"))
 
 
@@ -3268,8 +3286,12 @@ def admin_settings():
             raw = logo_file.read()
             if len(raw) > 500 * 1024:
                 errors["logo"] = "Logo must be 500KB or smaller."
-            elif logo_file.mimetype not in ("image/png", "image/jpeg", "image/svg+xml"):
-                errors["logo"] = "Logo must be a PNG, JPEG, or SVG file."
+            elif logo_file.mimetype not in ("image/png", "image/jpeg"):
+                # SVG intentionally excluded: SVG can embed <script>, and this file is
+                # later served back at /org/<id>/logo with Content-Type: image/svg+xml,
+                # which browsers execute as a document (not just an image) on direct
+                # navigation - i.e. a stored-XSS vector. PNG/JPEG can't carry script.
+                errors["logo"] = "Logo must be a PNG or JPEG file."
             else:
                 logo_data, logo_mime = raw, logo_file.mimetype
 

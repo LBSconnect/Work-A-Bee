@@ -1,10 +1,8 @@
-from flask import Blueprint, g, jsonify, request
+from flask import Blueprint, jsonify, request
 from werkzeug.security import check_password_hash
 
 import plans
 from api.auth import (
-    api_admin_required,
-    api_employee_required,
     issue_tokens,
     revoke_refresh_token,
     rotate_refresh_token,

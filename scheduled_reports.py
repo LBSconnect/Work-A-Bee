@@ -10,7 +10,7 @@ import traceback
 from email_report import send_report_email
 from models import get_db
 from payroll import calculate_payroll, get_period_bounds
-from tz import now_in, today_in
+from tz import now_in
 
 
 def _claim_report_log(conn, org_id, report_date):
