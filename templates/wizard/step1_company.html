@@ -63,7 +63,7 @@
     <input type="text" name="website" value="{{ data.website or '' }}">
 
     <label>Company Logo</label>
-    <input type="file" name="logo" accept="image/png,image/jpeg,image/svg+xml">
+    <input type="file" name="logo" accept="image/png,image/jpeg">
     {% if data.logo_b64 %}<p class="muted">Logo already uploaded. Choose a new file to replace it.</p>{% endif %}
     {% if errors.logo %}<p class="field-error">{{ errors.logo }}</p>{% endif %}
 
