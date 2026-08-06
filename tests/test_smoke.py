@@ -93,6 +93,15 @@ def test_security_headers_present(client):
 
 
 def test_robots_and_sitemap_serve(client):
-    assert client.get("/robots.txt").status_code == 200
+    robots = client.get("/robots.txt")
+    assert robots.status_code == 200
+    assert b"Disallow: /system" in robots.data
+    assert b"Disallow: /internal" in robots.data
     resp = client.get("/sitemap.xml")
     assert resp.status_code == 200
+
+
+def test_static_assets_are_cacheable(client):
+    resp = client.get("/static/style.css")
+    assert resp.status_code == 200
+    assert "max-age" in resp.headers.get("Cache-Control", "")

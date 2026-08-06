@@ -122,6 +122,12 @@ def set_security_headers(response):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     if config.ON_RENDER:
         response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
+    if request.path.startswith("/static/"):
+        # These filenames aren't content-hashed, so a moderate max-age (not
+        # "immutable") - a changed logo/stylesheet is visible to returning
+        # visitors within a day instead of every asset re-validating on
+        # every single page load.
+        response.headers["Cache-Control"] = "public, max-age=86400"
     return response
 
 
