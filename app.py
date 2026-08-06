@@ -2417,8 +2417,16 @@ def admin_send_report_now():
     try:
         _send_current_period_report(g.org)
         flash("Report emailed successfully.")
-    except Exception as e:
-        flash(f"Failed to send report: {e}")
+    except RuntimeError as e:
+        # Raised by _send_current_period_report itself for known, user-actionable
+        # conditions (e.g. no report_recipients configured) - safe to show as-is.
+        flash(str(e))
+    except Exception:
+        # Anything else (Microsoft Graph/network failure, DB error, ...) could
+        # carry internal URLs or other details in its message - never put that
+        # in a flashed message. Log server-side and show a generic message.
+        traceback.print_exc()
+        flash("Failed to send report. Please try again or contact support.")
     return redirect(url_for("admin_dashboard"))
 
 
