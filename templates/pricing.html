@@ -55,7 +55,7 @@
     .nav-logo-text span { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gray); }
     .nav-links { display: flex; gap: 28px; align-items: center; }
     .nav-links a { font-size: 14px; font-weight: 500; color: var(--black); display: flex; align-items: center; gap: 4px; }
-    .nav-links a.current { color: var(--yellow); font-weight: 700; }
+    .nav-links a.current { color: #9A6700; font-weight: 700; }
     .nav-links a .arrow { font-size: 10px; opacity: .6; }
     .nav-actions { display: flex; align-items: center; gap: 16px; }
     .btn-ghost { font-size: 14px; font-weight: 600; padding: 8px 16px; }
@@ -119,7 +119,7 @@
 
     .pricing-note {
       max-width: 720px; margin: 48px auto 0; text-align: center;
-      font-size: 13px; color: #777; line-height: 1.7;
+      font-size: 13px; color: #666; line-height: 1.7;
     }
     .pricing-note a { color: var(--yellow-dark, #9A6700); font-weight: 600; }
 
@@ -128,8 +128,8 @@
     .footer-top { display: grid; grid-template-columns: 1.5fr repeat(3,1fr); gap: 40px; margin-bottom: 40px; }
     .footer-brand .bee { font-size: 36px; }
     .footer-brand strong { font-size: 18px; font-weight: 800; }
-    .footer-brand .tagline { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #888; display: block; margin-bottom: 8px; }
-    .footer-brand .url { color: var(--yellow); font-size: 13px; font-weight: 600; margin-top: 8px; display: block; }
+    .footer-brand .tagline { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #666; display: block; margin-bottom: 8px; }
+    .footer-brand .url { color: #9A6700; font-size: 13px; font-weight: 600; margin-top: 8px; display: block; }
     .footer-col h4 { font-size: 13px; font-weight: 800; margin-bottom: 16px; }
     .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
     .footer-col ul li a { font-size: 13px; color: #555; }
@@ -148,9 +148,9 @@
       border-top: 1px solid #eee; padding-top: 24px;
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
     }
-    .footer-bottom p { font-size: 12px; color: #999; }
-    .footer-bottom-links { display: flex; gap: 24px; }
-    .footer-bottom-links a { font-size: 12px; color: #999; }
+    .footer-bottom p { font-size: 12px; color: #666; }
+    .footer-bottom-links { display: flex; flex-wrap: wrap; gap: 24px; row-gap: 8px; }
+    .footer-bottom-links a { font-size: 12px; color: #666; }
     .footer-bottom-links a:hover { color: var(--black); }
 
     /* ── RESPONSIVE ── */
@@ -196,7 +196,7 @@
   <div class="nav-actions">
     <a href="/staff/login" class="btn-ghost" style="font-size:13px;color:#555;">Employee Clock In</a>
     <a href="/admin/login" class="btn-ghost">Admin Login</a>
-    <a href="/signup"><button class="btn-yellow">Start Free Trial</button></a>
+    <a href="/signup" class="btn-yellow">Start Free Trial</a>
   </div>
 </nav>
 
@@ -210,6 +210,7 @@
 </section>
 
 <section class="pricing-section">
+  <h2 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Plans</h2>
   <div class="pricing-grid">
 
     <div class="price-card">
@@ -224,7 +225,7 @@
         <li><span class="check">✓</span> Weekly payroll email reports</li>
         <li><span class="check">✓</span> Admin dashboard</li>
       </ul>
-      <a href="/signup?plan=starter"><button class="price-cta">Get Started Free</button></a>
+      <a href="/signup?plan=starter" class="price-cta">Get Started Free</a>
     </div>
 
     <div class="price-card featured">
@@ -239,7 +240,7 @@
         <li><span class="check">✓</span> Overtime rules &amp; auto lunch deduction</li>
         <li><span class="check">✓</span> Manual time entry corrections</li>
       </ul>
-      <a href="/signup?plan=growth"><button class="price-cta primary">Start Free Trial</button></a>
+      <a href="/signup?plan=growth" class="price-cta primary">Start Free Trial</a>
     </div>
 
     <div class="price-card">
@@ -253,7 +254,7 @@
         <li><span class="check">✓</span> Full audit log access</li>
         <li><span class="check">✓</span> Priority email support</li>
       </ul>
-      <a href="/signup?plan=business"><button class="price-cta">Start Free Trial</button></a>
+      <a href="/signup?plan=business" class="price-cta">Start Free Trial</a>
     </div>
 
   </div>
@@ -313,7 +314,6 @@
       <a href="{{ url_for('terms_of_service') }}">Terms of Service</a>
       <a href="{{ url_for('aup_policy') }}">Acceptable Use Policy</a>
       <a href="{{ url_for('docs_index') }}">Documentation</a>
-      <a href="{{ url_for('system_login') }}">System Admin</a>
     </div>
   </div>
 </footer>
