@@ -101,8 +101,12 @@ def step_company():
             raw = logo_file.read()
             if len(raw) > 500 * 1024:
                 errors["logo"] = "Logo must be 500KB or smaller."
-            elif logo_file.mimetype not in ("image/png", "image/jpeg", "image/svg+xml"):
-                errors["logo"] = "Logo must be a PNG, JPEG, or SVG file."
+            elif logo_file.mimetype not in ("image/png", "image/jpeg"):
+                # SVG intentionally excluded: SVG can embed <script>, and this file is
+                # later served back at /org/<id>/logo with Content-Type: image/svg+xml,
+                # which browsers execute as a document (not just an image) on direct
+                # navigation - i.e. a stored-XSS vector. PNG/JPEG can't carry script.
+                errors["logo"] = "Logo must be a PNG or JPEG file."
             else:
                 fields["logo_b64"] = base64.b64encode(raw).decode("ascii")
                 fields["logo_mime"] = logo_file.mimetype
