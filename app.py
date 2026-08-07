@@ -5,6 +5,7 @@ import zlib
 from datetime import datetime, timedelta
 from functools import wraps
 
+import psycopg2.errors
 from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g, Response, make_response, send_from_directory
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -402,6 +403,23 @@ def clock_action():
 
         if request.method == "POST":
             now = now_in(org["timezone"])
+
+            # Debounce rapid repeated clicks: the unique-open-entry constraint
+            # (models.py) stops two simultaneous requests from both creating an
+            # open entry, but it can't stop a *sequence* of rapid clicks each
+            # correctly toggling in/out one after another - confirmed during the
+            # 2026-08 QA pass (10 near-simultaneous clicks produced 4 real,
+            # complete clock-in/clock-out pairs, each a fraction of a second
+            # long). No genuine employee action needs a second clock event
+            # within 3 seconds of their last one.
+            recent = conn.execute(
+                "SELECT 1 FROM time_entries WHERE employee_id=%s AND "
+                "GREATEST(clock_in, COALESCE(clock_out, clock_in)) > %s",
+                (emp_id, now - timedelta(seconds=3)),
+            ).fetchone()
+            if recent:
+                return redirect(url_for("clock_action"))
+
             if open_entry:
                 if open_break:
                     flash("End your break before clocking out.")
@@ -412,11 +430,20 @@ def clock_action():
                 )
                 flash(f"Clocked OUT at {now.strftime('%I:%M %p')}. Have a good one, {emp['name']}!")
             else:
-                conn.execute(
-                    "INSERT INTO time_entries (employee_id, clock_in) VALUES (%s, %s)",
-                    (emp_id, now),
-                )
-                flash(f"Clocked IN at {now.strftime('%I:%M %p')}. Welcome, {emp['name']}!")
+                try:
+                    conn.execute(
+                        "INSERT INTO time_entries (employee_id, clock_in) VALUES (%s, %s)",
+                        (emp_id, now),
+                    )
+                    conn.commit()
+                    flash(f"Clocked IN at {now.strftime('%I:%M %p')}. Welcome, {emp['name']}!")
+                except psycopg2.errors.UniqueViolation:
+                    # idx_time_entries_one_open_per_employee caught a race: another
+                    # near-simultaneous request (double-click, form resubmit) already
+                    # clocked this employee in. Nothing to do but discard this
+                    # duplicate attempt - the other request's clock-in already stands.
+                    conn.commit()
+                return redirect(url_for("clock_action"))
             conn.commit()
             return redirect(url_for("clock_action"))
 
