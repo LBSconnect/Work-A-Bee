@@ -508,6 +508,39 @@ def init_db():
         print("WARNING: onboarding-wizard schema migration failed; core app will still run. Traceback:")
         traceback.print_exc()
 
+    # --- One-open-entry-per-employee constraint (own transaction, same reasoning
+    # as above). Confirmed during the 2026-08 QA pass: two near-simultaneous
+    # clock POSTs (rapid double-click, flaky-network resubmit) can each read "no
+    # open entry" before either commits, both INSERT, and fragment one real
+    # shift into multiple bogus entries. clock_action() in app.py now relies on
+    # this constraint to make that race fail safely instead of corrupting data.
+    # If any employee already has more than one open entry from before this fix
+    # shipped, the CREATE UNIQUE INDEX itself fails (Postgres won't index over
+    # existing violations) - caught here so a pre-existing data conflict can
+    # never block startup; it prints exactly which employee_id(s) need a human
+    # to close the extra open entry, rather than silently discarding rows.
+    try:
+        with get_db() as conn:
+            dupes = conn.execute("""
+                SELECT employee_id, COUNT(*) AS n FROM time_entries
+                WHERE clock_out IS NULL GROUP BY employee_id HAVING COUNT(*) > 1
+            """).fetchall()
+            if dupes:
+                print(
+                    "WARNING: one-open-entry-per-employee constraint NOT applied - "
+                    f"employee_id(s) with multiple open time entries: {[d['employee_id'] for d in dupes]}. "
+                    "Close the extra open entries (Admin > time entry delete/edit) then restart to apply the fix."
+                )
+            else:
+                conn.execute("""
+                    CREATE UNIQUE INDEX IF NOT EXISTS idx_time_entries_one_open_per_employee
+                    ON time_entries (employee_id) WHERE clock_out IS NULL
+                """)
+            conn.commit()
+    except Exception:
+        print("WARNING: one-open-entry-per-employee migration failed; core app will still run. Traceback:")
+        traceback.print_exc()
+
 
 def ensure_system_admin_bootstrap():
     """Creates the first system_admins row from SYSTEM_ADMIN_BOOTSTRAP_USERNAME/
