@@ -3027,12 +3027,7 @@ def admin_pto():
 @admin_required
 def admin_pto_approve(request_id):
     with get_db() as conn:
-        req = conn.execute(
-            "SELECT r.*, e.name AS employee_name, e.pto_balance_hours FROM pto_requests r "
-            "JOIN employees e ON r.employee_id = e.id "
-            "WHERE r.id=%s AND r.org_id=%s AND r.status='pending'",
-            (request_id, g.org["id"]),
-        ).fetchone()
+        req = reports.approve_pto(conn, g.org["id"], request_id, g.admin["id"])
         if req is None:
             flash("Request not found or already reviewed.")
             return redirect(url_for("admin_pto"))
@@ -3040,14 +3035,6 @@ def admin_pto_approve(request_id):
         if req["hours"] > req["pto_balance_hours"]:
             flash(f"{req['employee_name']} only has {req['pto_balance_hours']:.1f} PTO hours available; approve anyway from Employees if you want to allow a negative balance.")
 
-        conn.execute(
-            "UPDATE pto_requests SET status='approved', reviewed_by_admin_id=%s, reviewed_at=NOW() WHERE id=%s",
-            (g.admin["id"], request_id),
-        )
-        conn.execute(
-            "UPDATE employees SET pto_balance_hours = pto_balance_hours - %s WHERE id=%s",
-            (req["hours"], req["employee_id"]),
-        )
         audit.log(conn, g.org["id"], "admin", g.admin["id"], "pto.approved", f"{req['employee_name']}: {req['hours']}h")
         notifications.notify_employee(
             conn, g.org["id"], req["employee_id"], "pto_approved",
@@ -3064,19 +3051,11 @@ def admin_pto_approve(request_id):
 @admin_required
 def admin_pto_deny(request_id):
     with get_db() as conn:
-        req = conn.execute(
-            "SELECT r.*, e.name AS employee_name FROM pto_requests r JOIN employees e ON r.employee_id = e.id "
-            "WHERE r.id=%s AND r.org_id=%s AND r.status='pending'",
-            (request_id, g.org["id"]),
-        ).fetchone()
+        req = reports.deny_pto(conn, g.org["id"], request_id, g.admin["id"])
         if req is None:
             flash("Request not found or already reviewed.")
             return redirect(url_for("admin_pto"))
 
-        conn.execute(
-            "UPDATE pto_requests SET status='denied', reviewed_by_admin_id=%s, reviewed_at=NOW() WHERE id=%s",
-            (g.admin["id"], request_id),
-        )
         audit.log(conn, g.org["id"], "admin", g.admin["id"], "pto.denied", f"{req['employee_name']}: {req['hours']}h")
         notifications.notify_employee(
             conn, g.org["id"], req["employee_id"], "pto_denied",

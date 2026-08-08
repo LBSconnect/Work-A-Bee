@@ -560,6 +560,7 @@ def approve_correction(conn, org_id, correction_id, admin_id):
         "UPDATE punch_corrections SET status='approved', reviewed_by_admin_id=%s, reviewed_at=NOW() WHERE id=%s",
         (admin_id, correction_id),
     )
+    c["status"] = "approved"
     return c
 
 
@@ -572,7 +573,50 @@ def deny_correction(conn, org_id, correction_id, admin_id, comment):
         "WHERE id=%s",
         (admin_id, comment, correction_id),
     )
+    c["status"] = "denied"
+    c["manager_comment"] = comment
     return c
+
+
+def _pending_pto_request(conn, org_id, request_id):
+    return conn.execute(
+        "SELECT r.*, e.name AS employee_name, e.employee_code, e.pto_balance_hours FROM pto_requests r "
+        "JOIN employees e ON r.employee_id = e.id "
+        "WHERE r.id=%s AND r.org_id=%s AND r.status='pending'",
+        (request_id, org_id),
+    ).fetchone()
+
+
+def approve_pto(conn, org_id, request_id, admin_id):
+    """Marks a pending PTO request approved and deducts the hours from the employee's
+    balance (allowed to go negative - callers should warn if it would). Returns the
+    request row (with employee_name/pto_balance_hours, pre-deduction) for
+    notification/audit, or None if not found/already reviewed."""
+    req = _pending_pto_request(conn, org_id, request_id)
+    if req is None:
+        return None
+    conn.execute(
+        "UPDATE pto_requests SET status='approved', reviewed_by_admin_id=%s, reviewed_at=NOW() WHERE id=%s",
+        (admin_id, request_id),
+    )
+    conn.execute(
+        "UPDATE employees SET pto_balance_hours = pto_balance_hours - %s WHERE id=%s",
+        (req["hours"], req["employee_id"]),
+    )
+    req["status"] = "approved"
+    return req
+
+
+def deny_pto(conn, org_id, request_id, admin_id):
+    req = _pending_pto_request(conn, org_id, request_id)
+    if req is None:
+        return None
+    conn.execute(
+        "UPDATE pto_requests SET status='denied', reviewed_by_admin_id=%s, reviewed_at=NOW() WHERE id=%s",
+        (admin_id, request_id),
+    )
+    req["status"] = "denied"
+    return req
 
 
 def overlapping_shifts_rows(conn, org, period_start, period_end):
