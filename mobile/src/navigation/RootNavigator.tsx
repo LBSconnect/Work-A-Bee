@@ -6,7 +6,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useAuth } from "../auth/AuthContext";
 import LoginScreen from "../screens/LoginScreen";
 import EmployeeTabs from "./EmployeeTabs";
-import AdminHomeScreen from "../screens/admin/AdminHomeScreen";
+import AdminTabs from "./AdminTabs";
 
 const Stack = createNativeStackNavigator();
 
@@ -29,7 +29,7 @@ export default function RootNavigator() {
         ) : me.role === "employee" ? (
           <Stack.Screen name="EmployeeTabs" component={EmployeeTabs} />
         ) : (
-          <Stack.Screen name="AdminHome" component={AdminHomeScreen} />
+          <Stack.Screen name="AdminTabs" component={AdminTabs} />
         )}
       </Stack.Navigator>
     </NavigationContainer>
