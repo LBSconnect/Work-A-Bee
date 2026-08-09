@@ -1,0 +1,75 @@
+name: EAS Build (mobile)
+
+# Manual-only on purpose: EAS builds consume Expo's build minutes/credits, so
+# this shouldn't fire automatically on every push while the mobile app is
+# still early-stage. Trigger it by hand from the Actions tab (or `gh workflow
+# run eas-build.yml -f profile=preview -f platform=android`) when you actually
+# want a build.
+#
+# Requires an EXPO_TOKEN repository secret (Settings -> Secrets and variables
+# -> Actions -> New repository secret, name it exactly EXPO_TOKEN) - an Expo
+# access token from https://expo.dev/accounts/[account]/settings/access-tokens,
+# used by `eas` below to authenticate non-interactively. This is a different
+# credential from EXPO_ACCESS_TOKEN (see config.py / env.example), which
+# authenticates push notification sends, not builds.
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Target platform"
+        required: true
+        default: android
+        type: choice
+        options:
+          - android
+          - ios
+          - all
+      profile:
+        description: "EAS build profile (see mobile/eas.json)"
+        required: true
+        default: preview
+        type: choice
+        options:
+          - development
+          - preview
+          - production
+
+concurrency:
+  group: eas-build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: eas build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set up eas-cli
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Verify Expo authentication
+        run: eas whoami
+
+      - name: EAS Build
+        run: >
+          eas build
+          --platform ${{ inputs.platform }}
+          --profile ${{ inputs.profile }}
+          --non-interactive
+          --no-wait

@@ -11,6 +11,7 @@ from api.employee.pto import api_employee_pto_bp
 from api.employee.schedule import api_employee_schedule_bp
 from api.employee.time_history import api_employee_time_history_bp
 from api.errors import register_error_handlers
+from api.push_tokens import api_push_tokens_bp
 
 API_BLUEPRINTS = [
     api_auth_bp,
@@ -25,6 +26,7 @@ API_BLUEPRINTS = [
     api_admin_today_bp,
     api_admin_pto_bp,
     api_admin_corrections_bp,
+    api_push_tokens_bp,
 ]
 
 
