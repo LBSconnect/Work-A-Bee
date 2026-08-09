@@ -13,6 +13,28 @@ Scan the QR code with Expo Go on your Android phone. The phone and your dev mach
 
 For logic-only smoke testing without a phone: `npx expo start --web`.
 
+Push notifications (see below) won't actually deliver in Expo Go - Expo removed
+remote push support from Expo Go in SDK 53+. `registerForPushNotificationsAsync`
+degrades to returning `null` there (no crash, just no token), so the rest of the
+app works normally; to see a real push end-to-end you need an EAS development
+build (`eas build --profile development`) or the production app.
+
+## Push notifications
+
+Employees/admins are registered for push on sign-in (`src/auth/AuthContext.tsx`
+calls `registerForPushNotificationsAsync` + `POST /api/v1/{employee,admin}/push-token`)
+and unregistered on sign-out. The Flask backend sends through Expo's push API
+whenever it would otherwise create an in-app notification or send a
+notification email (see `notifications.py` / `notify_push.py` on the backend) -
+shift claimed, PTO decided, new message, etc.
+
 ## Building for the Play Store
 
-Handled later by EAS Build (`eas.json` not yet added - see Phase E of the mobile/API plan). No local Android SDK is required; EAS builds in the cloud and can also manage the upload keystore.
+`eas.json` has build profiles for development/preview/production. Trigger a
+cloud build via the "EAS Build (mobile)" GitHub Actions workflow
+(`.github/workflows/eas-build.yml`, manual `workflow_dispatch` only) or locally
+with `eas build --platform android --profile preview`. Either way requires
+being authenticated with Expo - locally via `eas login`, in CI via an
+`EXPO_TOKEN` repository secret (see the workflow file for where to create one).
+No local Android SDK is required; EAS builds in the cloud and can also manage
+the upload keystore.

@@ -1,7 +1,9 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { adminLogin, employeeLogin, fetchMe, logout as logoutApi, MeResponse, refreshTokens } from "../api/authApi";
 import { setAccessToken, setOnSessionExpired } from "../api/client";
+import { registerPushToken, unregisterPushToken } from "../api/pushApi";
+import { registerForPushNotificationsAsync } from "../notifications/registerPushToken";
 import { clearStoredRefreshToken, getStoredRefreshToken, setStoredRefreshToken } from "./tokenStorage";
 
 interface AuthState {
@@ -20,22 +22,41 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({ status: "loading", me: null, refreshToken: null });
+  // This device's current Expo push token, once known - not state, since
+  // nothing ever needs to re-render off it. Only used to unregister on
+  // sign-out; a failed lookup just leaves it null and sign-out skips that.
+  const pushTokenRef = useRef<string | null>(null);
 
   const establishSession = useCallback(async (accessToken: string, refreshToken: string) => {
     setAccessToken(accessToken);
     await setStoredRefreshToken(refreshToken);
     const me = await fetchMe(accessToken);
     setState({ status: "signedIn", me, refreshToken });
+
+    // Fire-and-forget: registering this device for push must never delay or
+    // block sign-in landing on the home screen (see the doc comments on
+    // registerForPushNotificationsAsync/registerPushToken for why each step
+    // here already swallows its own failures).
+    registerForPushNotificationsAsync().then((token) => {
+      if (token) {
+        pushTokenRef.current = token;
+        registerPushToken(me.role, token);
+      }
+    });
   }, []);
 
   const signOut = useCallback(async () => {
     if (state.refreshToken) {
       await logoutApi(state.refreshToken);
     }
+    if (pushTokenRef.current && state.me) {
+      await unregisterPushToken(state.me.role, pushTokenRef.current);
+      pushTokenRef.current = null;
+    }
     setAccessToken(null);
     await clearStoredRefreshToken();
     setState({ status: "signedOut", me: null, refreshToken: null });
-  }, [state.refreshToken]);
+  }, [state.refreshToken, state.me]);
 
   const signInEmployee = useCallback(
     async (companyCode: string, employeeCode: string, pin: string) => {

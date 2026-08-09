@@ -370,6 +370,27 @@ def init_db():
                     revoked_at TIMESTAMP
                 )
             """)
+            # One row per device that has opted in to push notifications, keyed by
+            # (subject_type, subject_id) the same way api_refresh_tokens is above.
+            # `token` is unique on its own (not per-subject) rather than hashed like
+            # the refresh token, because: (a) it isn't a credential - it only lets
+            # our own server ask Expo to push to that device, it grants no access to
+            # our API - and (b) a single physical device can only ever be registered
+            # to one signed-in subject at a time, so re-registering it (a re-login,
+            # or a different employee signing into a shared device) should reassign
+            # the existing row rather than create a duplicate. See notifications.py
+            # for how this is used and api/push_tokens.py for how it's written.
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS push_tokens (
+                    id SERIAL PRIMARY KEY,
+                    org_id INTEGER NOT NULL REFERENCES organizations(id),
+                    subject_type TEXT NOT NULL,
+                    subject_id INTEGER NOT NULL,
+                    token TEXT UNIQUE NOT NULL,
+                    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                    last_used_at TIMESTAMP NOT NULL DEFAULT NOW()
+                )
+            """)
             # Automatic weekly reports moved from an unused Friday-5pm default to
             # Monday-morning (0=Monday, matching date.weekday()) - see
             # scheduled_reports.py. Existing orgs still sitting on the old

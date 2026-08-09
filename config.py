@@ -20,6 +20,15 @@ MS_SENDER_EMAIL = os.environ.get("MS_SENDER_EMAIL", "")
 POSTMARK_SERVER_TOKEN = os.environ.get("POSTMARK_SERVER_TOKEN", "")
 NOTIFICATION_FROM_EMAIL = os.environ.get("NOTIFICATION_FROM_EMAIL", "")
 
+# Optional. Expo's push API (notify_push.py) works with zero server-side
+# credentials by default - this only opts the project into Expo's "Enhanced
+# Security" push mode, which requires every send request to carry it. Get one
+# from https://expo.dev/accounts/[account]/settings/access-tokens. Unrelated
+# to the EXPO_TOKEN secret used by .github/workflows/eas-build.yml, which
+# authenticates the `eas` CLI (builds), not push sends - the two are
+# different Expo credentials for different purposes.
+EXPO_ACCESS_TOKEN = os.environ.get("EXPO_ACCESS_TOKEN", "")
+
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
 STRIPE_PRICE_STARTER = os.environ.get("STRIPE_PRICE_STARTER", "")
