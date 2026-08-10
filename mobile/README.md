@@ -39,13 +39,21 @@ being authenticated with Expo - locally via `eas login`, in CI via an
 No local Android SDK or Xcode install is required; EAS builds in the cloud and
 can also manage signing (keystore / distribution certificate) for you.
 
-### Submitting straight to the App Store
+### Submitting straight to a store
 
-The workflow's `auto_submit` input (iOS + `production` profile only) chains
-`eas build` straight into `eas submit`, using `eas.json`'s
-`submit.production.ios` config - already pointed at this app's App Store
+The workflow's `auto_submit` input (`production` profile, one platform at a
+time - not `all`) chains `eas build` straight into `eas submit`, using
+`eas.json`'s `submit.production.<platform>` config. There's also a separate
+"EAS Submit" workflow (`.github/workflows/eas-submit.yml`) for submitting a
+build that's already finished in EAS, without triggering a new one.
+
+Without `auto_submit=yes`, EAS Build only builds - the finished binary sits
+in your Expo dashboard for you to submit by hand or review before it goes
+anywhere near either store's review queue.
+
+**iOS** - `submit.production.ios` is already pointed at this app's App Store
 Connect record (`ascAppId: "6799530913"`, `appleTeamId: "F9JJ9GMS26"`, both
-plain identifiers, not secrets). Actually authenticating that submission needs
+plain identifiers, not secrets). Authenticating the actual submission needs
 an App Store Connect API Key, via three repository secrets (Settings ->
 Secrets and variables -> Actions), from App Store Connect -> Users and Access
 -> Integrations -> Keys:
@@ -56,9 +64,24 @@ Secrets and variables -> Actions), from App Store Connect -> Users and Access
 | `APPLE_ASC_ISSUER_ID` | the Issuer ID shown above the key list |
 | `APPLE_ASC_API_KEY` | the full contents of the downloaded `.p8` file |
 
-Without `auto_submit=yes`, the workflow only builds - the finished `.ipa`
-sits in your Expo dashboard for you to submit by hand (`eas submit -p ios`)
-or review before it goes anywhere near App Review.
+**Android** - `submit.production.android` uploads to the `internal` testing
+track as a `draft` release rather than `production`, since a brand-new Play
+Console listing won't have its store listing/content rating/target audience
+setup tasks finished yet (Google won't allow a production release until
+those are done, and - separately - new Play Developer accounts must run a
+closed test with 20+ testers for 14 days before their first production
+release, regardless of what's uploaded). Promote the draft to whichever
+track you want once the listing is ready. Needs one repository secret, from
+a Google Service Account key (exact steps: https://expo.fyi/creating-google-
+service-account - enable the Google Play Android Developer API in Google
+Cloud Console, create a service account + JSON key there, then invite that
+service account's email in Play Console's Users and permissions with
+release/store-listing permissions):
 
-There's no Play Store equivalent wired up yet (would need a Google Play
-service account key) - Android builds are build-only for now.
+| Secret name | Value |
+|---|---|
+| `GOOGLE_PLAY_SERVICE_ACCOUNT_KEY` | the full contents of the downloaded JSON key |
+
+The app listing itself (name, package, store listing) has to be created by
+hand in Play Console first - the Play Developer API can't create a brand-new
+app, only act on one that already exists there.

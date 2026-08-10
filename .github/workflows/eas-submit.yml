@@ -1,23 +1,34 @@
 name: EAS Submit (mobile)
 
-# Submits the most recent successfully-finished iOS build to the App Store,
-# without triggering a new build - for when a build is already sitting in
-# EAS (e.g. from a manual `eas build` or a prior run of the "EAS Build"
-# workflow without auto_submit). Manual dispatch only, same reasoning as EAS
-# Build: this hands the app straight to Apple's review queue, so it should
-# never fire automatically.
+# Submits the most recent successfully-finished build (one platform at a
+# time) to the relevant app store, without triggering a new build - for when
+# a build is already sitting in EAS (e.g. from a manual `eas build` or a
+# prior run of the "EAS Build" workflow without auto_submit). Manual dispatch
+# only, same reasoning as EAS Build: this hands the app straight to the
+# store's review queue, so it should never fire automatically.
 #
 # Needs the same secrets as EAS Build's auto_submit path - see that
 # workflow's header comment for exactly where to generate each one:
-#   EXPO_TOKEN            - authenticates the eas-cli itself
-#   APPLE_ASC_KEY_ID       ) from an App Store Connect API Key
-#   APPLE_ASC_ISSUER_ID    ) (App Store Connect -> Users and Access ->
-#   APPLE_ASC_API_KEY      )  Integrations -> Keys)
+#   EXPO_TOKEN                        - authenticates the eas-cli itself
+#   APPLE_ASC_KEY_ID                  ) iOS only, from an App Store Connect
+#   APPLE_ASC_ISSUER_ID               )   API Key
+#   APPLE_ASC_API_KEY                 )
+#   GOOGLE_PLAY_SERVICE_ACCOUNT_KEY   - Android only, from a Google Service
+#                                        Account key
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Which store to submit the latest finished build to"
+        required: true
+        default: ios
+        type: choice
+        options:
+          - ios
+          - android
 
 concurrency:
-  group: eas-submit-ios
+  group: eas-submit-${{ inputs.platform }}
   cancel-in-progress: false
 
 jobs:
@@ -49,6 +60,7 @@ jobs:
         run: eas whoami
 
       - name: Wire up App Store Connect API key
+        if: inputs.platform == 'ios'
         env:
           APPLE_ASC_KEY_ID: ${{ secrets.APPLE_ASC_KEY_ID }}
           APPLE_ASC_ISSUER_ID: ${{ secrets.APPLE_ASC_ISSUER_ID }}
@@ -64,5 +76,19 @@ jobs:
             eas.json > eas.json.tmp
           mv eas.json.tmp eas.json
 
-      - name: EAS Submit (latest finished iOS build)
-        run: eas submit --platform ios --profile production --non-interactive --latest
+      - name: Wire up Google Play service account
+        if: inputs.platform == 'android'
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY }}
+        run: |
+          if [ -z "$GOOGLE_PLAY_SERVICE_ACCOUNT_KEY" ]; then
+            echo "::error::Missing GOOGLE_PLAY_SERVICE_ACCOUNT_KEY repository secret - see the comment at the top of this workflow file."
+            exit 1
+          fi
+          printf '%s' "$GOOGLE_PLAY_SERVICE_ACCOUNT_KEY" > google-service-account.json
+          jq '.submit.production.android.serviceAccountKeyPath = "./google-service-account.json"' \
+            eas.json > eas.json.tmp
+          mv eas.json.tmp eas.json
+
+      - name: EAS Submit (latest finished build)
+        run: eas submit --platform ${{ inputs.platform }} --profile production --non-interactive --latest

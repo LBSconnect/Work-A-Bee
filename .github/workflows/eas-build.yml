@@ -13,16 +13,31 @@ name: EAS Build (mobile)
 # credential from EXPO_ACCESS_TOKEN (see config.py / env.example), which
 # authenticates push notification sends, not builds.
 #
-# Setting auto_submit=yes additionally hands the finished iOS build straight
-# to App Store Connect (eas.json's submit.production.ios) instead of just
-# building it. That path needs three more repository secrets, from an App
-# Store Connect API Key (App Store Connect -> Users and Access ->
-# Integrations -> Keys):
+# Setting auto_submit=yes additionally hands the finished build straight to
+# the relevant store (eas.json's submit.production.<platform>) instead of
+# just building it - one platform at a time (not "all"), production profile
+# only. Each platform needs its own store credentials as repository secrets:
+#
+# iOS - an App Store Connect API Key (App Store Connect -> Users and Access
+# -> Integrations -> Keys):
 #   APPLE_ASC_KEY_ID       - the key's Key ID
 #   APPLE_ASC_ISSUER_ID    - the Issuer ID shown above the key list
 #   APPLE_ASC_API_KEY      - the full contents of the downloaded .p8 file
-# ascAppId/appleTeamId themselves aren't secret (they're just identifiers,
-# not credentials) so they're committed directly in mobile/eas.json.
+# (ascAppId/appleTeamId themselves aren't secret - just identifiers, not
+# credentials - so they're committed directly in mobile/eas.json.)
+#
+# Android - a Google Service Account key (see
+# https://expo.fyi/creating-google-service-account for the exact steps:
+# enable the Google Play Android Developer API in Google Cloud Console,
+# create a service account + JSON key there, then invite that service
+# account's email in Play Console's Users and permissions with release/store
+# permissions):
+#   GOOGLE_PLAY_SERVICE_ACCOUNT_KEY - the full contents of the downloaded JSON key
+#
+# First-ever Android submission uploads to the "internal" testing track as a
+# draft (see eas.json) rather than production, since a brand-new Play Console
+# listing won't have its store listing/content rating/etc. finished yet -
+# promote it from there once that's done.
 on:
   workflow_dispatch:
     inputs:
@@ -45,7 +60,7 @@ on:
           - preview
           - production
       auto_submit:
-        description: "After building, also submit straight to the App Store? (iOS + production only)"
+        description: "After building, also submit straight to the store? (production + a single platform only)"
         required: true
         default: "no"
         type: choice
@@ -66,9 +81,9 @@ jobs:
         working-directory: mobile
     steps:
       - name: Validate inputs
-        if: inputs.auto_submit == 'yes' && (inputs.platform != 'ios' || inputs.profile != 'production')
+        if: inputs.auto_submit == 'yes' && (inputs.profile != 'production' || (inputs.platform != 'ios' && inputs.platform != 'android'))
         run: |
-          echo "::error::auto_submit=yes only works with platform=ios and profile=production (App Store submission needs an app-store-distribution build, and Android submission isn't configured yet)."
+          echo "::error::auto_submit=yes only works with profile=production and a single platform (ios or android, not all) - store submission needs a store-distribution build and per-store credentials wired up one at a time."
           exit 1
 
       - uses: actions/checkout@v4
@@ -92,19 +107,33 @@ jobs:
         run: eas whoami
 
       - name: Wire up App Store Connect API key for auto-submit
-        if: inputs.auto_submit == 'yes'
+        if: inputs.auto_submit == 'yes' && inputs.platform == 'ios'
         env:
           APPLE_ASC_KEY_ID: ${{ secrets.APPLE_ASC_KEY_ID }}
           APPLE_ASC_ISSUER_ID: ${{ secrets.APPLE_ASC_ISSUER_ID }}
           APPLE_ASC_API_KEY: ${{ secrets.APPLE_ASC_API_KEY }}
         run: |
           if [ -z "$APPLE_ASC_KEY_ID" ] || [ -z "$APPLE_ASC_ISSUER_ID" ] || [ -z "$APPLE_ASC_API_KEY" ]; then
-            echo "::error::auto_submit=yes requires the APPLE_ASC_KEY_ID, APPLE_ASC_ISSUER_ID, and APPLE_ASC_API_KEY repository secrets - see the comment at the top of this workflow file."
+            echo "::error::auto_submit=yes for iOS requires the APPLE_ASC_KEY_ID, APPLE_ASC_ISSUER_ID, and APPLE_ASC_API_KEY repository secrets - see the comment at the top of this workflow file."
             exit 1
           fi
           printf '%s' "$APPLE_ASC_API_KEY" > AuthKey.p8
           jq --arg keyId "$APPLE_ASC_KEY_ID" --arg issuerId "$APPLE_ASC_ISSUER_ID" \
             '.submit.production.ios.ascApiKeyPath = "./AuthKey.p8" | .submit.production.ios.ascApiKeyId = $keyId | .submit.production.ios.ascApiKeyIssuerId = $issuerId' \
+            eas.json > eas.json.tmp
+          mv eas.json.tmp eas.json
+
+      - name: Wire up Google Play service account for auto-submit
+        if: inputs.auto_submit == 'yes' && inputs.platform == 'android'
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY }}
+        run: |
+          if [ -z "$GOOGLE_PLAY_SERVICE_ACCOUNT_KEY" ]; then
+            echo "::error::auto_submit=yes for Android requires the GOOGLE_PLAY_SERVICE_ACCOUNT_KEY repository secret - see the comment at the top of this workflow file."
+            exit 1
+          fi
+          printf '%s' "$GOOGLE_PLAY_SERVICE_ACCOUNT_KEY" > google-service-account.json
+          jq '.submit.production.android.serviceAccountKeyPath = "./google-service-account.json"' \
             eas.json > eas.json.tmp
           mv eas.json.tmp eas.json
 
