@@ -33,6 +33,19 @@ def test_system_login_not_linked_from_public_marketing_pages():
         assert "system_login" not in src, f"{name} should not link system_login"
 
 
+def test_subscription_faq_matches_the_actual_90_day_trial():
+    """index.html, pricing.html, and terms.html all promise every new
+    customer an unconditional 90-day trial - matching plans.py's PROMO_DAYS
+    (organizations.promo_started_at defaults to NOW() on creation, so this
+    is what actually happens, not just marketing copy). subscription_faq.html
+    used to hedge with "availability depends on current promotional programs
+    and business policies", contradicting all of the above. Regression guard
+    for that inconsistency."""
+    src = open(f"{TEMPLATE_DIR}/subscription_faq.html", encoding="utf-8").read()
+    assert "depends on current promotional programs" not in src
+    assert "90-day trial" in src
+
+
 def test_all_post_forms_have_csrf_token():
     import re
     form_re = re.compile(r'<form\b[^>]*method=["\']post["\'][^>]*>', re.IGNORECASE)
