@@ -12,6 +12,17 @@ name: EAS Build (mobile)
 # used by `eas` below to authenticate non-interactively. This is a different
 # credential from EXPO_ACCESS_TOKEN (see config.py / env.example), which
 # authenticates push notification sends, not builds.
+#
+# Setting auto_submit=yes additionally hands the finished iOS build straight
+# to App Store Connect (eas.json's submit.production.ios) instead of just
+# building it. That path needs three more repository secrets, from an App
+# Store Connect API Key (App Store Connect -> Users and Access ->
+# Integrations -> Keys):
+#   APPLE_ASC_KEY_ID       - the key's Key ID
+#   APPLE_ASC_ISSUER_ID    - the Issuer ID shown above the key list
+#   APPLE_ASC_API_KEY      - the full contents of the downloaded .p8 file
+# ascAppId/appleTeamId themselves aren't secret (they're just identifiers,
+# not credentials) so they're committed directly in mobile/eas.json.
 on:
   workflow_dispatch:
     inputs:
@@ -33,6 +44,14 @@ on:
           - development
           - preview
           - production
+      auto_submit:
+        description: "After building, also submit straight to the App Store? (iOS + production only)"
+        required: true
+        default: "no"
+        type: choice
+        options:
+          - "no"
+          - "yes"
 
 concurrency:
   group: eas-build-${{ github.ref }}
@@ -46,6 +65,12 @@ jobs:
       run:
         working-directory: mobile
     steps:
+      - name: Validate inputs
+        if: inputs.auto_submit == 'yes' && (inputs.platform != 'ios' || inputs.profile != 'production')
+        run: |
+          echo "::error::auto_submit=yes only works with platform=ios and profile=production (App Store submission needs an app-store-distribution build, and Android submission isn't configured yet)."
+          exit 1
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
@@ -66,6 +91,23 @@ jobs:
       - name: Verify Expo authentication
         run: eas whoami
 
+      - name: Wire up App Store Connect API key for auto-submit
+        if: inputs.auto_submit == 'yes'
+        env:
+          APPLE_ASC_KEY_ID: ${{ secrets.APPLE_ASC_KEY_ID }}
+          APPLE_ASC_ISSUER_ID: ${{ secrets.APPLE_ASC_ISSUER_ID }}
+          APPLE_ASC_API_KEY: ${{ secrets.APPLE_ASC_API_KEY }}
+        run: |
+          if [ -z "$APPLE_ASC_KEY_ID" ] || [ -z "$APPLE_ASC_ISSUER_ID" ] || [ -z "$APPLE_ASC_API_KEY" ]; then
+            echo "::error::auto_submit=yes requires the APPLE_ASC_KEY_ID, APPLE_ASC_ISSUER_ID, and APPLE_ASC_API_KEY repository secrets - see the comment at the top of this workflow file."
+            exit 1
+          fi
+          printf '%s' "$APPLE_ASC_API_KEY" > AuthKey.p8
+          jq --arg keyId "$APPLE_ASC_KEY_ID" --arg issuerId "$APPLE_ASC_ISSUER_ID" \
+            '.submit.production.ios.ascApiKeyPath = "./AuthKey.p8" | .submit.production.ios.ascApiKeyId = $keyId | .submit.production.ios.ascApiKeyIssuerId = $issuerId' \
+            eas.json > eas.json.tmp
+          mv eas.json.tmp eas.json
+
       - name: EAS Build
         run: >
           eas build
@@ -73,3 +115,4 @@ jobs:
           --profile ${{ inputs.profile }}
           --non-interactive
           --no-wait
+          ${{ inputs.auto_submit == 'yes' && '--auto-submit-with-profile production' || '' }}
