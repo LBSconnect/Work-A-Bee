@@ -31,7 +31,7 @@
     </select>
     <button type="submit" style="margin:0;">Change Plan</button>
   </form>
-  <p class="muted" style="margin-top:8px;">See <a href="{{ url_for('pricing_page') }}">full plan details</a>. Your card is charged automatically once your 90-day free period ends. Cancel anytime, no questions asked.</p>
+  <p class="muted" style="margin-top:8px;">See <a href="{{ url_for('pricing_page') }}">full plan details</a>. Your card is charged automatically once your 14-day free period ends. Cancel anytime, no questions asked.</p>
 
   {% if org.stripe_subscription_id %}
     {% if org.cancel_at_period_end %}

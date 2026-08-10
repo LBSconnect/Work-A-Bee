@@ -33,17 +33,36 @@ def test_system_login_not_linked_from_public_marketing_pages():
         assert "system_login" not in src, f"{name} should not link system_login"
 
 
-def test_subscription_faq_matches_the_actual_90_day_trial():
+def test_subscription_faq_matches_the_actual_trial_length():
     """index.html, pricing.html, and terms.html all promise every new
-    customer an unconditional 90-day trial - matching plans.py's PROMO_DAYS
-    (organizations.promo_started_at defaults to NOW() on creation, so this
-    is what actually happens, not just marketing copy). subscription_faq.html
+    customer an unconditional trial - matching plans.py's DEFAULT_PROMO_DAYS
+    (organizations.promo_days defaults to that value on creation, so this is
+    what actually happens, not just marketing copy). subscription_faq.html
     used to hedge with "availability depends on current promotional programs
     and business policies", contradicting all of the above. Regression guard
-    for that inconsistency."""
+    for that inconsistency - and for the trial length drifting out of sync
+    across pages again, the way "90-day" (old) vs "14-day" (current) briefly
+    did when the length changed."""
     src = open(f"{TEMPLATE_DIR}/subscription_faq.html", encoding="utf-8").read()
     assert "depends on current promotional programs" not in src
-    assert "90-day trial" in src
+    assert "14-day trial" in src
+    assert "90-day" not in src
+
+
+def test_trial_length_is_consistent_across_every_page_that_mentions_it():
+    """The site-wide trial length is 14 days (plans.DEFAULT_PROMO_DAYS) as of
+    the 2026-08 change from 90 days. A stray leftover "90-day"/"90 days"/
+    "ninety (90)" on any customer-facing page would misstate what the site
+    (and Stripe) actually do. int_drp.html is exempted - its "90 days" is an
+    unrelated disaster-recovery retention period, not a trial length."""
+    offenders = []
+    for name in _ALL_TEMPLATES:
+        if name == "int_drp.html":
+            continue
+        src = open(f"{TEMPLATE_DIR}/{name}", encoding="utf-8").read()
+        if "90-day" in src or "90 days" in src or "90 Days" in src or "ninety (90)" in src:
+            offenders.append(name)
+    assert not offenders, f"stale 90-day trial wording found in: {offenders}"
 
 
 def test_all_post_forms_have_csrf_token():
