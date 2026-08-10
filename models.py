@@ -418,6 +418,23 @@ def init_db():
             conn.execute("ALTER TABLE organizations ADD COLUMN IF NOT EXISTS promo_started_at TIMESTAMP DEFAULT NOW()")
             conn.execute("ALTER TABLE organizations ADD COLUMN IF NOT EXISTS promo_denied BOOLEAN NOT NULL DEFAULT FALSE")
             conn.execute("UPDATE organizations SET promo_started_at=created_at WHERE promo_started_at IS NULL AND NOT promo_denied")
+            # promo_days is how long THIS org's promo actually runs - see
+            # plans.py's promo_active()/promo_days_left(), which read it per
+            # org rather than a single global constant. This exists because
+            # the site-wide trial length changed (90 -> 14 days) after some
+            # orgs already had a live Stripe subscription with
+            # trial_period_days=90 baked in at checkout time (Stripe fixes
+            # that per-subscription at creation and never revisits it) - so
+            # this column has to preserve whatever length each existing org
+            # was actually promised, not silently shorten a trial already in
+            # progress out from under a real customer. The two-step ALTER
+            # below is what does that: ADD COLUMN ... DEFAULT 90 backfills
+            # every row that exists at migration time to 90 (correct for all
+            # of them, since 90 was the only value ever used before this
+            # migration ran), then SET DEFAULT 14 only changes what NEW rows
+            # get from here on - it does not touch any existing row.
+            conn.execute("ALTER TABLE organizations ADD COLUMN IF NOT EXISTS promo_days INTEGER NOT NULL DEFAULT 90")
+            conn.execute("ALTER TABLE organizations ALTER COLUMN promo_days SET DEFAULT 14")
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS promo_claims (
                     id SERIAL PRIMARY KEY,

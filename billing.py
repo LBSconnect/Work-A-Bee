@@ -12,15 +12,19 @@ stripe.api_key = config.STRIPE_SECRET_KEY
 
 def create_checkout_session(draft_token, plan_key, admin_email, success_url, cancel_url):
     """Creates a Stripe Checkout session that collects a card and starts a
-    90-day-trial subscription for a signup that is NOT an organization yet -
-    keyed by the signup draft's token rather than an org_id. The org itself is
-    only created once checkout actually completes; see finalize_signup_checkout().
-    Returns the session's URL."""
+    trial subscription (plans.DEFAULT_PROMO_DAYS long) for a signup that is
+    NOT an organization yet - keyed by the signup draft's token rather than
+    an org_id. The org itself is only created once checkout actually
+    completes; see finalize_signup_checkout(). Returns the session's URL.
+
+    Once Stripe accepts this, trial_period_days is fixed for the life of
+    this subscription - changing DEFAULT_PROMO_DAYS later only affects
+    NEW checkout sessions, not this one."""
     session = stripe.checkout.Session.create(
         mode="subscription",
         line_items=[{"price": plans.stripe_price_id(plan_key), "quantity": 1}],
         subscription_data={
-            "trial_period_days": plans.PROMO_DAYS,
+            "trial_period_days": plans.DEFAULT_PROMO_DAYS,
             "metadata": {"signup_draft_token": draft_token},
         },
         customer_email=admin_email,
