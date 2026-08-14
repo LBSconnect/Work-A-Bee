@@ -46,12 +46,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    if (state.refreshToken) {
-      await logoutApi(state.refreshToken);
-    }
+    // Unregister the push token FIRST, while the access token can still be
+    // silently refreshed if expired. logoutApi() revokes the refresh token
+    // server-side - if that ran first and the access token had already
+    // expired, this authenticated DELETE call's 401 would try to refresh
+    // using the now-revoked refresh token, fail, and silently no-op
+    // (unregisterPushToken swallows its own errors). That left the device's
+    // push_tokens row behind, so a signed-out user kept receiving pushes
+    // addressed to their account until someone else logged into the same
+    // device and reassigned the token.
     if (pushTokenRef.current && state.me) {
       await unregisterPushToken(state.me.role, pushTokenRef.current);
       pushTokenRef.current = null;
+    }
+    if (state.refreshToken) {
+      await logoutApi(state.refreshToken);
     }
     setAccessToken(null);
     await clearStoredRefreshToken();

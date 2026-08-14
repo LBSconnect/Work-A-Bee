@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useIsFocused } from "@react-navigation/native";
 
 import { AppNotification, getNotifications, markNotificationsRead } from "../../api/employee";
+import { ErrorState } from "../../components/ErrorState";
 
 export default function NotificationsScreen() {
   const isFocused = useIsFocused();
@@ -30,6 +31,10 @@ export default function NotificationsScreen() {
         <ActivityIndicator size="large" color="#a8641f" />
       </View>
     );
+  }
+
+  if (query.isError) {
+    return <ErrorState message="Couldn't load notifications." onRetry={() => query.refetch()} />;
   }
 
   return (

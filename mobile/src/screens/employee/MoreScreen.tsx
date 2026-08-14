@@ -1,10 +1,11 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { useAuth } from "../../auth/AuthContext";
 import type { MoreStackParamList } from "../../navigation/MoreStack";
+import { PRIVACY_POLICY_URL } from "../../legal";
 
 const MENU_ITEMS: { label: string; screen: keyof MoreStackParamList }[] = [
   { label: "Pay Stubs", screen: "PayStubs" },
@@ -26,6 +27,10 @@ export default function MoreScreen() {
           <Text style={styles.chevron}>›</Text>
         </Pressable>
       ))}
+      <Pressable style={styles.row} onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}>
+        <Text style={styles.rowText}>Privacy Policy</Text>
+        <Text style={styles.chevron}>›</Text>
+      </Pressable>
       <Pressable style={styles.signOutButton} onPress={() => signOut()}>
         <Text style={styles.signOutButtonText}>Sign Out</Text>
       </Pressable>

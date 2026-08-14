@@ -28,7 +28,12 @@
     },
     "plugins": [
       "expo-secure-store",
-      "expo-notifications"
+      [
+        "expo-notifications",
+        {
+          "mode": "production"
+        }
+      ]
     ],
     "extra": {
       "eas": {

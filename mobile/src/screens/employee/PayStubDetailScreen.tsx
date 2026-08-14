@@ -5,6 +5,7 @@ import { useRoute, RouteProp } from "@react-navigation/native";
 
 import { getPayStubDetail, PayStubEntry } from "../../api/employee";
 import type { MoreStackParamList } from "../../navigation/MoreStack";
+import { ErrorState } from "../../components/ErrorState";
 
 export default function PayStubDetailScreen() {
   const route = useRoute<RouteProp<MoreStackParamList, "PayStubDetail">>();
@@ -15,12 +16,21 @@ export default function PayStubDetailScreen() {
     queryFn: () => getPayStubDetail(periodStart),
   });
 
-  if (query.isLoading || !query.data) {
+  if (query.isLoading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#a8641f" />
       </View>
     );
+  }
+
+  // isLoading is only true for the very first fetch attempt - a failure
+  // after that (or a failure that races the loading flag) leaves isLoading
+  // false with data still undefined. Checking isError || !data here (instead
+  // of folding !data into the isLoading branch above) is what stops this
+  // screen from spinning forever with no way out on a failed request.
+  if (query.isError || !query.data) {
+    return <ErrorState message="Couldn't load this pay stub." onRetry={() => query.refetch()} />;
   }
 
   const stub = query.data;

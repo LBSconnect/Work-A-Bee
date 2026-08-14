@@ -3,6 +3,7 @@ import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View }
 import { useQuery } from "@tanstack/react-query";
 
 import { AttendanceException, ClockedInEmployee, getTodayStatus } from "../../api/admin";
+import { ErrorState } from "../../components/ErrorState";
 
 function timeOnly(iso: string) {
   return new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
@@ -17,6 +18,10 @@ export default function AdminTodayScreen() {
         <ActivityIndicator size="large" color="#a8641f" />
       </View>
     );
+  }
+
+  if (query.isError) {
+    return <ErrorState message="Couldn't load today's status." onRetry={() => query.refetch()} />;
   }
 
   return (

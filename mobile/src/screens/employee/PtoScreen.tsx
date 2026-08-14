@@ -70,7 +70,18 @@ export default function PtoScreen() {
           <Text style={styles.subheader}>My Requests</Text>
         </View>
       }
-      ListEmptyComponent={query.isLoading ? null : <Text style={styles.empty}>No time off requests yet.</Text>}
+      ListEmptyComponent={
+        query.isLoading ? null : query.isError ? (
+          <View style={styles.inlineError}>
+            <Text style={styles.error}>Couldn't load your requests.</Text>
+            <Pressable style={styles.submitButton} onPress={() => query.refetch()}>
+              <Text style={styles.submitButtonText}>Try again</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <Text style={styles.empty}>No time off requests yet.</Text>
+        )
+      }
       contentContainerStyle={{ padding: 16 }}
     />
   );
@@ -82,6 +93,7 @@ const styles = StyleSheet.create({
   subheader: { fontSize: 16, fontWeight: "700", marginTop: 24, marginBottom: 4, color: "#1c1a17" },
   input: { borderWidth: 1, borderColor: "#e3dbcb", borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 10 },
   error: { color: "#a3271d", marginBottom: 10 },
+  inlineError: { alignItems: "center", gap: 10, marginTop: 20 },
   submitButton: { backgroundColor: "#a8641f", borderRadius: 10, paddingVertical: 12, alignItems: "center" },
   submitButtonText: { color: "#fff", fontWeight: "700" },
   row: { flexDirection: "row", alignItems: "center", paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "#e3dbcb" },

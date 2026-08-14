@@ -3,6 +3,7 @@ import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-nativ
 import { useQuery } from "@tanstack/react-query";
 
 import { getSchedule, Shift } from "../../api/employee";
+import { ErrorState } from "../../components/ErrorState";
 
 function formatRange(startIso: string, endIso: string) {
   const start = new Date(startIso);
@@ -32,6 +33,10 @@ export default function ScheduleScreen() {
         <ActivityIndicator size="large" color="#a8641f" />
       </View>
     );
+  }
+
+  if (query.isError) {
+    return <ErrorState message="Couldn't load your schedule." onRetry={() => query.refetch()} />;
   }
 
   return (

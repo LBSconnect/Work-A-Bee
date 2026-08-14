@@ -3,6 +3,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-nat
 import { useQuery } from "@tanstack/react-query";
 
 import { getProfile } from "../../api/employee";
+import { ErrorState } from "../../components/ErrorState";
 
 function Field({ label, value }: { label: string; value: string | number | null | undefined }) {
   if (value === null || value === undefined || value === "") return null;
@@ -17,12 +18,18 @@ function Field({ label, value }: { label: string; value: string | number | null 
 export default function ProfileScreen() {
   const query = useQuery({ queryKey: ["profile"], queryFn: getProfile });
 
-  if (query.isLoading || !query.data) {
+  if (query.isLoading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#a8641f" />
       </View>
     );
+  }
+
+  // See PayStubDetailScreen's comment on why isError/!data is a separate
+  // branch from isLoading, not folded into it.
+  if (query.isError || !query.data) {
+    return <ErrorState message="Couldn't load your profile." onRetry={() => query.refetch()} />;
   }
 
   const p = query.data;
