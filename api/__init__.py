@@ -2,6 +2,7 @@ from api.admin.corrections import api_admin_corrections_bp
 from api.admin.pto import api_admin_pto_bp
 from api.admin.today import api_admin_today_bp
 from api.auth_routes import api_auth_bp
+from api.employee.account_deletion import api_employee_account_deletion_bp
 from api.employee.announcements import api_employee_announcements_bp
 from api.employee.clock import api_employee_clock_bp
 from api.employee.notifications import api_employee_notifications_bp
@@ -23,6 +24,7 @@ API_BLUEPRINTS = [
     api_employee_profile_bp,
     api_employee_announcements_bp,
     api_employee_notifications_bp,
+    api_employee_account_deletion_bp,
     api_admin_today_bp,
     api_admin_pto_bp,
     api_admin_corrections_bp,
