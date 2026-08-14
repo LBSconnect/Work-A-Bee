@@ -90,5 +90,16 @@ jobs:
             eas.json > eas.json.tmp
           mv eas.json.tmp eas.json
 
-      - name: EAS Submit (latest finished build)
-        run: eas submit --platform ${{ inputs.platform }} --profile production --non-interactive --latest
+      - name: Find latest finished production build
+        id: latest_build
+        run: |
+          BUILD_ID=$(eas build:list --platform ${{ inputs.platform }} --profile production --status finished --limit 1 --non-interactive --json | jq -r '.[0].id // empty')
+          if [ -z "$BUILD_ID" ]; then
+            echo "::error::No finished build found for platform=${{ inputs.platform }}, build profile=production. Run the EAS Build workflow (profile=production) first - this workflow deliberately will not submit a development/preview build."
+            exit 1
+          fi
+          echo "Found build $BUILD_ID"
+          echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
+
+      - name: EAS Submit (latest finished production-profile build)
+        run: eas submit --platform ${{ inputs.platform }} --profile production --non-interactive --id ${{ steps.latest_build.outputs.build_id }}
