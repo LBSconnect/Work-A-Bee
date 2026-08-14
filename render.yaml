@@ -41,6 +41,8 @@ services:
         sync: false
       - key: REPORT_RECIPIENT
         value: "info@lbsconnect.net"
+      - key: PLATFORM_SUPPORT_EMAIL
+        value: "info@lbsconnect.net"
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_WEBHOOK_SECRET

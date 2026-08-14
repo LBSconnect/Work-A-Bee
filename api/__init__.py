@@ -1,3 +1,4 @@
+from api.admin.account_deletion import api_admin_account_deletion_bp
 from api.admin.corrections import api_admin_corrections_bp
 from api.admin.pto import api_admin_pto_bp
 from api.admin.today import api_admin_today_bp
@@ -28,6 +29,7 @@ API_BLUEPRINTS = [
     api_admin_today_bp,
     api_admin_pto_bp,
     api_admin_corrections_bp,
+    api_admin_account_deletion_bp,
     api_push_tokens_bp,
 ]
 
