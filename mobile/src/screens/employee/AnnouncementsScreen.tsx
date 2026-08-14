@@ -3,6 +3,7 @@ import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-nativ
 import { useQuery } from "@tanstack/react-query";
 
 import { Announcement, getAnnouncements } from "../../api/employee";
+import { ErrorState } from "../../components/ErrorState";
 
 export default function AnnouncementsScreen() {
   const query = useQuery({ queryKey: ["announcements"], queryFn: getAnnouncements });
@@ -13,6 +14,10 @@ export default function AnnouncementsScreen() {
         <ActivityIndicator size="large" color="#a8641f" />
       </View>
     );
+  }
+
+  if (query.isError) {
+    return <ErrorState message="Couldn't load announcements." onRetry={() => query.refetch()} />;
   }
 
   return (

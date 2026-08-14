@@ -6,6 +6,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { getPayStubs, PayStubSummary } from "../../api/employee";
 import type { MoreStackParamList } from "../../navigation/MoreStack";
+import { ErrorState } from "../../components/ErrorState";
 
 export default function PayStubsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<MoreStackParamList>>();
@@ -17,6 +18,10 @@ export default function PayStubsScreen() {
         <ActivityIndicator size="large" color="#a8641f" />
       </View>
     );
+  }
+
+  if (query.isError) {
+    return <ErrorState message="Couldn't load your pay stubs." onRetry={() => query.refetch()} />;
   }
 
   return (

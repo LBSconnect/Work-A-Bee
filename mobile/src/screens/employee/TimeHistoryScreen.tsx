@@ -3,16 +3,23 @@ import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-nativ
 import { useQuery } from "@tanstack/react-query";
 
 import { getTimeHistory, TimeHistoryEntry } from "../../api/employee";
+import { ErrorState } from "../../components/ErrorState";
 
 export default function TimeHistoryScreen() {
   const query = useQuery({ queryKey: ["time-history"], queryFn: getTimeHistory });
 
-  if (query.isLoading || !query.data) {
+  if (query.isLoading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#a8641f" />
       </View>
     );
+  }
+
+  // See PayStubDetailScreen's comment on why isError/!data is a separate
+  // branch from isLoading, not folded into it.
+  if (query.isError || !query.data) {
+    return <ErrorState message="Couldn't load your time history." onRetry={() => query.refetch()} />;
   }
 
   return (

@@ -34,6 +34,14 @@ export default function AdminPtoScreen() {
     onError: (err) => Alert.alert("Couldn't deny", apiErrorMessage(err, "Please try again.")),
   });
 
+  if (query.isLoading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#a8641f" />
+      </View>
+    );
+  }
+
   return (
     <FlatList
       style={styles.screen}
@@ -42,7 +50,18 @@ export default function AdminPtoScreen() {
       refreshing={query.isFetching}
       onRefresh={() => query.refetch()}
       ListHeaderComponent={<Text style={styles.header}>Time Off Requests</Text>}
-      ListEmptyComponent={query.isLoading ? null : <Text style={styles.empty}>No time off requests.</Text>}
+      ListEmptyComponent={
+        query.isError ? (
+          <View style={styles.inlineError}>
+            <Text style={styles.error}>Couldn't load requests.</Text>
+            <Pressable style={styles.retryButton} onPress={() => query.refetch()}>
+              <Text style={styles.actionButtonText}>Try again</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <Text style={styles.empty}>No time off requests.</Text>
+        )
+      }
       contentContainerStyle={{ padding: 16 }}
       renderItem={({ item }: { item: AdminPtoRequest }) => (
         <View style={styles.row}>
@@ -90,6 +109,7 @@ export default function AdminPtoScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#fff" },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
   header: { fontSize: 22, fontWeight: "700", marginBottom: 12, color: "#1c1a17" },
   row: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "#e3dbcb" },
   rowTop: { flexDirection: "row", alignItems: "flex-start" },
@@ -106,4 +126,7 @@ const styles = StyleSheet.create({
   denyButton: { backgroundColor: "#a3271d" },
   actionButtonText: { color: "#fff", fontWeight: "700" },
   empty: { color: "#6f6656", textAlign: "center", marginTop: 20 },
+  inlineError: { alignItems: "center", gap: 10, marginTop: 20 },
+  error: { color: "#a3271d", textAlign: "center" },
+  retryButton: { backgroundColor: "#a8641f", paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 },
 });
