@@ -34,7 +34,7 @@ PUBLIC_ROUTES = [
     "/sitemap.xml",
     "/favicon.ico",
     "/static/style.css",
-    "/static/logo-workabee.svg",
+    "/static/logo-workabee.png",
 ]
 
 

@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}System Admin{% endblock %}</title>
   <meta name="robots" content="noindex, nofollow, noarchive">
-  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo-workabee.svg') }}">
+  <link rel="icon" type="image/png" sizes="256x256" href="{{ url_for('static', filename='logo-workabee.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="admin-body">
   <div class="admin-shell">
     <div class="admin-topbar" style="background:#7f1d1d;">
       <a class="admin-topbar-left" href="{{ url_for('clock_home') }}">
-        <img src="{{ url_for('static', filename='logo-workabee.svg') }}" alt="Work-A-Beez">
+        <img src="{{ url_for('static', filename='logo-workabee.png') }}" alt="Work-A-Beez">
         <span>System Admin &middot; All Tenants</span>
       </a>
       <div class="admin-topbar-right">

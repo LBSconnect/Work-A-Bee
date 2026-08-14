@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Work-A-Beez Admin{% endblock %}</title>
-  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo-workabee.svg') }}">
+  <link rel="icon" type="image/png" sizes="256x256" href="{{ url_for('static', filename='logo-workabee.png') }}">
   <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
   <link rel="alternate icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
@@ -17,7 +17,7 @@
   <div class="admin-shell">
     <div class="admin-topbar">
       <a class="admin-topbar-left" href="{{ url_for('clock_home') }}">
-        <img src="{{ url_for('static', filename='logo-workabee.svg') }}" alt="Work-A-Beez">
+        <img src="{{ url_for('static', filename='logo-workabee.png') }}" alt="Work-A-Beez">
         <span>Work-A-Beez</span>
       </a>
       <div class="admin-topbar-right">
