@@ -2,6 +2,11 @@ APScheduler==3.11.0
 Flask==3.1.3
 Flask-Limiter==3.8.0
 Flask-WTF==1.2.2
+# Pinned exact, not just floor-pinned: PyJWT >=2.10 enforces the `sub` claim
+# be a string (RFC 7519 strict mode), but api/auth.py issues it as a raw int
+# (employee/admin id). Bumping this past 2.9.x without also stringifying
+# `sub` in _issue_access_token/verify_access_token breaks ALL authentication
+# - every request fails closed with a generic 401, not an obvious error.
 PyJWT==2.9.0
 Werkzeug==3.1.6
 psycopg2-binary==2.9.12

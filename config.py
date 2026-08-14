@@ -20,6 +20,13 @@ MS_SENDER_EMAIL = os.environ.get("MS_SENDER_EMAIL", "")
 POSTMARK_SERVER_TOKEN = os.environ.get("POSTMARK_SERVER_TOKEN", "")
 NOTIFICATION_FROM_EMAIL = os.environ.get("NOTIFICATION_FROM_EMAIL", "")
 
+# Where account-deletion requests from a self-service admin go (see
+# api/admin/account_deletion.py) - there's no in-app "admin's admin" to
+# route those to the way employee requests go to their org's admins.
+# notify_email.send_email() no-ops (doesn't raise) if this is unset, same as
+# every other best-effort email in this app.
+PLATFORM_SUPPORT_EMAIL = os.environ.get("PLATFORM_SUPPORT_EMAIL", "")
+
 # Optional. Expo's push API (notify_push.py) works with zero server-side
 # credentials by default - this only opts the project into Expo's "Enhanced
 # Security" push mode, which requires every send request to carry it. Get one

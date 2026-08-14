@@ -85,3 +85,11 @@ export async function denyCorrection(id: number, comment: string): Promise<Admin
   const res = await apiClient.post<{ request: AdminCorrection }>(`/api/v1/admin/corrections/${id}/deny`, { comment });
   return res.data.request;
 }
+
+export async function requestAccountDeletion(): Promise<{ already_requested: boolean }> {
+  const res = await apiClient.post<{ ok: boolean; already_requested: boolean }>(
+    "/api/v1/admin/account-deletion-request",
+    {}
+  );
+  return { already_requested: res.data.already_requested };
+}
