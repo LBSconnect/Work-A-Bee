@@ -164,3 +164,11 @@ export async function getNotifications(): Promise<AppNotification[]> {
 export async function markNotificationsRead(): Promise<void> {
   await apiClient.post("/api/v1/employee/notifications/read", {});
 }
+
+export async function requestAccountDeletion(): Promise<{ already_requested: boolean }> {
+  const res = await apiClient.post<{ ok: boolean; already_requested: boolean }>(
+    "/api/v1/employee/account-deletion-request",
+    {}
+  );
+  return { already_requested: res.data.already_requested };
+}
