@@ -110,7 +110,7 @@
     }
 
     .nav-logo { display: flex; align-items: center; gap: 10px; }
-    .nav-logo .bee { font-size: 32px; }
+    .nav-logo .bee { height: 32px; width: auto; display: block; }
     .nav-logo-text { display: flex; flex-direction: column; }
     .nav-logo-text strong { font-size: 18px; font-weight: 800; letter-spacing: -.3px; }
     .nav-logo-text span { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gray); }
@@ -479,7 +479,7 @@
       display: grid; grid-template-columns: 1.5fr repeat(3,1fr);
       gap: 40px; margin-bottom: 40px;
     }
-    .footer-brand .bee { font-size: 36px; }
+    .footer-brand .bee { height: 36px; width: auto; display: block; }
     .footer-brand strong { font-size: 18px; font-weight: 800; }
     .footer-brand .tagline { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #666; display: block; margin-bottom: 8px; }
     .footer-brand .url { color: #9A6700; font-size: 13px; font-weight: 600; margin-top: 8px; display: block; }
@@ -664,7 +664,7 @@
 <!-- ═══════════ NAV ═══════════ -->
 <nav>
   <a href="/" class="nav-logo">
-    <span class="bee">🐝</span>
+    <img class="bee" src="{{ url_for('static', filename='logo-workabee.png') }}" alt="Work-A-Beez">
     <div class="nav-logo-text">
       <strong>Work-A-Beez</strong>
       <span>Employee Timekeeping</span>
@@ -1522,7 +1522,7 @@
   <div class="footer-top">
     <div class="footer-brand">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-        <span class="bee">🐝</span>
+        <img class="bee" src="{{ url_for('static', filename='logo-workabee.png') }}" alt="Work-A-Beez">
         <div>
           <strong>Work-A-Beez</strong><br>
           <span class="tagline">Employee Timekeeping</span>

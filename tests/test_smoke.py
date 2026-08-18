@@ -105,3 +105,23 @@ def test_static_assets_are_cacheable(client):
     resp = client.get("/static/style.css")
     assert resp.status_code == 200
     assert "max-age" in resp.headers.get("Cache-Control", "")
+
+
+def test_health_endpoint_reports_ok_against_a_real_database(client):
+    resp = client.get("/health")
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body == {"status": "ok", "database": "ok"}
+
+
+def test_health_endpoint_reports_503_when_the_database_is_unreachable(client, monkeypatch):
+    import app as app_module
+
+    def _broken_get_db():
+        raise RuntimeError("simulated database outage")
+
+    monkeypatch.setattr(app_module, "get_db", _broken_get_db)
+    resp = client.get("/health")
+    assert resp.status_code == 503
+    body = resp.get_json()
+    assert body == {"status": "error", "database": "unreachable"}

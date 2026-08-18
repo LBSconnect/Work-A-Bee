@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 
 import psycopg2.errors
-from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g, Response, make_response, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g, Response, make_response, send_from_directory, jsonify
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_limiter import Limiter
@@ -226,6 +226,22 @@ def _active_companies():
         return conn.execute(
             "SELECT company_code, name FROM organizations WHERE status='active' ORDER BY name"
         ).fetchall()
+
+
+@app.route("/health")
+def health():
+    """Real uptime probe for external monitoring (UptimeRobot, Render's own
+    health checks, etc.) - unlike "does the homepage happen to render", this
+    actually round-trips the database. Deliberately unauthenticated (so an
+    external monitor can hit it with no credentials) and deliberately terse
+    on failure - no stack trace or exception text, just enough to alert on.
+    """
+    try:
+        with get_db() as conn:
+            conn.execute("SELECT 1")
+        return jsonify({"status": "ok", "database": "ok"}), 200
+    except Exception:
+        return jsonify({"status": "error", "database": "unreachable"}), 503
 
 
 @app.route("/")
