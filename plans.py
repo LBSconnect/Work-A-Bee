@@ -25,14 +25,14 @@ PLANS = {
     },
     "growth": {
         "label": "Growth",
-        "price": 29,
-        "max_employees": 25,
+        "price": 79,
+        "max_employees": 10,
         "max_devices": 3,
         "stripe_price_env": "STRIPE_PRICE_GROWTH",
     },
     "business": {
         "label": "Business",
-        "price": 79,
+        "price": 139.99,
         "max_employees": 100,
         "max_devices": None,
         "stripe_price_env": "STRIPE_PRICE_BUSINESS",
