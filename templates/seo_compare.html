@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% if page %}
+  {% block title %}{{ page.title }}{% endblock %}
+{% else %}
+  {% block title %}Employee Time Clock Comparisons | Work-A-Beez{% endblock %}
+{% endif %}
+
+{% block head_extra %}
+  {% if page %}
+    <meta name="description" content="{{ page.description }}">
+  {% else %}
+    <meta name="description" content="Compare Work-A-Beez with paper timesheets, spreadsheets, GPS clock apps, employee-phone clock-in and dedicated punch-clock hardware.">
+  {% endif %}
+  <link rel="canonical" href="{{ canonical }}">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Work-A-Beez">
+  <meta property="og:title" content="{% if page %}{{ page.title }}{% else %}Employee Time Clock Comparisons | Work-A-Beez{% endif %}">
+  <meta property="og:description" content="{% if page %}{{ page.description }}{% else %}Compare common timekeeping approaches with Work-A-Beez for on-site teams.{% endif %}">
+  <meta property="og:url" content="{{ canonical }}">
+  <meta property="og:image" content="https://www.workabeez.net/static/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": {{ (page.h1 if page else "Employee Time Clock Comparisons")|tojson }},
+    "url": {{ canonical|tojson }},
+    "description": {{ (page.description if page else "Compare common employee timekeeping approaches with Work-A-Beez.")|tojson }}
+  }
+  </script>
+  <style>
+    .seo-compare-wrap { max-width: 980px; margin: 0 auto; padding: 32px 16px 64px; }
+    .seo-kicker { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #9A6700; }
+    .seo-compare-wrap h1 { font-size: clamp(32px, 5vw, 50px); line-height: 1.05; margin: 10px 0 16px; }
+    .seo-lede { font-size: 18px; line-height: 1.7; color: #444; max-width: 780px; }
+    .seo-actions { display:flex; flex-wrap:wrap; gap:12px; margin:24px 0 34px; }
+    .seo-primary,.seo-secondary { display:inline-block; padding:12px 18px; border-radius:8px; font-weight:800; text-decoration:none; }
+    .seo-primary { background:#FFB800; color:#111; }
+    .seo-secondary { border:1px solid #bbb; color:#111; }
+    .seo-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px; margin:28px 0; }
+    .seo-card { border:1px solid #e4e4e4; border-radius:12px; padding:20px; background:#fff; }
+    .seo-card h2,.seo-card h3 { margin-top:0; }
+    .compare-table { width:100%; border-collapse:collapse; margin:22px 0 30px; }
+    .compare-table th,.compare-table td { border:1px solid #ddd; padding:12px; text-align:left; vertical-align:top; }
+    .compare-table th { background:#f7f7f7; }
+    .price-box { background:#fff8df; border:1px solid #f4cd62; border-radius:12px; padding:20px; margin:28px 0; }
+    .related { display:flex; flex-wrap:wrap; gap:10px; }
+    .related a { border:1px solid #ddd; border-radius:999px; padding:8px 12px; text-decoration:none; }
+    @media (max-width:700px) { .compare-table { font-size:14px; } .compare-table th,.compare-table td { padding:9px; } }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="seo-compare-wrap">
+  {% if not page %}
+    <div class="seo-kicker">Compare Your Options</div>
+    <h1>Employee Time Clock Comparisons for Small Business</h1>
+    <p class="seo-lede">There is no single timekeeping setup that fits every workforce. Compare the tradeoffs between common approaches and see where a browser-based, employer-controlled clock fits best.</p>
+    <div class="seo-grid">
+      {% for slug, item in comparisons.items() %}
+      <div class="seo-card">
+        <h2 style="font-size:20px;">{{ item.label }}</h2>
+        <p>{{ item.lede }}</p>
+        <a href="/compare/{{ slug }}">Read comparison →</a>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="seo-kicker">Timekeeping Comparison</div>
+    <h1>{{ page.h1 }}</h1>
+    <p class="seo-lede">{{ page.lede }}</p>
+
+    <div class="seo-actions">
+      <a class="seo-primary" href="/signup">Start 14-Day Trial</a>
+      <a class="seo-secondary" href="/pricing">See Current Pricing</a>
+    </div>
+
+    <div class="seo-grid">
+      <div class="seo-card"><h2>Typical alternative</h2><p>{{ page.old_way }}</p></div>
+      <div class="seo-card"><h2>Work-A-Beez approach</h2><p>{{ page.workabeez_way }}</p></div>
+    </div>
+
+    <h2>Key differences</h2>
+    <table class="compare-table">
+      <thead><tr><th>Area</th><th>Typical alternative</th><th>Work-A-Beez</th></tr></thead>
+      <tbody>
+      {% for row in page.differences %}
+        <tr><td><strong>{{ row[0] }}</strong></td><td>{{ row[1] }}</td><td>{{ row[2] }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="seo-card">
+      <h2>Who this is a good fit for</h2>
+      <p>{{ page.best_for }}</p>
+    </div>
+
+    <div class="price-box">
+      <h2 style="margin-top:0;">Current Work-A-Beez pricing</h2>
+      <p><strong>Starter:</strong> $0/month for up to 5 employees.</p>
+      <p><strong>Growth:</strong> $79/month for up to 10 employees.</p>
+      <p><strong>Business:</strong> $139.99/month for up to 100 employees.</p>
+      <p style="margin-bottom:0;">All paid plans currently include a 14-day trial. Pricing shown here should match the live pricing page; the pricing page controls if plans change.</p>
+    </div>
+
+    <h2>Related comparisons</h2>
+    <div class="related">
+      {% for related_slug, label in related %}
+        <a href="/compare/{{ related_slug }}">{{ label }}</a>
+      {% endfor %}
+    </div>
+
+    <div class="seo-actions" style="margin-top:32px;">
+      <a class="seo-primary" href="/signup">Try Work-A-Beez</a>
+      <a class="seo-secondary" href="/tools">Use Free Calculators</a>
+      <a class="seo-secondary" href="/industries">Browse Industry Pages</a>
+    </div>
+
+    <p style="font-size:13px;color:#666;margin-top:28px;">Product comparisons describe general workflow differences, not a claim that one approach is best for every employer. Features and pricing can change; confirm current details on the pricing and product pages.</p>
+  {% endif %}
+</div>
+{% endblock %}
