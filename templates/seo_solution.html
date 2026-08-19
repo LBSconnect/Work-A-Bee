@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}{{ page.title }}{% endblock %}
+{% block wrapclass %}wide{% endblock %}
+{% block head_extra %}
+  <meta name="description" content="{{ page.description }}">
+  <link rel="canonical" href="{{ canonical }}">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Work-A-Beez">
+  <meta property="og:title" content="{{ page.title }}">
+  <meta property="og:description" content="{{ page.description }}">
+  <meta property="og:url" content="{{ canonical }}">
+  <meta property="og:image" content="https://www.workabeez.net/static/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ page.title }}">
+  <meta name="twitter:description" content="{{ page.description }}">
+  <meta name="twitter:image" content="https://www.workabeez.net/static/og-image.png">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": {{ page.h1|tojson }},
+    "description": {{ page.description|tojson }},
+    "url": {{ canonical|tojson }},
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Work-A-Beez",
+      "url": "https://www.workabeez.net/"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {% for question, answer in page.faq %}
+      {
+        "@type": "Question",
+        "name": {{ question|tojson }},
+        "acceptedAnswer": {"@type": "Answer", "text": {{ answer|tojson }}}
+      }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ]
+  }
+  </script>
+  <style>
+    .seo-hero { background: linear-gradient(135deg,#fff9df,#fff); border:1px solid #f3df91; border-radius:16px; padding:42px; }
+    .seo-eyebrow { color:#9A6700; font-weight:700; text-transform:uppercase; letter-spacing:.08em; font-size:12px; }
+    .seo-hero h1 { font-size:40px; line-height:1.08; margin:10px 0 16px; }
+    .seo-hero p { font-size:18px; line-height:1.65; color:#4b5563; max-width:760px; }
+    .seo-ctas { display:flex; flex-wrap:wrap; gap:12px; margin-top:24px; }
+    .seo-btn { display:inline-block; padding:12px 18px; border-radius:8px; font-weight:700; text-decoration:none; }
+    .seo-btn.primary { background:#FFC107; color:#111; }
+    .seo-btn.secondary { border:1px solid #d1d5db; color:#111; background:#fff; }
+    .seo-grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:28px; }
+    .seo-card { border:1px solid #e5e7eb; border-radius:14px; padding:24px; background:#fff; }
+    .seo-card h2 { margin-top:0; font-size:22px; }
+    .seo-card p,.seo-card li { line-height:1.65; }
+    .seo-list { padding-left:20px; }
+    .seo-faq { margin-top:28px; }
+    .seo-faq h2,.seo-related h2 { font-size:26px; }
+    .seo-faq-item { border-top:1px solid #e5e7eb; padding:18px 0; }
+    .seo-faq-item h3 { margin:0 0 8px; font-size:17px; }
+    .seo-related { margin-top:30px; }
+    .seo-related-links { display:flex; flex-wrap:wrap; gap:10px; }
+    .seo-related-links a { border:1px solid #d1d5db; border-radius:999px; padding:8px 12px; text-decoration:none; background:#fff; }
+    @media (max-width:700px){ .seo-grid{grid-template-columns:1fr}.seo-hero{padding:28px 22px}.seo-hero h1{font-size:32px} }
+  </style>
+{% endblock %}
+{% block content %}
+  <nav aria-label="Breadcrumb" style="font-size:14px;margin-bottom:18px;color:#6b7280;">
+    <a href="/">Home</a> &rsaquo; <span>Solutions</span> &rsaquo; <span>{{ page.h1 }}</span>
+  </nav>
+
+  <section class="seo-hero">
+    <div class="seo-eyebrow">{{ page.eyebrow }}</div>
+    <h1>{{ page.h1 }}</h1>
+    <p>{{ page.lede }}</p>
+    <div class="seo-ctas">
+      <a class="seo-btn primary" href="/signup">Start 14-Day Trial</a>
+      <a class="seo-btn secondary" href="/pricing">See Pricing</a>
+    </div>
+  </section>
+
+  <div class="seo-grid">
+    <section class="seo-card">
+      <h2>The problem</h2>
+      <p>{{ page.problem }}</p>
+    </section>
+    <section class="seo-card">
+      <h2>How Work-A-Beez handles it</h2>
+      <p>{{ page.solution }}</p>
+    </section>
+  </div>
+
+  <section class="seo-card" style="margin-top:22px;">
+    <h2>What you get</h2>
+    <ul class="seo-list">
+      {% for benefit in page.benefits %}<li>{{ benefit }}</li>{% endfor %}
+    </ul>
+    <p style="margin-top:18px;color:#6b7280;font-size:14px;">Work-A-Beez is browser-based workforce software. Product controls reduce certain risks but do not guarantee prevention of time theft or policy violations.</p>
+  </section>
+
+  <section class="seo-faq">
+    <h2>Frequently asked questions</h2>
+    {% for question, answer in page.faq %}
+      <div class="seo-faq-item">
+        <h3>{{ question }}</h3>
+        <p>{{ answer }}</p>
+      </div>
+    {% endfor %}
+  </section>
+
+  <section class="seo-related">
+    <h2>Related time-clock solutions</h2>
+    <div class="seo-related-links">
+      {% for related_slug, related_title in related %}
+        <a href="/solutions/{{ related_slug }}">{{ related_title }}</a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="seo-card" style="margin-top:30px;text-align:center;">
+    <h2>Try Work-A-Beez with your team</h2>
+    <p>Set up your company, authorize the computers you want to use for clock-in, and test the workflow with your own employees.</p>
+    <div class="seo-ctas" style="justify-content:center;">
+      <a class="seo-btn primary" href="/signup">Start 14-Day Trial</a>
+      <a class="seo-btn secondary" href="/features">Explore Features</a>
+    </div>
+  </section>
+{% endblock %}
