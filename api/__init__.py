@@ -14,6 +14,7 @@ from api.employee.schedule import api_employee_schedule_bp
 from api.employee.time_history import api_employee_time_history_bp
 from api.errors import register_error_handlers
 from api.push_tokens import api_push_tokens_bp
+from seo_compare import seo_compare_bp
 from seo_industries import seo_industries_bp
 from seo_public import seo_public_bp
 from seo_tools import seo_tools_bp
@@ -47,4 +48,5 @@ def register_api(app, csrf):
     app.register_blueprint(seo_public_bp)
     app.register_blueprint(seo_industries_bp)
     app.register_blueprint(seo_tools_bp)
+    app.register_blueprint(seo_compare_bp)
     register_error_handlers(app)
