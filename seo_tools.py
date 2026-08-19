@@ -1,4 +1,4 @@
-from flask import Blueprint, abort, render_template
+from flask import Blueprint, Response, abort, render_template
 
 seo_tools_bp = Blueprint("seo_tools", __name__)
 
@@ -66,3 +66,16 @@ def tool_page(slug):
         related=related,
         canonical=f"https://www.workabeez.net/tools/{slug}",
     )
+
+
+@seo_tools_bp.route("/sitemap-tools.xml")
+def tools_sitemap():
+    urls = ["https://www.workabeez.net/tools"] + [
+        f"https://www.workabeez.net/tools/{slug}" for slug in TOOLS
+    ]
+    rows = "".join(
+        f"<url><loc>{url}</loc><lastmod>2026-08-19</lastmod><changefreq>monthly</changefreq><priority>{'0.90' if url.endswith('/tools') else '0.85'}</priority></url>"
+        for url in urls
+    )
+    xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{rows}</urlset>'
+    return Response(xml, mimetype="application/xml")
