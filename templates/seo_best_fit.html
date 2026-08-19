@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title if page else "Best Employee Time Clock by Team Size & Use Case | Work-A-Beez" }}{% endblock %}
+
+{% block head_extra %}
+<meta name="description" content="{{ page.description if page else 'Find the right Work-A-Beez employee time clock setup by team size and workplace use case, including 5-person teams, 10-person teams, hourly workers and shared-computer clock-in.' }}">
+<link rel="canonical" href="{{ canonical }}">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Work-A-Beez">
+<meta property="og:title" content="{{ page.title if page else 'Best Employee Time Clock by Team Size & Use Case | Work-A-Beez' }}">
+<meta property="og:description" content="{{ page.description if page else 'Compare Work-A-Beez time clock fit by team size and workplace setup.' }}">
+<meta property="og:url" content="{{ canonical }}">
+<meta property="og:image" content="https://www.workabeez.net/static/og-image.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": {{ (page.h1 if page else "Best Employee Time Clock by Team Size & Use Case")|tojson }},
+  "url": {{ canonical|tojson }},
+  "description": {{ (page.description if page else "Work-A-Beez employee time clock fit guides by team size and use case.")|tojson }}
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:980px;margin:0 auto;padding:40px 20px 60px;">
+  <nav aria-label="Breadcrumb" style="font-size:13px;margin-bottom:24px;">
+    <a href="/">Home</a> / <a href="/best-for">Best Fit</a>{% if page %} / {{ page.label }}{% endif %}
+  </nav>
+
+  {% if not page %}
+    <section style="text-align:center;margin-bottom:36px;">
+      <p style="font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:12px;">Choose by team size or workflow</p>
+      <h1 style="font-size:42px;line-height:1.1;margin:10px 0 16px;">Find the Right Employee Time Clock Fit</h1>
+      <p style="max-width:720px;margin:0 auto;font-size:18px;line-height:1.6;">These guides help small businesses match a time-clock setup to their actual team size and workplace routine instead of buying more software than they need.</p>
+    </section>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;">
+      {% for key, item in pages.items() %}
+      <article style="border:1px solid #e5e7eb;border-radius:14px;padding:22px;background:white;">
+        <h2 style="font-size:20px;margin:0 0 10px;"><a href="/best-for/{{ key }}">{{ item.label }}</a></h2>
+        <p style="line-height:1.6;margin:0 0 14px;">{{ item.lede }}</p>
+        <a href="/best-for/{{ key }}" style="font-weight:700;">See fit guide →</a>
+      </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <section style="margin-bottom:34px;">
+      <p style="font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:12px;">Best-fit guide</p>
+      <h1 style="font-size:42px;line-height:1.1;margin:10px 0 16px;">{{ page.h1 }}</h1>
+      <p style="font-size:18px;line-height:1.7;max-width:800px;">{{ page.lede }}</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;">
+        <a href="/signup" class="site-footer-btn" style="font-weight:700;">Start Free Trial</a>
+        <a href="/pricing" class="site-footer-btn">See Pricing</a>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:30px;">
+      <div style="border:1px solid #e5e7eb;border-radius:14px;padding:22px;background:white;">
+        <h2 style="margin-top:0;">Who this fits</h2>
+        <p style="line-height:1.7;">{{ page.fit }}</p>
+      </div>
+      <div style="border:1px solid #e5e7eb;border-radius:14px;padding:22px;background:white;">
+        <h2 style="margin-top:0;">Why it works</h2>
+        <ul style="line-height:1.8;padding-left:20px;">
+          {% for reason in page.reasons %}<li>{{ reason }}</li>{% endfor %}
+        </ul>
+      </div>
+    </section>
+
+    <section style="background:#fff8dc;border-radius:14px;padding:24px;margin-bottom:30px;">
+      <h2 style="margin-top:0;">Current Work-A-Beez plan fit</h2>
+      <p style="line-height:1.7;margin-bottom:0;">{{ page.plan }}</p>
+    </section>
+
+    <section style="margin-bottom:30px;">
+      <h2>Related buyer guides</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        {% for key, label in related %}<a href="/best-for/{{ key }}" class="site-footer-btn">{{ label }}</a>{% endfor %}
+      </div>
+    </section>
+
+    <section style="border-top:1px solid #e5e7eb;padding-top:26px;">
+      <h2>Keep researching</h2>
+      <p><a href="/compare">Compare time-clock approaches</a> · <a href="/tools">Use free workforce calculators</a> · <a href="/industries">Browse industry solutions</a></p>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}
