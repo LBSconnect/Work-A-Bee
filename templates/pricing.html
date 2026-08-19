@@ -49,7 +49,7 @@
       position: sticky; top: 0; z-index: 100;
     }
     .nav-logo { display: flex; align-items: center; gap: 10px; }
-    .nav-logo .bee { font-size: 32px; }
+    .nav-logo .bee { height: 32px; width: auto; display: block; }
     .nav-logo-text { display: flex; flex-direction: column; }
     .nav-logo-text strong { font-size: 18px; font-weight: 800; letter-spacing: -.3px; }
     .nav-logo-text span { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gray); }
@@ -126,7 +126,7 @@
     /* ── FOOTER ── */
     footer { background: var(--white); padding: 56px 48px 32px; border-top: 1px solid #eee; }
     .footer-top { display: grid; grid-template-columns: 1.5fr repeat(3,1fr); gap: 40px; margin-bottom: 40px; }
-    .footer-brand .bee { font-size: 36px; }
+    .footer-brand .bee { height: 36px; width: auto; display: block; }
     .footer-brand strong { font-size: 18px; font-weight: 800; }
     .footer-brand .tagline { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #666; display: block; margin-bottom: 8px; }
     .footer-brand .url { color: #9A6700; font-size: 13px; font-weight: 600; margin-top: 8px; display: block; }
@@ -178,7 +178,7 @@
 
 <nav>
   <a href="/" class="nav-logo">
-    <span class="bee">🐝</span>
+    <img class="bee" src="{{ url_for('static', filename='logo-workabee.png') }}" alt="Work-A-Beez">
     <div class="nav-logo-text">
       <strong>Work-A-Beez</strong>
       <span>Employee Timekeeping</span>
@@ -190,7 +190,7 @@
     <a href="/#features">Features <span class="arrow">▾</span></a>
     <a href="/#why-businesses">Benefits <span class="arrow">▾</span></a>
     <a href="/pricing" class="current">Pricing</a>
-    <a href="https://www.LBSconnect.net" target="_blank" rel="noopener">About Us</a>
+    <a href="https://www.lbsconnect.net/index.html" target="_blank" rel="noopener">About Us</a>
   </div>
 
   <div class="nav-actions">
@@ -232,9 +232,9 @@
       <div class="price-card-badge">Most Popular</div>
       <h3>Growth</h3>
       <p class="price-sub">For growing crews and small businesses</p>
-      <div class="price-amount">$29<span>/mo</span></div>
+      <div class="price-amount">$79<span>/mo</span></div>
       <ul>
-        <li><span class="check">✓</span> Up to 25 employees</li>
+        <li><span class="check">✓</span> Up to 10 employees</li>
         <li><span class="check">✓</span> 3 authorized clock-in devices</li>
         <li><span class="check">✓</span> Everything in Starter</li>
         <li><span class="check">✓</span> Overtime rules &amp; auto lunch deduction</li>
@@ -246,7 +246,7 @@
     <div class="price-card">
       <h3>Business</h3>
       <p class="price-sub">For larger, multi-crew operations</p>
-      <div class="price-amount">$79<span>/mo</span></div>
+      <div class="price-amount">$139.99<span>/mo</span></div>
       <ul>
         <li><span class="check">✓</span> Up to 100 employees</li>
         <li><span class="check">✓</span> Unlimited authorized devices</li>
@@ -270,7 +270,7 @@
   <div class="footer-top">
     <div class="footer-brand">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-        <span class="bee">🐝</span>
+        <img class="bee" src="{{ url_for('static', filename='logo-workabee.png') }}" alt="Work-A-Beez">
         <div>
           <strong>Work-A-Beez</strong><br>
           <span class="tagline">Employee Timekeeping</span>
@@ -292,7 +292,7 @@
     <div class="footer-col">
       <h4>Company</h4>
       <ul>
-        <li><a href="https://www.LBSconnect.net" target="_blank" rel="noopener">About Us</a></li>
+        <li><a href="https://www.lbsconnect.net/index.html" target="_blank" rel="noopener">About Us</a></li>
         <li><a href="mailto:info@lbsconnect.net?subject=Work-A-Beez Inquiry">Contact Us</a></li>
       </ul>
     </div>
