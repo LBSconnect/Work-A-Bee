@@ -14,6 +14,7 @@ from api.employee.schedule import api_employee_schedule_bp
 from api.employee.time_history import api_employee_time_history_bp
 from api.errors import register_error_handlers
 from api.push_tokens import api_push_tokens_bp
+from seo_public import seo_public_bp
 
 API_BLUEPRINTS = [
     api_auth_bp,
@@ -38,4 +39,8 @@ def register_api(app, csrf):
     for bp in API_BLUEPRINTS:
         app.register_blueprint(bp)
         csrf.exempt(bp)
+    # Public SEO pages are GET-only and intentionally live outside /api.
+    # Register separately so they are not unnecessarily CSRF-exempted with
+    # the JSON API blueprints.
+    app.register_blueprint(seo_public_bp)
     register_error_handlers(app)
