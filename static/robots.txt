@@ -11,3 +11,4 @@ Disallow: /internal
 Sitemap: https://www.workabeez.net/sitemap.xml
 Sitemap: https://www.workabeez.net/sitemap-industries.xml
 Sitemap: https://www.workabeez.net/sitemap-tools.xml
+Sitemap: https://www.workabeez.net/sitemap-comparisons.xml
