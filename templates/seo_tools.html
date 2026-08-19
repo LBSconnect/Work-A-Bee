@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}{% if page %}{{ page.title }}{% else %}Free Workforce Calculators | Work-A-Beez{% endif %}{% endblock %}
+{% block wrapclass %}wide{% endblock %}
+{% block head_extra %}
+  <meta name="description" content="{% if page %}{{ page.description }}{% else %}Free timecard, overtime, payroll-hours and labor-cost calculators for small businesses from Work-A-Beez.{% endif %}">
+  <link rel="canonical" href="{{ canonical }}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Work-A-Beez">
+  <meta property="og:title" content="{% if page %}{{ page.title }}{% else %}Free Workforce Calculators | Work-A-Beez{% endif %}">
+  <meta property="og:description" content="{% if page %}{{ page.description }}{% else %}Free workforce calculators for timecards, overtime, payroll hours and labor costs.{% endif %}">
+  <meta property="og:url" content="{{ canonical }}">
+  <meta property="og:image" content="https://www.workabeez.net/static/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {{ {
+    "@context": "https://schema.org",
+    "@type": "WebApplication" if page else "CollectionPage",
+    "name": page.h1 if page else "Free Workforce Calculators",
+    "url": canonical,
+    "applicationCategory": "BusinessApplication" if page else none,
+    "operatingSystem": "Web" if page else none,
+    "description": page.description if page else "Free workforce calculators for timecards, overtime, payroll hours and labor costs."
+  } | tojson }}
+  </script>
+  <style>
+    .tool-hero { text-align:center; padding:10px 0 22px; }
+    .tool-hero h1 { font-size:34px; margin-bottom:10px; }
+    .tool-hero p { max-width:720px; margin:0 auto; color:#4b5563; line-height:1.65; }
+    .tool-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin:26px 0; }
+    .tool-card { border:1px solid #e5e7eb; border-radius:12px; padding:20px; text-decoration:none; color:#1f2937; background:#fff; }
+    .tool-card:hover { border-color:#FFC107; box-shadow:0 4px 16px rgba(0,0,0,.06); }
+    .calc { border:1px solid #e5e7eb; border-radius:14px; padding:24px; margin:22px 0; background:#fff; }
+    .calc-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; }
+    .calc label { font-size:13px; color:#374151; }
+    .calc input { width:100%; margin-top:5px; padding:10px; border:1px solid #d1d5db; border-radius:8px; font:inherit; }
+    .calc button { margin-top:18px; padding:12px 18px; border:0; border-radius:8px; background:#FFC107; color:#111; font-weight:700; cursor:pointer; }
+    .result { margin-top:20px; padding:16px; border-radius:10px; background:#fff8db; line-height:1.7; }
+    .time-row { display:grid; grid-template-columns:90px repeat(3,minmax(120px,1fr)); gap:10px; align-items:end; margin-bottom:10px; }
+    .time-row strong { padding-bottom:10px; }
+    .employee-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
+    .small { font-size:13px; color:#6b7280; line-height:1.55; }
+    .cta { margin:28px 0 8px; padding:22px; border-radius:12px; background:#1a1a1a; color:#fff; }
+    .cta a { display:inline-block; margin:8px 8px 0 0; padding:10px 14px; border-radius:7px; background:#FFC107; color:#111; text-decoration:none; font-weight:700; }
+    @media(max-width:700px){ .time-row,.employee-row{grid-template-columns:1fr;} .time-row strong{padding:0;} }
+  </style>
+{% endblock %}
+{% block content %}
+  {% if not page %}
+    <section class="tool-hero">
+      <h1>Free Workforce Calculators</h1>
+      <p>Use these simple calculators to estimate hours, overtime, payroll and labor cost. No signup required.</p>
+    </section>
+    <div class="tool-grid">
+      {% for key, item in tools.items() %}
+        <a class="tool-card" href="/tools/{{ key }}"><strong>{{ item.label }}</strong><p class="small">{{ item.description }}</p></a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <section class="tool-hero">
+      <div class="small"><a href="/tools">Free Tools</a> / {{ page.label }}</div>
+      <h1>{{ page.h1 }}</h1>
+      <p>{{ page.lede }}</p>
+    </section>
+
+    <div class="calc" data-tool="{{ page.type }}">
+      {% if page.type == 'timecard' %}
+        <div class="calc-grid" style="margin-bottom:18px;">
+          <label>Overtime threshold (hours)<input id="ot-threshold" type="number" min="0" step="0.25" value="40"></label>
+        </div>
+        <div id="timecard-rows">
+          {% for day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] %}
+            <div class="time-row">
+              <strong>{{ day }}</strong>
+              <label>Start<input class="start" type="time"></label>
+              <label>End<input class="end" type="time"></label>
+              <label>Unpaid break (min)<input class="break" type="number" min="0" step="1" value="0"></label>
+            </div>
+          {% endfor %}
+        </div>
+        <button type="button" onclick="calcTimecard()">Calculate weekly hours</button>
+
+      {% elif page.type == 'overtime' %}
+        <div class="calc-grid">
+          <label>Hourly rate ($)<input id="rate" type="number" min="0" step="0.01" value="20"></label>
+          <label>Regular hours<input id="regular-hours" type="number" min="0" step="0.25" value="40"></label>
+          <label>Overtime hours<input id="overtime-hours" type="number" min="0" step="0.25" value="5"></label>
+          <label>Overtime multiplier<input id="ot-multiplier" type="number" min="0" step="0.1" value="1.5"></label>
+        </div>
+        <button type="button" onclick="calcOvertime()">Calculate estimated pay</button>
+
+      {% elif page.type == 'payroll' %}
+        <p class="small">Enter up to five employees. Leave unused rows blank.</p>
+        <div id="employee-rows">
+          {% for i in range(1,6) %}
+            <div class="employee-row">
+              <label>Employee {{ i }}<input class="emp-name" type="text" placeholder="Name (optional)"></label>
+              <label>Hours<input class="emp-hours" type="number" min="0" step="0.25"></label>
+              <label>Hourly rate ($)<input class="emp-rate" type="number" min="0" step="0.01"></label>
+            </div>
+          {% endfor %}
+        </div>
+        <button type="button" onclick="calcPayroll()">Total payroll hours</button>
+
+      {% elif page.type == 'labor' %}
+        <div class="calc-grid">
+          <label>Employees<input id="headcount" type="number" min="0" step="1" value="10"></label>
+          <label>Avg weekly hours / employee<input id="avg-hours" type="number" min="0" step="0.25" value="40"></label>
+          <label>Avg hourly wage ($)<input id="avg-rate" type="number" min="0" step="0.01" value="20"></label>
+          <label>Payroll burden (%)<input id="burden" type="number" min="0" step="0.1" value="15"></label>
+          <label>Weeks per month<input id="weeks-month" type="number" min="0" step="0.01" value="4.33"></label>
+        </div>
+        <button type="button" onclick="calcLabor()">Estimate labor cost</button>
+      {% endif %}
+      <div id="result" class="result" aria-live="polite">Enter your numbers and calculate.</div>
+    </div>
+
+    <p class="small"><strong>Important:</strong> {{ page.note }}</p>
+
+    <div class="tool-grid">
+      {% for key, label in related %}
+        <a class="tool-card" href="/tools/{{ key }}"><strong>{{ label }}</strong></a>
+      {% endfor %}
+    </div>
+
+    <div class="cta">
+      <strong>Ready to stop calculating time manually?</strong>
+      <p>Work-A-Beez tracks punches, hours, schedules and payroll-ready records in one browser-based system.</p>
+      <a href="/signup">Start Free Trial</a><a href="/pricing">See Pricing</a><a href="/features">View Features</a>
+    </div>
+  {% endif %}
+
+<script>
+function num(id){ const v=parseFloat(document.getElementById(id).value); return Number.isFinite(v)?v:0; }
+function money(v){ return v.toLocaleString(undefined,{style:'currency',currency:'USD'}); }
+function show(html){ document.getElementById('result').innerHTML=html; }
+function calcTimecard(){
+  let total=0;
+  document.querySelectorAll('.time-row').forEach(row=>{
+    const s=row.querySelector('.start').value, e=row.querySelector('.end').value;
+    const b=parseFloat(row.querySelector('.break').value)||0;
+    if(!s||!e) return;
+    const [sh,sm]=s.split(':').map(Number), [eh,em]=e.split(':').map(Number);
+    let mins=(eh*60+em)-(sh*60+sm); if(mins<0) mins+=1440;
+    mins=Math.max(0,mins-b); total+=mins/60;
+  });
+  const threshold=num('ot-threshold'); const regular=Math.min(total,threshold); const overtime=Math.max(0,total-threshold);
+  show(`<strong>Total: ${total.toFixed(2)} hours</strong><br>Regular: ${regular.toFixed(2)} hours<br>Above threshold: ${overtime.toFixed(2)} hours`);
+}
+function calcOvertime(){
+  const rate=num('rate'), rh=num('regular-hours'), oh=num('overtime-hours'), mult=num('ot-multiplier');
+  const regular=rate*rh, overtime=rate*mult*oh, gross=regular+overtime;
+  show(`<strong>Estimated gross pay: ${money(gross)}</strong><br>Regular pay: ${money(regular)}<br>Overtime pay: ${money(overtime)}<br>Overtime rate used: ${money(rate*mult)}/hr`);
+}
+function calcPayroll(){
+  let hours=0,pay=0,used=0;
+  document.querySelectorAll('.employee-row').forEach(row=>{ const h=parseFloat(row.querySelector('.emp-hours').value)||0; const r=parseFloat(row.querySelector('.emp-rate').value)||0; if(h||r) used++; hours+=h; pay+=h*r; });
+  show(`<strong>Total payroll hours: ${hours.toFixed(2)}</strong><br>Estimated gross hourly payroll: ${money(pay)}<br>Rows included: ${used}`);
+}
+function calcLabor(){
+  const weeklyWages=num('headcount')*num('avg-hours')*num('avg-rate'); const burden=weeklyWages*(num('burden')/100); const weekly=weeklyWages+burden; const monthly=weekly*num('weeks-month'); const annual=weekly*52;
+  show(`<strong>Estimated weekly labor cost: ${money(weekly)}</strong><br>Direct weekly wages: ${money(weeklyWages)}<br>Estimated weekly burden: ${money(burden)}<br>Estimated monthly labor cost: ${money(monthly)}<br>Estimated annual labor cost: ${money(annual)}`);
+}
+</script>
+{% endblock %}
