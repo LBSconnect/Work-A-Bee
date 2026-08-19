@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}{% if page %}{{ page.title }}{% else %}Employee Time Tracking by Industry | Work-A-Beez{% endif %}{% endblock %}
+{% block wrapclass %}wide{% endblock %}
+{% block head_extra %}
+  {% set meta_description = page.description if page else "Explore Work-A-Beez employee time tracking for construction, cleaning, property management, warehouse, retail and auto repair teams." %}
+  <meta name="description" content="{{ meta_description }}">
+  <link rel="canonical" href="{{ canonical }}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Work-A-Beez">
+  <meta property="og:title" content="{% if page %}{{ page.title }}{% else %}Employee Time Tracking by Industry | Work-A-Beez{% endif %}">
+  <meta property="og:description" content="{{ meta_description }}">
+  <meta property="og:url" content="{{ canonical }}">
+  <meta property="og:image" content="https://www.workabeez.net/static/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% if page %}{{ page.title }}{% else %}Employee Time Tracking by Industry | Work-A-Beez{% endif %}">
+  <meta name="twitter:description" content="{{ meta_description }}">
+  <meta name="twitter:image" content="https://www.workabeez.net/static/og-image.png">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": {{ (page.h1 if page else "Employee Time Tracking by Industry")|tojson }},
+    "description": {{ meta_description|tojson }},
+    "url": {{ canonical|tojson }},
+    "isPartOf": {"@type":"WebSite","name":"Work-A-Beez","url":"https://www.workabeez.net/"}
+  }
+  </script>
+  <style>
+    .industry-hero{padding:44px;border-radius:16px;background:linear-gradient(150deg,#fff8dc,#fff);margin-bottom:28px}
+    .industry-hero h1{font-size:38px;line-height:1.08;margin:0 0 16px}.industry-hero p{font-size:17px;line-height:1.7;color:#4b5563;max-width:760px}
+    .industry-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}.industry-btn{display:inline-block;padding:12px 18px;border-radius:8px;background:#FFC107;color:#111;font-weight:700;text-decoration:none}.industry-btn.alt{background:#111;color:#fff}
+    .industry-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.industry-card{border:1px solid #e5e7eb;border-radius:12px;padding:22px;background:#fff}.industry-card h2,.industry-card h3{margin-top:0}.industry-card p,.industry-card li{line-height:1.65}.industry-card ul{padding-left:20px}.industry-related{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.industry-related a{border:1px solid #d1d5db;border-radius:999px;padding:8px 12px;text-decoration:none;color:#374151}
+    @media(max-width:700px){.industry-grid{grid-template-columns:1fr}.industry-hero{padding:28px}.industry-hero h1{font-size:31px}}
+  </style>
+{% endblock %}
+{% block content %}
+{% if page %}
+  <div class="industry-hero">
+    <p style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9A6700;margin:0 0 10px;">Workforce Time Tracking</p>
+    <h1>{{ page.h1 }}</h1>
+    <p>{{ page.lede }}</p>
+    <div class="industry-actions">
+      <a class="industry-btn" href="/signup">Start 14-Day Trial</a>
+      <a class="industry-btn alt" href="/pricing">View Pricing</a>
+    </div>
+  </div>
+
+  <div class="industry-grid">
+    <div class="industry-card">
+      <h2>The challenge</h2>
+      <p>{{ page.challenge }}</p>
+    </div>
+    <div class="industry-card">
+      <h2>How Work-A-Beez fits</h2>
+      <p>{{ page.fit }}</p>
+    </div>
+  </div>
+
+  <div class="industry-card" style="margin-top:18px;">
+    <h2>Useful features for {{ page.label|lower }}</h2>
+    <ul>{% for benefit in page.benefits %}<li>{{ benefit }}</li>{% endfor %}</ul>
+  </div>
+
+  <div class="industry-card" style="margin-top:18px;">
+    <h2>Related industries</h2>
+    <div class="industry-related">
+      {% for key, label in related %}<a href="/industries/{{ key }}">{{ label }}</a>{% endfor %}
+      <a href="/industries">View all industries</a>
+    </div>
+  </div>
+
+  <div class="industry-card" style="margin-top:18px;text-align:center;">
+    <h2>See whether the workflow fits your team</h2>
+    <p>Start with the browser-based time clock, then add the scheduling and reporting features your operation needs.</p>
+    <div class="industry-actions" style="justify-content:center;">
+      <a class="industry-btn" href="/signup">Start 14-Day Trial</a>
+      <a class="industry-btn alt" href="/features">Explore Features</a>
+    </div>
+    <p style="font-size:12px;color:#6b7280;margin-top:18px;">Work-A-Beez provides timekeeping software, not legal, payroll-tax, or employment-law advice. Businesses remain responsible for configuring policies and practices that meet their obligations.</p>
+  </div>
+{% else %}
+  <div class="industry-hero">
+    <p style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9A6700;margin:0 0 10px;">Industry Solutions</p>
+    <h1>Employee Time Tracking by Industry</h1>
+    <p>Different workplaces clock time differently. Explore how Work-A-Beez can fit teams that want browser-based clock-in, employee PINs, schedules, attendance records and payroll-ready reporting.</p>
+  </div>
+  <div class="industry-grid">
+    {% for key, item in industries.items() %}
+      <div class="industry-card">
+        <h2>{{ item.label }}</h2>
+        <p>{{ item.lede }}</p>
+        <a href="/industries/{{ key }}">Explore {{ item.label }} →</a>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

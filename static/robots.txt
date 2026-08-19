@@ -9,3 +9,4 @@ Disallow: /system
 Disallow: /internal
 
 Sitemap: https://www.workabeez.net/sitemap.xml
+Sitemap: https://www.workabeez.net/sitemap-industries.xml
