@@ -1,4 +1,4 @@
-from flask import Blueprint, abort, render_template
+from flask import Blueprint, Response, abort, render_template
 
 seo_industries_bp = Blueprint("seo_industries", __name__)
 
@@ -79,3 +79,16 @@ def industry_page(slug):
     canonical = f"https://www.workabeez.net/industries/{slug}"
     related = [(key, value["label"]) for key, value in INDUSTRIES.items() if key != slug]
     return render_template("seo_industry.html", page=page, slug=slug, canonical=canonical, related=related, industries=INDUSTRIES)
+
+
+@seo_industries_bp.route("/sitemap-industries.xml")
+def industries_sitemap():
+    urls = ["https://www.workabeez.net/industries"] + [
+        f"https://www.workabeez.net/industries/{slug}" for slug in INDUSTRIES
+    ]
+    rows = "".join(
+        f"<url><loc>{url}</loc><lastmod>2026-08-19</lastmod><changefreq>monthly</changefreq><priority>{'0.90' if url.endswith('/industries') else '0.85'}</priority></url>"
+        for url in urls
+    )
+    xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{rows}</urlset>'
+    return Response(xml, mimetype="application/xml")
