@@ -28,6 +28,49 @@ def test_tools_hub_loads(client):
     assert b"Payroll Error Cost Calculator" in resp.data
 
 
+def test_tools_hub_redesign_has_required_elements(client):
+    """Covers the /tools hub redesign: shared header (logo + nav), hero
+    copy, the featured-tool CTA route, every calculator route still being
+    discoverable from the hub, and the signup/pricing CTAs."""
+    from seo_tools import TOOLS
+
+    resp = client.get("/tools")
+    assert resp.status_code == 200
+    html = resp.get_data(as_text=True)
+
+    # Work-A-Beez logo stays visible in the shared public header.
+    assert 'src="/static/logo-workabee.png"' in html
+    assert 'alt="Work-A-Beez"' in html
+
+    # Public nav retains Home, Free Tools, and Pricing.
+    assert ">Home<" in html
+    assert ">Free Tools<" in html
+    assert ">Pricing<" in html
+
+    # Hero headline, subheadline, and trust row.
+    assert "Free Workforce Calculators for Small Businesses" in html
+    assert "Estimate payroll hours, labor cost, timekeeping ROI" in html
+    assert "Free to use" in html
+    assert "No signup required" in html
+    assert "Built for small businesses" in html
+
+    # The ROI calculator is featured and its CTAs point at the real route.
+    assert "Featured Tool" in html
+    assert 'href="/tools/employee-time-tracking-roi-calculator"' in html
+    assert "Try the ROI Calculator" in html
+    assert "Calculate My ROI" in html
+
+    # Every existing calculator route is still discoverable from the hub -
+    # rendered dynamically from the TOOLS dict, not hardcoded.
+    for slug in TOOLS:
+        assert f'href="/tools/{slug}"' in html
+
+    # Signup and pricing CTAs are present (product bridge + final CTA).
+    assert 'href="/signup"' in html
+    assert 'href="/pricing"' in html
+    assert "Start Your Free 14-Day Trial" in html
+
+
 @pytest.mark.parametrize(
     "slug, heading",
     [

@@ -42,19 +42,244 @@
     .cta { margin:28px 0 8px; padding:22px; border-radius:12px; background:#1a1a1a; color:#fff; }
     .cta a { display:inline-block; margin:8px 8px 0 0; padding:10px 14px; border-radius:7px; background:#FFC107; color:#111; text-decoration:none; font-weight:700; }
     @media(max-width:700px){ .time-row,.employee-row{grid-template-columns:1fr;} .time-row strong{padding:0;} }
+
+    /* --- /tools hub redesign (scoped to th- classes; calculator pages above are untouched) --- */
+    .th-hero { padding:8px 0 40px; }
+    .th-hero-inner { display:grid; grid-template-columns:1.15fr 1fr; gap:40px; align-items:center; }
+    .th-eyebrow { display:inline-block; font-size:12px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; color:var(--bee-black); background:var(--bee-yellow); padding:5px 12px; border-radius:999px; margin-bottom:16px; }
+    .th-hero h1 { font-size:38px; line-height:1.15; margin:0 0 14px; color:var(--bee-black); }
+    .th-hero-sub { font-size:16.5px; line-height:1.6; color:#4b5563; margin:0 0 24px; max-width:480px; }
+    .th-cta-row { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:24px; }
+    .th-btn-outline { display:inline-block; padding:13px 20px; border-radius:8px; border:2px solid var(--bee-black); color:var(--bee-black); font-weight:700; text-decoration:none; background:#fff; }
+    .th-btn-outline:hover, .th-btn-outline:focus-visible { background:var(--bee-black); color:#fff; }
+    .th-trust-row { display:flex; flex-wrap:wrap; gap:10px 20px; margin:0; padding:0; list-style:none; }
+    .th-trust-row li { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#374151; }
+    .th-trust-row svg { width:16px; height:16px; color:#16a34a; flex-shrink:0; }
+    .th-example-card { background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:26px; box-shadow:0 18px 40px rgba(0,0,0,.08); }
+    .th-example-label { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:#6b7280; margin-bottom:10px; }
+    .th-example-value { font-size:38px; font-weight:800; color:var(--bee-black); margin-bottom:4px; }
+    .th-example-note { font-size:12px; color:#9ca3af; font-style:italic; margin-bottom:18px; }
+    .th-example-bars { display:flex; align-items:flex-end; gap:8px; height:64px; }
+    .th-example-bars span { flex:1; background:var(--bee-yellow); border-radius:5px 5px 0 0; }
+
+    .th-section { padding:44px 0; border-radius:20px; }
+    .th-section.alt { background:#f9fafb; margin:0 -32px; padding:44px 32px; border-radius:0; }
+    .th-section.warm { background:#fffdf2; margin:0 -32px; padding:44px 32px; border-radius:0; }
+    .th-section-head { text-align:center; max-width:600px; margin:0 auto 32px; }
+    .th-eyebrow-sm { font-size:12px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; color:#9A6700; margin:0 0 8px; display:block; }
+    .th-section-head h2 { font-size:27px; margin:0 0 10px; color:var(--bee-black); }
+    .th-section-head p { color:#4b5563; line-height:1.6; margin:0; }
+
+    .th-featured { background:#fff; border:1px solid #eee; border-radius:20px; padding:32px; box-shadow:0 10px 28px rgba(0,0,0,.05); }
+    .th-featured-icon { width:52px; height:52px; border-radius:14px; background:var(--bee-yellow); display:flex; align-items:center; justify-content:center; margin-bottom:16px; }
+    .th-featured-icon svg { width:26px; height:26px; color:var(--bee-black); }
+    .th-featured h3 { font-size:23px; margin:0 0 12px; }
+    .th-featured p { color:#4b5563; line-height:1.7; margin:0 0 22px; max-width:640px; }
+    .th-featured .th-cta-row { margin-bottom:0; }
+
+    .th-tool-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:20px; }
+    .th-tool-card { display:flex; flex-direction:column; background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:24px; text-decoration:none; color:inherit; box-shadow:0 2px 8px rgba(0,0,0,.03); transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+    .th-tool-card:hover, .th-tool-card:focus-visible { transform:translateY(-4px); box-shadow:0 16px 32px rgba(0,0,0,.09); border-color:var(--bee-yellow); outline:none; }
+    .th-tool-card:focus-visible { outline:3px solid var(--bee-yellow); outline-offset:2px; }
+    .th-tool-icon { width:46px; height:46px; border-radius:12px; background:#fff8db; display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+    .th-tool-icon svg { width:22px; height:22px; color:#9A6700; }
+    .th-tool-card h3 { font-size:17px; margin:0 0 8px; color:var(--bee-black); }
+    .th-tool-card p { font-size:13.5px; color:#6b7280; line-height:1.55; margin:0 0 16px; flex-grow:1; }
+    .th-tool-link { font-size:14px; font-weight:700; color:#9A6700; }
+    .th-tool-card:hover .th-tool-link, .th-tool-card:focus-visible .th-tool-link { text-decoration:underline; }
+
+    .th-benefits { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:26px; }
+    .th-benefit { text-align:center; }
+    .th-benefit-icon { width:50px; height:50px; border-radius:50%; background:var(--bee-black); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; }
+    .th-benefit-icon svg { width:22px; height:22px; color:var(--bee-yellow); }
+    .th-benefit h3 { font-size:15.5px; margin:0 0 6px; }
+    .th-benefit p { font-size:13px; color:#6b7280; line-height:1.55; margin:0; }
+
+    .th-bridge { display:grid; grid-template-columns:1.1fr 1fr; gap:32px; align-items:center; }
+    .th-checklist { list-style:none; margin:20px 0 26px; padding:0; display:grid; gap:11px; }
+    .th-checklist li { display:flex; align-items:flex-start; gap:10px; font-size:14.5px; color:#1f2937; font-weight:600; }
+    .th-checklist svg { width:18px; height:18px; color:#16a34a; flex-shrink:0; margin-top:2px; }
+    .th-bridge-panel { background:var(--bee-black); border-radius:18px; padding:28px; color:#fff; }
+    .th-bridge-panel-icon { width:44px; height:44px; border-radius:12px; background:var(--bee-yellow); display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+    .th-bridge-panel-icon svg { width:22px; height:22px; color:var(--bee-black); }
+    .th-bridge-panel h3 { color:#fff; font-size:17px; margin:0 0 8px; }
+    .th-bridge-panel p { color:#d1d5db; font-size:13.5px; line-height:1.6; margin:0; }
+
+    .th-final { text-align:center; background:var(--bee-black); border-radius:22px; padding:48px 28px; margin:0; }
+    .th-final h2 { color:#fff; font-size:27px; margin:0 0 12px; }
+    .th-final p { color:#d1d5db; margin:0 0 24px; }
+    .th-final .th-cta-row { justify-content:center; margin-bottom:0; }
+    .th-final .th-btn-outline { border-color:#fff; color:#fff; background:transparent; }
+    .th-final .th-btn-outline:hover, .th-final .th-btn-outline:focus-visible { background:#fff; color:var(--bee-black); }
+
+    @media (max-width:760px){
+      .th-hero-inner, .th-bridge { grid-template-columns:1fr; }
+      .th-hero-visual { order:-1; }
+      .th-section.alt, .th-section.warm { padding:36px 32px; }
+    }
+    @media (max-width:520px){
+      .th-hero h1 { font-size:29px; }
+      .th-section-head h2 { font-size:23px; }
+      .th-section { padding:32px 0; }
+      .th-featured, .th-final { padding:24px; }
+      .th-cta-row { flex-direction:column; align-items:stretch; }
+      .th-cta-row a { text-align:center; }
+    }
   </style>
 {% endblock %}
 {% block content %}
   {% if not page %}
-    <section class="tool-hero">
-      <h1>Free Workforce Calculators</h1>
-      <p>Use these simple calculators to estimate hours, overtime, payroll, labor cost and the modeled value of timekeeping and payroll-process differences. No signup required.</p>
+    {% macro th_icon(kind) %}
+      {% if kind == 'roi' %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+      {% elif kind == 'buddy' %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      {% elif kind == 'payroll_error' %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      {% elif kind == 'timecard' %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>
+      {% elif kind == 'overtime' %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 2h6"></path><path d="M12 2v3"></path><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2.5"></path></svg>
+      {% elif kind == 'labor' %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2v20"></path><path d="M17 6.5c0-1.9-2-3-5-3s-5 1.1-5 3 2 2.7 5 3.2 5 1.6 5 3.3-2 3-5 3-5-1.1-5-3"></path></svg>
+      {% else %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="5" y="2" width="14" height="20" rx="2"></rect><path d="M9 6h6"></path><circle cx="9" cy="11" r="1" fill="currentColor" stroke="none"></circle><circle cx="12" cy="11" r="1" fill="currentColor" stroke="none"></circle><circle cx="15" cy="11" r="1" fill="currentColor" stroke="none"></circle><circle cx="9" cy="15" r="1" fill="currentColor" stroke="none"></circle><circle cx="12" cy="15" r="1" fill="currentColor" stroke="none"></circle><circle cx="15" cy="15" r="1" fill="currentColor" stroke="none"></circle></svg>
+      {% endif %}
+    {% endmacro %}
+
+    <!-- 1. HERO -->
+    <section class="th-hero">
+      <div class="th-hero-inner">
+        <div>
+          <span class="th-eyebrow">Free &middot; No Signup Required</span>
+          <h1>Free Workforce Calculators for Small Businesses</h1>
+          <p class="th-hero-sub">Estimate payroll hours, labor cost, timekeeping ROI, buddy punching cost, and payroll correction costs in minutes.</p>
+          <div class="th-cta-row">
+            <a class="btn" href="/tools/employee-time-tracking-roi-calculator">Try the ROI Calculator</a>
+            <a class="th-btn-outline" href="#tool-grid">Browse All Tools</a>
+          </div>
+          <ul class="th-trust-row">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"></polyline></svg>Free to use</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"></polyline></svg>No signup required</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"></polyline></svg>Built for small businesses</li>
+          </ul>
+        </div>
+        <div class="th-hero-visual">
+          <div class="th-example-card">
+            <div class="th-example-label">Modeled monthly labor value</div>
+            <div class="th-example-value">$1,083</div>
+            <div class="th-example-note">Example only &mdash; not a savings guarantee</div>
+            <div class="th-example-bars" aria-hidden="true">
+              <span style="height:35%;"></span>
+              <span style="height:55%;"></span>
+              <span style="height:40%;"></span>
+              <span style="height:75%;"></span>
+              <span style="height:60%;"></span>
+              <span style="height:90%;"></span>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
-    <div class="tool-grid">
-      {% for key, item in tools.items() %}
-        <a class="tool-card" href="/tools/{{ key }}"><strong>{{ item.label }}</strong><p class="small">{{ item.description }}</p></a>
-      {% endfor %}
-    </div>
+
+    <!-- 2. FEATURED TOOL -->
+    <section class="th-section">
+      <div class="th-featured">
+        <h2 class="th-eyebrow-sm">Featured Tool</h2>
+        <div class="th-featured-icon">{{ th_icon('roi') }}</div>
+        <h3>Employee Time Tracking ROI Calculator</h3>
+        <p>Small timekeeping differences can add up fast across a team. Use your own numbers to estimate the labor value of recurring timekeeping gaps and compare that amount with the Work-A-Beez plan sized for your business.</p>
+        <div class="th-cta-row">
+          <a class="btn" href="/tools/employee-time-tracking-roi-calculator">Calculate My ROI</a>
+          <a class="th-btn-outline" href="/pricing">See Pricing</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. FREE TOOL GRID -->
+    <section class="th-section alt" id="tool-grid">
+      <div class="th-section-head">
+        <h2>Explore Free Workforce Tools</h2>
+        <p>Choose the calculator that matches the workforce problem you're trying to understand.</p>
+      </div>
+      <div class="th-tool-grid">
+        {% for key, item in tools.items() %}
+          <a class="th-tool-card" href="/tools/{{ key }}">
+            <div class="th-tool-icon">{{ th_icon(item.type) }}</div>
+            <h3>{{ item.label }}</h3>
+            <p>{{ item.description }}</p>
+            <span class="th-tool-link">Use Calculator &rarr;</span>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- 4. BENEFITS STRIP -->
+    <section class="th-section">
+      <div class="th-section-head">
+        <h2>Useful numbers. No complicated spreadsheets.</h2>
+      </div>
+      <div class="th-benefits">
+        <div class="th-benefit">
+          <div class="th-benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 1v22"></path><path d="M17 5.5c0-1.9-2-3-5-3s-5 1.1-5 3 2 2.7 5 3.2 5 1.6 5 3.3-2 3-5 3-5-1.1-5-3"></path></svg></div>
+          <h3>100% Free</h3>
+          <p>Use every calculator without creating an account.</p>
+        </div>
+        <div class="th-benefit">
+          <div class="th-benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
+          <h3>Fast Estimates</h3>
+          <p>Get useful planning numbers in minutes.</p>
+        </div>
+        <div class="th-benefit">
+          <div class="th-benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></div>
+          <h3>Your Inputs</h3>
+          <p>Calculations are based on the numbers you provide.</p>
+        </div>
+        <div class="th-benefit">
+          <div class="th-benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 21h18"></path><path d="M5 21V7l8-4 8 4v14"></path><path d="M10 21v-6h4v6"></path></svg></div>
+          <h3>Built for Employers</h3>
+          <p>Designed around common timekeeping and payroll questions.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. PRODUCT BRIDGE -->
+    <section class="th-section warm">
+      <div class="th-bridge">
+        <div>
+          <h2 style="font-size:26px;margin:0 0 14px;color:var(--bee-black);">Estimates Tell You the Cost. Work-A-Beez Helps You Manage the Time.</h2>
+          <p style="color:#4b5563;line-height:1.65;margin:0;">Manual timekeeping, payroll corrections, and inaccurate clock-ins can create unnecessary administrative work. Work-A-Beez gives businesses a simpler way to manage employee time from secure, office-authorized computers.</p>
+          <ul class="th-checklist">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"></polyline></svg>PIN-based employee clock in and out</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"></polyline></svg>Office-authorized clock-in devices</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"></polyline></svg>Employee attendance and time tracking</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"></polyline></svg>Payroll-ready reports</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"></polyline></svg>Scheduling and workforce management</li>
+          </ul>
+          <div class="th-cta-row">
+            <a class="btn" href="/signup">Start Free Trial</a>
+            <a class="th-btn-outline" href="/pricing">View Pricing</a>
+          </div>
+        </div>
+        <div class="th-bridge-panel">
+          <div class="th-bridge-panel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg></div>
+          <h3>From estimate to system of record</h3>
+          <p>These calculators model the cost. Work-A-Beez is the day-to-day system that records actual punches, flags exceptions, and produces payroll-ready hours &mdash; so fewer numbers need estimating in the first place.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. FINAL CTA -->
+    <section class="th-section">
+      <div class="th-final">
+        <h2>Ready to Simplify Employee Timekeeping?</h2>
+        <p>Spend less time correcting time records and more time running your business.</p>
+        <div class="th-cta-row">
+          <a class="btn" href="/signup">Start Your Free 14-Day Trial</a>
+          <a class="th-btn-outline" href="/pricing">Explore Pricing</a>
+        </div>
+      </div>
+    </section>
   {% else %}
     <section class="tool-hero">
       <div class="small"><a href="/tools">Free Tools</a> / {{ page.label }}</div>
