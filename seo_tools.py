@@ -1,5 +1,7 @@
 from flask import Blueprint, Response, abort, render_template
 
+from plans import PLANS
+
 seo_tools_bp = Blueprint("seo_tools", __name__)
 
 TOOLS = {
@@ -39,6 +41,15 @@ TOOLS = {
         "type": "labor",
         "note": "Payroll burden varies by business and may include employer taxes, insurance, benefits and other costs. Enter your own percentage for planning purposes.",
     },
+    "employee-time-tracking-roi-calculator": {
+        "label": "Time Tracking ROI Calculator",
+        "title": "Employee Time Tracking ROI Calculator | Work-A-Beez",
+        "description": "Estimate the labor value of minutes lost to manual timekeeping and compare the modeled amount with Work-A-Beez plan pricing.",
+        "h1": "Employee Time Tracking ROI Calculator",
+        "lede": "Model the dollar value of small daily timekeeping differences across your team, then compare that estimate with the Work-A-Beez plan sized for your headcount.",
+        "type": "roi",
+        "note": "This is a planning model, not a savings guarantee. It estimates the labor value of the minutes you enter. Work-A-Beez does not guarantee that all modeled time will be recovered, prevented or converted into payroll savings.",
+    },
 }
 
 
@@ -48,6 +59,7 @@ def tools_hub():
         "seo_tools.html",
         page=None,
         tools=TOOLS,
+        plans=PLANS,
         canonical="https://www.workabeez.net/tools",
     )
 
@@ -64,6 +76,7 @@ def tool_page(slug):
         slug=slug,
         tools=TOOLS,
         related=related,
+        plans=PLANS,
         canonical=f"https://www.workabeez.net/tools/{slug}",
     )
 
@@ -74,7 +87,7 @@ def tools_sitemap():
         f"https://www.workabeez.net/tools/{slug}" for slug in TOOLS
     ]
     rows = "".join(
-        f"<url><loc>{url}</loc><lastmod>2026-08-19</lastmod><changefreq>monthly</changefreq><priority>{'0.90' if url.endswith('/tools') else '0.85'}</priority></url>"
+        f"<url><loc>{url}</loc><lastmod>2026-08-20</lastmod><changefreq>monthly</changefreq><priority>{'0.90' if url.endswith('/tools') else '0.85'}</priority></url>"
         for url in urls
     )
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{rows}</urlset>'
