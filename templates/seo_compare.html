@@ -1,10 +1,6 @@
 {% extends "base.html" %}
 
-{% if page %}
-  {% block title %}{{ page.title }}{% endblock %}
-{% else %}
-  {% block title %}Employee Time Clock Comparisons | Work-A-Beez{% endblock %}
-{% endif %}
+{% block title %}{% if page %}{{ page.title }}{% else %}Employee Time Clock Comparisons | Work-A-Beez{% endif %}{% endblock %}
 
 {% block head_extra %}
   {% if page %}
