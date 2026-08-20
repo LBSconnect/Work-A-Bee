@@ -2,12 +2,12 @@
 {% block title %}{% if page %}{{ page.title }}{% else %}Free Workforce Calculators | Work-A-Beez{% endif %}{% endblock %}
 {% block wrapclass %}wide{% endblock %}
 {% block head_extra %}
-  <meta name="description" content="{% if page %}{{ page.description }}{% else %}Free timecard, overtime, payroll-hours and labor-cost calculators for small businesses from Work-A-Beez.{% endif %}">
+  <meta name="description" content="{% if page %}{{ page.description }}{% else %}Free timecard, overtime, payroll-hours, labor-cost and time-tracking ROI calculators for small businesses from Work-A-Beez.{% endif %}">
   <link rel="canonical" href="{{ canonical }}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Work-A-Beez">
   <meta property="og:title" content="{% if page %}{{ page.title }}{% else %}Free Workforce Calculators | Work-A-Beez{% endif %}">
-  <meta property="og:description" content="{% if page %}{{ page.description }}{% else %}Free workforce calculators for timecards, overtime, payroll hours and labor costs.{% endif %}">
+  <meta property="og:description" content="{% if page %}{{ page.description }}{% else %}Free workforce calculators for timecards, overtime, payroll hours, labor costs and time-tracking ROI.{% endif %}">
   <meta property="og:url" content="{{ canonical }}">
   <meta property="og:image" content="https://www.workabeez.net/static/og-image.png">
   <meta name="twitter:card" content="summary_large_image">
@@ -19,7 +19,7 @@
     "url": canonical,
     "applicationCategory": "BusinessApplication" if page else none,
     "operatingSystem": "Web" if page else none,
-    "description": page.description if page else "Free workforce calculators for timecards, overtime, payroll hours and labor costs."
+    "description": page.description if page else "Free workforce calculators for timecards, overtime, payroll hours, labor costs and time-tracking ROI."
   } | tojson }}
   </script>
   <style>
@@ -48,7 +48,7 @@
   {% if not page %}
     <section class="tool-hero">
       <h1>Free Workforce Calculators</h1>
-      <p>Use these simple calculators to estimate hours, overtime, payroll and labor cost. No signup required.</p>
+      <p>Use these simple calculators to estimate hours, overtime, payroll, labor cost and the modeled value of timekeeping differences. No signup required.</p>
     </section>
     <div class="tool-grid">
       {% for key, item in tools.items() %}
@@ -62,7 +62,7 @@
       <p>{{ page.lede }}</p>
     </section>
 
-    <div class="calc" data-tool="{{ page.type }}">
+    <div class="calc" data-tool="{{ page.type }}"{% if page.type == 'roi' %} data-starter-max="{{ plans.starter.max_employees }}" data-starter-price="{{ plans.starter.price }}" data-growth-max="{{ plans.growth.max_employees }}" data-growth-price="{{ plans.growth.price }}" data-business-max="{{ plans.business.max_employees }}" data-business-price="{{ plans.business.price }}"{% endif %}>
       {% if page.type == 'timecard' %}
         <div class="calc-grid" style="margin-bottom:18px;">
           <label>Overtime threshold (hours)<input id="ot-threshold" type="number" min="0" step="0.25" value="40"></label>
@@ -110,6 +110,17 @@
           <label>Weeks per month<input id="weeks-month" type="number" min="0" step="0.01" value="4.33"></label>
         </div>
         <button type="button" onclick="calcLabor()">Estimate labor cost</button>
+
+      {% elif page.type == 'roi' %}
+        <div class="calc-grid">
+          <label>Employees<input id="roi-headcount" type="number" min="1" step="1" value="10"></label>
+          <label>Average hourly wage ($)<input id="roi-rate" type="number" min="0" step="0.01" value="20"></label>
+          <label>Minutes per employee per workday<input id="roi-minutes" type="number" min="0" step="1" value="5"></label>
+          <label>Workdays per week<input id="roi-days" type="number" min="1" max="7" step="1" value="5"></label>
+        </div>
+        <p class="small">Use the minutes field for the timekeeping difference you want to model, such as rounding, late clock-outs, manual-entry cleanup or another recurring gap you have measured. Do not enter an assumed savings percentage.</p>
+        <p class="small">Current plan pricing used by this calculator: Starter ${{ '%.2f'|format(plans.starter.price) }}/month up to {{ plans.starter.max_employees }} employees; Growth ${{ '%.2f'|format(plans.growth.price) }}/month up to {{ plans.growth.max_employees }}; Business ${{ '%.2f'|format(plans.business.price) }}/month up to {{ plans.business.max_employees }}.</p>
+        <button type="button" onclick="calcRoi()">Estimate modeled labor value</button>
       {% endif %}
       <div id="result" class="result" aria-live="polite">Enter your numbers and calculate.</div>
     </div>
@@ -159,6 +170,29 @@ function calcPayroll(){
 function calcLabor(){
   const weeklyWages=num('headcount')*num('avg-hours')*num('avg-rate'); const burden=weeklyWages*(num('burden')/100); const weekly=weeklyWages+burden; const monthly=weekly*num('weeks-month'); const annual=weekly*52;
   show(`<strong>Estimated weekly labor cost: ${money(weekly)}</strong><br>Direct weekly wages: ${money(weeklyWages)}<br>Estimated weekly burden: ${money(burden)}<br>Estimated monthly labor cost: ${money(monthly)}<br>Estimated annual labor cost: ${money(annual)}`);
+}
+function calcRoi(){
+  const headcount=Math.max(0,num('roi-headcount'));
+  const rate=Math.max(0,num('roi-rate'));
+  const minutes=Math.max(0,num('roi-minutes'));
+  const days=Math.min(7,Math.max(0,num('roi-days')));
+  const weeklyHours=headcount*(minutes/60)*days;
+  const weeklyValue=weeklyHours*rate;
+  const annualValue=weeklyValue*52;
+  const monthlyValue=annualValue/12;
+  const calc=document.querySelector('.calc[data-tool="roi"]');
+  const starterMax=parseFloat(calc.dataset.starterMax), starterPrice=parseFloat(calc.dataset.starterPrice);
+  const growthMax=parseFloat(calc.dataset.growthMax), growthPrice=parseFloat(calc.dataset.growthPrice);
+  const businessMax=parseFloat(calc.dataset.businessMax), businessPrice=parseFloat(calc.dataset.businessPrice);
+  let plan='Custom', monthlyPlan=null;
+  if(headcount<=starterMax){ plan='Starter'; monthlyPlan=starterPrice; }
+  else if(headcount<=growthMax){ plan='Growth'; monthlyPlan=growthPrice; }
+  else if(headcount<=businessMax){ plan='Business'; monthlyPlan=businessPrice; }
+  const planLine=monthlyPlan===null
+    ? `Your ${headcount.toFixed(0)}-employee team is above the published Business-plan limit; contact Work-A-Beez for fit and pricing.`
+    : `Published plan sized for this headcount: <strong>${plan} at ${money(monthlyPlan)}/month</strong> (${money(monthlyPlan*12)}/year).`;
+  const comparison=monthlyPlan===null ? '' : `<br>Modeled monthly labor value minus plan price: <strong>${money(monthlyValue-monthlyPlan)}</strong>. This is a comparison, not a savings forecast.`;
+  show(`<strong>Modeled labor value: ${money(monthlyValue)}/month</strong><br>${weeklyHours.toFixed(2)} modeled hours/week × ${money(rate)}/hour = ${money(weeklyValue)}/week.<br>Modeled annual labor value: ${money(annualValue)}.<br>${planLine}${comparison}`);
 }
 </script>
 {% endblock %}
