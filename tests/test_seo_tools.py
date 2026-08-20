@@ -23,6 +23,7 @@ def test_tools_hub_loads(client):
     assert b"Free Workforce Calculators" in resp.data
     assert b"Timecard Calculator" in resp.data
     assert b"Labor Cost Calculator" in resp.data
+    assert b"Time Tracking ROI Calculator" in resp.data
 
 
 @pytest.mark.parametrize(
@@ -32,6 +33,7 @@ def test_tools_hub_loads(client):
         ("overtime-calculator", b"Free Overtime Pay Calculator"),
         ("payroll-hours-calculator", b"Free Payroll Hours Calculator"),
         ("labor-cost-calculator", b"Free Labor Cost Calculator"),
+        ("employee-time-tracking-roi-calculator", b"Employee Time Tracking ROI Calculator"),
     ],
 )
 def test_tool_pages_load(client, slug, heading):
@@ -39,6 +41,22 @@ def test_tool_pages_load(client, slug, heading):
     assert resp.status_code == 200
     assert heading in resp.data
     assert b"Start Free Trial" in resp.data
+
+
+def test_roi_tool_uses_current_plan_source_of_truth(client):
+    from plans import PLANS
+
+    resp = client.get("/tools/employee-time-tracking-roi-calculator")
+    assert resp.status_code == 200
+    html = resp.get_data(as_text=True)
+
+    assert f"data-starter-max=\"{PLANS['starter']['max_employees']}\"" in html
+    assert f"data-starter-price=\"{PLANS['starter']['price']}\"" in html
+    assert f"data-growth-max=\"{PLANS['growth']['max_employees']}\"" in html
+    assert f"data-growth-price=\"{PLANS['growth']['price']}\"" in html
+    assert f"data-business-max=\"{PLANS['business']['max_employees']}\"" in html
+    assert f"data-business-price=\"{PLANS['business']['price']}\"" in html
+    assert "This is a planning model, not a savings guarantee." in html
 
 
 def test_unknown_tool_returns_404(client):
@@ -54,6 +72,7 @@ def test_tools_sitemap_lists_every_tool(client):
         "overtime-calculator",
         "payroll-hours-calculator",
         "labor-cost-calculator",
+        "employee-time-tracking-roi-calculator",
     ):
         assert f"/tools/{slug}".encode() in resp.data
 
