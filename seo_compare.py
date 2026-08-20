@@ -1,4 +1,4 @@
-from flask import Blueprint, abort, render_template
+from flask import Blueprint, Response, abort, render_template
 
 seo_compare_bp = Blueprint("seo_compare", __name__)
 
@@ -116,4 +116,9 @@ def compare_page(slug):
 def comparison_sitemap():
     urls = ["https://www.workabeez.net/compare"]
     urls.extend(f"https://www.workabeez.net/compare/{slug}" for slug in COMPARISONS)
-    return render_template("seo_sitemap.xml", urls=urls), 200, {"Content-Type": "application/xml; charset=utf-8"}
+    rows = "".join(
+        f"<url><loc>{url}</loc><lastmod>2026-08-19</lastmod><changefreq>monthly</changefreq><priority>{'0.90' if url.endswith('/compare') else '0.85'}</priority></url>"
+        for url in urls
+    )
+    xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{rows}</urlset>'
+    return Response(xml, mimetype="application/xml")
