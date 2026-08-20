@@ -24,6 +24,7 @@ def test_tools_hub_loads(client):
     assert b"Timecard Calculator" in resp.data
     assert b"Labor Cost Calculator" in resp.data
     assert b"Time Tracking ROI Calculator" in resp.data
+    assert b"Buddy Punching Cost Calculator" in resp.data
 
 
 @pytest.mark.parametrize(
@@ -34,6 +35,7 @@ def test_tools_hub_loads(client):
         ("payroll-hours-calculator", b"Free Payroll Hours Calculator"),
         ("labor-cost-calculator", b"Free Labor Cost Calculator"),
         ("employee-time-tracking-roi-calculator", b"Employee Time Tracking ROI Calculator"),
+        ("buddy-punching-cost-calculator", b"Buddy Punching Cost Calculator"),
     ],
 )
 def test_tool_pages_load(client, slug, heading):
@@ -59,6 +61,19 @@ def test_roi_tool_uses_current_plan_source_of_truth(client):
     assert "This is a planning model, not a savings guarantee." in html
 
 
+def test_buddy_punching_tool_uses_observed_inputs_and_disclaimer(client):
+    resp = client.get("/tools/buddy-punching-cost-calculator")
+    assert resp.status_code == 200
+    html = resp.get_data(as_text=True)
+
+    assert 'id="buddy-employees"' in html
+    assert 'id="buddy-rate"' in html
+    assert 'id="buddy-minutes"' in html
+    assert 'id="buddy-occurrences"' in html
+    assert "does not establish that buddy punching" in html
+    assert "calcBuddyPunching()" in html
+
+
 def test_unknown_tool_returns_404(client):
     assert client.get("/tools/not-a-real-tool").status_code == 404
 
@@ -73,6 +88,7 @@ def test_tools_sitemap_lists_every_tool(client):
         "payroll-hours-calculator",
         "labor-cost-calculator",
         "employee-time-tracking-roi-calculator",
+        "buddy-punching-cost-calculator",
     ):
         assert f"/tools/{slug}".encode() in resp.data
 
