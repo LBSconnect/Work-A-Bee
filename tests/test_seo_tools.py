@@ -28,6 +28,25 @@ def test_tools_hub_loads(client):
     assert b"Payroll Error Cost Calculator" in resp.data
 
 
+def test_shared_public_header_links_to_free_tools(client):
+    resp = client.get("/tools")
+    assert resp.status_code == 200
+    html = resp.get_data(as_text=True)
+    header = html.split('<header class="site-header"', 1)[1].split("</header>", 1)[0]
+    assert 'href="/tools"' in header
+    assert "Free Tools" in header
+
+
+@pytest.mark.parametrize("path", ["/", "/pricing"])
+def test_standalone_top_nav_links_to_free_tools(client, path):
+    resp = client.get(path)
+    assert resp.status_code == 200
+    html = resp.get_data(as_text=True)
+    nav = html.split('<div class="nav-links">', 1)[1].split("</div>", 1)[0]
+    assert nav.count('href="/tools"') == 1
+    assert "Free Tools" in nav
+
+
 @pytest.mark.parametrize(
     "slug, heading",
     [
