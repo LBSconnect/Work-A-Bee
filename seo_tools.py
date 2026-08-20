@@ -50,6 +50,15 @@ TOOLS = {
         "type": "roi",
         "note": "This is a planning model, not a savings guarantee. It estimates the labor value of the minutes you enter. Work-A-Beez does not guarantee that all modeled time will be recovered, prevented or converted into payroll savings.",
     },
+    "buddy-punching-cost-calculator": {
+        "label": "Buddy Punching Cost Calculator",
+        "title": "Buddy Punching Cost Calculator | Work-A-Beez",
+        "description": "Estimate the labor value of suspected or observed buddy-punching minutes using affected employees, frequency and average hourly wage.",
+        "h1": "Buddy Punching Cost Calculator",
+        "lede": "Estimate what recurring unauthorized or inaccurate clock-ins could represent in labor dollars using your own observed inputs.",
+        "type": "buddy",
+        "note": "This calculator is an estimation tool. Its output does not establish that buddy punching, time theft or misconduct occurred, and it does not predict savings from Work-A-Beez. Investigate timekeeping concerns using your records and applicable workplace policies.",
+    },
 }
 
 
