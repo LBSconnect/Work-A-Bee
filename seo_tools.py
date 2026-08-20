@@ -1,4 +1,4 @@
-from flask import Blueprint, Response, abort, render_template
+from flask import Blueprint, Response, abort, render_template, request
 
 from plans import PLANS
 
@@ -69,6 +69,34 @@ TOOLS = {
         "note": "This is an administrative cost estimate, not payroll, tax, legal or accounting advice. It does not calculate employee underpayments, penalties, taxes or legal exposure and does not guarantee savings from Work-A-Beez.",
     },
 }
+
+
+@seo_tools_bp.after_app_request
+def add_free_tools_to_standalone_public_nav(response):
+    """Expose /tools in the two standalone public navs without rewriting large templates."""
+    if response.status_code != 200 or response.mimetype != "text/html":
+        return response
+
+    if request.path == "/":
+        marker = '    <a href="/pricing">Pricing</a>\n'
+    elif request.path == "/pricing":
+        marker = '    <a href="/pricing" class="current">Pricing</a>\n'
+    else:
+        return response
+
+    html = response.get_data(as_text=True)
+    nav_start = html.find('<div class="nav-links">')
+    nav_end = html.find("</div>", nav_start)
+    if nav_start == -1 or nav_end == -1:
+        return response
+
+    nav_html = html[nav_start:nav_end]
+    if 'href="/tools"' in nav_html or marker not in nav_html:
+        return response
+
+    replacement = marker + '    <a href="/tools">Free Tools</a>\n'
+    response.set_data(html[:nav_start] + nav_html.replace(marker, replacement, 1) + html[nav_end:])
+    return response
 
 
 @seo_tools_bp.route("/tools")

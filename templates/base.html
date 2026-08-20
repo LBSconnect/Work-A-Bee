@@ -15,11 +15,16 @@
   {% block head_extra %}{% endblock %}
 </head>
 <body>
-  <header class="site-header">
+  <header class="site-header" style="display:flex;align-items:center;justify-content:space-between;gap:20px;">
     <a href="{{ url_for('clock_home') }}" class="site-header-brand">
       <img src="{{ url_for('static', filename='logo-workabee.png') }}" alt="Work-A-Beez">
       <span class="site-header-brand-name">Work-A-Beez</span>
     </a>
+    <nav aria-label="Public navigation" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <a href="/" style="font-size:14px;font-weight:600;text-decoration:none;">Home</a>
+      <a href="/tools" style="font-size:14px;font-weight:700;text-decoration:none;">Free Tools</a>
+      <a href="/pricing" style="font-size:14px;font-weight:600;text-decoration:none;">Pricing</a>
+    </nav>
   </header>
 
   <div class="wrap {% block wrapclass %}{% endblock %}">
