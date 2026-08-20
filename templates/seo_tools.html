@@ -2,12 +2,12 @@
 {% block title %}{% if page %}{{ page.title }}{% else %}Free Workforce Calculators | Work-A-Beez{% endif %}{% endblock %}
 {% block wrapclass %}wide{% endblock %}
 {% block head_extra %}
-  <meta name="description" content="{% if page %}{{ page.description }}{% else %}Free timecard, overtime, payroll-hours, labor-cost and time-tracking ROI calculators for small businesses from Work-A-Beez.{% endif %}">
+  <meta name="description" content="{% if page %}{{ page.description }}{% else %}Free timecard, overtime, payroll-hours, labor-cost, time-tracking ROI and buddy-punching calculators for small businesses from Work-A-Beez.{% endif %}">
   <link rel="canonical" href="{{ canonical }}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Work-A-Beez">
   <meta property="og:title" content="{% if page %}{{ page.title }}{% else %}Free Workforce Calculators | Work-A-Beez{% endif %}">
-  <meta property="og:description" content="{% if page %}{{ page.description }}{% else %}Free workforce calculators for timecards, overtime, payroll hours, labor costs and time-tracking ROI.{% endif %}">
+  <meta property="og:description" content="{% if page %}{{ page.description }}{% else %}Free workforce calculators for timecards, overtime, payroll hours, labor costs, time-tracking ROI and buddy-punching estimates.{% endif %}">
   <meta property="og:url" content="{{ canonical }}">
   <meta property="og:image" content="https://www.workabeez.net/static/og-image.png">
   <meta name="twitter:card" content="summary_large_image">
@@ -19,7 +19,7 @@
     "url": canonical,
     "applicationCategory": "BusinessApplication" if page else none,
     "operatingSystem": "Web" if page else none,
-    "description": page.description if page else "Free workforce calculators for timecards, overtime, payroll hours, labor costs and time-tracking ROI."
+    "description": page.description if page else "Free workforce calculators for timecards, overtime, payroll hours, labor costs, time-tracking ROI and buddy-punching estimates."
   } | tojson }}
   </script>
   <style>
@@ -121,6 +121,16 @@
         <p class="small">Use the minutes field for the timekeeping difference you want to model, such as rounding, late clock-outs, manual-entry cleanup or another recurring gap you have measured. Do not enter an assumed savings percentage.</p>
         <p class="small">Current plan pricing used by this calculator: Starter ${{ '%.2f'|format(plans.starter.price) }}/month up to {{ plans.starter.max_employees }} employees; Growth ${{ '%.2f'|format(plans.growth.price) }}/month up to {{ plans.growth.max_employees }}; Business ${{ '%.2f'|format(plans.business.price) }}/month up to {{ plans.business.max_employees }}.</p>
         <button type="button" onclick="calcRoi()">Estimate modeled labor value</button>
+
+      {% elif page.type == 'buddy' %}
+        <div class="calc-grid">
+          <label>Affected employees<input id="buddy-employees" type="number" min="1" step="1" value="5"></label>
+          <label>Average hourly wage ($)<input id="buddy-rate" type="number" min="0" step="0.01" value="20"></label>
+          <label>Minutes per occurrence<input id="buddy-minutes" type="number" min="0" step="1" value="10"></label>
+          <label>Occurrences per employee / week<input id="buddy-occurrences" type="number" min="0" step="0.1" value="2"></label>
+        </div>
+        <p class="small">Use documented or observed values where possible. The calculator converts the time you enter into a labor-value estimate; it does not determine whether buddy punching or misconduct actually occurred.</p>
+        <button type="button" onclick="calcBuddyPunching()">Estimate potential labor cost</button>
       {% endif %}
       <div id="result" class="result" aria-live="polite">Enter your numbers and calculate.</div>
     </div>
@@ -193,6 +203,17 @@ function calcRoi(){
     : `Published plan sized for this headcount: <strong>${plan} at ${money(monthlyPlan)}/month</strong> (${money(monthlyPlan*12)}/year).`;
   const comparison=monthlyPlan===null ? '' : `<br>Modeled monthly labor value minus plan price: <strong>${money(monthlyValue-monthlyPlan)}</strong>. This is a comparison, not a savings forecast.`;
   show(`<strong>Modeled labor value: ${money(monthlyValue)}/month</strong><br>${weeklyHours.toFixed(2)} modeled hours/week × ${money(rate)}/hour = ${money(weeklyValue)}/week.<br>Modeled annual labor value: ${money(annualValue)}.<br>${planLine}${comparison}`);
+}
+function calcBuddyPunching(){
+  const employees=Math.max(0,num('buddy-employees'));
+  const rate=Math.max(0,num('buddy-rate'));
+  const minutes=Math.max(0,num('buddy-minutes'));
+  const occurrences=Math.max(0,num('buddy-occurrences'));
+  const weeklyHours=employees*occurrences*(minutes/60);
+  const weeklyCost=weeklyHours*rate;
+  const monthlyCost=weeklyCost*52/12;
+  const annualCost=weeklyCost*52;
+  show(`<strong>Estimated labor value: ${money(monthlyCost)}/month</strong><br>${weeklyHours.toFixed(2)} modeled hours/week × ${money(rate)}/hour = ${money(weeklyCost)}/week.<br>Estimated annual labor value: ${money(annualCost)}.<br>This estimate reflects only the inputs you entered and does not establish that buddy punching or misconduct occurred.`);
 }
 </script>
 {% endblock %}
