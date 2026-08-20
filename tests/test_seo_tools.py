@@ -25,6 +25,7 @@ def test_tools_hub_loads(client):
     assert b"Labor Cost Calculator" in resp.data
     assert b"Time Tracking ROI Calculator" in resp.data
     assert b"Buddy Punching Cost Calculator" in resp.data
+    assert b"Payroll Error Cost Calculator" in resp.data
 
 
 @pytest.mark.parametrize(
@@ -36,6 +37,7 @@ def test_tools_hub_loads(client):
         ("labor-cost-calculator", b"Free Labor Cost Calculator"),
         ("employee-time-tracking-roi-calculator", b"Employee Time Tracking ROI Calculator"),
         ("buddy-punching-cost-calculator", b"Buddy Punching Cost Calculator"),
+        ("payroll-error-cost-calculator", b"Payroll Error Cost Calculator"),
     ],
 )
 def test_tool_pages_load(client, slug, heading):
@@ -74,6 +76,19 @@ def test_buddy_punching_tool_uses_observed_inputs_and_disclaimer(client):
     assert "calcBuddyPunching()" in html
 
 
+def test_payroll_error_tool_models_admin_cost_only(client):
+    resp = client.get("/tools/payroll-error-cost-calculator")
+    assert resp.status_code == 200
+    html = resp.get_data(as_text=True)
+
+    assert 'id="payroll-error-count"' in html
+    assert 'id="payroll-error-minutes"' in html
+    assert 'id="payroll-error-rate"' in html
+    assert 'id="payroll-error-periods"' in html
+    assert "does not calculate employee underpayments" in html
+    assert "calcPayrollErrors()" in html
+
+
 def test_unknown_tool_returns_404(client):
     assert client.get("/tools/not-a-real-tool").status_code == 404
 
@@ -89,6 +104,7 @@ def test_tools_sitemap_lists_every_tool(client):
         "labor-cost-calculator",
         "employee-time-tracking-roi-calculator",
         "buddy-punching-cost-calculator",
+        "payroll-error-cost-calculator",
     ):
         assert f"/tools/{slug}".encode() in resp.data
 

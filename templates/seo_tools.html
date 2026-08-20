@@ -2,12 +2,12 @@
 {% block title %}{% if page %}{{ page.title }}{% else %}Free Workforce Calculators | Work-A-Beez{% endif %}{% endblock %}
 {% block wrapclass %}wide{% endblock %}
 {% block head_extra %}
-  <meta name="description" content="{% if page %}{{ page.description }}{% else %}Free timecard, overtime, payroll-hours, labor-cost, time-tracking ROI and buddy-punching calculators for small businesses from Work-A-Beez.{% endif %}">
+  <meta name="description" content="{% if page %}{{ page.description }}{% else %}Free timecard, overtime, payroll-hours, labor-cost, time-tracking ROI, buddy-punching and payroll-error calculators for small businesses from Work-A-Beez.{% endif %}">
   <link rel="canonical" href="{{ canonical }}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Work-A-Beez">
   <meta property="og:title" content="{% if page %}{{ page.title }}{% else %}Free Workforce Calculators | Work-A-Beez{% endif %}">
-  <meta property="og:description" content="{% if page %}{{ page.description }}{% else %}Free workforce calculators for timecards, overtime, payroll hours, labor costs, time-tracking ROI and buddy-punching estimates.{% endif %}">
+  <meta property="og:description" content="{% if page %}{{ page.description }}{% else %}Free workforce calculators for timecards, overtime, payroll hours, labor costs, time-tracking ROI, buddy-punching and payroll-error estimates.{% endif %}">
   <meta property="og:url" content="{{ canonical }}">
   <meta property="og:image" content="https://www.workabeez.net/static/og-image.png">
   <meta name="twitter:card" content="summary_large_image">
@@ -19,7 +19,7 @@
     "url": canonical,
     "applicationCategory": "BusinessApplication" if page else none,
     "operatingSystem": "Web" if page else none,
-    "description": page.description if page else "Free workforce calculators for timecards, overtime, payroll hours, labor costs, time-tracking ROI and buddy-punching estimates."
+    "description": page.description if page else "Free workforce calculators for timecards, overtime, payroll hours, labor costs, time-tracking ROI, buddy-punching and payroll-error estimates."
   } | tojson }}
   </script>
   <style>
@@ -48,7 +48,7 @@
   {% if not page %}
     <section class="tool-hero">
       <h1>Free Workforce Calculators</h1>
-      <p>Use these simple calculators to estimate hours, overtime, payroll, labor cost and the modeled value of timekeeping differences. No signup required.</p>
+      <p>Use these simple calculators to estimate hours, overtime, payroll, labor cost and the modeled value of timekeeping and payroll-process differences. No signup required.</p>
     </section>
     <div class="tool-grid">
       {% for key, item in tools.items() %}
@@ -131,6 +131,16 @@
         </div>
         <p class="small">Use documented or observed values where possible. The calculator converts the time you enter into a labor-value estimate; it does not determine whether buddy punching or misconduct actually occurred.</p>
         <button type="button" onclick="calcBuddyPunching()">Estimate potential labor cost</button>
+
+      {% elif page.type == 'payroll_error' %}
+        <div class="calc-grid">
+          <label>Payroll errors per pay period<input id="payroll-error-count" type="number" min="0" step="1" value="5"></label>
+          <label>Minutes to correct each error<input id="payroll-error-minutes" type="number" min="0" step="1" value="20"></label>
+          <label>Admin hourly cost ($)<input id="payroll-error-rate" type="number" min="0" step="0.01" value="30"></label>
+          <label>Pay periods per year<input id="payroll-error-periods" type="number" min="1" step="1" value="26"></label>
+        </div>
+        <p class="small">Use your observed correction volume and staff time where possible. This calculator models administrative labor only; it does not estimate employee underpayments, taxes, penalties or legal exposure.</p>
+        <button type="button" onclick="calcPayrollErrors()">Estimate correction cost</button>
       {% endif %}
       <div id="result" class="result" aria-live="polite">Enter your numbers and calculate.</div>
     </div>
@@ -214,6 +224,18 @@ function calcBuddyPunching(){
   const monthlyCost=weeklyCost*52/12;
   const annualCost=weeklyCost*52;
   show(`<strong>Estimated labor value: ${money(monthlyCost)}/month</strong><br>${weeklyHours.toFixed(2)} modeled hours/week × ${money(rate)}/hour = ${money(weeklyCost)}/week.<br>Estimated annual labor value: ${money(annualCost)}.<br>This estimate reflects only the inputs you entered and does not establish that buddy punching or misconduct occurred.`);
+}
+function calcPayrollErrors(){
+  const errors=Math.max(0,num('payroll-error-count'));
+  const minutes=Math.max(0,num('payroll-error-minutes'));
+  const rate=Math.max(0,num('payroll-error-rate'));
+  const periods=Math.max(0,num('payroll-error-periods'));
+  const hoursPerPeriod=errors*(minutes/60);
+  const costPerPeriod=hoursPerPeriod*rate;
+  const annualHours=hoursPerPeriod*periods;
+  const annualCost=costPerPeriod*periods;
+  const monthlyCost=annualCost/12;
+  show(`<strong>Estimated admin correction cost: ${money(monthlyCost)}/month</strong><br>${hoursPerPeriod.toFixed(2)} admin hours/pay period × ${money(rate)}/hour = ${money(costPerPeriod)}/pay period.<br>Estimated annual admin time: ${annualHours.toFixed(2)} hours.<br>Estimated annual admin cost: ${money(annualCost)}.<br>This estimate excludes underpayments, taxes, penalties, legal exposure and other downstream costs.`);
 }
 </script>
 {% endblock %}

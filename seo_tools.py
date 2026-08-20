@@ -59,6 +59,15 @@ TOOLS = {
         "type": "buddy",
         "note": "This calculator is an estimation tool. Its output does not establish that buddy punching, time theft or misconduct occurred, and it does not predict savings from Work-A-Beez. Investigate timekeeping concerns using your records and applicable workplace policies.",
     },
+    "payroll-error-cost-calculator": {
+        "label": "Payroll Error Cost Calculator",
+        "title": "Payroll Error Cost Calculator | Work-A-Beez",
+        "description": "Estimate the administrative labor cost of recurring payroll corrections using error volume, correction time and staff cost.",
+        "h1": "Payroll Error Cost Calculator",
+        "lede": "Model how recurring payroll corrections can consume staff time and administrative dollars using your own observed error volume and correction effort.",
+        "type": "payroll_error",
+        "note": "This is an administrative cost estimate, not payroll, tax, legal or accounting advice. It does not calculate employee underpayments, penalties, taxes or legal exposure and does not guarantee savings from Work-A-Beez.",
+    },
 }
 
 
