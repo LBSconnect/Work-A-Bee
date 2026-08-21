@@ -42,10 +42,15 @@ def test_tools_hub_redesign_has_required_elements(client):
     assert 'src="/static/logo-workabee.png"' in html
     assert 'alt="Work-A-Beez"' in html
 
-    # Public nav retains Home, Free Tools, and Pricing.
+    # Public nav matches the main marketing site.
     assert ">Home<" in html
-    assert ">Free Tools<" in html
+    assert ">Features" in html
+    assert ">Benefits" in html
     assert ">Pricing<" in html
+    assert ">About Us<" in html
+    assert ">Employee Clock In<" in html
+    assert ">Admin Login<" in html
+    assert ">Start Free Trial<" in html
 
     # Hero headline, subheadline, and trust row.
     assert "Free Workforce Calculators for Small Businesses" in html
