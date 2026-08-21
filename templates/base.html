@@ -13,6 +13,58 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   {% block head_extra %}{% endblock %}
+  <style>
+    /* Shared public navigation mirrors the main Work-A-Beez marketing site. */
+    .public-nav {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      padding:0 48px;
+      height:72px;
+      background:#fff;
+      box-shadow:0 1px 0 #eee;
+      position:sticky;
+      top:0;
+      z-index:100;
+      font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    }
+    .public-nav a { text-decoration:none; color:#111; }
+    .public-nav-logo { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+    .public-nav-logo img { height:32px; width:auto; display:block; }
+    .public-nav-logo-text { display:flex; flex-direction:column; }
+    .public-nav-logo-text strong { font-size:18px; font-weight:800; letter-spacing:-.3px; }
+    .public-nav-logo-text span { font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:#555; }
+    .public-nav-links { display:flex; gap:28px; align-items:center; }
+    .public-nav-links a { font-size:14px; font-weight:500; display:flex; align-items:center; gap:4px; }
+    .public-nav-links .arrow { font-size:10px; opacity:.6; }
+    .public-nav-actions { display:flex; align-items:center; gap:16px; }
+    .public-nav-ghost { font-size:14px; font-weight:600; padding:8px 16px; white-space:nowrap; }
+    .public-nav-trial {
+      background:#FFB800;
+      color:#111;
+      font-size:14px;
+      font-weight:700;
+      padding:10px 22px;
+      border-radius:6px;
+      display:inline-flex;
+      align-items:center;
+      white-space:nowrap;
+    }
+    .public-nav-trial:hover { background:#e6a600; }
+    @media (max-width:960px) {
+      .public-nav { padding:0 24px; }
+      .public-nav-links { display:none; }
+    }
+    @media (max-width:600px) {
+      .public-nav { flex-wrap:wrap; height:auto; padding:12px 20px; row-gap:10px; }
+      .public-nav-logo-text span { display:none; }
+      .public-nav-logo-text strong { font-size:15px; white-space:nowrap; }
+      .public-nav-actions { width:100%; justify-content:center; gap:10px; flex-wrap:wrap; }
+      .public-nav-ghost { font-size:12px; padding:6px 8px; }
+      .public-nav-trial { font-size:12px; padding:8px 14px; }
+    }
+  </style>
   {% if request.path.startswith('/tools/') %}
   <style>
     /* Keep every individual calculator on one consistent readable column. */
@@ -33,17 +85,29 @@
   {% endif %}
 </head>
 <body>
-  <header class="site-header" style="display:flex;align-items:center;justify-content:space-between;gap:20px;">
-    <a href="{{ url_for('clock_home') }}" class="site-header-brand">
+  <nav class="public-nav" aria-label="Public navigation">
+    <a href="/" class="public-nav-logo">
       <img src="{{ url_for('static', filename='logo-workabee.png') }}" alt="Work-A-Beez">
-      <span class="site-header-brand-name">Work-A-Beez</span>
+      <span class="public-nav-logo-text">
+        <strong>Work-A-Beez</strong>
+        <span>Employee Timekeeping</span>
+      </span>
     </a>
-    <nav aria-label="Public navigation" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-      <a href="/" style="font-size:14px;font-weight:600;text-decoration:none;">Home</a>
-      <a href="/tools" style="font-size:14px;font-weight:700;text-decoration:none;">Free Tools</a>
-      <a href="/pricing" style="font-size:14px;font-weight:600;text-decoration:none;">Pricing</a>
-    </nav>
-  </header>
+
+    <div class="public-nav-links">
+      <a href="/">Home</a>
+      <a href="/#features">Features <span class="arrow">▾</span></a>
+      <a href="/#why-businesses">Benefits <span class="arrow">▾</span></a>
+      <a href="/pricing">Pricing</a>
+      <a href="https://www.lbsconnect.net/index.html" target="_blank" rel="noopener">About Us</a>
+    </div>
+
+    <div class="public-nav-actions">
+      <a href="/staff/login" class="public-nav-ghost" style="font-size:13px;color:#555;">Employee Clock In</a>
+      <a href="/admin/login" class="public-nav-ghost">Admin Login</a>
+      <a href="/signup" class="public-nav-trial">Start Free Trial</a>
+    </div>
+  </nav>
 
   <div class="wrap {% block wrapclass %}{% endblock %}">
     {% with messages = get_flashed_messages() %}
