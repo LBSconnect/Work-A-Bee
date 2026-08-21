@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}{% if page %}{{ page.title }}{% else %}Employee Time Clock Comparisons | Work-A-Beez{% endif %}{% endblock %}
+{% block wrapclass %}wide{% endblock %}
 
 {% block head_extra %}
   {% if page %}
@@ -27,7 +28,7 @@
   }
   </script>
   <style>
-    .seo-compare-wrap { max-width: 980px; margin: 0 auto; padding: 32px 16px 64px; }
+    .seo-compare-wrap { max-width: 900px; margin: 0 auto; padding: 32px 0 64px; }
     .seo-kicker { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #9A6700; }
     .seo-compare-wrap h1 { font-size: clamp(32px, 5vw, 50px); line-height: 1.05; margin: 10px 0 16px; }
     .seo-lede { font-size: 18px; line-height: 1.7; color: #444; max-width: 780px; }
