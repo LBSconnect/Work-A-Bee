@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}{{ page.title if page else "Best Employee Time Clock by Team Size & Use Case | Work-A-Beez" }}{% endblock %}
+{% block wrapclass %}wide{% endblock %}
 
 {% block head_extra %}
 <meta name="description" content="{{ page.description if page else 'Find the right Work-A-Beez employee time clock setup by team size and workplace use case, including 5-person teams, 10-person teams, hourly workers and shared-computer clock-in.' }}">
@@ -24,7 +25,7 @@
 {% endblock %}
 
 {% block content %}
-<div style="max-width:980px;margin:0 auto;padding:40px 20px 60px;">
+<div style="max-width:900px;margin:0 auto;padding:40px 0 60px;">
   <nav aria-label="Breadcrumb" style="font-size:13px;margin-bottom:24px;">
     <a href="/">Home</a> / <a href="/best-for">Best Fit</a>{% if page %} / {{ page.label }}{% endif %}
   </nav>
