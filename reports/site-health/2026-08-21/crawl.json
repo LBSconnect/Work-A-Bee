@@ -1,0 +1,133 @@
+{
+  "base_url": "https://www.workabeez.net",
+  "checked": 18,
+  "broken": 0,
+  "results": [
+    {
+      "url": "https://www.workabeez.net/",
+      "status": 200,
+      "elapsed_ms": 470,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/"
+    },
+    {
+      "url": "https://www.workabeez.net/pricing",
+      "status": 200,
+      "elapsed_ms": 155,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/pricing"
+    },
+    {
+      "url": "https://www.workabeez.net/privacy",
+      "status": 200,
+      "elapsed_ms": 275,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/privacy"
+    },
+    {
+      "url": "https://www.workabeez.net/terms",
+      "status": 200,
+      "elapsed_ms": 128,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/terms"
+    },
+    {
+      "url": "https://www.workabeez.net/dpa",
+      "status": 200,
+      "elapsed_ms": 313,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/dpa"
+    },
+    {
+      "url": "https://www.workabeez.net/aup",
+      "status": 200,
+      "elapsed_ms": 134,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/aup"
+    },
+    {
+      "url": "https://www.workabeez.net/security-policy",
+      "status": 200,
+      "elapsed_ms": 123,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/security-policy"
+    },
+    {
+      "url": "https://www.workabeez.net/sla",
+      "status": 200,
+      "elapsed_ms": 124,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/sla"
+    },
+    {
+      "url": "https://www.workabeez.net/faq",
+      "status": 200,
+      "elapsed_ms": 118,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/faq"
+    },
+    {
+      "url": "https://www.workabeez.net/docs",
+      "status": 200,
+      "elapsed_ms": 138,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/docs"
+    },
+    {
+      "url": "https://www.workabeez.net/staff/login",
+      "status": 200,
+      "elapsed_ms": 156,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/staff/login"
+    },
+    {
+      "url": "https://www.workabeez.net/admin/login",
+      "status": 200,
+      "elapsed_ms": 177,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/admin/login"
+    },
+    {
+      "url": "https://www.workabeez.net/signup",
+      "status": 200,
+      "elapsed_ms": 595,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/signup/company"
+    },
+    {
+      "url": "https://www.workabeez.net/robots.txt",
+      "status": 200,
+      "elapsed_ms": 288,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/robots.txt"
+    },
+    {
+      "url": "https://www.workabeez.net/sitemap.xml",
+      "status": 200,
+      "elapsed_ms": 124,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/sitemap.xml"
+    },
+    {
+      "url": "https://www.workabeez.net/favicon.ico",
+      "status": 200,
+      "elapsed_ms": 266,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/favicon.ico"
+    },
+    {
+      "url": "https://www.workabeez.net/static/style.css",
+      "status": 200,
+      "elapsed_ms": 129,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/static/style.css"
+    },
+    {
+      "url": "https://www.workabeez.net/static/logo-workabee.png",
+      "status": 200,
+      "elapsed_ms": 135,
+      "ok": true,
+      "final_url": "https://www.workabeez.net/static/logo-workabee.png"
+    }
+  ]
+}
